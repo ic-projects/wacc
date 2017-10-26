@@ -1,0 +1,36 @@
+{
+    package main
+
+    import (
+        "bufio"
+        "fmt"
+        "io"
+        "io/ioutil"
+        "os"
+    )
+
+    func check(e error) {
+        if e != nil {
+            panic(e)
+        }
+    }
+
+    func main() {
+        f, err := os.Open("skip.wacc")
+        check(err)
+
+        got, err := ParseReader("", f)
+        check(err)
+        fmt.Println(got)
+    }
+}
+
+Program <- "begin" stat:Stat "end" {
+    return stat, nil
+}
+
+Stat <- _ stat:"skip" _ {
+    return stat, nil
+}
+
+_ "Whitespace" <- [ \n\t\r]*
