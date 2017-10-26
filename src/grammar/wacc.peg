@@ -1,0 +1,88 @@
+package main
+
+type WACC Peg{}
+
+PROGRAM <- _ "begin" __ FUNC* _ STAT __ "end"
+
+FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT __ "end"
+PARAMLIST <- PARAM (_ ',' _ PARAM)*
+PARAM <- TYPE __ IDENT
+
+STAT <- (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE) (_ ';' _ (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE))*
+SKIP <- "skip"
+NEWASSIGN <- TYPE __ IDENT _ '=' _ ASSIGNRHS
+ASSIGN <- ASSIGNLHS _ "=" _ ASSIGNRHS
+READ <- "read" __ ASSIGNLHS
+FREE <- "free" __ EXPR
+RETURN <- "return" __ EXPR
+EXIT <- "exit" __ EXPR
+PRINT <- "print" __ EXPR
+PRINTLN <- "println" __ EXPR
+IF <- "if" __ EXPR __ "then" __ STAT __ "else" __ STAT __ "fi"
+WHILE <- "while" __ EXPR __ "do" __ STAT __ "done"
+SCOPE <- "begin" __ STAT __ "end"
+
+ASSIGNLHS <- IDENT / ARRAYELEM / PAIRELEM
+ASSIGNRHS <- EXPR / ARRAYLITER / NEWPAIR / PAIRELEM / CALL
+NEWPAIR <- "newpair" _ '(' _ EXPR _ ',' _ EXPR _ ')'
+CALL <- "call" __ IDENT _ '(' _ ARGLIST? _ ')'
+ARGLIST <- EXPR (_ ',' _ EXPR)*
+PAIRELEM <- FST / SND
+FST <- "fst" __ EXPR
+SND <- "snd" __ EXPR
+
+TYPE <- (BASETYPE / PAIRTYPE) (_ ARRAYTYPE)*
+BASETYPE <- INT / BOOL / CHAR / STRING
+INT <- "int"
+BOOL <- "bool"
+CHAR <- "char"
+STRING <- "string"
+ARRAYTYPE <- '[' _ ']'
+PAIRTYPE <- "pair" _ '(' _ PAIRELEMTYPE _ ',' _ PAIRELEMTYPE _ ')'
+
+PAIRELEMTYPE <- BASETYPE / ARRAYTYPE / PAIR
+PAIR <- "pair"
+
+EXPR <- '('? _ (INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / IDENT / ARRAYELEM / UNARYOPER _ EXPR) (_ BINARYOPER _ EXPR)* (_ ')')?
+UNARYOPER <- NOT / NEG / LEN / ORD / CHR
+NOT <- '!'
+NEG <- '-'
+LEN <- "len"
+ORD <- "ord"
+CHR <- "chr"
+BINARYOPER <- MULT / DIV / MOD / PLUS / SUB / GT / GEQ / LT / LEQ / EQ / NEQ / AND / OR
+MULT <- '*'
+DIV <- '/'
+MOD <- '%'
+PLUS <- '+'
+SUB <- '-'
+GT <- '>'
+GEQ <- ">="
+LT <- '<'
+LEQ <- "<="
+EQ <- "=="
+NEQ <- "!="
+AND <- "&&"
+OR <- "||"
+
+
+IDENT <- ('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*
+
+ARRAYELEM <- IDENT (_ '[' _ EXPR _ ']')+
+INTLITER <- INTSIGN? _ DIGIT+
+DIGIT <- [0-9]
+INTSIGN <- '+' / '-'
+BOOLLITER <- TRUE / FALSE
+TRUE <- "true"
+FALSE <- "false"
+CHARLITER <- '\'' CHARACTER '\''
+STRLITER <- '\"' CHARACTER* '\"'
+CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
+ESCAPEDCHAR <- [0btnfr""''\\]
+ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? ']'
+PAIRLITER <- "null"
+
+COMMENT <- '#' ([^\n])* '\n'
+
+_ <- ([ \n\t\r] / COMMENT)*
+__ <- ([ \n\t\r] / COMMENT)+
