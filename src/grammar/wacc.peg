@@ -2,9 +2,9 @@ package main
 
 type WACC Peg{}
 
-PROGRAM <- _ "begin" __ FUNC* _ STAT __ "end"
+PROGRAM <- _ "begin" (__ FUNC)* _ STAT _ "end"
 
-FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT __ "end"
+FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT _ "end"
 PARAMLIST <- PARAM (_ ',' _ PARAM)*
 PARAM <- TYPE __ IDENT
 
@@ -18,12 +18,12 @@ RETURN <- "return" __ EXPR
 EXIT <- "exit" __ EXPR
 PRINT <- "print" __ EXPR
 PRINTLN <- "println" __ EXPR
-IF <- "if" __ EXPR __ "then" __ STAT __ "else" __ STAT __ "fi"
-WHILE <- "while" __ EXPR __ "do" __ STAT __ "done"
-SCOPE <- "begin" __ STAT __ "end"
+IF <- "if" __ EXPR _ "then" __ STAT _ "else" __ STAT _ "fi"
+WHILE <- "while" __ EXPR _ "do" __ STAT _ "done"
+SCOPE <- "begin" __ STAT _ "end"
 
-ASSIGNLHS <- IDENT / ARRAYELEM / PAIRELEM
-ASSIGNRHS <- EXPR / ARRAYLITER / NEWPAIR / PAIRELEM / CALL
+ASSIGNLHS <- PAIRELEM / ARRAYELEM / IDENT
+ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
 NEWPAIR <- "newpair" _ '(' _ EXPR _ ',' _ EXPR _ ')'
 CALL <- "call" __ IDENT _ '(' _ ARGLIST? _ ')'
 ARGLIST <- EXPR (_ ',' _ EXPR)*
@@ -40,17 +40,18 @@ STRING <- "string"
 ARRAYTYPE <- '[' _ ']'
 PAIRTYPE <- "pair" _ '(' _ PAIRELEMTYPE _ ',' _ PAIRELEMTYPE _ ')'
 
-PAIRELEMTYPE <- BASETYPE / ARRAYTYPE / PAIR
+PAIRELEMTYPE <- ((BASETYPE / ARRAYTYPE) (_ ARRAYTYPE)*) / BASETYPE / PAIR
 PAIR <- "pair"
 
-EXPR <- '('? _ (INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / IDENT / ARRAYELEM / UNARYOPER _ EXPR) (_ BINARYOPER _ EXPR)* (_ ')')?
+EXPR <- ((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / (UNARYOPER _ EXPR) / ARRAYELEM / IDENT) (_ BINARYOPER _ EXPR)*
+BREXPR <- '(' _ EXPR
 UNARYOPER <- NOT / NEG / LEN / ORD / CHR
 NOT <- '!'
 NEG <- '-'
 LEN <- "len"
 ORD <- "ord"
 CHR <- "chr"
-BINARYOPER <- MULT / DIV / MOD / PLUS / SUB / GT / GEQ / LT / LEQ / EQ / NEQ / AND / OR
+BINARYOPER <- MULT / DIV / MOD / PLUS / SUB / GEQ / GT / LEQ / LT / EQ / NEQ / AND / OR
 MULT <- '*'
 DIV <- '/'
 MOD <- '%'
@@ -79,7 +80,7 @@ CHARLITER <- '\'' CHARACTER '\''
 STRLITER <- '\"' CHARACTER* '\"'
 CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
 ESCAPEDCHAR <- [0btnfr""''\\]
-ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? ']'
+ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? _ ']'
 PAIRLITER <- "null"
 
 COMMENT <- '#' ([^\n])* '\n'
