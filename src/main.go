@@ -1,22 +1,16 @@
 package main;
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
 	"os"
 )
 
 func main() {
-	buffer, err := ioutil.ReadFile(os.Args[1])
+	tree, err := ParseFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	wacc := &WACC{Buffer: string(buffer)}
-	wacc.Init()
-
-	if err := wacc.Parse(); err != nil {
-		log.Fatal(err)
-	}
-	wacc.PrintSyntaxTree()
+	fmt.Println(tree)
 }
