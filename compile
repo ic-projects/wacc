@@ -67,7 +67,7 @@ end
 
 # now process each target file
 files.each do |file_path|
-  puts "Compiling #{file_path}..."
+  puts "Compiling #{file_path}"
 
   output = %x(src/src #{file_path})
   puts output

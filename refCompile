@@ -104,7 +104,7 @@ end
 
 # now process each target file
 files.each do |file_path|
-  puts "calling the reference compiler on #{file_path}"
+  puts "Compiling #{file_path}"
   
   #get stdin from the user to pass to the reference compiler
   stdin = ""
