@@ -1,8 +1,14 @@
-package main
+{
+	package main
 
-type WACC Peg{}
+	import (
+		"wacc_22/src/ast"
+	)
+}
 
-PROGRAM <- _ "begin" (__ FUNC)* _ STAT _ "end"
+PROGRAM <- _ "begin" (__ FUNC)* _ STAT _ "end" {
+	return ast.NewProgram([]ast.FunctionNode{}), nil
+}
 
 FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT _ "end"
 PARAMLIST <- PARAM (_ ',' _ PARAM)*
@@ -76,8 +82,8 @@ INTSIGN <- '+' / '-'
 BOOLLITER <- TRUE / FALSE
 TRUE <- "true"
 FALSE <- "false"
-CHARLITER <- '\'' CHARACTER '\''
-STRLITER <- '\"' CHARACTER* '\"'
+CHARLITER <- "'" CHARACTER "'"
+STRLITER <- '"' CHARACTER* '"'
 CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
 ESCAPEDCHAR <- [0btnfr""''\\]
 ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? _ ']'

@@ -2,30 +2,31 @@
 
 GOPATH := $(CURDIR)/vendor/:$(GOPATH)
 export GOPATH
-BIN = $(CURDIR)/vendor/bin
-GOLINT = $(BIN)/golint
-PEG = $(BIN)/peg
+GOBIN := $(CURDIR)/vendor/bin/:$(GOBIN)
+PATH := $(GOBIN):$(PATH)
+
+GOLINT = golint
+PIGEON = pigeon
 
 SRC = main.go 
 BUILD = wacc.go
 
-all: peg build
+all: build
 	go build -o wacc
 
 build: $(SRC) $(BUILD)
 
 wacc.go: grammar/wacc.peg
-	$(PEG) grammar/wacc.peg
-	mv grammar/wacc.peg.go wacc.go
+	$(PIGEON) $^ > $@
 
 lint: golint
 	@echo "==Lint Checking=="
-	$(BIN)/golint $(SRC)
+	$(GOLINT) $(SRC)
 
 golint:
 	go get github.com/golang/lint/golint
 
-peg:
+pigeon:
 	go get github.com/pointlander/peg
 
 clean:
