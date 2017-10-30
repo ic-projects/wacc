@@ -1,177 +1,223 @@
-ProgramNode {
-	[FunctionNode]
+type ProgramNode struct {
+    functions []FunctionNode
 }
 
-FunctionNode {
-	Position
-	TypeNode
-	Identifier
-	[StatementNode]
+type FunctionNode struct {
+    pos Position
+    t TypeNode
+    ident string
+    stats [StatementNode]
+}
+
+type Position struct {
+    lineNumber int
+    charNumber int
 }
 
 // ---- StatementNodes ----
 
-DeclareNode {
-	Position
-	TypeNode
-	Identifier
-	RHSNode
+type StatementNode interface {
+
 }
 
-AssignNode {
-	Position
-	LHSNode
-	RHSNode
+type DeclareNode struct {
+    pos Position
+    t TypeNode
+    ident string
+    rhs RHSNode
 }
 
-ReadNode {
-	Position
-	ExpressionNode
+type AssignNode struct {
+    pos Position
+    lhs LHSNode
+    rhs RHSNode
 }
 
-FreeNode {
-	Position
-	ExpressionNode
+type ReadNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-ReturnNode {
-	Position
-	ExpressionNode
+type FreeNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-ExitNode {
-	Position
-	ExpressionNode
+type ReturnNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-PrintNode {
-	Position
-	ExpressionNode
+type ExitNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-PrintlnNode {
-	Position
-	ExpressionNode
+type PrintNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-IfNode {
-	Position
-	ExpressionNode
-	[StatementNodes]
-	[StatementNodes]
+type PrintlnNode struct {
+    pos Position
+    expr ExpressionNode
 }
 
-LoopNode {
-	Position
-	ExpressionNode
-	[StatementNodes]
+type IfNode struct {
+    pos Position
+    expr ExpressionNode
+    stats []StatementNode
+    stats []StatementNode
 }
 
-ScopeNode {
-	Position
-	[StatementNodes]
+type LoopNode struct {
+    pos Position
+    expr ExpressionNode
+    stats []StatementNode
+}
+
+type ScopeNode struct {
+    pos Position
+    stats []StatementNode
 }
 
 // LHSNodes
 
-IdentifierNode {
-	Position
-	Identifier
+type LHSNode interface {
+
 }
 
-PairFirstElementNode {
-	Position
-	Identifier
-	ExpressionNode
+type IdentifierNode struct {
+    pos Position
+    ident string
 }
 
-PairSecondElementNode {
-	Position
-	Identifier
-	ExpressionNode
+type PairFirstElementNode struct {
+    pos Position
+    ident string
+    expr ExpressionNode
 }
 
-ArrayElementNode {
-	Position
-	Identifier
-	ExpressionNode
+type PairSecondElementNode struct {
+    pos Position
+    ident string
+    expr ExpressionNode
+}
+
+type ArrayElementNode struct {
+    pos Position
+    ident string
+    expr ExpressionNode
 }
 
 // ---- RHSNodes ----
 
-// ExpressionNode
+type RHSNode interface {
 
-ArrayLiteralNode {
-	Position
-	[ExpressionNode]
 }
 
-PairLiteralNode {
-	Position
-	ExpressionNode
-	ExpressionNode
+// ExpressionNode
+
+type ArrayLiteralNode struct {
+    pos Position
+    exprs []ExpressionNode
+}
+
+type PairLiteralNode struct {
+    pos Position
+    expr ExpressionNode
+    expr ExpressionNode
 }
 
 // PairFirstElementNode
 
 // PairSecondElementNode
 
-FunctionCallNode {
-	Position
-	Identifier
-	[ExpressionNode]
+type FunctionCallNode struct {
+    pos Position
+    ident string
+    exprs []ExpressionNode
 }
 
 // ---- TypeNodes ----
 
-BaseTypeNode {
-	BaseType
+type TypeNode interface {
 }
 
-ArrayTypeNode {
-	Dimension
-	ArrayableTypeNode
+type BaseType int
+const (
+    INT BaseType = iota
+    BOOL
+    CHAR
+    STRING
+    PAIR
+)
+
+type BaseTypeNode struct {
+    t BaseType
 }
 
-PairTypeNode {
-	PairableTypeNode
-	PairableTypeNode
+type ArrayTypeNode struct {
+    dim int
+    t BaseType
 }
 
-// ---- ArrayableTypeNodes ----
-
-// BaseTypeNode
-
-// PairTypeNode
-
-// ---- PairableTypeNodes ----
-
-// BaseTypeNode
-
-// ArrayTypeNode
-
-PairablePairTypeNode {}
+type PairTypeNode struct {
+    t1 TypeNode
+    t2 TypeNode
+}
 
 // ---- ExpressionNodes ----
 
-IntegerLiteralNode {
-	Position
-	Integer
+type ExpressionNode interface {
+
 }
 
-BooleanLiteralNode {
-	Position
-	Boolean
+type UnaryOperator int
+const (
+    NOT UnaryOperator = iota
+    NEG
+    LEN
+    ORD
+    CHR
+)
+
+
+type BinaryOperator int
+const (
+    MUL BinaryOperator = iota
+    DIV
+    MOD
+    ADD
+    SUB
+    GT
+    GEQ
+    LT
+    LEQ
+    EQ
+    NEQ
+    AND
+    OR
+)
+
+type IntegerLiteralNode struct {
+    pos Position
+    val int
 }
 
-CharacterLiteralNode {
-	Position
-	Character
+type BooleanLiteralNode struct {
+    pos Position
+    val bool
 }
 
-StringLiteralNode {
-	Position
-	String
+type CharacterLiteralNode struct {
+    pos Position
+    val rune
+}
+
+type StringLiteralNode struct {
+    pos Position
+    val string
 }
 
 // PairLiteralNode
@@ -180,15 +226,15 @@ StringLiteralNode {
 
 // ArrayElementNode
 
-UnaryOperatorNode {
-	Position
-	UnaryOperator
-	ExpressionNode
+type UnaryOperatorNode struct {
+    pos Position
+    op UnaryOperator
+    expr ExpressionNode
 }
 
-BinaryOperatorNode {
-	Position
-	BinaryOperator
-	ExpressionNode
-	ExpressionNode
+type BinaryOperatorNode struct {
+    pos Position
+    op BinaryOperator
+    expr ExpressionNode
+    expr ExpressionNode
 }
