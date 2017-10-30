@@ -1,17 +1,38 @@
-type ProgramNode struct {
-    functions []FunctionNode
+package ast
+
+import (
+    "bytes"
+)
+
+type Program struct {
+    Functions []FunctionNode
+}
+
+func NewProgram(functions []FunctionNode) Program {
+    return Program{
+        Functions: functions,
+    }
+}
+
+func (p Program) String() string {
+    var buf bytes.Buffer
+
+    buf.WriteString("Program")
+
+    return buf.String()
 }
 
 type FunctionNode struct {
     pos Position
     t TypeNode
     ident string
-    stats [StatementNode]
+    stats []StatementNode
 }
 
 type Position struct {
+    filename string
     lineNumber int
-    charNumber int
+    colNumber int
 }
 
 // ---- StatementNodes ----
@@ -66,8 +87,8 @@ type PrintlnNode struct {
 type IfNode struct {
     pos Position
     expr ExpressionNode
-    stats []StatementNode
-    stats []StatementNode
+    ifStats []StatementNode
+    elseStats []StatementNode
 }
 
 type LoopNode struct {
@@ -125,8 +146,8 @@ type ArrayLiteralNode struct {
 
 type PairLiteralNode struct {
     pos Position
-    expr ExpressionNode
-    expr ExpressionNode
+    expr1 ExpressionNode
+    expr2 ExpressionNode
 }
 
 // PairFirstElementNode
@@ -235,6 +256,6 @@ type UnaryOperatorNode struct {
 type BinaryOperatorNode struct {
     pos Position
     op BinaryOperator
-    expr ExpressionNode
-    expr ExpressionNode
+    expr1 ExpressionNode
+    expr2 ExpressionNode
 }
