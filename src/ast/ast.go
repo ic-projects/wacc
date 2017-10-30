@@ -1,5 +1,22 @@
 package ast
 
+/*  WACC Abstract Syntax Tree
+
+    For similar implementations, see:
+     *  Pigeon itself:
+        PEG: https://github.com/mna/pigeon/blob/master/grammar/pigeon.peg
+        AST: https://github.com/mna/pigeon/blob/master/ast/ast.go
+
+     *  Pigeon 'indentation' example:
+        PEG: https://github.com/mna/pigeon/blob/master/examples/indentation/indentation.peg
+        AST: https://github.com/mna/pigeon/blob/master/examples/indentation/indentation_ast.go
+
+     *  Logstash example:
+        PEG: https://github.com/breml/logstash-config/blob/master/logstash_config.peg
+        AST: https://github.com/breml/logstash-config/blob/master/ast/ast.go
+
+*/
+
 import (
     "bytes"
 )
