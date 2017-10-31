@@ -3,6 +3,7 @@ package ast
 import (
     "bytes"
     "fmt"
+    "strconv"
 )
 
 /*  WACC Abstract Syntax Tree
@@ -501,6 +502,20 @@ const (
     CHR
 )
 
+func (unOp UnaryOperator) String() string {
+  switch unOp {
+  case NOT:
+    return "- !"
+  case NEG:
+    return "- -"
+  case LEN:
+    return "- len"
+  case ORD:
+    return "- ord"
+  case CHR:
+    return "- chr"
+  }
+}
 
 type BinaryOperator int
 const (
@@ -519,9 +534,55 @@ const (
     OR
 )
 
+func (binOp BinaryOperator) String() string {
+  switch binOp {
+  case MUL:
+    return "- *"
+  case DIV:
+    return "- /"
+  case MOD:
+    return "- %"
+  case ADD:
+    return "- +"
+  case SUB:
+    return "- -"
+  case GT:
+    return "- >"
+  case LT:
+    return "- <"
+  case LEQ:
+    return "- <="
+  case GET:
+    return "- >="
+  case EQ:
+    return "- =="
+  case NEQ:
+    return "- !="
+  case AND:
+    return "- &&"
+  case OR:
+    return "- ||"
+  }
+}
+
 type IntegerLiteralNode struct {
     pos Position
     val int
+}
+
+func NewIntegerLiteralNode(pos Position, val int) IntegerLiteralNode {
+  return IntegerLiteralNode {
+    pos: pos,
+    val: val,
+  }
+}
+
+func (node IntegerLiteralNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintf("- %d", node.val))
+
+  return buf;
 }
 
 type BooleanLiteralNode struct {
@@ -529,14 +590,59 @@ type BooleanLiteralNode struct {
     val bool
 }
 
+func NewBooleanLiteralNode(pos Position, val bool) BooleanLiteralNode {
+  return BooleanLiteralNode {
+    pos: pos,
+    val: val,
+  }
+}
+
+func (node BooleanLiteralNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintf("- %s", strconv.FormatBool(node.val)))
+
+  return buf.String()
+}
+
 type CharacterLiteralNode struct {
     pos Position
     val rune
 }
 
+func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
+  return CharacterLiteralNode {
+    pos: pos,
+    val: val,
+  }
+}
+
+func (node CharacterLiteralNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintf("- %c", node.val))
+
+  return buf.String()
+}
+
 type StringLiteralNode struct {
     pos Position
     val string
+}
+
+func NewStringLiteralNode(pos Position, val rune) StringLiteralNode {
+  return StringLiteralNode {
+    pos: pos,
+    val: val,
+  }
+}
+
+func (node StringLiteralNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintf("- %s", node.val))
+
+  return buf.String()
 }
 
 // PairLiteralNode
@@ -551,9 +657,45 @@ type UnaryOperatorNode struct {
     expr ExpressionNode
 }
 
+func NewUnaryOperatorNode(pos Position, op UnaryOperator, expr ExpressionNode) UnaryOperatorNode {
+  return UnaryOperatorNode {
+    pos: pos,
+    op: op,
+    expr: expr,
+  }
+}
+
+func (node UnaryOperatorNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintln("- %s", node.op))
+  buf.WriteString(fmt.Sprintln("- %s", node.expr))
+
+  return buf.String()
+}
+
 type BinaryOperatorNode struct {
     pos Position
     op BinaryOperator
     expr1 ExpressionNode
     expr2 ExpressionNode
+}
+
+func NewBinaryOperatorNode(pos Position, op BinaryOperatorNode, expr1 ExpressionNode, expr2 ExpressionNode) BinaryOperatorNode {
+  return BinaryOperatorNode {
+    pos: pos,
+    op: op,
+    expr1: expr1,
+    expr2: expr2,
+  }
+}
+
+func (node BinaryOperatorNode) String() string {
+  var buf bytes.Buffer
+
+  buf.WriteString(fmt.Sprintln("- %s", node.op))
+  buf.WriteString(fmt.Sprintln("- %s", node.expr1))
+  buf.WriteString(fmt.Sprintln("- %s", node.expr2))
+
+  return buf.String()
 }
