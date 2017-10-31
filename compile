@@ -69,6 +69,6 @@ end
 files.each do |file_path|
   puts "Compiling #{file_path}..."
 
-  output = %x(src/src #{file_path})
+  output = %x(src/wacc #{file_path})
   puts output
 end
