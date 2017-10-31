@@ -1,16 +1,16 @@
 package main;
 
 import (
-	"fmt"
-	"log"
-	"os"
+    "fmt"
+    "log"
+    "os"
 )
 
 func main() {
-	tree, err := ParseFile(os.Args[1])
-	if err != nil {
-		log.Fatal(err)
-	}
+    tree, err := ParseFile(os.Args[1])
+    if err != nil {
+        log.Fatal(err)
+    }
 
-	fmt.Println(tree)
+    fmt.Println(tree)
 }
