@@ -405,10 +405,37 @@ type IdentifierNode struct {
     ident string
 }
 
+func NewIdentifierNode(pos Position, ident string) IdentifierNode {
+    return IdentifierNode {
+        pos: pos,
+        ident: ident,
+    }
+}
+
+func (node IdentifierNode) String() string {
+    var buf bytes.Buffer
+    buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
+    return buf.String()
+}
+
 type PairFirstElementNode struct {
     pos Position
     ident string
     expr ExpressionNode
+}
+
+func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElementNode {
+    return PairFirstElementNode {
+        pos: pos,
+        expr: expr,
+    }
+}
+
+func (node PairFirstElementNode) String() string {
+    var buf bytes.Buffer
+    buf.WriteString(fmt.Sprintln("- FST"))
+    buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+    return buf.String()
 }
 
 type PairSecondElementNode struct {
@@ -417,10 +444,40 @@ type PairSecondElementNode struct {
     expr ExpressionNode
 }
 
+func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondElementNode {
+    return PairSecondElementNode {
+        pos: pos,
+        expr: expr,
+    }
+}
+
+func (node PairSecondElementNode) String() string {
+    var buf bytes.Buffer
+    buf.WriteString(fmt.Sprintln("- SND"))
+    buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+    return buf.String()
+}
+
 type ArrayElementNode struct {
     pos Position
     ident string
     expr ExpressionNode
+}
+
+func NewArrayElementNode(pos Position, ident string, expr ExpressionNode) ArrayElementNode {
+    return ArrayElementNode {
+        pos: pos,
+        ident: ident,
+        expr: expr,
+    }
+}
+
+func (node ArrayElementNode) String() string {
+    var buf bytes.Buffer
+    buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
+    buf.WriteString(fmt.Sprintln("  - []"))
+    buf.WriteString(fmt.Sprintf("  %s\n", node.expr))
+    return buf.String()
 }
 
 /**** RHSNodes ****/
