@@ -545,6 +545,22 @@ const (
 	PAIR
 )
 
+func (t BaseType) String() string {
+	switch t {
+	case INT:
+		return "int"
+	case BOOL:
+		return "bool"
+	case CHAR:
+		return "char"
+	case STRING:
+		return "string"
+	case PAIR:
+		return "pair"
+	}
+	return ""
+}
+
 type BaseTypeNode struct {
 	t BaseType
 }
@@ -555,14 +571,50 @@ func NewBaseTypeNode(t BaseType) BaseTypeNode {
 	}
 }
 
+func (node BaseTypeNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- %s\n", node.t))
+	return buf.String()
+}
+
 type ArrayTypeNode struct {
-	dim int
 	t   BaseType
+	dim int
+}
+
+func NewArrayTypeNode(t BaseType, dim int) ArrayTypeNode {
+	return ArrayTypeNode{
+		t:   t,
+		dim: dim,
+	}
+}
+
+func (node ArrayTypeNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- %s", node.t))
+	for i := 0; i < node.dim; i++ {
+		buf.WriteString("[]")
+	}
+	buf.WriteString("\n")
+	return buf.String()
 }
 
 type PairTypeNode struct {
 	t1 TypeNode
 	t2 TypeNode
+}
+
+func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
+	return PairTypeNode{
+		t1: t1,
+		t2: t2,
+	}
+}
+
+func (node PairTypeNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- %s%s", node.t1, node.t2))
+	return buf.String()
 }
 
 /**** ExpressionNodes ****/
