@@ -1,21 +1,45 @@
 {
-	package main
+    package main
 
-	import (
-		"wacc_22/src/ast"
-	)
+    import (
+        "wacc_22/src/ast"
+    )
+
+    func (p position) getPosition() ast.Position {
+        return ast.NewPosition(p.line, p.col, p.offset)
+    }
 }
 
-PROGRAM <- _ "begin" (__ FUNC)* _ STAT _ "end" {
-	return ast.NewProgram([]ast.FunctionNode{}), nil
+PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" {
+    main := ast.NewFunctionNode(
+        c.pos.getPosition(),
+        ast.NewBaseTypeNode(ast.INT),
+        "main",
+        []ast.ParameterNode{},
+        stat.([]ast.StatementNode),
+    )
+    functions := []ast.FunctionNode{main}
+    // for _, f := range fs.([]interface{}) {
+    //     functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
+    // }
+    return ast.NewProgram(functions), nil
 }
 
 FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT _ "end"
 PARAMLIST <- PARAM (_ ',' _ PARAM)*
 PARAM <- TYPE __ IDENT
 
-STAT <- (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE) (_ ';' _ (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE))*
-SKIP <- "skip"
+STAT <- stat:(SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE) stats:(_ ';' _ (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE))* {
+    statements := []ast.StatementNode{stat}
+    for _, s := range stats.([]interface{}) {
+        statements = append(statements, s.([]interface{})[3].(ast.StatementNode))
+    }
+    return statements, nil
+}
+
+SKIP <- "skip" {
+    return ast.NewSkipNode(c.pos.getPosition()), nil
+}
 NEWASSIGN <- TYPE __ IDENT _ '=' _ ASSIGNRHS
 ASSIGN <- ASSIGNLHS _ "=" _ ASSIGNRHS
 READ <- "read" __ ASSIGNLHS
@@ -89,7 +113,9 @@ ESCAPEDCHAR <- [0btnfr""''\\]
 ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? _ ']'
 PAIRLITER <- "null"
 
-COMMENT <- '#' ([^\n])* '\n'
+/**** Comments and Spacing ****/
 
-_ <- ([ \n\t\r] / COMMENT)*
-__ <- ([ \n\t\r] / COMMENT)+
+Comment <- '#' ([^\n])* '\n'
+
+_ "Optional Space" <- ([ \n\t\r] / Comment)*
+__ "Obligatory Space" <- ([ \n\t\r] / Comment)+
