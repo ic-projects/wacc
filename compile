@@ -68,7 +68,15 @@ end
 # now process each target file
 files.each do |file_path|
   puts "Compiling #{file_path}"
-
+  puts "-- Test: #{File.basename file_path}"
+  puts ""
+  puts "-- Uploaded file: "
+  puts "---------------------------------------------------------------"
+  puts IO.read(file_path)
+  puts "---------------------------------------------------------------"
+  puts ""
+  puts "-- Compiler Output:"
   output = %x(src/wacc #{file_path})
   puts output
+  puts ""
 end
