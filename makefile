@@ -1,6 +1,6 @@
 .PHONY = all build check lint clean clean-vendor
 
-GOPATH := $(CURDIR)/src/vendor/:$(CURDIR):$(GOPATH)
+GOPATH := $(CURDIR)/src/vendor/:$(CURDIR)
 export GOPATH
 GOBIN = $(CURDIR)/src/vendor/bin
 
