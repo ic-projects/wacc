@@ -641,6 +641,7 @@ const (
 	ADD
 	SUB
 	GT
+  GET
 	GEQ
 	LT
 	LEQ
@@ -679,6 +680,7 @@ func (binOp BinaryOperator) String() string {
   case OR:
     return "- ||"
   }
+  return "ERROR"
 }
 
 type IntegerLiteralNode struct {
@@ -698,7 +700,7 @@ func (node IntegerLiteralNode) String() string {
 
   buf.WriteString(fmt.Sprintf("- %d", node.val))
 
-  return buf;
+  return buf.String();
 }
 
 type BooleanLiteralNode struct {
@@ -746,7 +748,7 @@ type StringLiteralNode struct {
 	val string
 }
 
-func NewStringLiteralNode(pos Position, val rune) StringLiteralNode {
+func NewStringLiteralNode(pos Position, val string) StringLiteralNode {
   return StringLiteralNode {
     pos: pos,
     val: val,
@@ -797,7 +799,7 @@ type BinaryOperatorNode struct {
 	expr2 ExpressionNode
 }
 
-func NewBinaryOperatorNode(pos Position, op BinaryOperatorNode, expr1 ExpressionNode, expr2 ExpressionNode) BinaryOperatorNode {
+func NewBinaryOperatorNode(pos Position, op BinaryOperator, expr1 ExpressionNode, expr2 ExpressionNode) BinaryOperatorNode {
   return BinaryOperatorNode {
     pos: pos,
     op: op,
