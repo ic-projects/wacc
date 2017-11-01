@@ -3,6 +3,9 @@
 
     import (
         "ast"
+        "unicode/utf8"
+        "strconv"
+        "strings"
     )
 
     func (p position) getPosition() ast.Position {
@@ -139,14 +142,26 @@ IDENT <- s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
 }
 
 ARRAYELEM <- IDENT (_ '[' _ EXPR _ ']')+
-INTLITER <- INTSIGN? _ DIGIT+
+INTLITER <- INTSIGN? _ DIGIT+ {
+  i, _ := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
+  return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), nil
+}
 DIGIT <- [0-9]
 INTSIGN <- '+' / '-'
 BOOLLITER <- TRUE / FALSE
-TRUE <- "true"
-FALSE <- "false"
-CHARLITER <- "'" CHARACTER "'"
-STRLITER <- '"' CHARACTER* '"'
+TRUE <- "true" {
+  return ast.NewBooleanLiteralNode(c.pos.getPosition(), true), nil
+}
+FALSE <- "false" {
+  return ast.NewBooleanLiteralNode(c.pos.getPosition(), false), nil
+}
+CHARLITER <- "'" char:CHARACTER "'" {
+  r, _ := utf8.DecodeRune(char.([]byte))
+  return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), nil
+}
+STRLITER <- '"' CHARACTER* '"' {
+  return ast.NewStringLiteralNode(c.pos.getPosition(), string(c.text)), nil
+}
 CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
 ESCAPEDCHAR <- [0btnfr""''\\]
 ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? _ ']'

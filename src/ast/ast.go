@@ -275,7 +275,7 @@ func NewPrintNode(pos Position, expr ExpressionNode) PrintNode {
 func (node PrintNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINT"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
 	return buf.String()
 }
 
@@ -294,7 +294,7 @@ func NewPrintlnNode(pos Position, expr ExpressionNode) PrintlnNode {
 func (node PrintlnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINTLN"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
 	return buf.String()
 }
 
@@ -737,7 +737,7 @@ func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
 func (node CharacterLiteralNode) String() string {
   var buf bytes.Buffer
 
-  buf.WriteString(fmt.Sprintf("- %c", node.val))
+  buf.WriteString(fmt.Sprintf("- '%c'", node.val))
 
   return buf.String()
 }
