@@ -76,7 +76,9 @@ SCOPE <- "begin" __ stats:STAT _ "end" {
 
 ASSIGNLHS <- PAIRELEM / ARRAYELEM / IDENT
 ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
-NEWPAIR <- "newpair" _ '(' _ EXPR _ ',' _ EXPR _ ')'
+NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
+    return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
+}
 CALL <- "call" __ IDENT _ '(' _ ARGLIST? _ ')'
 ARGLIST <- EXPR (_ ',' _ EXPR)*
 PAIRELEM <- FST / SND
@@ -89,9 +91,7 @@ TYPE <- t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
     }
     return t, nil
 }
-BASETYPE <- t:(INT / BOOL / CHAR / STRING) {
-    return t, nil
-}
+BASETYPE <- INT / BOOL / CHAR / STRING
 INT <- "int" {
     return ast.NewBaseTypeNode(ast.INT), nil
 }
@@ -109,9 +109,12 @@ PAIRTYPE <- "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
     return ast.NewPairTypeNode(t1.(ast.TypeNode), t2.(ast.TypeNode)), nil
 }
 
-PAIRELEMTYPE <- t:(((BASETYPE / ARRAYTYPE) (_ ARRAYTYPE)*) / BASETYPE / PAIR) {
-    return t.(ast.TypeNode), nil
-}
+PAIRELEMTYPE <- (t:BASETYPE array:(_ ARRAYTYPE)*) {
+    if (len(array.([]interface{})) > 0) {
+        return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
+    }
+    return t, nil
+} / PAIR
 PAIR <- "pair"
 
 EXPR <- expr:((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) binex:(_ BINARYOPER _ EXPR)? {
