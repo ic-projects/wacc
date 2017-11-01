@@ -801,8 +801,8 @@ func NewUnaryOperatorNode(pos Position, op UnaryOperator, expr ExpressionNode) U
 func (node UnaryOperatorNode) String() string {
   var buf bytes.Buffer
 
-  buf.WriteString(fmt.Sprintln("- %s", node.op))
-  buf.WriteString(fmt.Sprintln("- %s", node.expr))
+  buf.WriteString(fmt.Sprintf("- %s\n", node.op))
+  buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
 
   return buf.String()
 }
@@ -826,9 +826,9 @@ func NewBinaryOperatorNode(pos Position, op BinaryOperator, expr1 ExpressionNode
 func (node BinaryOperatorNode) String() string {
   var buf bytes.Buffer
 
-  buf.WriteString(fmt.Sprintln("- %s", node.op))
-  buf.WriteString(fmt.Sprintln("- %s", node.expr1))
-  buf.WriteString(fmt.Sprintln("- %s", node.expr2))
+  buf.WriteString(fmt.Sprintf("- %s\n", node.op))
+  buf.WriteString(fmt.Sprintf("- %s\n", node.expr1))
+  buf.WriteString(fmt.Sprintf("- %s\n", node.expr2))
 
   return buf.String()
 }
