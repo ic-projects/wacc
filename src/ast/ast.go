@@ -129,7 +129,7 @@ func NewSkipNode(pos Position) SkipNode {
 }
 
 func (node SkipNode) String() string {
-	return "- SKIP"
+	return "- SKIP\n"
 }
 
 type DeclareNode struct {
@@ -401,7 +401,6 @@ func (node IdentifierNode) String() string {
 
 type PairFirstElementNode struct {
 	pos   Position
-	ident string
 	expr  ExpressionNode
 }
 
@@ -421,7 +420,6 @@ func (node PairFirstElementNode) String() string {
 
 type PairSecondElementNode struct {
 	pos   Position
-	ident string
 	expr  ExpressionNode
 }
 
@@ -489,18 +487,28 @@ func (node ArrayLiteralNode) String() string {
 	return buf.String()
 }
 
-type PairLiteralNode struct {
+type NewPairNode struct {
 	pos Position
+    fst ExpressionNode
+    snd ExpressionNode
 }
 
-func NewPairLiteralNode(pos Position) PairLiteralNode {
-	return PairLiteralNode{
+func NewNewPairNode(pos Position, fst ExpressionNode, snd ExpressionNode) NewPairNode {
+	return NewPairNode{
 		pos: pos,
+        fst: fst,
+        snd: snd,
 	}
 }
 
-func (node PairLiteralNode) String() string {
-	return "- null"
+func (node NewPairNode) String() string {
+    var buf bytes.Buffer
+    buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
+    buf.WriteString(fmt.Sprintln("  - FST"))
+    buf.WriteString(fmt.Sprintf("  %s\n", node.fst))
+    buf.WriteString(fmt.Sprintln("  - SND"))
+    buf.WriteString(fmt.Sprintf("  %s\n", node.snd))
+    return buf.String()
 }
 
 // PairFirstElementNode
@@ -778,7 +786,19 @@ func (node StringLiteralNode) String() string {
   return buf.String()
 }
 
-// PairLiteralNode
+type PairLiteralNode struct {
+	pos Position
+}
+
+func NewPairLiteralNode(pos Position, fst ExpressionNode, snd ExpressionNode) PairLiteralNode {
+	return PairLiteralNode{
+		pos: pos,
+	}
+}
+
+func (node PairLiteralNode) String() string {
+    return "- null\n"
+}
 
 // IdentifierNode
 
