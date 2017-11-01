@@ -28,7 +28,7 @@ lint: golint
 
 fmt:
 	@echo "\n== Formatting =="
-	gofmt -l $(SRC)
+	gofmt -w $(SRC)
 
 vet:
 	@echo "\n== Vetting =="
