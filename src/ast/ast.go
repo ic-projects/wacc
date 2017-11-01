@@ -275,7 +275,7 @@ func NewPrintNode(pos Position, expr ExpressionNode) PrintNode {
 func (node PrintNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINT"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
 	return buf.String()
 }
 
@@ -294,7 +294,7 @@ func NewPrintlnNode(pos Position, expr ExpressionNode) PrintlnNode {
 func (node PrintlnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINTLN"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
 	return buf.String()
 }
 
@@ -440,22 +440,24 @@ func (node PairSecondElementNode) String() string {
 type ArrayElementNode struct {
 	pos   Position
 	ident string
-	expr  ExpressionNode
+	exprs  []ExpressionNode
 }
 
-func NewArrayElementNode(pos Position, ident string, expr ExpressionNode) ArrayElementNode {
+func NewArrayElementNode(pos Position, ident string, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
 		pos:   pos,
 		ident: ident,
-		expr:  expr,
+		exprs:  exprs,
 	}
 }
 
 func (node ArrayElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
-	buf.WriteString(fmt.Sprintln("  - []"))
-	buf.WriteString(fmt.Sprintf("  %s\n", node.expr))
+  for _, e := range node.exprs {
+	  buf.WriteString(fmt.Sprintln("  - []"))
+	  buf.WriteString(fmt.Sprintf("  %s\n", e))
+  }
 	return buf.String()
 }
 
@@ -761,7 +763,7 @@ func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
 func (node CharacterLiteralNode) String() string {
   var buf bytes.Buffer
 
-  buf.WriteString(fmt.Sprintf("- %c", node.val))
+  buf.WriteString(fmt.Sprintf("- '%c'", node.val))
 
   return buf.String()
 }
