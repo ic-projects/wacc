@@ -1,4 +1,4 @@
-.PHONY = all build lint golint pigeon clean check spellcheck fmt vet lint cyclo
+.PHONY = all build check lint clean clean-vendor
 
 PATHDOWN = $(subst $(notdir ${CURDIR}),,${CURDIR})
 GOPATH := $(CURDIR)/vendor/:$(PATHDOWN):$(GOPATH)
