@@ -2,7 +2,7 @@
     package main
 
     import (
-        "wacc_22/src/ast"
+        "ast"
     )
 
     func (p position) getPosition() ast.Position {

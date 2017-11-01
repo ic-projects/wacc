@@ -1,17 +1,17 @@
-.PHONY = all build lint golint peg clean
+.PHONY = all build lint golint pigeon clean
 
-GOPATH := $(CURDIR)/vendor/:$(GOPATH)
+PATHDOWN = $(subst $(notdir ${CURDIR}),,${CURDIR})
+GOPATH := $(CURDIR)/vendor/:$(PATHDOWN):$(GOPATH)
 export GOPATH
-GOBIN := $(CURDIR)/vendor/bin/:$(GOBIN)
-PATH := $(GOBIN):$(PATH)
+GOBIN = $(CURDIR)/vendor/bin
 
-GOLINT = golint
-PIGEON = pigeon
+GOLINT = $(GOBIN)/golint
+PIGEON = $(GOBIN)/pigeon
 
-SRC = main.go 
+SRC = main.go
 BUILD = wacc.go
 
-all: build
+all: pigeon build
 	go build -o wacc
 
 build: $(SRC) $(BUILD)
@@ -27,7 +27,8 @@ golint:
 	go get github.com/golang/lint/golint
 
 pigeon:
-	go get github.com/pointlander/peg
+	go get github.com/mna/pigeon
 
 clean:
-	rm wacc $(BUILD)
+	rm $(BUILD)
+	rm wacc
