@@ -442,22 +442,24 @@ func (node PairSecondElementNode) String() string {
 type ArrayElementNode struct {
 	pos   Position
 	ident string
-	expr  ExpressionNode
+	exprs  []ExpressionNode
 }
 
-func NewArrayElementNode(pos Position, ident string, expr ExpressionNode) ArrayElementNode {
+func NewArrayElementNode(pos Position, ident string, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
 		pos:   pos,
 		ident: ident,
-		expr:  expr,
+		exprs:  exprs,
 	}
 }
 
 func (node ArrayElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
-	buf.WriteString(fmt.Sprintln("  - []"))
-	buf.WriteString(fmt.Sprintf("  %s\n", node.expr))
+  for _, e := range node.exprs {
+	  buf.WriteString(fmt.Sprintln("  - []"))
+	  buf.WriteString(fmt.Sprintf("  %s\n", e))
+  }
 	return buf.String()
 }
 

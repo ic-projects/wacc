@@ -141,7 +141,13 @@ IDENT <- s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
   return string(c.text), nil
 }
 
-ARRAYELEM <- IDENT (_ '[' _ EXPR _ ']')+
+ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
+  var expressionNodes  []ast.ExpressionNode
+  for _, e := range exprs.([]interface{}) {
+      expressionNodes = append(expressionNodes, e.([]interface{})[3].(ast.ExpressionNode))
+  }
+  return ast.NewArrayElementNode(c.pos.getPosition(), ident.(string), expressionNodes), nil
+}
 INTLITER <- INTSIGN? _ DIGIT+ {
   i, _ := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
   return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), nil
@@ -164,8 +170,22 @@ STRLITER <- '"' CHARACTER* '"' {
 }
 CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
 ESCAPEDCHAR <- [0btnfr""''\\]
-ARRAYLITER <- '[' _ (EXPR (_ ',' _ EXPR)*)? _ ']'
-PAIRLITER <- "null"
+ARRAYLITER <- '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
+  var expressions []ast.ExpressionNode
+  if (exprs == nil) {
+    expressions = nil
+  } else {
+    firstExpression := exprs.([]interface{})[0].(ast.ExpressionNode)
+    expressions = []ast.ExpressionNode{firstExpression}
+    for _, e := range exprs.([]interface{})[1].([]interface{}) {
+        expressions = append(expressions, e.([]interface{})[3].(ast.ExpressionNode))
+    }
+  }
+  return ast.NewArrayLiteralNode(c.pos.getPosition(), expressions), nil
+}
+PAIRLITER <- "null" {
+  return ast.NewPairLiteralNode(c.pos.getPosition()), nil
+}
 
 /**** Comments and Spacing ****/
 
