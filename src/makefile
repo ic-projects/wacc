@@ -24,36 +24,36 @@ wacc.go: grammar/wacc.peg
 check: spellcheck fmt vet lint cyclo
 
 lint: golint
-	@echo "== Lint Checking =="
+	@echo "\n== Lint Checking =="
 	$(GOLINT) $(SRC)
 
 fmt:
-	@echo "== Formatting =="
-	gofmt -s $(SRC)
+	@echo "\n== Formatting =="
+	gofmt -l $(SRC)
 
 vet:
-	@echo "== Vetting =="
+	@echo "\n== Vetting =="
 	go tool vet $(SRC)
 
 cyclo: gocyclo
-	@echo "== Cyclo =="
+	@echo "\n== Cyclo =="
 	$(GOCYCLO) $(SRC)
 
 spellcheck: misspell
-	@echo "== Spell Checking =="
+	@echo "\n== Spell Checking =="
 	$(MISSPELL) $(SRC)
 
 golint:
-	go get github.com/golang/lint/golint
+	@go get github.com/golang/lint/golint
 
 pigeon:
-	go get github.com/mna/pigeon
+	@go get github.com/mna/pigeon
 
 gocyclo:
-	go get github.com/fzipp/gocyclo
+	@go get github.com/fzipp/gocyclo
 
 misspell:
-	go get github.com/client9/misspell/cmd/misspell
+	@go get github.com/client9/misspell/cmd/misspell
 
 clean:
 	rm $(BUILD)
