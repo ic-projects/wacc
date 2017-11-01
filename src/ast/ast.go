@@ -336,11 +336,11 @@ type LoopNode struct {
 	stats []StatementNode
 }
 
-func NewLoopNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseStats []StatementNode) LoopNode {
+func NewLoopNode(pos Position, expr ExpressionNode, stats []StatementNode) LoopNode {
 	return LoopNode{
 		pos:   pos,
 		expr:  expr,
-		stats: ifStats,
+		stats: stats,
 	}
 }
 

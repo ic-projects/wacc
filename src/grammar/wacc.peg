@@ -40,17 +40,39 @@ STAT <- stat:(SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / 
 SKIP <- "skip" {
     return ast.NewSkipNode(c.pos.getPosition()), nil
 }
-NEWASSIGN <- TYPE __ IDENT _ '=' _ ASSIGNRHS
-ASSIGN <- ASSIGNLHS _ "=" _ ASSIGNRHS
-READ <- "read" __ ASSIGNLHS
-FREE <- "free" __ EXPR
-RETURN <- "return" __ EXPR
-EXIT <- "exit" __ EXPR
-PRINT <- "print" __ EXPR
-PRINTLN <- "println" __ EXPR
-IF <- "if" __ EXPR _ "then" __ STAT _ "else" __ STAT _ "fi"
-WHILE <- "while" __ EXPR _ "do" __ STAT _ "done"
-SCOPE <- "begin" __ STAT _ "end"
+NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
+  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), string(ident.([]byte)), rhs.(ast.RHSNode)), nil
+}
+ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
+  return ast.NewAssignNode(c.pos.getPosition(), lhs.(ast.LHSNode), rhs.(ast.LHSNode)), nil
+}
+READ <- "read" __ lhs:ASSIGNLHS {
+  return ast.NewReadNode(c.pos.getPosition(), lhs.(ast.LHSNode)), nil
+}
+FREE <- "free" __ expr:EXPR {
+  return ast.NewFreeNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
+}
+RETURN <- "return" __ expr:EXPR {
+  return ast.NewReturnNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
+}
+EXIT <- "exit" __ expr:EXPR {
+  return ast.NewExitNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
+}
+PRINT <- "print" __ expr:EXPR {
+  return ast.NewPrintNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
+}
+PRINTLN <- "println" __ expr:EXPR {
+  return ast.NewPrintlnNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
+}
+IF <- "if" __ cond:EXPR _ "then" __ ifStats:STAT _ "else" __ elseStats:STAT _ "fi" {
+  return ast.NewIfNode(c.pos.getPosition(), cond.(ast.ExpressionNode), ifStats.(ast.StatementNode).([]ast.StatementNode), elseStats.(ast.StatementNode).([]ast.StatementNode)), nil
+}
+WHILE <- "while" __ cond:EXPR _ "do" __ stats:STAT _ "done" {
+  return ast.NewLoopNode(c.pos.getPosition(), cond.(ast.ExpressionNode), stats.(ast.StatementNode).([]ast.StatementNode)), nil
+}
+SCOPE <- "begin" __ stats:STAT _ "end" {
+  return ast.NewScopeNode(c.pos.getPosition(), stats.(ast.StatementNode).([]ast.StatementNode)), nil
+}
 
 ASSIGNLHS <- PAIRELEM / ARRAYELEM / IDENT
 ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
