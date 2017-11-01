@@ -1,7 +1,6 @@
 
 require 'fileutils'
 require 'open3'
-require 'tmpdir'
 
 require 'json'
 
@@ -72,20 +71,10 @@ class TestSuite
              }
     end
 
-    # TODO: check the files exist etc.
-
     expected = `#{@refCompile} -t #{source}`
-
-    # abort(source)
-    run_results = nil
-
-    Dir.mktmpdir do |dir|
-      Dir.chdir(dir) do
-        run_results = Utils.run3("/usr/bin/timeout",
-                           ["--kill-after=5", "3", @compile, source],
-                           nil, 1024 * 1024 * 100)
-      end
-    end
+    run_results = Utils.run3("/usr/bin/timeout",
+                       ["--kill-after=5", "3", @compile, source],
+                       nil, 1024 * 1024 * 100)
 
     passed = (expected == run_results[:stdout]) &&
              (run_results[:exit_status] == 0)
