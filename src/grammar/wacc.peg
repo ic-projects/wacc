@@ -110,28 +110,81 @@ PAIRTYPE <- "pair" _ '(' _ PAIRELEMTYPE _ ',' _ PAIRELEMTYPE _ ')'
 PAIRELEMTYPE <- ((BASETYPE / ARRAYTYPE) (_ ARRAYTYPE)*) / BASETYPE / PAIR
 PAIR <- "pair"
 
-EXPR <- ((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / (UNARYOPER _ EXPR) / ARRAYELEM / IDENT) (_ BINARYOPER _ EXPR)*
-BREXPR <- '(' _ EXPR
-UNARYOPER <- NOT / NEG / LEN / ORD / CHR
-NOT <- '!'
-NEG <- '-'
-LEN <- "len"
-ORD <- "ord"
-CHR <- "chr"
-BINARYOPER <- MULT / DIV / MOD / PLUS / SUB / GEQ / GT / LEQ / LT / EQ / NEQ / AND / OR
-MULT <- '*'
-DIV <- '/'
-MOD <- '%'
-PLUS <- '+'
-SUB <- '-'
-GT <- '>'
-GEQ <- ">="
-LT <- '<'
-LEQ <- "<="
-EQ <- "=="
-NEQ <- "!="
-AND <- "&&"
-OR <- "||"
+EXPR <- expr:((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) binex:(_ BINARYOPER _ EXPR)? {
+  if (binex != nil) {
+    bineexp := binex.([]interface{})
+    return ast.NewBinaryOperatorNode(c.pos.getPosition(), bineexp[1].(ast.BinaryOperator), expr.(ast.ExpressionNode), bineexp[3].(ast.ExpressionNode)), nil
+  }
+  return expr, nil
+}
+
+UNARYEXPR <- op:UNARYOPER _ expr:EXPR {
+  return ast.NewUnaryOperatorNode(c.pos.getPosition(), op.(ast.UnaryOperator), expr.(ast.ExpressionNode)), nil
+}
+
+BREXPR <- '(' _ expr:(EXPR) {
+  return expr, nil
+}
+UNARYOPER <- op:(NOT / NEG / LEN / ORD / CHR) {
+  return op, nil
+}
+NOT <- '!' {
+  return ast.NOT, nil
+}
+NEG <- '-' {
+  return ast.NEG, nil
+}
+LEN <- "len" {
+  return ast.LEN, nil
+}
+ORD <- "ord" {
+  return ast.ORD, nil
+}
+CHR <- "chr" {
+  return ast.CHR, nil
+}
+BINARYOPER <- op:(MULT / DIV / MOD / PLUS / SUB / GEQ / GT / LEQ / LT / EQ / NEQ / AND / OR) {
+  return op, nil
+}
+MULT <- '*' {
+  return ast.MUL, nil
+}
+DIV <- '/' {
+  return ast.DIV, nil
+}
+MOD <- '%' {
+  return ast.MOD, nil
+}
+PLUS <- '+' {
+  return ast.ADD, nil
+}
+SUB <- '-' {
+  return ast.SUB, nil
+}
+GT <- '>' {
+  return ast.GT, nil
+}
+GEQ <- ">=" {
+  return ast.GEQ, nil
+}
+LT <- '<' {
+  return ast.LT, nil
+}
+LEQ <- "<=" {
+  return ast.LEQ, nil
+}
+EQ <- "==" {
+  return ast.EQ, nil
+}
+NEQ <- "!=" {
+  return ast.NEQ, nil
+}
+AND <- "&&" {
+  return ast.AND, nil
+}
+OR <- "||" {
+  return ast.OR, nil
+}
 
 
 IDENT <- s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
