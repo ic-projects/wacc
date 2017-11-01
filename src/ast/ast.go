@@ -632,6 +632,22 @@ const (
 	CHR
 )
 
+func (unOp UnaryOperator) String() string {
+  switch unOp {
+  case NOT:
+    return "- !"
+  case NEG:
+    return "- -"
+  case LEN:
+    return "- LEN"
+  case ORD:
+    return "- ORD"
+  case CHR:
+    return "- CHR"
+  }
+  return "ERROR"
+}
+
 type BinaryOperator int
 
 const (
