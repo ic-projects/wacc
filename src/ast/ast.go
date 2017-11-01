@@ -578,11 +578,11 @@ func (node BaseTypeNode) String() string {
 }
 
 type ArrayTypeNode struct {
-	t   BaseType
+	t   TypeNode
 	dim int
 }
 
-func NewArrayTypeNode(t BaseType, dim int) ArrayTypeNode {
+func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 	return ArrayTypeNode{
 		t:   t,
 		dim: dim,
@@ -591,7 +591,7 @@ func NewArrayTypeNode(t BaseType, dim int) ArrayTypeNode {
 
 func (node ArrayTypeNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s", node.t))
+	buf.WriteString(fmt.Sprintf("%s", node.t))
 	for i := 0; i < node.dim; i++ {
 		buf.WriteString("[]")
 	}

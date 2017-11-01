@@ -83,12 +83,27 @@ PAIRELEM <- FST / SND
 FST <- "fst" __ EXPR
 SND <- "snd" __ EXPR
 
-TYPE <- (BASETYPE / PAIRTYPE) (_ ARRAYTYPE)*
-BASETYPE <- INT / BOOL / CHAR / STRING
-INT <- "int"
-BOOL <- "bool"
-CHAR <- "char"
-STRING <- "string"
+TYPE <- t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
+    if (len(array.([]interface{})) > 0) {
+        return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
+    }
+    return t, nil
+}
+BASETYPE <- t:(INT / BOOL / CHAR / STRING) {
+    return t, nil
+}
+INT <- "int" {
+    return ast.NewBaseTypeNode(ast.INT), nil
+}
+BOOL <- "bool" {
+    return ast.NewBaseTypeNode(ast.BOOL), nil
+}
+CHAR <- "char" {
+    return ast.NewBaseTypeNode(ast.CHAR), nil
+}
+STRING <- "string" {
+    return ast.NewBaseTypeNode(ast.STRING), nil
+}
 ARRAYTYPE <- '[' _ ']'
 PAIRTYPE <- "pair" _ '(' _ PAIRELEMTYPE _ ',' _ PAIRELEMTYPE _ ')'
 
