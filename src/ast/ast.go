@@ -641,7 +641,6 @@ const (
 	ADD
 	SUB
 	GT
-  GET
 	GEQ
 	LT
 	LEQ
@@ -669,7 +668,7 @@ func (binOp BinaryOperator) String() string {
     return "- <"
   case LEQ:
     return "- <="
-  case GET:
+  case GEQ:
     return "- >="
   case EQ:
     return "- =="

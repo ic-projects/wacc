@@ -41,7 +41,7 @@ SKIP <- "skip" {
     return ast.NewSkipNode(c.pos.getPosition()), nil
 }
 NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
-  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), string(ident.([]byte)), rhs.(ast.RHSNode)), nil
+  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(string), rhs.(ast.RHSNode)), nil
 }
 ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
   return ast.NewAssignNode(c.pos.getPosition(), lhs.(ast.LHSNode), rhs.(ast.LHSNode)), nil
@@ -119,7 +119,9 @@ AND <- "&&"
 OR <- "||"
 
 
-IDENT <- ('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*
+IDENT <- s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
+  return string(c.text), nil
+}
 
 ARRAYELEM <- IDENT (_ '[' _ EXPR _ ']')+
 INTLITER <- INTSIGN? _ DIGIT+
