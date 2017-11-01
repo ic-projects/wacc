@@ -105,9 +105,13 @@ STRING <- "string" {
     return ast.NewBaseTypeNode(ast.STRING), nil
 }
 ARRAYTYPE <- '[' _ ']'
-PAIRTYPE <- "pair" _ '(' _ PAIRELEMTYPE _ ',' _ PAIRELEMTYPE _ ')'
+PAIRTYPE <- "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
+    return ast.NewPairTypeNode(t1.(ast.TypeNode), t2.(ast.TypeNode)), nil
+}
 
-PAIRELEMTYPE <- ((BASETYPE / ARRAYTYPE) (_ ARRAYTYPE)*) / BASETYPE / PAIR
+PAIRELEMTYPE <- t:(((BASETYPE / ARRAYTYPE) (_ ARRAYTYPE)*) / BASETYPE / PAIR) {
+    return t.(ast.TypeNode), nil
+}
 PAIR <- "pair"
 
 EXPR <- ((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / (UNARYOPER _ EXPR) / ARRAYELEM / IDENT) (_ BINARYOPER _ EXPR)*
