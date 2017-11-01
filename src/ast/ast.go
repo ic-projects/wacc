@@ -792,7 +792,7 @@ type PairLiteralNode struct {
 	pos Position
 }
 
-func NewPairLiteralNode(pos Position, fst ExpressionNode, snd ExpressionNode) PairLiteralNode {
+func NewPairLiteralNode(pos Position) PairLiteralNode {
 	return PairLiteralNode{
 		pos: pos,
 	}
