@@ -353,11 +353,12 @@ func NewLoopNode(pos Position, expr ExpressionNode, stats []StatementNode) LoopN
 
 func (node LoopNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- CONDITION"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
-	buf.WriteString(fmt.Sprintln("- DO"))
+	buf.WriteString(fmt.Sprintln("- LOOP"))
+	buf.WriteString(fmt.Sprintln("  - CONDITION"))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "    "))
+	buf.WriteString(fmt.Sprintln("  - DO"))
 	for _, s := range node.stats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
 }
