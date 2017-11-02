@@ -95,8 +95,16 @@ ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
 NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
     return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
 }
-CALL <- "call" __ IDENT _ '(' _ ARGLIST? _ ')'
-ARGLIST <- EXPR (_ ',' _ EXPR)*
+CALL <- "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
+    return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), args.([]ast.ExpressionNode)), nil
+}
+ARGLIST <- expr:EXPR exprs:(_ ',' _ EXPR)* {
+    argList := []ast.ExpressionNode{expr}
+    for _, e := range exprs.([]interface{}) {
+        argList = append(argList, e.([]interface{})[3].(ast.ExpressionNode))
+    }
+    return argList, nil
+}
 PAIRELEM <- FST / SND
 FST <- "fst" __ e:EXPR {
     return ast.NewPairFirstElementNode(c.pos.getPosition(), e.(ast.ExpressionNode)), nil
