@@ -443,7 +443,7 @@ func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondEleme
 func (node PairSecondElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SND"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
 	return buf.String()
 }
 
@@ -463,10 +463,10 @@ func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionN
 
 func (node ArrayElementNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
+	buf.WriteString(fmt.Sprintf("%s\n", node.ident))
 	for _, e := range node.exprs {
 		buf.WriteString(fmt.Sprintln("  - []"))
-		buf.WriteString(fmt.Sprintf("  %s\n", e))
+		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
 }
@@ -654,11 +654,11 @@ func (unOp UnaryOperator) String() string {
 	case NEG:
 		return "- -"
 	case LEN:
-		return "- LEN"
+		return "- len"
 	case ORD:
-		return "- ORD"
+		return "- ord"
 	case CHR:
-		return "- CHR"
+		return "- chr"
 	}
 	return "ERROR"
 }
@@ -758,7 +758,13 @@ func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
 }
 
 func (node CharacterLiteralNode) String() string {
-	return fmt.Sprintf("- '%c'", node.val)
+  if node.val == '\000' {
+    return "- '\\0'"
+  }
+  if node.val == '"' {
+    return "- '\\\"'"
+  }
+	return fmt.Sprintf("- %q", node.val)
 }
 
 type StringLiteralNode struct {
