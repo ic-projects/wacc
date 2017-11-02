@@ -854,3 +854,17 @@ func (node BinaryOperatorNode) String() string {
 
   return buf.String()
 }
+
+func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position) ExpressionNode {
+  if(len(list) > 1) {
+    var toparse []interface{}
+    for i := 0; i < len(list) - 1; i++ {
+        toparse = append(toparse, list[i])
+    }
+    rest := BuildBinOpTree(first, toparse, position)
+    last := list[len(list) - 1].([]interface{})
+    return NewBinaryOperatorNode(position, last[1].(BinaryOperator), rest , last[3])
+  } else {
+    return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
+  }
+}
