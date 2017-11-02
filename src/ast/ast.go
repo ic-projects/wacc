@@ -490,7 +490,7 @@ func (node ArrayLiteralNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
 	for _, e := range node.exprs {
-		buf.WriteString(fmt.Sprintf("%s\n", e))
+		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "  "))
 	}
 	return buf.String()
 }
