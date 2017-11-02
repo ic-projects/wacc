@@ -1,0 +1,48 @@
+-- Test: intLeadingZeros.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# integer variable declaration with leading zeroes
+
+# Output:
+# 42
+# 0
+
+# Program:
+
+begin
+  int x = 0000000000000000000000000000000000000042 ;
+  int y = 0000000000000000000000000000000000000000 ;
+  println x ;
+  println y
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intLeadingZeros.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 42
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 0
+16	    - PRINTLN
+17	      - x
+18	    - PRINTLN
+19	      - y
+===========================================================
+-- Finished
+

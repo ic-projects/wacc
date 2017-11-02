@@ -1,0 +1,58 @@
+-- Test: modifyString.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# create and modify string
+
+# Output:
+# hello world!
+# Hello world!
+# Hi!
+
+# Program:
+
+begin
+  string s = "hello world!" ;
+  println s ;
+  s[0] = 'H' ;
+  println s ;
+  s = "Hi!" ;
+  println s
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+modifyString.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - s
+7	      - RHS
+8	        - "hello world!"
+9	    - PRINTLN
+10	      - s
+11	    - ASSIGNMENT
+12	      - LHS
+13	        - s
+14	          - []
+15	            - 0
+16	      - RHS
+17	        - 'H'
+18	    - PRINTLN
+19	      - s
+20	    - ASSIGNMENT
+21	      - LHS
+22	        - s
+23	      - RHS
+24	        - "Hi!"
+25	    - PRINTLN
+26	      - s
+===========================================================
+-- Finished
+

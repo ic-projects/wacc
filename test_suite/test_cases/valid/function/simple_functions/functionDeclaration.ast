@@ -1,0 +1,33 @@
+-- Test: functionDeclaration.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a simple function is declared, but not called
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int f() is
+    return 0 
+  end
+  skip
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+functionDeclaration.ast contents are:
+===========================================================
+0	Program
+1	  - int f()
+2	    - RETURN
+3	      - 0
+4	  - int main()
+5	    - SKIP
+===========================================================
+-- Finished
+

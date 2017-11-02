@@ -1,0 +1,31 @@
+-- Test: exit-1.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# common error exit statement
+
+# Output:
+# #empty#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  exit -1
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+exit-1.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - EXIT
+3	      - -1
+===========================================================
+-- Finished
+

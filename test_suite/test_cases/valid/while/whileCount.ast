@@ -1,0 +1,65 @@
+-- Test: whileCount.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple counting while loop
+
+# Output:
+# Can you count to 10?
+# 1
+# 2
+# 3
+# 4
+# 5
+# 6
+# 7
+# 8
+# 9
+# 10
+
+# Program:
+
+begin
+  int i = 1 ;
+  println "Can you count to 10?" ;
+  while i <= 10 do
+    println i ;
+    i = i + 1
+  done
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+whileCount.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - i
+7	      - RHS
+8	        - 1
+9	    - PRINTLN
+10	      - "Can you count to 10?"
+11	    - LOOP
+12	      - CONDITION
+13	        - <=
+14	          - i
+15	          - 10
+16	      - DO
+17	        - PRINTLN
+18	          - i
+19	        - ASSIGNMENT
+20	          - LHS
+21	            - i
+22	          - RHS
+23	            - +
+24	              - i
+25	              - 1
+===========================================================
+-- Finished
+

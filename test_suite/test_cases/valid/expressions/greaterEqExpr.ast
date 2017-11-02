@@ -1,0 +1,74 @@
+-- Test: greaterEqExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating greater-than
+
+# Output:
+# false
+# true
+# true
+
+# Program:
+
+begin
+  int x = 2 ;
+  int y = 6 ;
+  int z = 4 ;
+  int a = 4 ;
+  println x >= y ;
+  println y >= z ;
+  println z >= z
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+greaterEqExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 2
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 6
+16	    - DECLARE
+17	      - TYPE
+18	        - int
+19	      - LHS
+20	        - z
+21	      - RHS
+22	        - 4
+23	    - DECLARE
+24	      - TYPE
+25	        - int
+26	      - LHS
+27	        - a
+28	      - RHS
+29	        - 4
+30	    - PRINTLN
+31	      - >=
+32	        - x
+33	        - y
+34	    - PRINTLN
+35	      - >=
+36	        - y
+37	        - z
+38	    - PRINTLN
+39	      - >=
+40	        - z
+41	        - z
+===========================================================
+-- Finished
+

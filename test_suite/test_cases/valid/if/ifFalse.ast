@@ -1,0 +1,41 @@
+-- Test: ifFalse.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple false if statement 
+
+# Output:
+# here
+
+# Program:
+
+begin
+  if false
+  then
+    println "not here"
+  else
+    println "here"
+  fi
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+ifFalse.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - IF
+3	      - CONDITION
+4	        - false
+5	      - THEN
+6	        - PRINTLN
+7	          - "not here"
+8	      - ELSE
+9	        - PRINTLN
+10	          - "here"
+===========================================================
+-- Finished
+

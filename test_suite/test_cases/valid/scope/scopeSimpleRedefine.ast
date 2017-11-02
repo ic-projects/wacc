@@ -1,0 +1,52 @@
+-- Test: scopeSimpleRedefine.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# variable scoping test that redefines a variable
+
+# Output:
+# true
+# 12
+
+# Program:
+
+begin
+  int x = 12 ;
+  begin
+    bool x = true ;
+    println x
+  end ;
+  println x 
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+scopeSimpleRedefine.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 12
+9	    - SCOPE
+10	      - DECLARE
+11	        - TYPE
+12	          - bool
+13	        - LHS
+14	          - x
+15	        - RHS
+16	          - true
+17	      - PRINTLN
+18	        - x
+19	    - PRINTLN
+20	      - x
+===========================================================
+-- Finished
+

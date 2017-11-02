@@ -1,0 +1,40 @@
+-- Test: freeNull.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Create and free a null pair
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  pair(pair, pair) a = null ;
+  free a
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+freeNull.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - 
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - null
+9	    - FREE
+10	      - a
+===========================================================
+-- Finished
+

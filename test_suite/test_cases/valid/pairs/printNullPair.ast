@@ -1,0 +1,36 @@
+-- Test: printNullPair.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# print pair a null pair
+
+# Output:
+# (nil)
+
+# Program:
+
+begin
+  pair(pair, pair) p = null ;
+  println p
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printNullPair.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - 
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - null
+9	    - PRINTLN
+10	      - p
+===========================================================
+-- Finished
+

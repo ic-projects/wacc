@@ -1,0 +1,135 @@
+-- Test: longSplitExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# tests whether the compiler can handle long expressions with several variables
+
+# Output:
+# #empty#
+
+# Exit:
+# 153
+
+begin
+
+  int a = 1 + 2 ;
+  int b = 3 + 4 ; 
+  int c = 5 + 6 ;
+  int d = 7 + 8 ;
+  int e = 9 + 10 ;
+  int f = 11 + 12 ;
+  int g = 13 + 14 ;
+  int h = 15 + 16 ;
+  int i = 17 ;
+  exit a + b + c + d + e + f + g + h + i
+
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+longSplitExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - +
+9	          - 1
+10	          - 2
+11	    - DECLARE
+12	      - TYPE
+13	        - int
+14	      - LHS
+15	        - b
+16	      - RHS
+17	        - +
+18	          - 3
+19	          - 4
+20	    - DECLARE
+21	      - TYPE
+22	        - int
+23	      - LHS
+24	        - c
+25	      - RHS
+26	        - +
+27	          - 5
+28	          - 6
+29	    - DECLARE
+30	      - TYPE
+31	        - int
+32	      - LHS
+33	        - d
+34	      - RHS
+35	        - +
+36	          - 7
+37	          - 8
+38	    - DECLARE
+39	      - TYPE
+40	        - int
+41	      - LHS
+42	        - e
+43	      - RHS
+44	        - +
+45	          - 9
+46	          - 10
+47	    - DECLARE
+48	      - TYPE
+49	        - int
+50	      - LHS
+51	        - f
+52	      - RHS
+53	        - +
+54	          - 11
+55	          - 12
+56	    - DECLARE
+57	      - TYPE
+58	        - int
+59	      - LHS
+60	        - g
+61	      - RHS
+62	        - +
+63	          - 13
+64	          - 14
+65	    - DECLARE
+66	      - TYPE
+67	        - int
+68	      - LHS
+69	        - h
+70	      - RHS
+71	        - +
+72	          - 15
+73	          - 16
+74	    - DECLARE
+75	      - TYPE
+76	        - int
+77	      - LHS
+78	        - i
+79	      - RHS
+80	        - 17
+81	    - EXIT
+82	      - +
+83	        - +
+84	          - +
+85	            - +
+86	              - +
+87	                - +
+88	                  - +
+89	                    - +
+90	                      - a
+91	                      - b
+92	                    - c
+93	                  - d
+94	                - e
+95	              - f
+96	            - g
+97	          - h
+98	        - i
+===========================================================
+-- Finished
+

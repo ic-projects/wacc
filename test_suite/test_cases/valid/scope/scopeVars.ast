@@ -1,0 +1,56 @@
+-- Test: scopeVars.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple variable scoping test
+
+# Output:
+# 2
+# 4
+# 2
+
+# Program:
+
+begin
+  int x = 2 ;
+  println x ;
+  begin
+    int x = 4 ;
+    println x
+  end ;
+  println x 
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+scopeVars.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 2
+9	    - PRINTLN
+10	      - x
+11	    - SCOPE
+12	      - DECLARE
+13	        - TYPE
+14	          - int
+15	        - LHS
+16	          - x
+17	        - RHS
+18	          - 4
+19	      - PRINTLN
+20	        - x
+21	    - PRINTLN
+22	      - x
+===========================================================
+-- Finished
+

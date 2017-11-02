@@ -1,0 +1,53 @@
+-- Test: functionConditionalReturn.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# program has function which only contains an if statement and a return in each branch
+
+# Output:
+# true
+
+# Program:
+
+begin
+  bool f() is 
+    if true then
+      return true
+    else
+      return false
+    fi
+  end
+  bool x = call f();
+  println x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+functionConditionalReturn.ast contents are:
+===========================================================
+0	Program
+1	  - bool f()
+2	    - IF
+3	      - CONDITION
+4	        - true
+5	      - THEN
+6	        - RETURN
+7	          - true
+8	      - ELSE
+9	        - RETURN
+10	          - false
+11	  - int main()
+12	    - DECLARE
+13	      - TYPE
+14	        - bool
+15	      - LHS
+16	        - x
+17	      - RHS
+18	        - f
+19	    - PRINTLN
+20	      - x
+===========================================================
+-- Finished
+

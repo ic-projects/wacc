@@ -1,0 +1,148 @@
+-- Test: sequentialCount.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple sequential counting
+
+# Output:
+# Can you count to 10?
+# 1
+# 2
+# 3
+# 4
+# 5
+# 6
+# 7
+# 8
+# 9
+# 10
+
+# Program:
+
+begin
+  int i = 1 ;
+  println "Can you count to 10?" ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i ;
+  i = i + 1 ;
+  println i 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+sequentialCount.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - i
+7	      - RHS
+8	        - 1
+9	    - PRINTLN
+10	      - "Can you count to 10?"
+11	    - PRINTLN
+12	      - i
+13	    - ASSIGNMENT
+14	      - LHS
+15	        - i
+16	      - RHS
+17	        - +
+18	          - i
+19	          - 1
+20	    - PRINTLN
+21	      - i
+22	    - ASSIGNMENT
+23	      - LHS
+24	        - i
+25	      - RHS
+26	        - +
+27	          - i
+28	          - 1
+29	    - PRINTLN
+30	      - i
+31	    - ASSIGNMENT
+32	      - LHS
+33	        - i
+34	      - RHS
+35	        - +
+36	          - i
+37	          - 1
+38	    - PRINTLN
+39	      - i
+40	    - ASSIGNMENT
+41	      - LHS
+42	        - i
+43	      - RHS
+44	        - +
+45	          - i
+46	          - 1
+47	    - PRINTLN
+48	      - i
+49	    - ASSIGNMENT
+50	      - LHS
+51	        - i
+52	      - RHS
+53	        - +
+54	          - i
+55	          - 1
+56	    - PRINTLN
+57	      - i
+58	    - ASSIGNMENT
+59	      - LHS
+60	        - i
+61	      - RHS
+62	        - +
+63	          - i
+64	          - 1
+65	    - PRINTLN
+66	      - i
+67	    - ASSIGNMENT
+68	      - LHS
+69	        - i
+70	      - RHS
+71	        - +
+72	          - i
+73	          - 1
+74	    - PRINTLN
+75	      - i
+76	    - ASSIGNMENT
+77	      - LHS
+78	        - i
+79	      - RHS
+80	        - +
+81	          - i
+82	          - 1
+83	    - PRINTLN
+84	      - i
+85	    - ASSIGNMENT
+86	      - LHS
+87	        - i
+88	      - RHS
+89	        - +
+90	          - i
+91	          - 1
+92	    - PRINTLN
+93	      - i
+===========================================================
+-- Finished
+

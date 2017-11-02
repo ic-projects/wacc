@@ -1,0 +1,54 @@
+-- Test: boolCalc.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple boolean calculation
+
+# Output:
+# false
+
+# Program:
+
+begin
+  bool b1 = true ;
+  bool b2 = false ;
+  bool b3 = b1 && b2 ;
+  println b3
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+boolCalc.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - b1
+7	      - RHS
+8	        - true
+9	    - DECLARE
+10	      - TYPE
+11	        - bool
+12	      - LHS
+13	        - b2
+14	      - RHS
+15	        - false
+16	    - DECLARE
+17	      - TYPE
+18	        - bool
+19	      - LHS
+20	        - b3
+21	      - RHS
+22	        - &&
+23	          - b1
+24	          - b2
+25	    - PRINTLN
+26	      - b3
+===========================================================
+-- Finished
+

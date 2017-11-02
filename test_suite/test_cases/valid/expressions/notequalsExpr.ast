@@ -1,0 +1,74 @@
+-- Test: notequalsExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating inequality
+
+# Output:
+# true
+# true
+# false
+
+# Program:
+
+begin
+  int x = 2 ;
+  int y = 4 ;
+  int z = 4 ;
+  bool b = x != y ;
+  println b ;
+  println x != y ;
+  println y != z
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+notequalsExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 2
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 4
+16	    - DECLARE
+17	      - TYPE
+18	        - int
+19	      - LHS
+20	        - z
+21	      - RHS
+22	        - 4
+23	    - DECLARE
+24	      - TYPE
+25	        - bool
+26	      - LHS
+27	        - b
+28	      - RHS
+29	        - !=
+30	          - x
+31	          - y
+32	    - PRINTLN
+33	      - b
+34	    - PRINTLN
+35	      - !=
+36	        - x
+37	        - y
+38	    - PRINTLN
+39	      - !=
+40	        - y
+41	        - z
+===========================================================
+-- Finished
+

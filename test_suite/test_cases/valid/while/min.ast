@@ -1,0 +1,91 @@
+-- Test: min.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# find the min of two numbers
+
+# Output:
+# min value = 10
+
+# Program:
+
+begin
+  int i = 0 ;
+  int x = 10 ;
+  int y = 17 ;
+  while y > 0 && x > 0 do
+    x = x - 1 ;
+    y = y - 1 ;
+    i = i + 1
+  done ;
+  print "min value = " ;
+  println i
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+min.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - i
+7	      - RHS
+8	        - 0
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - x
+14	      - RHS
+15	        - 10
+16	    - DECLARE
+17	      - TYPE
+18	        - int
+19	      - LHS
+20	        - y
+21	      - RHS
+22	        - 17
+23	    - LOOP
+24	      - CONDITION
+25	        - &&
+26	          - >
+27	            - y
+28	            - 0
+29	          - >
+30	            - x
+31	            - 0
+32	      - DO
+33	        - ASSIGNMENT
+34	          - LHS
+35	            - x
+36	          - RHS
+37	            - -
+38	              - x
+39	              - 1
+40	        - ASSIGNMENT
+41	          - LHS
+42	            - y
+43	          - RHS
+44	            - -
+45	              - y
+46	              - 1
+47	        - ASSIGNMENT
+48	          - LHS
+49	            - i
+50	          - RHS
+51	            - +
+52	              - i
+53	              - 1
+54	    - PRINT
+55	      - "min value = "
+56	    - PRINTLN
+57	      - i
+===========================================================
+-- Finished
+

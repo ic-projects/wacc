@@ -1,0 +1,31 @@
+-- Test: printInt.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic Integer printing
+
+# Output:
+# An example integer is 189
+
+# Program:
+
+begin
+  print "An example integer is " ;
+  println 189
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printInt.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINT
+3	      - "An example integer is "
+4	    - PRINTLN
+5	      - 189
+===========================================================
+-- Finished
+

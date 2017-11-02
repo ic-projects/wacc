@@ -1,0 +1,28 @@
+-- Test: print.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple print statement
+
+# Output:
+# Hello World!
+
+# Program:
+
+begin
+  print "Hello World!\n"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+print.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINT
+3	      - "Hello World!\n"
+===========================================================
+-- Finished
+

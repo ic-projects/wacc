@@ -1,0 +1,53 @@
+-- Test: whileBoolFlip.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# while loop flips bool to terminate
+
+# Output:
+# flip b!
+# end of loop
+
+# Program:
+
+begin
+  bool b = true ;
+  while b do
+    println "flip b!" ;
+    b = !b 
+  done ;
+  println "end of loop"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+whileBoolFlip.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - b
+7	      - RHS
+8	        - true
+9	    - LOOP
+10	      - CONDITION
+11	        - b
+12	      - DO
+13	        - PRINTLN
+14	          - "flip b!"
+15	        - ASSIGNMENT
+16	          - LHS
+17	            - b
+18	          - RHS
+19	            - !
+20	              - b
+21	    - PRINTLN
+22	      - "end of loop"
+===========================================================
+-- Finished
+

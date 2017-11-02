@@ -1,0 +1,113 @@
+-- Test: functionManyArguments.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a function with varied inputs
+
+# Output:
+# a is 42
+# b is true
+# c is u
+# d is hello
+# e is #addrs#
+# f is #addrs#
+# answer is g
+
+# Program:
+
+begin
+  char doSomething(int a, bool b, char c, string d, bool[] e, int[] f) is
+    print "a is " ;
+    println a ;
+    print "b is " ;
+    println b ;
+    print "c is " ;
+    println c ;
+    print "d is " ;
+    println d ;
+    print "e is " ;
+    println e ;
+    print "f is " ;
+    println f ;
+    return 'g'
+  end
+  bool[] bools = [ false, true ] ;
+  int[] ints = [ 1, 2 ] ;
+  char answer = call doSomething(42, true, 'u', "hello", bools, ints) ;
+  print "answer is " ;
+  println answer
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+functionManyArguments.ast contents are:
+===========================================================
+0	Program
+1	  - char doSomething(int a, bool b, char c, string d, bool[] e, int[] f)
+2	    - PRINT
+3	      - "a is "
+4	    - PRINTLN
+5	      - a
+6	    - PRINT
+7	      - "b is "
+8	    - PRINTLN
+9	      - b
+10	    - PRINT
+11	      - "c is "
+12	    - PRINTLN
+13	      - c
+14	    - PRINT
+15	      - "d is "
+16	    - PRINTLN
+17	      - d
+18	    - PRINT
+19	      - "e is "
+20	    - PRINTLN
+21	      - e
+22	    - PRINT
+23	      - "f is "
+24	    - PRINTLN
+25	      - f
+26	    - RETURN
+27	      - 'g'
+28	  - int main()
+29	    - DECLARE
+30	      - TYPE
+31	        - bool[]
+32	      - LHS
+33	        - bools
+34	      - RHS
+35	        - ARRAY LITERAL
+36	          - false
+37	          - true
+38	    - DECLARE
+39	      - TYPE
+40	        - int[]
+41	      - LHS
+42	        - ints
+43	      - RHS
+44	        - ARRAY LITERAL
+45	          - 1
+46	          - 2
+47	    - DECLARE
+48	      - TYPE
+49	        - char
+50	      - LHS
+51	        - answer
+52	      - RHS
+53	        - doSomething
+54	        - 42
+55	        - true
+56	        - 'u'
+57	        - "hello"
+58	        - bools
+59	        - ints
+60	    - PRINT
+61	      - "answer is "
+62	    - PRINTLN
+63	      - answer
+===========================================================
+-- Finished
+

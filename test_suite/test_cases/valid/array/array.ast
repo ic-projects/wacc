@@ -1,0 +1,129 @@
+-- Test: array.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# moderate complexity array manipulations
+
+# Output:
+# #addrs# = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+# Program:
+
+begin
+  int[] a = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ;
+  int i = 0 ;
+  while i < 10 
+  do
+    a[i] = i ;
+    i = i + 1
+  done ;
+  print a ;
+  print " = {" ;
+  i = 0 ;
+  while i < 10 
+  do 
+    print a[i] ;
+    if i < 9
+    then
+      print ", "
+    else
+      skip
+    fi ;
+    i = i + 1
+  done ;
+  println "}"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+array.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 0
+10	          - 0
+11	          - 0
+12	          - 0
+13	          - 0
+14	          - 0
+15	          - 0
+16	          - 0
+17	          - 0
+18	          - 0
+19	    - DECLARE
+20	      - TYPE
+21	        - int
+22	      - LHS
+23	        - i
+24	      - RHS
+25	        - 0
+26	    - LOOP
+27	      - CONDITION
+28	        - <
+29	          - i
+30	          - 10
+31	      - DO
+32	        - ASSIGNMENT
+33	          - LHS
+34	            - a
+35	              - []
+36	                - i
+37	          - RHS
+38	            - i
+39	        - ASSIGNMENT
+40	          - LHS
+41	            - i
+42	          - RHS
+43	            - +
+44	              - i
+45	              - 1
+46	    - PRINT
+47	      - a
+48	    - PRINT
+49	      - " = {"
+50	    - ASSIGNMENT
+51	      - LHS
+52	        - i
+53	      - RHS
+54	        - 0
+55	    - LOOP
+56	      - CONDITION
+57	        - <
+58	          - i
+59	          - 10
+60	      - DO
+61	        - PRINT
+62	          - a
+63	            - []
+64	              - i
+65	        - IF
+66	          - CONDITION
+67	            - <
+68	              - i
+69	              - 9
+70	          - THEN
+71	            - PRINT
+72	              - ", "
+73	          - ELSE
+74	            - SKIP
+75	        - ASSIGNMENT
+76	          - LHS
+77	            - i
+78	          - RHS
+79	            - +
+80	              - i
+81	              - 1
+82	    - PRINTLN
+83	      - "}"
+===========================================================
+-- Finished
+

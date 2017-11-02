@@ -1,0 +1,60 @@
+-- Test: lessExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating less-than
+
+# Output:
+# true
+# false
+
+# Program:
+
+begin
+  int x = 2 ;
+  int y = 6 ;
+  int z = 4 ;
+  println x < y ;
+  println y < z
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+lessExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 2
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 6
+16	    - DECLARE
+17	      - TYPE
+18	        - int
+19	      - LHS
+20	        - z
+21	      - RHS
+22	        - 4
+23	    - PRINTLN
+24	      - <
+25	        - x
+26	        - y
+27	    - PRINTLN
+28	      - <
+29	        - y
+30	        - z
+===========================================================
+-- Finished
+

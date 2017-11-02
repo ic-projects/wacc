@@ -1,0 +1,48 @@
+-- Test: arraySimple.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple array assignment and lookup
+
+# Output:
+# 42
+
+# Program:
+
+begin
+  int[] a = [0] ;
+  a[0] = 42 ;
+  println a[0]
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arraySimple.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 0
+10	    - ASSIGNMENT
+11	      - LHS
+12	        - a
+13	          - []
+14	            - 0
+15	      - RHS
+16	        - 42
+17	    - PRINTLN
+18	      - a
+19	        - []
+20	          - 0
+===========================================================
+-- Finished
+

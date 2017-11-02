@@ -1,0 +1,39 @@
+-- Test: ifBasic.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple if statement
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  if true 
+  then
+    skip
+  else
+    skip
+  fi
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+ifBasic.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - IF
+3	      - CONDITION
+4	        - true
+5	      - THEN
+6	        - SKIP
+7	      - ELSE
+8	        - SKIP
+===========================================================
+-- Finished
+

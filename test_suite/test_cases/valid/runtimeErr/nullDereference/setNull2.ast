@@ -1,0 +1,43 @@
+-- Test: setNull2.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# attempt dereference of a null pair by setting an element of it
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+	pair(int, int) p = null ;
+	snd p = 1
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+setNull2.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intint
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - null
+9	    - ASSIGNMENT
+10	      - LHS
+11	        - SND
+12	          - p
+13	      - RHS
+14	        - 1
+===========================================================
+-- Finished
+

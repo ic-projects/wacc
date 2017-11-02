@@ -1,0 +1,117 @@
+-- Test: fibonacciFullIt.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# iteratively calculate the given fibonacci number
+
+# Output:
+# This program calculates the nth fibonacci number iteratively.
+# Please enter n (should not be too large): #input#
+# The input n is #output#
+# The nth fibonacci number is #output#
+
+# Program:
+
+begin
+  println "This program calculates the nth fibonacci number iteratively." ;
+  print "Please enter n (should not be too large): " ;
+  int n = 0;
+  read n ;
+  print "The input n is " ;
+  println n ;
+  print "The nth fibonacci number is " ;
+  int f0 = 0 ;
+  int f1 = 1 ;
+  int save = 0;
+  while n > 0 do
+    save = f0 ;
+    f0 = f1 ;
+    f1 = save + f1 ;
+    n = n - 1
+  done ;
+  println f0
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+fibonacciFullIt.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINTLN
+3	      - "This program calculates the nth fibonacci number iteratively."
+4	    - PRINT
+5	      - "Please enter n (should not be too large): "
+6	    - DECLARE
+7	      - TYPE
+8	        - int
+9	      - LHS
+10	        - n
+11	      - RHS
+12	        - 0
+13	    - READ
+14	      - n
+15	    - PRINT
+16	      - "The input n is "
+17	    - PRINTLN
+18	      - n
+19	    - PRINT
+20	      - "The nth fibonacci number is "
+21	    - DECLARE
+22	      - TYPE
+23	        - int
+24	      - LHS
+25	        - f0
+26	      - RHS
+27	        - 0
+28	    - DECLARE
+29	      - TYPE
+30	        - int
+31	      - LHS
+32	        - f1
+33	      - RHS
+34	        - 1
+35	    - DECLARE
+36	      - TYPE
+37	        - int
+38	      - LHS
+39	        - save
+40	      - RHS
+41	        - 0
+42	    - LOOP
+43	      - CONDITION
+44	        - >
+45	          - n
+46	          - 0
+47	      - DO
+48	        - ASSIGNMENT
+49	          - LHS
+50	            - save
+51	          - RHS
+52	            - f0
+53	        - ASSIGNMENT
+54	          - LHS
+55	            - f0
+56	          - RHS
+57	            - f1
+58	        - ASSIGNMENT
+59	          - LHS
+60	            - f1
+61	          - RHS
+62	            - +
+63	              - save
+64	              - f1
+65	        - ASSIGNMENT
+66	          - LHS
+67	            - n
+68	          - RHS
+69	            - -
+70	              - n
+71	              - 1
+72	    - PRINTLN
+73	      - f0
+===========================================================
+-- Finished
+

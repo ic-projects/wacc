@@ -1,0 +1,376 @@
+-- Test: fixedPointRealArithmetic.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# This program implements floating-point type using integers.
+# The details about how it is done can found here: 
+# http://www.cse.iitd.ernet.in/~sbansal/csl373/pintos/doc/pintos_7.html#SEC135
+# 
+# Basically, our integer have 32 bits. We use the first bit for sign, the next 
+# 17 bits for value above the decimal digit and the last 14 bits for the values 
+# after the decimal digits.
+# 
+# We call the number 17 above p, and the number 14 above q.
+# We have f = 2**q. 
+# 
+
+begin
+	# Returns the number of bits behind the decimal points.
+	int q() is
+		return 14
+	end
+	
+	# Because we do not have bitwise shit in the language, we have to calculate it manually.
+	int power(int base, int amount) is
+		int result = 1 ;
+		while amount > 0 do
+			result = result * base ;
+			amount = amount - 1
+		done ;
+		return result
+	end
+	
+	int f() is
+		int qq = call q() ;
+		# f = 2**q
+		int f = call power(2, qq) ;
+		return f
+	end
+	
+	# The implementation of the following functions are translated from the URI above.
+	# Arguments start with 'x' have type fixed-point. Those start with 'n' have type integer.
+	
+	int intToFixedPoint(int n) is
+		int ff = call f() ;
+		return n * ff
+	end
+	
+	int fixedPointToIntRoundDown(int x) is
+		int ff = call f() ;
+		return x / ff
+	end
+
+	int fixedPointToIntRoundNear(int x) is
+		int ff = call f() ;
+		if x >= 0
+		then
+			return (x + ff / 2) / ff 
+		else
+			return (x - ff / 2) / ff
+		fi
+	end
+
+	int add(int x1, int x2) is 
+		return x1 + x2
+	end
+	
+	int subtract(int x1, int x2) is
+		return x1 - x2
+	end
+	
+	int addByInt(int x, int n) is
+		int ff = call f() ;
+		return x + n * ff
+	end
+
+	int subtractByInt(int x, int n) is
+		int ff = call f() ;
+		return x - n * ff
+	end
+
+	int multiply(int x1, int x2) is
+		# We don't have int_64 in our language so we just ignore the overflow
+		int ff = call f() ;
+		return x1 * x2 / ff 
+	end
+
+	int multiplyByInt(int x, int n) is
+		return x * n
+	end
+	
+	int divide(int x1, int x2) is
+		# We don't have int_64 in our language so we just ignore the overflow
+		int ff = call f() ;
+		return x1 * ff / x2
+	end
+
+	int divideByInt(int x, int n) is
+		return x / n
+	end
+
+	# Main function
+	int n1 = 10 ;
+	int n2 = 3 ;
+	
+	print "Using fixed-point real: " ;
+	print n1 ;
+	print " / " ;
+	print n2 ;
+	print " * " ;
+	print n2 ;
+	print " = " ;
+	
+	int x = call intToFixedPoint(n1) ;
+	x = call divideByInt(x, n2) ;
+	x = call multiplyByInt(x, n2) ;
+	int result = call fixedPointToIntRoundNear(x) ;
+	println result 
+end
+
+
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+fixedPointRealArithmetic.ast contents are:
+===========================================================
+0	Program
+1	  - int q()
+2	    - RETURN
+3	      - 14
+4	  - int power(int base, int amount)
+5	    - DECLARE
+6	      - TYPE
+7	        - int
+8	      - LHS
+9	        - result
+10	      - RHS
+11	        - 1
+12	    - LOOP
+13	      - CONDITION
+14	        - >
+15	          - amount
+16	          - 0
+17	      - DO
+18	        - ASSIGNMENT
+19	          - LHS
+20	            - result
+21	          - RHS
+22	            - *
+23	              - result
+24	              - base
+25	        - ASSIGNMENT
+26	          - LHS
+27	            - amount
+28	          - RHS
+29	            - -
+30	              - amount
+31	              - 1
+32	    - RETURN
+33	      - result
+34	  - int f()
+35	    - DECLARE
+36	      - TYPE
+37	        - int
+38	      - LHS
+39	        - qq
+40	      - RHS
+41	        - q
+42	    - DECLARE
+43	      - TYPE
+44	        - int
+45	      - LHS
+46	        - f
+47	      - RHS
+48	        - power
+49	        - 2
+50	        - qq
+51	    - RETURN
+52	      - f
+53	  - int intToFixedPoint(int n)
+54	    - DECLARE
+55	      - TYPE
+56	        - int
+57	      - LHS
+58	        - ff
+59	      - RHS
+60	        - f
+61	    - RETURN
+62	      - *
+63	        - n
+64	        - ff
+65	  - int fixedPointToIntRoundDown(int x)
+66	    - DECLARE
+67	      - TYPE
+68	        - int
+69	      - LHS
+70	        - ff
+71	      - RHS
+72	        - f
+73	    - RETURN
+74	      - /
+75	        - x
+76	        - ff
+77	  - int fixedPointToIntRoundNear(int x)
+78	    - DECLARE
+79	      - TYPE
+80	        - int
+81	      - LHS
+82	        - ff
+83	      - RHS
+84	        - f
+85	    - IF
+86	      - CONDITION
+87	        - >=
+88	          - x
+89	          - 0
+90	      - THEN
+91	        - RETURN
+92	          - /
+93	            - +
+94	              - x
+95	              - /
+96	                - ff
+97	                - 2
+98	            - ff
+99	      - ELSE
+100	        - RETURN
+101	          - /
+102	            - -
+103	              - x
+104	              - /
+105	                - ff
+106	                - 2
+107	            - ff
+108	  - int add(int x1, int x2)
+109	    - RETURN
+110	      - +
+111	        - x1
+112	        - x2
+113	  - int subtract(int x1, int x2)
+114	    - RETURN
+115	      - -
+116	        - x1
+117	        - x2
+118	  - int addByInt(int x, int n)
+119	    - DECLARE
+120	      - TYPE
+121	        - int
+122	      - LHS
+123	        - ff
+124	      - RHS
+125	        - f
+126	    - RETURN
+127	      - +
+128	        - x
+129	        - *
+130	          - n
+131	          - ff
+132	  - int subtractByInt(int x, int n)
+133	    - DECLARE
+134	      - TYPE
+135	        - int
+136	      - LHS
+137	        - ff
+138	      - RHS
+139	        - f
+140	    - RETURN
+141	      - -
+142	        - x
+143	        - *
+144	          - n
+145	          - ff
+146	  - int multiply(int x1, int x2)
+147	    - DECLARE
+148	      - TYPE
+149	        - int
+150	      - LHS
+151	        - ff
+152	      - RHS
+153	        - f
+154	    - RETURN
+155	      - /
+156	        - *
+157	          - x1
+158	          - x2
+159	        - ff
+160	  - int multiplyByInt(int x, int n)
+161	    - RETURN
+162	      - *
+163	        - x
+164	        - n
+165	  - int divide(int x1, int x2)
+166	    - DECLARE
+167	      - TYPE
+168	        - int
+169	      - LHS
+170	        - ff
+171	      - RHS
+172	        - f
+173	    - RETURN
+174	      - /
+175	        - *
+176	          - x1
+177	          - ff
+178	        - x2
+179	  - int divideByInt(int x, int n)
+180	    - RETURN
+181	      - /
+182	        - x
+183	        - n
+184	  - int main()
+185	    - DECLARE
+186	      - TYPE
+187	        - int
+188	      - LHS
+189	        - n1
+190	      - RHS
+191	        - 10
+192	    - DECLARE
+193	      - TYPE
+194	        - int
+195	      - LHS
+196	        - n2
+197	      - RHS
+198	        - 3
+199	    - PRINT
+200	      - "Using fixed-point real: "
+201	    - PRINT
+202	      - n1
+203	    - PRINT
+204	      - " / "
+205	    - PRINT
+206	      - n2
+207	    - PRINT
+208	      - " * "
+209	    - PRINT
+210	      - n2
+211	    - PRINT
+212	      - " = "
+213	    - DECLARE
+214	      - TYPE
+215	        - int
+216	      - LHS
+217	        - x
+218	      - RHS
+219	        - intToFixedPoint
+220	        - n1
+221	    - ASSIGNMENT
+222	      - LHS
+223	        - x
+224	      - RHS
+225	        - divideByInt
+226	        - x
+227	        - n2
+228	    - ASSIGNMENT
+229	      - LHS
+230	        - x
+231	      - RHS
+232	        - multiplyByInt
+233	        - x
+234	        - n2
+235	    - DECLARE
+236	      - TYPE
+237	        - int
+238	      - LHS
+239	        - result
+240	      - RHS
+241	        - fixedPointToIntRoundNear
+242	        - x
+243	    - PRINTLN
+244	      - result
+===========================================================
+-- Finished
+

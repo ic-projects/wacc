@@ -1,0 +1,33 @@
+-- Test: capCharDeclaration.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple capital character variable declaration
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  char c = 'M'
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+capCharDeclaration.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - c
+7	      - RHS
+8	        - 'M'
+===========================================================
+-- Finished
+

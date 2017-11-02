@@ -1,0 +1,31 @@
+-- Test: basicSeq2.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic sequential composition
+
+# Output:
+# #empty#
+
+# Program:
+
+begin 
+  skip;
+  skip;
+  skip 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+basicSeq2.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - SKIP
+3	    - SKIP
+4	    - SKIP
+===========================================================
+-- Finished
+

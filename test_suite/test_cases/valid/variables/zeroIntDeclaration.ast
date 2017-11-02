@@ -1,0 +1,33 @@
+-- Test: zeroIntDeclaration.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple zero integer variable declaration
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int x = 0
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+zeroIntDeclaration.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 0
+===========================================================
+-- Finished
+

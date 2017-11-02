@@ -1,0 +1,121 @@
+-- Test: readPair.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# construct a pair from supplied user input
+
+# Output:
+# Please enter the first element (char): #input#
+# Please enter the second element (int): #input#
+# The first element was #output#
+# The second element was #output#
+
+# Program:
+
+begin
+	pair(char, int) p = newpair('\0', 0) ;
+	print "Please enter the first element (char): " ;
+  	char c = '0';
+	read c ;
+  	fst p = c ;
+	print "Please enter the second element (int): " ;
+	int i = 0 ;
+	read i ;
+	snd p = i ;
+	# Clear the value for c and i
+	c = '\0' ;
+	i = -1 ;
+	print "The first element was " ;
+	c = fst p ;
+	println c ;
+	print "The second element was " ;
+	i = snd p ;
+	println i 
+end 
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+readPair.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - charint
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - '\0'
+11	          - SND
+12	            - 0
+13	    - PRINT
+14	      - "Please enter the first element (char): "
+15	    - DECLARE
+16	      - TYPE
+17	        - char
+18	      - LHS
+19	        - c
+20	      - RHS
+21	        - '0'
+22	    - READ
+23	      - c
+24	    - ASSIGNMENT
+25	      - LHS
+26	        - FST
+27	          - p
+28	      - RHS
+29	        - c
+30	    - PRINT
+31	      - "Please enter the second element (int): "
+32	    - DECLARE
+33	      - TYPE
+34	        - int
+35	      - LHS
+36	        - i
+37	      - RHS
+38	        - 0
+39	    - READ
+40	      - i
+41	    - ASSIGNMENT
+42	      - LHS
+43	        - SND
+44	          - p
+45	      - RHS
+46	        - i
+47	    - ASSIGNMENT
+48	      - LHS
+49	        - c
+50	      - RHS
+51	        - '\0'
+52	    - ASSIGNMENT
+53	      - LHS
+54	        - i
+55	      - RHS
+56	        - -1
+57	    - PRINT
+58	      - "The first element was "
+59	    - ASSIGNMENT
+60	      - LHS
+61	        - c
+62	      - RHS
+63	        - FST
+64	          - p
+65	    - PRINTLN
+66	      - c
+67	    - PRINT
+68	      - "The second element was "
+69	    - ASSIGNMENT
+70	      - LHS
+71	        - i
+72	      - RHS
+73	        - SND
+74	          - p
+75	    - PRINTLN
+76	      - i
+===========================================================
+-- Finished
+

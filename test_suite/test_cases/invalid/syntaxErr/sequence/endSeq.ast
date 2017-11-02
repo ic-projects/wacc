@@ -1,0 +1,23 @@
+-- Test: endSeq.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# extra sequential composition 
+
+# Output:
+# #syntax_error#
+
+# Exit:
+# 100
+
+# Program:
+
+begin skip end;
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+Errors detected during compilation! Exit code 100 returned.
+Syntactic Error at 11:14 -- extraneous input ';' expecting <EOF>
+1 parser error(s) detected, no further compilation attempted.
+

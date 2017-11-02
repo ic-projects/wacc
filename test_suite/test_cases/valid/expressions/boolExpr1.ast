@@ -1,0 +1,56 @@
+-- Test: boolExpr1.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating a moderately complex boolean expression
+
+# Output:
+# Correct
+
+# Program:
+
+begin
+  bool b = ! ( ( true && false) || (true && false) );
+  if b == true then
+    println "Correct"
+  else
+    println "Wrong"
+  fi
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+boolExpr1.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - b
+7	      - RHS
+8	        - !
+9	          - ||
+10	            - &&
+11	              - true
+12	              - false
+13	            - &&
+14	              - true
+15	              - false
+16	    - IF
+17	      - CONDITION
+18	        - ==
+19	          - b
+20	          - true
+21	      - THEN
+22	        - PRINTLN
+23	          - "Correct"
+24	      - ELSE
+25	        - PRINTLN
+26	          - "Wrong"
+===========================================================
+-- Finished
+

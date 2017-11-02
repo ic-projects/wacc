@@ -1,0 +1,75 @@
+-- Test: IOLoop.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple input/output loop
+
+# Output:
+# Please input an integer: #input#
+# echo input: #output#
+# Do you want to continue entering input?
+# (enter Y for 'yes' and N for 'no')
+# #input#
+# ...
+
+# Program:
+
+begin
+  char continue = 'Y' ;
+  int buff = 0 ;
+  while continue != 'N' do
+    print "Please input an integer: " ;
+    read buff ;
+    print "echo input: " ;
+    println buff ;
+    println "Do you want to continue entering input?" ; 
+    println "(enter Y for \'yes\' and N for \'no\')" ;
+    read continue
+  done
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+IOLoop.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - continue
+7	      - RHS
+8	        - 'Y'
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - buff
+14	      - RHS
+15	        - 0
+16	    - LOOP
+17	      - CONDITION
+18	        - !=
+19	          - continue
+20	          - 'N'
+21	      - DO
+22	        - PRINT
+23	          - "Please input an integer: "
+24	        - READ
+25	          - buff
+26	        - PRINT
+27	          - "echo input: "
+28	        - PRINTLN
+29	          - buff
+30	        - PRINTLN
+31	          - "Do you want to continue entering input?"
+32	        - PRINTLN
+33	          - "(enter Y for \'yes\' and N for \'no\')"
+34	        - READ
+35	          - continue
+===========================================================
+-- Finished
+

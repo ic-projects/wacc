@@ -1,0 +1,106 @@
+-- Test: fibonacciIterative.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# iterative calculation of the first 20 fibonacci numbers
+
+# Output:
+# The first 20 fibonacci numbers are:
+# 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, ...
+
+# Program:
+
+begin
+  int i = 0 ;
+  int f0 = 0 ;
+  int f1 = 1 ;
+  int save = 0;
+  println "The first 20 fibonacci numbers are:" ;
+  while i < 20 do
+    print f0 ;
+    print ", " ;
+    save = f0 ;
+    f0 = f1 ;
+    f1 = save + f1 ;
+    i = i + 1
+  done ;
+  println "..."
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+fibonacciIterative.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - i
+7	      - RHS
+8	        - 0
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - f0
+14	      - RHS
+15	        - 0
+16	    - DECLARE
+17	      - TYPE
+18	        - int
+19	      - LHS
+20	        - f1
+21	      - RHS
+22	        - 1
+23	    - DECLARE
+24	      - TYPE
+25	        - int
+26	      - LHS
+27	        - save
+28	      - RHS
+29	        - 0
+30	    - PRINTLN
+31	      - "The first 20 fibonacci numbers are:"
+32	    - LOOP
+33	      - CONDITION
+34	        - <
+35	          - i
+36	          - 20
+37	      - DO
+38	        - PRINT
+39	          - f0
+40	        - PRINT
+41	          - ", "
+42	        - ASSIGNMENT
+43	          - LHS
+44	            - save
+45	          - RHS
+46	            - f0
+47	        - ASSIGNMENT
+48	          - LHS
+49	            - f0
+50	          - RHS
+51	            - f1
+52	        - ASSIGNMENT
+53	          - LHS
+54	            - f1
+55	          - RHS
+56	            - +
+57	              - save
+58	              - f1
+59	        - ASSIGNMENT
+60	          - LHS
+61	            - i
+62	          - RHS
+63	            - +
+64	              - i
+65	              - 1
+66	    - PRINTLN
+67	      - "..."
+===========================================================
+-- Finished
+

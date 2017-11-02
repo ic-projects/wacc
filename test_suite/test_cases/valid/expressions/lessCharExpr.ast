@@ -1,0 +1,60 @@
+-- Test: lessCharExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating less-than on characters
+
+# Output:
+# true
+# false
+
+# Program:
+
+begin
+  char a = 'a' ;
+  char e = 'e' ;
+  char c = 'c' ;
+  println a < e ;
+  println e < c
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+lessCharExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - 'a'
+9	    - DECLARE
+10	      - TYPE
+11	        - char
+12	      - LHS
+13	        - e
+14	      - RHS
+15	        - 'e'
+16	    - DECLARE
+17	      - TYPE
+18	        - char
+19	      - LHS
+20	        - c
+21	      - RHS
+22	        - 'c'
+23	    - PRINTLN
+24	      - <
+25	        - a
+26	        - e
+27	    - PRINTLN
+28	      - <
+29	        - e
+30	        - c
+===========================================================
+-- Finished
+

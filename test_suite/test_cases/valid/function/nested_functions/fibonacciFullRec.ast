@@ -1,0 +1,113 @@
+-- Test: fibonacciFullRec.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# recursively calculate the nth fibonacci number
+
+# Output:
+# This program calculates the nth fibonacci number recursively.
+# Please enter n (should not be too large): #input#
+# The input n is #output#
+# The nth fibonacci number is #output#
+
+# Program:
+
+begin
+  int fibonacci(int n) is
+    if n <= 1
+    then
+      return n
+    else
+      skip
+    fi ;
+    int f1 = call fibonacci(n - 1) ;
+    int f2 = call fibonacci(n - 2) ;
+    return f1 + f2
+  end
+
+  println "This program calculates the nth fibonacci number recursively." ;
+  print "Please enter n (should not be too large): " ;
+  int n = 0;
+  read n ;
+  print "The input n is " ;
+  println n ;
+  print "The nth fibonacci number is " ;
+  int result = call fibonacci(n) ;
+  println  result
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+fibonacciFullRec.ast contents are:
+===========================================================
+0	Program
+1	  - int fibonacci(int n)
+2	    - IF
+3	      - CONDITION
+4	        - <=
+5	          - n
+6	          - 1
+7	      - THEN
+8	        - RETURN
+9	          - n
+10	      - ELSE
+11	        - SKIP
+12	    - DECLARE
+13	      - TYPE
+14	        - int
+15	      - LHS
+16	        - f1
+17	      - RHS
+18	        - fibonacci
+19	        - -
+20	          - n
+21	          - 1
+22	    - DECLARE
+23	      - TYPE
+24	        - int
+25	      - LHS
+26	        - f2
+27	      - RHS
+28	        - fibonacci
+29	        - -
+30	          - n
+31	          - 2
+32	    - RETURN
+33	      - +
+34	        - f1
+35	        - f2
+36	  - int main()
+37	    - PRINTLN
+38	      - "This program calculates the nth fibonacci number recursively."
+39	    - PRINT
+40	      - "Please enter n (should not be too large): "
+41	    - DECLARE
+42	      - TYPE
+43	        - int
+44	      - LHS
+45	        - n
+46	      - RHS
+47	        - 0
+48	    - READ
+49	      - n
+50	    - PRINT
+51	      - "The input n is "
+52	    - PRINTLN
+53	      - n
+54	    - PRINT
+55	      - "The nth fibonacci number is "
+56	    - DECLARE
+57	      - TYPE
+58	        - int
+59	      - LHS
+60	        - result
+61	      - RHS
+62	        - fibonacci
+63	        - n
+64	    - PRINTLN
+65	      - result
+===========================================================
+-- Finished
+

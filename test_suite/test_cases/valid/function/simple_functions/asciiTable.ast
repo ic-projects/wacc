@@ -1,0 +1,250 @@
+-- Test: asciiTable.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# print out a lookup table for ascii character representations
+
+# Output:
+# Asci character lookup table:
+# -------------
+# |   32 =    |
+# |   33 = !  |
+# |   34 = "  |
+# |   35 = #  |
+# |   36 = $  |
+# |   37 = %  |
+# |   38 = &  |
+# |   39 = '  |
+# |   40 = (  |
+# |   41 = )  |
+# |   42 = *  |
+# |   43 = +  |
+# |   44 = ,  |
+# |   45 = -  |
+# |   46 = .  |
+# |   47 = /  |
+# |   48 = 0  |
+# |   49 = 1  |
+# |   50 = 2  |
+# |   51 = 3  |
+# |   52 = 4  |
+# |   53 = 5  |
+# |   54 = 6  |
+# |   55 = 7  |
+# |   56 = 8  |
+# |   57 = 9  |
+# |   58 = :  |
+# |   59 = ;  |
+# |   60 = <  |
+# |   61 = =  |
+# |   62 = >  |
+# |   63 = ?  |
+# |   64 = @  |
+# |   65 = A  |
+# |   66 = B  |
+# |   67 = C  |
+# |   68 = D  |
+# |   69 = E  |
+# |   70 = F  |
+# |   71 = G  |
+# |   72 = H  |
+# |   73 = I  |
+# |   74 = J  |
+# |   75 = K  |
+# |   76 = L  |
+# |   77 = M  |
+# |   78 = N  |
+# |   79 = O  |
+# |   80 = P  |
+# |   81 = Q  |
+# |   82 = R  |
+# |   83 = S  |
+# |   84 = T  |
+# |   85 = U  |
+# |   86 = V  |
+# |   87 = W  |
+# |   88 = X  |
+# |   89 = Y  |
+# |   90 = Z  |
+# |   91 = [  |
+# |   92 = \  |
+# |   93 = ]  |
+# |   94 = ^  |
+# |   95 = _  |
+# |   96 = `  |
+# |   97 = a  |
+# |   98 = b  |
+# |   99 = c  |
+# |  100 = d  |
+# |  101 = e  |
+# |  102 = f  |
+# |  103 = g  |
+# |  104 = h  |
+# |  105 = i  |
+# |  106 = j  |
+# |  107 = k  |
+# |  108 = l  |
+# |  109 = m  |
+# |  110 = n  |
+# |  111 = o  |
+# |  112 = p  |
+# |  113 = q  |
+# |  114 = r  |
+# |  115 = s  |
+# |  116 = t  |
+# |  117 = u  |
+# |  118 = v  |
+# |  119 = w  |
+# |  120 = x  |
+# |  121 = y  |
+# |  122 = z  |
+# |  123 = {  |
+# |  124 = |  |
+# |  125 = }  |
+# |  126 = ~  |
+# -------------
+
+
+# Program:
+
+begin
+  bool printLine(int n) is
+    int i = 0 ;
+    while i < n do
+      print "-" ;
+      i = i + 1
+    done ;
+    println "" ;
+    return true
+  end
+
+  bool printMap(int n) is
+    print "|  " ;
+    if n <100 then
+      print " "
+    else
+      skip
+    fi ;
+    print n ;
+    print " = " ;
+    print chr n ;
+    println "  |" ; 
+    return true
+  end
+
+  println "Asci character lookup table:" ;
+  bool r = call printLine(13) ;
+  int num = ord ' ' ;
+  while num < 127 do
+    r = call printMap(num) ;
+    num = num + 1
+  done ;
+  r = call printLine(13)
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+asciiTable.ast contents are:
+===========================================================
+0	Program
+1	  - bool printLine(int n)
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - i
+7	      - RHS
+8	        - 0
+9	    - LOOP
+10	      - CONDITION
+11	        - <
+12	          - i
+13	          - n
+14	      - DO
+15	        - PRINT
+16	          - "-"
+17	        - ASSIGNMENT
+18	          - LHS
+19	            - i
+20	          - RHS
+21	            - +
+22	              - i
+23	              - 1
+24	    - PRINTLN
+25	      - ""
+26	    - RETURN
+27	      - true
+28	  - bool printMap(int n)
+29	    - PRINT
+30	      - "|  "
+31	    - IF
+32	      - CONDITION
+33	        - <
+34	          - n
+35	          - 100
+36	      - THEN
+37	        - PRINT
+38	          - " "
+39	      - ELSE
+40	        - SKIP
+41	    - PRINT
+42	      - n
+43	    - PRINT
+44	      - " = "
+45	    - PRINT
+46	      - chr
+47	        - n
+48	    - PRINTLN
+49	      - "  |"
+50	    - RETURN
+51	      - true
+52	  - int main()
+53	    - PRINTLN
+54	      - "Asci character lookup table:"
+55	    - DECLARE
+56	      - TYPE
+57	        - bool
+58	      - LHS
+59	        - r
+60	      - RHS
+61	        - printLine
+62	        - 13
+63	    - DECLARE
+64	      - TYPE
+65	        - int
+66	      - LHS
+67	        - num
+68	      - RHS
+69	        - ord
+70	          - ' '
+71	    - LOOP
+72	      - CONDITION
+73	        - <
+74	          - num
+75	          - 127
+76	      - DO
+77	        - ASSIGNMENT
+78	          - LHS
+79	            - r
+80	          - RHS
+81	            - printMap
+82	            - num
+83	        - ASSIGNMENT
+84	          - LHS
+85	            - num
+86	          - RHS
+87	            - +
+88	              - num
+89	              - 1
+90	    - ASSIGNMENT
+91	      - LHS
+92	        - r
+93	      - RHS
+94	        - printLine
+95	        - 13
+===========================================================
+-- Finished
+

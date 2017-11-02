@@ -1,0 +1,51 @@
+-- Test: intnegateOverflow2.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# multiplying the biggest possible negative integer
+
+# Output:
+# -2147483648
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  int x = -2147483648 ;
+  println x ;
+  x = x*10; #err here?
+  println x 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intnegateOverflow2.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - -2147483648
+9	    - PRINTLN
+10	      - x
+11	    - ASSIGNMENT
+12	      - LHS
+13	        - x
+14	      - RHS
+15	        - *
+16	          - x
+17	          - 10
+18	    - PRINTLN
+19	      - x
+===========================================================
+-- Finished
+
