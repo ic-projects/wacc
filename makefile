@@ -55,8 +55,8 @@ misspell:
 	@go get github.com/client9/misspell/cmd/misspell
 
 clean:
-	rm $(BUILD)
-	rm src/wacc
+	rm -rf $(BUILD)
+	rm -rf src/wacc
 
 clean-vendor:
 	rm -rf src/vendor
