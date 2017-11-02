@@ -1,0 +1,42 @@
+-- Test: printRef.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic array (reference) printing
+
+# Output:
+# Printing an array variable gives an address, such as #addrs#
+
+# Program:
+
+begin
+  print "Printing an array variable gives an address, such as " ;
+  int[] a = [1,2,3] ;
+  println a
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printRef.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINT
+3	      - "Printing an array variable gives an address, such as "
+4	    - DECLARE
+5	      - TYPE
+6	        - int[]
+7	      - LHS
+8	        - a
+9	      - RHS
+10	        - ARRAY LITERAL
+11	          - 1
+12	          - 2
+13	          - 3
+14	    - PRINTLN
+15	      - a
+===========================================================
+-- Finished
+

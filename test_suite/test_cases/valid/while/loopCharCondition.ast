@@ -1,0 +1,54 @@
+-- Test: loopCharCondition.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Use a character as a loop condition. Enter the loop once only, then exit the loop.
+
+# Output:
+# Change c
+# Should print "Change c" once before.
+
+# Program:
+
+begin
+	char c = '\0' ;
+	while c == '\0' do
+		c = 'a' ;
+		println "Change c"
+	done ;
+	println "Should print \"Change c\" once before."
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+loopCharCondition.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - c
+7	      - RHS
+8	        - '\0'
+9	    - LOOP
+10	      - CONDITION
+11	        - ==
+12	          - c
+13	          - '\0'
+14	      - DO
+15	        - ASSIGNMENT
+16	          - LHS
+17	            - c
+18	          - RHS
+19	            - 'a'
+20	        - PRINTLN
+21	          - "Change c"
+22	    - PRINTLN
+23	      - "Should print \"Change c\" once before."
+===========================================================
+-- Finished
+

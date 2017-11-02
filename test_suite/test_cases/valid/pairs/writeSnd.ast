@@ -1,0 +1,67 @@
+-- Test: writeSnd.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# create a pair and write to its second element
+
+# Output:
+# a
+# Z
+
+# Program:
+
+begin
+  pair(int, char) p = newpair(10, 'a') ;
+  char s = snd p ;
+  println s ;
+  snd p = 'Z' ;
+  s = snd p ;
+  println s
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+writeSnd.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intchar
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - 10
+11	          - SND
+12	            - 'a'
+13	    - DECLARE
+14	      - TYPE
+15	        - char
+16	      - LHS
+17	        - s
+18	      - RHS
+19	        - SND
+20	          - p
+21	    - PRINTLN
+22	      - s
+23	    - ASSIGNMENT
+24	      - LHS
+25	        - SND
+26	          - p
+27	      - RHS
+28	        - 'Z'
+29	    - ASSIGNMENT
+30	      - LHS
+31	        - s
+32	      - RHS
+33	        - SND
+34	          - p
+35	    - PRINTLN
+36	      - s
+===========================================================
+-- Finished
+

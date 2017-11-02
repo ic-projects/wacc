@@ -1,0 +1,104 @@
+-- Test: arrayPrint.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# print the contents of a simple array
+
+# Output:
+# #addrs# = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+# Program:
+
+begin
+  int[] a = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] ;
+  int i = 0 ;
+  print a ;
+  print " = {" ;
+  i = 0 ;
+  while i < 10 
+  do 
+    print a[i] ;
+    if i < 9
+    then
+      print ", "
+    else
+      skip
+    fi ;
+    i = i + 1
+  done ;
+  println "}"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arrayPrint.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 0
+10	          - 1
+11	          - 2
+12	          - 3
+13	          - 4
+14	          - 5
+15	          - 6
+16	          - 7
+17	          - 8
+18	          - 9
+19	    - DECLARE
+20	      - TYPE
+21	        - int
+22	      - LHS
+23	        - i
+24	      - RHS
+25	        - 0
+26	    - PRINT
+27	      - a
+28	    - PRINT
+29	      - " = {"
+30	    - ASSIGNMENT
+31	      - LHS
+32	        - i
+33	      - RHS
+34	        - 0
+35	    - LOOP
+36	      - CONDITION
+37	        - <
+38	          - i
+39	          - 10
+40	      - DO
+41	        - PRINT
+42	          - a
+43	            - []
+44	              - i
+45	        - IF
+46	          - CONDITION
+47	            - <
+48	              - i
+49	              - 9
+50	          - THEN
+51	            - PRINT
+52	              - ", "
+53	          - ELSE
+54	            - SKIP
+55	        - ASSIGNMENT
+56	          - LHS
+57	            - i
+58	          - RHS
+59	            - +
+60	              - i
+61	              - 1
+62	    - PRINTLN
+63	      - "}"
+===========================================================
+-- Finished
+

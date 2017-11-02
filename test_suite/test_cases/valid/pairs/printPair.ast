@@ -1,0 +1,73 @@
+-- Test: printPair.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# print pair program
+
+# Output:
+# #addrs# = (10, a)
+
+# Program:
+
+begin
+  pair(int, char) p = newpair(10, 'a') ;
+  print p ; 
+  print " = (" ;
+  int x = fst p ;
+  print x ;
+  print ", " ;
+  char c = snd p ;
+  print c ;
+  println ')' 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printPair.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intchar
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - 10
+11	          - SND
+12	            - 'a'
+13	    - PRINT
+14	      - p
+15	    - PRINT
+16	      - " = ("
+17	    - DECLARE
+18	      - TYPE
+19	        - int
+20	      - LHS
+21	        - x
+22	      - RHS
+23	        - FST
+24	          - p
+25	    - PRINT
+26	      - x
+27	    - PRINT
+28	      - ", "
+29	    - DECLARE
+30	      - TYPE
+31	        - char
+32	      - LHS
+33	        - c
+34	      - RHS
+35	        - SND
+36	          - p
+37	    - PRINT
+38	      - c
+39	    - PRINTLN
+40	      - ')'
+===========================================================
+-- Finished
+

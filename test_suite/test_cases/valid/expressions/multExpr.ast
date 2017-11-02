@@ -1,0 +1,46 @@
+-- Test: multExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating multiplication
+
+# Output:
+# 15
+
+# Program:
+
+begin
+  int x = 5 ;
+  int y = 3 ;
+  println x * y
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+multExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 5
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 3
+16	    - PRINTLN
+17	      - *
+18	        - x
+19	        - y
+===========================================================
+-- Finished
+

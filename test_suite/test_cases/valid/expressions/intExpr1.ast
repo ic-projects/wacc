@@ -1,0 +1,55 @@
+-- Test: intExpr1.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating a moderately complex integer expression
+
+# Output:
+# Correct
+
+# Program:
+
+begin
+  int a = ( 10 * 1 + 2 * 15 );
+  if a == 40 then
+    println "Correct"
+  else
+    println "Wrong"
+  fi
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intExpr1.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - +
+9	          - *
+10	            - 10
+11	            - 1
+12	          - *
+13	            - 2
+14	            - 15
+15	    - IF
+16	      - CONDITION
+17	        - ==
+18	          - a
+19	          - 40
+20	      - THEN
+21	        - PRINTLN
+22	          - "Correct"
+23	      - ELSE
+24	        - PRINTLN
+25	          - "Wrong"
+===========================================================
+-- Finished
+

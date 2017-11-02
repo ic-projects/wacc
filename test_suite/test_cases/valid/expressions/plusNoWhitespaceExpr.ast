@@ -1,0 +1,30 @@
+-- Test: plusNoWhitespaceExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# addition expressions should not be whitespace sensitive
+
+# Output:
+# 3
+
+# Program:
+
+begin
+  println 1+2
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+plusNoWhitespaceExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINTLN
+3	      - +
+4	        - 1
+5	        - 2
+===========================================================
+-- Finished
+

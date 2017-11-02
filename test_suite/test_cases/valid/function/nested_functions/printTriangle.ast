@@ -1,0 +1,101 @@
+-- Test: printTriangle.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# print a fixed size triangle
+
+# Output:
+# --------
+# -------
+# ------
+# -----
+# ----
+# ---
+# --
+# -
+
+# Program:
+
+begin
+  int f(int x) is
+    if x == 0 then
+      skip
+    else
+      int i = x ;
+      while i > 0 do 
+        print "-" ;
+        i = i - 1
+      done ;
+      println "" ;
+      int s = call f(x - 1)
+    fi ;
+    return 0
+  end
+
+  int s = call f(8) 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printTriangle.ast contents are:
+===========================================================
+0	Program
+1	  - int f(int x)
+2	    - IF
+3	      - CONDITION
+4	        - ==
+5	          - x
+6	          - 0
+7	      - THEN
+8	        - SKIP
+9	      - ELSE
+10	        - DECLARE
+11	          - TYPE
+12	            - int
+13	          - LHS
+14	            - i
+15	          - RHS
+16	            - x
+17	        - LOOP
+18	          - CONDITION
+19	            - >
+20	              - i
+21	              - 0
+22	          - DO
+23	            - PRINT
+24	              - "-"
+25	            - ASSIGNMENT
+26	              - LHS
+27	                - i
+28	              - RHS
+29	                - -
+30	                  - i
+31	                  - 1
+32	        - PRINTLN
+33	          - ""
+34	        - DECLARE
+35	          - TYPE
+36	            - int
+37	          - LHS
+38	            - s
+39	          - RHS
+40	            - f
+41	            - -
+42	              - x
+43	              - 1
+44	    - RETURN
+45	      - 0
+46	  - int main()
+47	    - DECLARE
+48	      - TYPE
+49	        - int
+50	      - LHS
+51	        - s
+52	      - RHS
+53	        - f
+54	        - 8
+===========================================================
+-- Finished
+

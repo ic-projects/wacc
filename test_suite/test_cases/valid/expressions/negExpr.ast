@@ -1,0 +1,37 @@
+-- Test: negExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating negation
+
+# Output:
+# -42
+
+# Program:
+
+begin
+	int x = 42 ;
+  println -x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+negExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 42
+9	    - PRINTLN
+10	      - -
+11	        - x
+===========================================================
+-- Finished
+

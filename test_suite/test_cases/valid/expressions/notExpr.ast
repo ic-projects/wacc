@@ -1,0 +1,50 @@
+-- Test: notExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating not
+
+# Output:
+# false
+# true
+
+# Program:
+
+begin
+  bool a = true ;
+  bool b = false ;
+  println !a ;
+  println !b
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+notExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - true
+9	    - DECLARE
+10	      - TYPE
+11	        - bool
+12	      - LHS
+13	        - b
+14	      - RHS
+15	        - false
+16	    - PRINTLN
+17	      - !
+18	        - a
+19	    - PRINTLN
+20	      - !
+21	        - b
+===========================================================
+-- Finished
+

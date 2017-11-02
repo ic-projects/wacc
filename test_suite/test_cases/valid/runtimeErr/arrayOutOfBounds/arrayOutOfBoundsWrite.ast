@@ -1,0 +1,65 @@
+-- Test: arrayOutOfBoundsWrite.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# attempt write out of array bounds (gods, this really should not work!)
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+
+  int[] b = [1, 2, 3] ;
+	int[] a = [43, 2, 18, 1] ;
+	a[5] = 100 ;
+  println a[5]
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arrayOutOfBoundsWrite.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - b
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 1
+10	          - 2
+11	          - 3
+12	    - DECLARE
+13	      - TYPE
+14	        - int[]
+15	      - LHS
+16	        - a
+17	      - RHS
+18	        - ARRAY LITERAL
+19	          - 43
+20	          - 2
+21	          - 18
+22	          - 1
+23	    - ASSIGNMENT
+24	      - LHS
+25	        - a
+26	          - []
+27	            - 5
+28	      - RHS
+29	        - 100
+30	    - PRINTLN
+31	      - a
+32	        - []
+33	          - 5
+===========================================================
+-- Finished
+

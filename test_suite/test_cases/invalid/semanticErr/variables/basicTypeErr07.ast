@@ -1,0 +1,24 @@
+-- Test: basicTypeErr07.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# type mismatch: char <- int
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+  char c = 1
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 12:11 -- Incompatible type at 1 (expected: CHAR, actual: INT)
+

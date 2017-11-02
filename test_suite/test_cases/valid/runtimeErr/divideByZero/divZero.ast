@@ -1,0 +1,41 @@
+-- Test: divZero.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# division by zero
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  int x = 10 / 0 ;
+  println "should not reach here"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+divZero.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - /
+9	          - 10
+10	          - 0
+11	    - PRINTLN
+12	      - "should not reach here"
+===========================================================
+-- Finished
+

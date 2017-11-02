@@ -1,0 +1,54 @@
+-- Test: whitespace.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Whitespace only important between keyword and variable tokens
+
+# Output:
+# 1
+
+# Program:
+
+begin
+	int a=13;	
+  if a==13then a=1else a=0fi;
+  println a
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+whitespace.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - 13
+9	    - IF
+10	      - CONDITION
+11	        - ==
+12	          - a
+13	          - 13
+14	      - THEN
+15	        - ASSIGNMENT
+16	          - LHS
+17	            - a
+18	          - RHS
+19	            - 1
+20	      - ELSE
+21	        - ASSIGNMENT
+22	          - LHS
+23	            - a
+24	          - RHS
+25	            - 0
+26	    - PRINTLN
+27	      - a
+===========================================================
+-- Finished
+

@@ -1,0 +1,31 @@
+-- Test: exitBasic.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic exit statement
+
+# Output:
+# #empty#
+
+# Exit:
+# 7
+
+# Program:
+
+begin
+  exit 7
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+exitBasic.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - EXIT
+3	      - 7
+===========================================================
+-- Finished
+

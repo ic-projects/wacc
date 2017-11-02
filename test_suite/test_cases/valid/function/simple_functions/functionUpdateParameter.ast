@@ -1,0 +1,85 @@
+-- Test: functionUpdateParameter.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# test that the passed parameter can be updated and used
+# and that y remains the same
+
+# Output:
+# y is 1
+# x is 1
+# x is now 5
+# y is still 1
+
+# Program:
+
+begin
+
+  int f(int x) is
+    print "x is ";
+    println x;
+    x = 5;
+    print "x is now ";
+    println x;
+    return x
+  end
+
+  int y = 1;
+  print "y is ";
+  println y;
+  int x = call f(y);
+  print "y is still ";
+  println y
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+functionUpdateParameter.ast contents are:
+===========================================================
+0	Program
+1	  - int f(int x)
+2	    - PRINT
+3	      - "x is "
+4	    - PRINTLN
+5	      - x
+6	    - ASSIGNMENT
+7	      - LHS
+8	        - x
+9	      - RHS
+10	        - 5
+11	    - PRINT
+12	      - "x is now "
+13	    - PRINTLN
+14	      - x
+15	    - RETURN
+16	      - x
+17	  - int main()
+18	    - DECLARE
+19	      - TYPE
+20	        - int
+21	      - LHS
+22	        - y
+23	      - RHS
+24	        - 1
+25	    - PRINT
+26	      - "y is "
+27	    - PRINTLN
+28	      - y
+29	    - DECLARE
+30	      - TYPE
+31	        - int
+32	      - LHS
+33	        - x
+34	      - RHS
+35	        - f
+36	        - y
+37	    - PRINT
+38	      - "y is still "
+39	    - PRINTLN
+40	      - y
+===========================================================
+-- Finished
+

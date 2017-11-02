@@ -1,0 +1,44 @@
+-- Test: sameArgName2.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# program with function that has same parameter name as function and also returns to same named variable
+
+# Output:
+# 99
+
+# Program:
+
+begin
+  int f(int f) is
+    return f
+  end
+  
+  int f = call f(99);
+  println f
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+sameArgName2.ast contents are:
+===========================================================
+0	Program
+1	  - int f(int f)
+2	    - RETURN
+3	      - f
+4	  - int main()
+5	    - DECLARE
+6	      - TYPE
+7	        - int
+8	      - LHS
+9	        - f
+10	      - RHS
+11	        - f
+12	        - 99
+13	    - PRINTLN
+14	      - f
+===========================================================
+-- Finished
+

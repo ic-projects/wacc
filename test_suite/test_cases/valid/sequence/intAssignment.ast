@@ -1,0 +1,45 @@
+-- Test: intAssignment.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple integer variable declaration and assignment
+
+# Output:
+# #empty#
+
+# Exit:
+# 20
+
+# Program:
+
+begin
+  int x = 10 ;
+  x = 20 ;
+  exit x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intAssignment.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 10
+9	    - ASSIGNMENT
+10	      - LHS
+11	        - x
+12	      - RHS
+13	        - 20
+14	    - EXIT
+15	      - x
+===========================================================
+-- Finished
+

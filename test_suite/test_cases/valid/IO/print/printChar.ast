@@ -1,0 +1,31 @@
+-- Test: printChar.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic character printing
+
+# Output:
+# A simple character example is f
+
+# Program:
+
+begin
+  print "A simple character example is " ;
+  println 'f'
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printChar.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINT
+3	      - "A simple character example is "
+4	    - PRINTLN
+5	      - 'f'
+===========================================================
+-- Finished
+

@@ -1,0 +1,39 @@
+-- Test: stringAssignment.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple string variable declaration and assignment
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  string s = "foo" ;
+  s = "bar"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+stringAssignment.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - s
+7	      - RHS
+8	        - "foo"
+9	    - ASSIGNMENT
+10	      - LHS
+11	        - s
+12	      - RHS
+13	        - "bar"
+===========================================================
+-- Finished
+
