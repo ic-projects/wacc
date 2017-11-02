@@ -22,15 +22,28 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" {
         stat.([]ast.StatementNode),
     )
     functions := []ast.FunctionNode{main}
-    // for _, f := range fs.([]interface{}) {
-    //     functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
-    // }
+    for _, f := range fs.([]interface{}) {
+        functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
+    }
     return ast.NewProgram(functions), nil
 }
 
-FUNC <- TYPE __ IDENT _ '(' _ PARAMLIST? _ ')' _ "is" __ STAT _ "end"
-PARAMLIST <- PARAM (_ ',' _ PARAM)*
-PARAM <- TYPE __ IDENT
+FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
+    if (params != nil) {
+        return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), s.([]ast.StatementNode)), nil
+    }
+    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, s.([]ast.StatementNode)), nil
+}
+PARAMLIST <- param:PARAM params:(_ ',' _ PARAM)* {
+    paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
+    for _, p := range params.([]interface{}) {
+        paramList = append(paramList, p.([]interface{})[3].(ast.ParameterNode))
+    }
+    return paramList, nil
+}
+PARAM <- t:TYPE __ i:IDENT {
+    return ast.NewParameterNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode)), nil
+}
 
 STAT <- stat:(SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE) stats:(_ ';' _ (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE))* {
     statements := []ast.StatementNode{stat}
