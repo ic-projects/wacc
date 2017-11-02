@@ -137,13 +137,59 @@ PAIRELEMTYPE <- (t:BASETYPE array:(_ ARRAYTYPE)*) {
 } / PAIR
 PAIR <- "pair"
 
-EXPR <- expr:((BREXPR _ ')') / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) binex:(_ BINARYOPER _ EXPR)? {
-  if (binex != nil) {
-    bineexp := binex.([]interface{})
-    return ast.NewBinaryOperatorNode(c.pos.getPosition(), bineexp[1].(ast.BinaryOperator), expr.(ast.ExpressionNode), bineexp[3].(ast.ExpressionNode)), nil
+EXPR <- e1:PREC2 e2:(_ OR _ PREC2)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
   }
-  return expr, nil
+  return e1, nil
 }
+
+PREC2 <- e1:PREC3 e2:(_ AND _ PREC3)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
+  }
+  return e1, nil
+}
+
+PREC3 <- e1:PREC4 e2:(_ EQUOP _ PREC4)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
+  }
+  return e1, nil
+}
+
+PREC4 <- e1:PREC5 e2:(_ COMPOP _ PREC5)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
+  }
+  return e1, nil
+}
+
+PREC5 <- e1:PREC6 e2:(_ ADDOP _ PREC6)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
+  }
+  return e1, nil
+}
+
+PREC6 <- e1:PREC7 e2:(_ MULOP _ PREC7)* {
+  if (len(e2.([]interface{})) > 0) {
+    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
+  }
+  return e1, nil
+}
+
+PREC7 <- e:BREXPR _ ')' {
+    return e, nil
+} / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT
+
+MULOP <- MULT / DIV / MOD
+
+ADDOP <- SUB / PLUS
+
+COMPOP <- GEQ / GT / LEQ / LT
+
+EQUOP <- EQ / NEQ
 
 UNARYEXPR <- op:UNARYOPER _ expr:EXPR {
   return ast.NewUnaryOperatorNode(c.pos.getPosition(), op.(ast.UnaryOperator), expr.(ast.ExpressionNode)), nil
