@@ -25,7 +25,6 @@ import (
 */
 
 type ProgramNode interface {
-
 }
 
 func indent(s string, sep string) string {
@@ -758,12 +757,12 @@ func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
 }
 
 func (node CharacterLiteralNode) String() string {
-  if node.val == '\000' {
-    return "- '\\0'"
-  }
-  if node.val == '"' {
-    return "- '\\\"'"
-  }
+	if node.val == '\000' {
+		return "- '\\0'"
+	}
+	if node.val == '"' {
+		return "- '\\\"'"
+	}
 	return fmt.Sprintf("- %q", node.val)
 }
 
