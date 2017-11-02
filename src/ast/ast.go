@@ -45,12 +45,12 @@ func (program Program) String() string {
 type FunctionNode struct {
 	pos    Position
 	t      TypeNode
-	ident  string
+	ident  IdentifierNode
 	params []ParameterNode
 	stats  []StatementNode
 }
 
-func NewFunctionNode(pos Position, t TypeNode, ident string, params []ParameterNode, stats []StatementNode) FunctionNode {
+func NewFunctionNode(pos Position, t TypeNode, ident IdentifierNode, params []ParameterNode, stats []StatementNode) FunctionNode {
 	return FunctionNode{
 		pos:    pos,
 		t:      t,
@@ -80,10 +80,10 @@ func (node FunctionNode) String() string {
 type ParameterNode struct {
 	pos   Position
 	t     TypeNode
-	ident string
+	ident IdentifierNode
 }
 
-func NewParameterNode(pos Position, t TypeNode, ident string) ParameterNode {
+func NewParameterNode(pos Position, t TypeNode, ident IdentifierNode) ParameterNode {
 	return ParameterNode{
 		pos:   pos,
 		t:     t,
@@ -135,11 +135,11 @@ func (node SkipNode) String() string {
 type DeclareNode struct {
 	pos   Position
 	t     TypeNode
-	ident string
+	ident IdentifierNode
 	rhs   RHSNode
 }
 
-func NewDeclareNode(pos Position, t TypeNode, ident string, rhs RHSNode) DeclareNode {
+func NewDeclareNode(pos Position, t TypeNode, ident IdentifierNode, rhs RHSNode) DeclareNode {
 	return DeclareNode{
 		pos:   pos,
 		t:     t,
@@ -439,11 +439,11 @@ func (node PairSecondElementNode) String() string {
 
 type ArrayElementNode struct {
 	pos   Position
-	ident string
+	ident IdentifierNode
 	exprs  []ExpressionNode
 }
 
-func NewArrayElementNode(pos Position, ident string, exprs []ExpressionNode) ArrayElementNode {
+func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
 		pos:   pos,
 		ident: ident,
@@ -519,11 +519,11 @@ func (node NewPairNode) String() string {
 
 type FunctionCallNode struct {
 	pos   Position
-	ident string
+	ident IdentifierNode
 	exprs []ExpressionNode
 }
 
-func NewFunctionCallNode(pos Position, ident string, exprs []ExpressionNode) FunctionCallNode {
+func NewFunctionCallNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) FunctionCallNode {
 	return FunctionCallNode{
 		pos:   pos,
 		ident: ident,
