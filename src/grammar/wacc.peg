@@ -21,10 +21,12 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" {
         []ast.ParameterNode{},
         stat.([]ast.StatementNode),
     )
-    functions := []ast.FunctionNode{main}
+    functions := []ast.FunctionNode{}
     for _, f := range fs.([]interface{}) {
         functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
     }
+    functions = append(functions, main)
+
     return ast.NewProgram(functions), nil
 }
 
@@ -96,6 +98,9 @@ NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
     return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
 }
 CALL <- "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
+    if(args == nil) {
+      return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), []ast.ExpressionNode{}), nil
+    }
     return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), args.([]ast.ExpressionNode)), nil
 }
 ARGLIST <- expr:EXPR exprs:(_ ',' _ EXPR)* {
