@@ -77,7 +77,7 @@ func NewFunctionNode(pos Position, t TypeNode, ident IdentifierNode, params []Pa
 
 func (node FunctionNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s %s(", node.t, node.ident))
+	buf.WriteString(fmt.Sprintf("- %s %s(", node.t, node.ident.String()[2:]))
 	for i, p := range node.params {
 		if i == 0 {
 			buf.WriteString(fmt.Sprintf("%s", p))
@@ -107,7 +107,7 @@ func NewParameterNode(pos Position, t TypeNode, ident IdentifierNode) ParameterN
 }
 
 func (node ParameterNode) String() string {
-	return fmt.Sprintf("%s %s\n", node.t, node.ident)
+	return fmt.Sprintf("%s %s", node.t, node.ident.String()[2:])
 }
 
 type Position struct {
@@ -165,7 +165,7 @@ func (node DeclareNode) String() string {
 	buf.WriteString(fmt.Sprintln("  - TYPE"))
 	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.t), "    "))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.ident), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.ident), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
 	buf.WriteString(indent(fmt.Sprintf("%s\n", node.rhs), "    "))
 	return buf.String()
@@ -189,7 +189,7 @@ func (node AssignNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ASSIGNMENT"))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.lhs), "   "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.lhs), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
 	buf.WriteString(indent(fmt.Sprintf("%s", node.rhs), "    "))
 	return buf.String()
@@ -327,16 +327,16 @@ func NewIfNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseS
 
 func (node IfNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- CONDITION"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
-	buf.WriteString(fmt.Sprintln("- THEN"))
+	buf.WriteString(fmt.Sprintln("- IF"))
+	buf.WriteString(indent(fmt.Sprintln("- CONDITION"), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "    "))
+	buf.WriteString(indent(fmt.Sprintln("- THEN"), "  "))
 	for _, s := range node.ifStats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
-	buf.WriteString(fmt.Sprintln("- ELSE"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.elseStats))
+	buf.WriteString(indent(fmt.Sprintln("- ELSE"), "  "))
 	for _, s := range node.elseStats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
 }
@@ -406,7 +406,7 @@ func NewIdentifierNode(pos Position, ident string) IdentifierNode {
 }
 
 func (node IdentifierNode) String() string {
-	return fmt.Sprintf("%s", node.ident)
+	return fmt.Sprintf("- %s", node.ident)
 }
 
 type PairFirstElementNode struct {
@@ -424,7 +424,7 @@ func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElement
 func (node PairFirstElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FST"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
 	return buf.String()
 }
 
@@ -443,7 +443,7 @@ func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondEleme
 func (node PairSecondElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SND"))
-	buf.WriteString(fmt.Sprintf("%s\n", node.expr))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
 	return buf.String()
 }
 
@@ -463,10 +463,10 @@ func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionN
 
 func (node ArrayElementNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
+	buf.WriteString(fmt.Sprintf("%s\n", node.ident))
 	for _, e := range node.exprs {
 		buf.WriteString(fmt.Sprintln("  - []"))
-		buf.WriteString(fmt.Sprintf("  %s\n", e))
+		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
 }
@@ -516,10 +516,10 @@ func NewNewPairNode(pos Position, fst ExpressionNode, snd ExpressionNode) NewPai
 func (node NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
-	buf.WriteString(fmt.Sprintln("  - FST"))
-	buf.WriteString(fmt.Sprintf("  %s\n", node.fst))
-	buf.WriteString(fmt.Sprintln("  - SND"))
-	buf.WriteString(fmt.Sprintf("  %s\n", node.snd))
+	buf.WriteString(indent(fmt.Sprintln("- FST"), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.fst), "    "))
+	buf.WriteString(indent(fmt.Sprintln("- SND"), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.snd), "    "))
 	return buf.String()
 }
 
@@ -543,9 +543,9 @@ func NewFunctionCallNode(pos Position, ident IdentifierNode, exprs []ExpressionN
 
 func (node FunctionCallNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s\n", node.ident))
+	buf.WriteString(fmt.Sprintf("%s\n", node.ident))
 	for _, e := range node.exprs {
-		buf.WriteString(fmt.Sprintf("  %s\n", e))
+		buf.WriteString(fmt.Sprintf("%s\n", e))
 	}
 	return buf.String()
 }
@@ -576,7 +576,7 @@ func (t BaseType) String() string {
 	case STRING:
 		return "string"
 	case PAIR:
-		return "pair"
+		return ""
 	}
 	return ""
 }
@@ -654,11 +654,11 @@ func (unOp UnaryOperator) String() string {
 	case NEG:
 		return "- -"
 	case LEN:
-		return "- LEN"
+		return "- len"
 	case ORD:
-		return "- ORD"
+		return "- ord"
 	case CHR:
-		return "- CHR"
+		return "- chr"
 	}
 	return "ERROR"
 }
@@ -758,7 +758,13 @@ func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
 }
 
 func (node CharacterLiteralNode) String() string {
-	return fmt.Sprintf("- '%c'", node.val)
+  if node.val == '\000' {
+    return "- '\\0'"
+  }
+  if node.val == '"' {
+    return "- '\\\"'"
+  }
+	return fmt.Sprintf("- %q", node.val)
 }
 
 type StringLiteralNode struct {
@@ -812,8 +818,8 @@ func NewUnaryOperatorNode(pos Position, op UnaryOperator, expr ExpressionNode) U
 func (node UnaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("- %s\n", node.op))
-	buf.WriteString(fmt.Sprintf("- %s\n", node.expr))
+	buf.WriteString(fmt.Sprintf("%s\n", node.op))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
 
 	return buf.String()
 }
@@ -837,9 +843,9 @@ func NewBinaryOperatorNode(pos Position, op BinaryOperator, expr1 ExpressionNode
 func (node BinaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
-	buf.WriteString(fmt.Sprintf("- %s\n", node.op))
-	buf.WriteString(fmt.Sprintf("- %s\n", node.expr1))
-	buf.WriteString(fmt.Sprintf("- %s\n", node.expr2))
+	buf.WriteString(fmt.Sprintf("%s\n", node.op))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr1), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr2), "  "))
 
 	return buf.String()
 }

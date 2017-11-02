@@ -21,10 +21,12 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" {
         []ast.ParameterNode{},
         stat.([]ast.StatementNode),
     )
-    functions := []ast.FunctionNode{main}
+    functions := []ast.FunctionNode{}
     for _, f := range fs.([]interface{}) {
         functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
     }
+    functions = append(functions, main)
+
     return ast.NewProgram(functions), nil
 }
 
@@ -96,6 +98,9 @@ NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
     return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
 }
 CALL <- "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
+    if(args == nil) {
+      return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), []ast.ExpressionNode{}), nil
+    }
     return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), args.([]ast.ExpressionNode)), nil
 }
 ARGLIST <- expr:EXPR exprs:(_ ',' _ EXPR)* {
@@ -143,7 +148,9 @@ PAIRELEMTYPE <- (t:BASETYPE array:(_ ARRAYTYPE)*) {
     }
     return t, nil
 } / PAIR
-PAIR <- "pair"
+PAIR <- "pair" {
+  return ast.NewBaseTypeNode(ast.PAIR), nil
+}
 
 EXPR <- e1:PREC2 e2:(_ OR _ PREC2)* {
   if (len(e2.([]interface{})) > 0) {
@@ -213,13 +220,13 @@ NOT <- '!' {
 NEG <- '-' {
   return ast.NEG, nil
 }
-LEN <- "len" {
+LEN <- "len" __ {
   return ast.LEN, nil
 }
-ORD <- "ord" {
+ORD <- "ord" __ {
   return ast.ORD, nil
 }
-CHR <- "chr" {
+CHR <- "chr" __ {
   return ast.CHR, nil
 }
 MULT <- '*' {
@@ -294,7 +301,26 @@ CHARLITER <- "'" char:CHARACTER "'" {
 STRLITER <- '"' CHARACTER* '"' {
   return ast.NewStringLiteralNode(c.pos.getPosition(), string(c.text)), nil
 }
-CHARACTER <- [^""''\\] / '\\' ESCAPEDCHAR
+CHARACTER <- char:[^""''\\] {
+  return char, nil
+} / '\\' char:ESCAPEDCHAR {
+    switch char.([]byte)[0] {
+    case '0':
+      return []byte{'\000'}, nil
+    case 'b':
+      return '\b', nil
+    case 't':
+      return '\t', nil
+    case 'n':
+      return '\n', nil
+    case 'f':
+      return '\f', nil
+    case 'r':
+      return '\r', nil
+    default:
+      return char, nil
+    }
+}
 ESCAPEDCHAR <- [0btnfr""''\\]
 ARRAYLITER <- '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
   var expressions []ast.ExpressionNode
