@@ -1,0 +1,97 @@
+-- Test: rmStyleAddIO.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# register machine style addition
+
+# Output:
+# Enter the first number: #input# Enter the second number: #input# Initial value of x: #output#
+# #output#
+# final value of x: #output
+
+# Program:
+
+begin
+  int x = 0 ;
+  int y = 0 ;
+  print "Enter the first number: " ;
+  read x ;
+  print "Enter the second number: " ;
+  read y ;
+  print "Initial value of x: " ;
+  println x ;
+  while y > 0 do
+    print "(+)" ;
+    x = x + 1 ;
+    y = y - 1
+  done ;
+  println "" ;
+  print "final value of x: " ;
+  println x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+rmStyleAddIO.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 0
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 0
+16	    - PRINT
+17	      - "Enter the first number: "
+18	    - READ
+19	      - x
+20	    - PRINT
+21	      - "Enter the second number: "
+22	    - READ
+23	      - y
+24	    - PRINT
+25	      - "Initial value of x: "
+26	    - PRINTLN
+27	      - x
+28	    - LOOP
+29	      - CONDITION
+30	        - >
+31	          - y
+32	          - 0
+33	      - DO
+34	        - PRINT
+35	          - "(+)"
+36	        - ASSIGNMENT
+37	          - LHS
+38	            - x
+39	          - RHS
+40	            - +
+41	              - x
+42	              - 1
+43	        - ASSIGNMENT
+44	          - LHS
+45	            - y
+46	          - RHS
+47	            - -
+48	              - y
+49	              - 1
+50	    - PRINTLN
+51	      - ""
+52	    - PRINT
+53	      - "final value of x: "
+54	    - PRINTLN
+55	      - x
+===========================================================
+-- Finished
+

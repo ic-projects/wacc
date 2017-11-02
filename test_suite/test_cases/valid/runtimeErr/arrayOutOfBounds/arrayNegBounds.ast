@@ -1,0 +1,56 @@
+-- Test: arrayNegBounds.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# attempt out of bounds array access (this ought to seg fault or similar)
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+	int[] a = [43, 2, 18, 1] ;
+  int[] b = [1, 2, 3] ;	
+  println a[-2]
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arrayNegBounds.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 43
+10	          - 2
+11	          - 18
+12	          - 1
+13	    - DECLARE
+14	      - TYPE
+15	        - int[]
+16	      - LHS
+17	        - b
+18	      - RHS
+19	        - ARRAY LITERAL
+20	          - 1
+21	          - 2
+22	          - 3
+23	    - PRINTLN
+24	      - a
+25	        - []
+26	          - -2
+===========================================================
+-- Finished
+

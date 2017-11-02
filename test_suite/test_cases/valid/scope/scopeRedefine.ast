@@ -1,0 +1,58 @@
+-- Test: scopeRedefine.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# more complex variable scoping test that redefines a variable
+
+# Output:
+# true
+# 2
+
+# Program:
+
+begin
+  int x = 1 ;
+  begin
+    x = 2 ;
+    bool x = true ;
+    println x
+  end ;
+  println x 
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+scopeRedefine.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 1
+9	    - SCOPE
+10	      - ASSIGNMENT
+11	        - LHS
+12	          - x
+13	        - RHS
+14	          - 2
+15	      - DECLARE
+16	        - TYPE
+17	          - bool
+18	        - LHS
+19	          - x
+20	        - RHS
+21	          - true
+22	      - PRINTLN
+23	        - x
+24	    - PRINTLN
+25	      - x
+===========================================================
+-- Finished
+

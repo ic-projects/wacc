@@ -1,0 +1,37 @@
+-- Test: whileFalse.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple unentered while loop
+
+# Output:
+# end of loop
+
+# Program:
+
+begin
+  while false do
+    println "looping..."
+  done ;
+  println "end of loop"
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+whileFalse.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - LOOP
+3	      - CONDITION
+4	        - false
+5	      - DO
+6	        - PRINTLN
+7	          - "looping..."
+8	    - PRINTLN
+9	      - "end of loop"
+===========================================================
+-- Finished
+

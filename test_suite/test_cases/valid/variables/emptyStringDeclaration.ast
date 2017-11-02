@@ -1,0 +1,33 @@
+-- Test: emptyStringDeclaration.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple empty string variable declaration
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  string s = ""
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+emptyStringDeclaration.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - s
+7	      - RHS
+8	        - ""
+===========================================================
+-- Finished
+

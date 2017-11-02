@@ -50,7 +50,6 @@ end.parse!
 
 # set up empty array of file_paths to process
 files = []
-puts ARGV[0]
 if $options[:directory] then
   # add the results of a search to the array
   files += Dir.glob(File.join(ARGV[0], "**", "*.wacc"))
@@ -67,7 +66,6 @@ end
 
 # now process each target file
 files.each do |file_path|
-  puts "Compiling #{file_path}"
   puts "-- Test: #{File.basename file_path}"
   puts ""
   puts "-- Uploaded file: "

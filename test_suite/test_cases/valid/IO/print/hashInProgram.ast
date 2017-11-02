@@ -1,0 +1,43 @@
+-- Test: hashInProgram.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# In-line comments and printing #
+
+# Output:
+# We can print the hash character: #
+# We can also print # when its in a string.
+
+# Program:
+
+begin 
+  int x = 0 ; # comments can be in-line
+  print "We can print the hash character: " ;
+  println '#' ;
+  println "We can also print # when its in a string."
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+hashInProgram.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 0
+9	    - PRINT
+10	      - "We can print the hash character: "
+11	    - PRINTLN
+12	      - '#'
+13	    - PRINTLN
+14	      - "We can also print # when its in a string."
+===========================================================
+-- Finished
+

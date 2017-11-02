@@ -1,0 +1,51 @@
+-- Test: intWayOverflow.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# positive overflow
+
+# Output:
+# 2000000000
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  int x = 2000000000 ;
+  println x ;
+  x = x + 2000000000; #err here?
+  println x 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intWayOverflow.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 2000000000
+9	    - PRINTLN
+10	      - x
+11	    - ASSIGNMENT
+12	      - LHS
+13	        - x
+14	      - RHS
+15	        - +
+16	          - x
+17	          - 2000000000
+18	    - PRINTLN
+19	      - x
+===========================================================
+-- Finished
+

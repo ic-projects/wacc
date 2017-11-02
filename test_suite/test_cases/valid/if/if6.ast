@@ -1,0 +1,58 @@
+-- Test: if6.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Simple conditional statement with character comparison test
+
+# Output:
+# correct
+
+# Program:
+
+begin
+  char c1 = 'f';
+  char c2 = 'F';	
+  if c1 == c2 
+  then 
+    println "incorrect"
+  else 
+    println "correct"
+  fi
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+if6.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - c1
+7	      - RHS
+8	        - 'f'
+9	    - DECLARE
+10	      - TYPE
+11	        - char
+12	      - LHS
+13	        - c2
+14	      - RHS
+15	        - 'F'
+16	    - IF
+17	      - CONDITION
+18	        - ==
+19	          - c1
+20	          - c2
+21	      - THEN
+22	        - PRINTLN
+23	          - "incorrect"
+24	      - ELSE
+25	        - PRINTLN
+26	          - "correct"
+===========================================================
+-- Finished
+

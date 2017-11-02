@@ -1,0 +1,64 @@
+-- Test: ifNested1.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Nested conditional statement
+
+# Output:
+# correct
+
+# Program:
+
+begin
+  int a = 13;	
+  if a == 13 
+  then 
+    if a > 5
+    then
+      println "correct"
+    else
+      println "incorrect"
+    fi
+  else 
+    println "incorrect"
+  fi
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+ifNested1.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - 13
+9	    - IF
+10	      - CONDITION
+11	        - ==
+12	          - a
+13	          - 13
+14	      - THEN
+15	        - IF
+16	          - CONDITION
+17	            - >
+18	              - a
+19	              - 5
+20	          - THEN
+21	            - PRINTLN
+22	              - "correct"
+23	          - ELSE
+24	            - PRINTLN
+25	              - "incorrect"
+26	      - ELSE
+27	        - PRINTLN
+28	          - "incorrect"
+===========================================================
+-- Finished
+

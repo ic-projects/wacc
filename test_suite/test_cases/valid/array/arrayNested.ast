@@ -1,0 +1,72 @@
+-- Test: arrayNested.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# basic array declaration and assignment
+
+# Output:
+# 3
+# 3
+
+# Program:
+
+begin
+  int[] a = [1,2,3];
+  int[] b = [3,4];
+  int[][] c = [a,b] ;
+  println c[0][2] ;
+  println c[1][0]
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arrayNested.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 1
+10	          - 2
+11	          - 3
+12	    - DECLARE
+13	      - TYPE
+14	        - int[]
+15	      - LHS
+16	        - b
+17	      - RHS
+18	        - ARRAY LITERAL
+19	          - 3
+20	          - 4
+21	    - DECLARE
+22	      - TYPE
+23	        - int[][]
+24	      - LHS
+25	        - c
+26	      - RHS
+27	        - ARRAY LITERAL
+28	          - a
+29	          - b
+30	    - PRINTLN
+31	      - c
+32	        - []
+33	          - 0
+34	        - []
+35	          - 2
+36	    - PRINTLN
+37	      - c
+38	        - []
+39	          - 1
+40	        - []
+41	          - 0
+===========================================================
+-- Finished
+

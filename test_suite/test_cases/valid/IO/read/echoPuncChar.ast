@@ -1,0 +1,44 @@
+-- Test: echoPuncChar.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# echo the user's input char
+
+# Output:
+# enter a character to echo
+# #input#
+# #output#
+
+# Program:
+
+begin
+  char c = '\0' ;
+  println "enter a character to echo";
+  read c ;
+  println c 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+echoPuncChar.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - c
+7	      - RHS
+8	        - '\0'
+9	    - PRINTLN
+10	      - "enter a character to echo"
+11	    - READ
+12	      - c
+13	    - PRINTLN
+14	      - c
+===========================================================
+-- Finished
+

@@ -1,0 +1,77 @@
+-- Test: charComparisonExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# detailed battery of character comparison tests
+
+# Output:
+# false
+# true
+# true
+# true
+# false
+# false
+
+# Program:
+
+begin
+  char c1 = 'a' ;
+  char c2 = 'z' ;
+  println c1 == c2 ;
+  println c1 != c2 ;
+  println c1 < c2 ;
+  println c1 <= c2 ;
+  println c1 > c2 ;
+  println c1 >= c2
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+charComparisonExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char
+5	      - LHS
+6	        - c1
+7	      - RHS
+8	        - 'a'
+9	    - DECLARE
+10	      - TYPE
+11	        - char
+12	      - LHS
+13	        - c2
+14	      - RHS
+15	        - 'z'
+16	    - PRINTLN
+17	      - ==
+18	        - c1
+19	        - c2
+20	    - PRINTLN
+21	      - !=
+22	        - c1
+23	        - c2
+24	    - PRINTLN
+25	      - <
+26	        - c1
+27	        - c2
+28	    - PRINTLN
+29	      - <=
+30	        - c1
+31	        - c2
+32	    - PRINTLN
+33	      - >
+34	        - c1
+35	        - c2
+36	    - PRINTLN
+37	      - >=
+38	        - c1
+39	        - c2
+===========================================================
+-- Finished
+

@@ -1,0 +1,117 @@
+-- Test: multipleStringsAssignment.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# multiple string assignments and comparisons
+
+# Output:
+# s1 is Hi
+# s2 is Hi
+# They are not the same.
+# Now modify s1[0] = 'h'
+# s1 is hi
+# s2 is Hi
+# They are not the same.
+
+
+# Program:
+
+begin
+  string s1 = "Hi" ;
+  string s2 = "Hi" ;
+  print "s1 is " ;
+  println s1 ;
+  print "s2 is " ;
+  println s2 ;
+  if s1 == s2 then
+    println "They are the same." 
+  else 
+    println "They are not the same."
+  fi ;
+
+  println "Now modify s1[0] = \'h\'" ;
+  s1[0] = 'h' ;
+
+  print "s1 is " ;
+  println s1 ;
+  print "s2 is " ;
+  println s2 ;
+  if s1 == s2 then
+    println "They are the same." 
+  else 
+    println "They are not the same."
+  fi
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+multipleStringsAssignment.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - s1
+7	      - RHS
+8	        - "Hi"
+9	    - DECLARE
+10	      - TYPE
+11	        - string
+12	      - LHS
+13	        - s2
+14	      - RHS
+15	        - "Hi"
+16	    - PRINT
+17	      - "s1 is "
+18	    - PRINTLN
+19	      - s1
+20	    - PRINT
+21	      - "s2 is "
+22	    - PRINTLN
+23	      - s2
+24	    - IF
+25	      - CONDITION
+26	        - ==
+27	          - s1
+28	          - s2
+29	      - THEN
+30	        - PRINTLN
+31	          - "They are the same."
+32	      - ELSE
+33	        - PRINTLN
+34	          - "They are not the same."
+35	    - PRINTLN
+36	      - "Now modify s1[0] = \'h\'"
+37	    - ASSIGNMENT
+38	      - LHS
+39	        - s1
+40	          - []
+41	            - 0
+42	      - RHS
+43	        - 'h'
+44	    - PRINT
+45	      - "s1 is "
+46	    - PRINTLN
+47	      - s1
+48	    - PRINT
+49	      - "s2 is "
+50	    - PRINTLN
+51	      - s2
+52	    - IF
+53	      - CONDITION
+54	        - ==
+55	          - s1
+56	          - s2
+57	      - THEN
+58	        - PRINTLN
+59	          - "They are the same."
+60	      - ELSE
+61	        - PRINTLN
+62	          - "They are not the same."
+===========================================================
+-- Finished
+

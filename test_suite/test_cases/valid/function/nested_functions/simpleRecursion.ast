@@ -1,0 +1,71 @@
+-- Test: simpleRecursion.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a simple recursive function
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int rec(int x) is
+    if x == 0 
+    then
+      skip
+    else
+      int y = call rec(x - 1)
+    fi ;
+    return 42  
+  end
+
+  int x = 0 ;
+  x = call rec(8)
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+simpleRecursion.ast contents are:
+===========================================================
+0	Program
+1	  - int rec(int x)
+2	    - IF
+3	      - CONDITION
+4	        - ==
+5	          - x
+6	          - 0
+7	      - THEN
+8	        - SKIP
+9	      - ELSE
+10	        - DECLARE
+11	          - TYPE
+12	            - int
+13	          - LHS
+14	            - y
+15	          - RHS
+16	            - rec
+17	            - -
+18	              - x
+19	              - 1
+20	    - RETURN
+21	      - 42
+22	  - int main()
+23	    - DECLARE
+24	      - TYPE
+25	        - int
+26	      - LHS
+27	        - x
+28	      - RHS
+29	        - 0
+30	    - ASSIGNMENT
+31	      - LHS
+32	        - x
+33	      - RHS
+34	        - rec
+35	        - 8
+===========================================================
+-- Finished
+

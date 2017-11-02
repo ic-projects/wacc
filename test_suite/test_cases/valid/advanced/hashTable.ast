@@ -1,0 +1,1213 @@
+-- Test: hashTable.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# This program is interactive. We implement a hash table containing integers and we play with it.
+# 
+# A hash table is represented by an array of node lists. Each node in a node list is represented 
+# by pair(int, pair). The first element of the pair is the integer at that node, the second element 
+# is the pointer to the next node (or null if no more node). 
+# 
+# Integers those mapped to the same index are stored on the list (in any order) in that index.
+
+begin
+
+	######################### Functions for Hash Table Interface ###############################
+	
+	# Given a hash table, initialise it. Return true.
+	bool init(pair(int, pair)[] table) is
+		int length = len table ;
+		int i = 0 ;
+		while i < length do
+			table[i] = null ; 
+			i = i + 1
+		done ;
+		return true
+	end
+
+	# Returns true if and only if the given hash table contains x.
+	bool contain(pair(int, pair)[] table, int x) is
+		int index = call calculateIndex(table, x) ;
+		pair(int, pair) node = call findNode(table[index], x) ;
+		return node != null
+	end
+	
+	# Insert the given x into the hash table if it does not already contain x.
+	# Returns true if and only if the table does not already contain x.
+	bool insertIfNotContain(pair(int, pair)[] table, int x) is
+		int index = call calculateIndex(table, x) ;
+		pair(int, pair) node = call findNode(table[index], x) ;
+		if node != null then
+			# Already contain it. Do nothing.
+			return false
+		else
+			# Insert in the front of the list.
+			pair(int, pair) p = newpair(x, table[index]) ;
+			table[index] = p ;
+			return true 
+		fi
+	end
+	
+	# Remove the given x from the hash table. Returns true if an only if the table contains x. 
+	# Otherwise, do nothing and returns false.
+	bool remove(pair(int, pair)[] table, int x) is
+		int index = call calculateIndex(table, x) ;
+		pair(int, pair) node = call findNode(table[index], x) ;
+		if node == null then
+			# Not found x. Just return false.
+			return false
+		else
+			# Found x, have to remove the node.
+			table[index] = call removeNode(table[index], node) ;
+			return true
+		fi
+	end
+	
+	# Remove all nodes from the table. Returns true.
+	bool removeAll(pair(int, pair)[] table) is
+		int length = len table ;
+		int i = 0 ;
+		while i < length do
+			pair(int, pair) p = table[i] ;
+			while p != null do
+				pair(int, pair) p2 = snd p ;
+				free p ;
+				p = p2
+			done ;
+			table[i] = null ;
+			i = i + 1
+		done ; 
+		return true
+	end
+	
+	# Count the number of integers in the table and return it.
+	int count(pair(int, pair)[] table) is
+		int length = len table ;
+		int sum = 0 ;
+		int i = 0 ;
+		while i < length do
+			int subSum = call countNodes(table[i]) ;
+			sum = sum + subSum ;
+			i = i + 1
+		done ;
+		return sum
+	end
+	
+	# Print all the integers inside the table, separated by a space and ended with a newline. Returns true.
+	bool printAll(pair(int, pair)[] table) is
+		int length = len table ;
+		int i = 0 ;
+		while i < length do
+      bool result = call printAllNodes(table[i]) ;
+			i = i + 1
+		done ;
+		println "" ;
+		return true
+	end
+		
+	# A helper function.
+	# Given a hash table and an integer, calculate the index of the integer in the table.
+	int calculateIndex(pair(int, pair)[] table, int x) is
+		int length = len table ;
+		return x % length
+	end
+	
+	# A helper function.
+	# Given a head of a chain of nodes, returns the first node containing the value x.
+	# Returns null if no such node.
+	pair(int, pair) findNode(pair(int, pair) head, int x) is
+		while head != null do
+			int y = fst head ;
+			if y == x then
+				return head
+			else
+				head = snd head
+			fi 
+		done ;
+		return null
+	end
+
+	# A helper function.
+	# Given a list of nodes and a node to remove, remove that node from the 
+	# list and return the new list.
+	pair(int, pair) removeNode(pair(int, pair) head, pair(int, pair) toRemove) is
+		if head == null then
+			# Should not happen actually.
+			return null
+		else
+			if head == toRemove then
+				# Save the new head.
+				head = snd head ;
+				
+				# Deallocate the memory of the old node.
+				free toRemove ;
+				
+				# Return the new head.
+				return head
+			else
+				# Not this node, recursive.
+				pair(int, pair) tail = snd head ;
+				snd head = call removeNode(tail, toRemove) ;
+				return head
+			fi
+		fi
+	end
+
+	# A helper function.
+	# Given a list of nodes, count how many nodes there are.
+	int countNodes(pair(int, pair) head) is 
+		int sum = 0 ;
+		while head != null do
+			sum = sum + 1 ;
+			head = snd head
+		done ;
+		return sum
+	end
+
+	# A helper function.
+	# Given a list of nodes, print each integer in the node followed by a space. Returns true.
+	bool printAllNodes(pair(int, pair) head) is
+    while head != null do
+			int x = fst head ;
+			print x ;
+			print ' ' ;
+			head = snd head
+		done ;
+		return true
+	end
+
+	######################### Functions for Command Line Interface ###############################
+	
+	# Print the menu and ask to choose. Returns a valid decision.
+	char printMenu() is
+		println "===========================================" ;
+		println "========== Hash Table Program =============" ;
+		println "===========================================" ;
+		println "=                                         =" ;
+		println "= Please choose the following options:    =" ;
+		println "=                                         =" ;
+		println "= a: insert an integer                    =" ;
+		println "= b: find an integer                      =" ;
+		println "= c: count the integers                   =" ;
+		println "= d: print all integers                   =" ;
+		println "= e: remove an integer                    =" ;
+		println "= f: remove all integers                  =" ;
+		println "= g: exit                                 =" ;
+		println "=                                         =" ;
+		println "===========================================" ;
+		
+		int minChoice = ord 'a' ;
+		int maxChoice = ord 'g' ;
+		
+		while true do
+			print   "Your decision: " ;
+			char d = '\0' ;
+			read d ;
+			int dInt = ord d ;
+			if minChoice <= dInt && dInt <= maxChoice then
+				return d
+			else 
+				print "You have entered: " ;
+				print d ;
+				println " which is invalid, please try again."
+			fi
+		done ;
+		# The compiler is not smart enough to know that this never reaches. 
+		# We have to add a return statement here.
+		return '\0'
+	end
+	
+	# Print out the question, and then read an integer. After that print the integer back and return it.
+	int askForInt(char[] message) is
+		print message ;
+		int x = 0 ;
+		read x ;
+		print "You have entered: " ;
+		println x ;
+		return x
+	end
+	
+	# Handle menu insert. Returns true.
+	bool handleMenuInsert(pair(int, pair)[] table) is
+		int x = call askForInt("Please enter an integer to insert: ") ;
+		bool notContain = call insertIfNotContain(table, x) ;
+		if notContain then
+			println "Successfully insert it. The integer is new." 
+		else 
+			println "The integer is already there. No insertion is made."
+		fi ;
+		return true		
+	end
+	
+	# Handle menu find. Returns true.
+	bool handleMenuFind(pair(int, pair)[] table) is
+		int x = call askForInt("Please enter an integer to find: ") ;
+		bool find = call contain(table, x) ;
+		if find then
+			println "Find the integer." 
+		else 
+			println "The integer is not found."
+		fi ;
+		return true		
+	end
+	
+	# Handle menu count. Returns true.
+	bool handleMenuCount(pair(int, pair)[] table) is
+		int size = call count(table) ;
+		if size == 1 then
+			println "There is only 1 integer."
+		else
+			print "There are " ;
+			print size ;
+			println " integers."
+		fi ; 
+		return true
+	end
+	
+	# Handle menu print. Returns true.
+	bool handleMenuPrint(pair(int, pair)[] table) is
+		print "Here are the integers: " ;
+		bool junk = call printAll(table) ;
+		return true
+	end
+	
+	# Handle menu remove. Returns true.
+	bool handleMenuRemove(pair(int, pair)[] table) is
+		int x = call askForInt("Please enter an integer to remove: ") ;
+		bool find = call remove(table, x) ;
+		if find then
+			println "The integer has been removed." 
+		else 
+			println "The integer is not found."
+		fi ;
+		return true		
+	end
+	
+	# Handle menu remove all. Returns true.
+	bool handleMenuRemoveAll(pair(int, pair)[] table) is
+		bool junk = call removeAll(table) ; 
+		println "All integers have been removed." ; 
+		return true
+	end
+	
+	################################# The main function ########################################
+	# Our hash table of size 13.
+	pair(int, pair)[] table = [null, null, null, null, null, null, null, null, null, null, null, null, null] ;
+	bool junk = call init(table) ;
+	
+	bool continue = true ;
+	while continue do
+		char choice = call printMenu() ;
+		if choice == 'a' then
+			bool result = call handleMenuInsert(table)
+		else if choice == 'b' then
+			bool result = call handleMenuFind(table)
+		else if choice == 'c' then
+			bool result = call handleMenuCount(table)
+		else if choice == 'd' then
+			bool result = call handleMenuPrint(table)
+		else if choice == 'e' then
+			bool result = call handleMenuRemove(table)
+		else if choice == 'f' then
+			bool result = call handleMenuRemoveAll(table)
+		else if choice == 'g' then
+			println "Goodbye Human" ;
+			continue = false
+		else
+			# Should not happen.
+			print "Error: unknown choice (" ;
+			print choice ;
+			println ")" ;
+			exit -1
+		fi fi fi fi fi fi fi
+	done
+	
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+hashTable.ast contents are:
+===========================================================
+0	Program
+1	  - bool init(int[] table)
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - length
+7	      - RHS
+8	        - len
+9	          - table
+10	    - DECLARE
+11	      - TYPE
+12	        - int
+13	      - LHS
+14	        - i
+15	      - RHS
+16	        - 0
+17	    - LOOP
+18	      - CONDITION
+19	        - <
+20	          - i
+21	          - length
+22	      - DO
+23	        - ASSIGNMENT
+24	          - LHS
+25	            - table
+26	              - []
+27	                - i
+28	          - RHS
+29	            - null
+30	        - ASSIGNMENT
+31	          - LHS
+32	            - i
+33	          - RHS
+34	            - +
+35	              - i
+36	              - 1
+37	    - RETURN
+38	      - true
+39	  - bool contain(int[] table, int x)
+40	    - DECLARE
+41	      - TYPE
+42	        - int
+43	      - LHS
+44	        - index
+45	      - RHS
+46	        - calculateIndex
+47	        - table
+48	        - x
+49	    - DECLARE
+50	      - TYPE
+51	        - int
+52	      - LHS
+53	        - node
+54	      - RHS
+55	        - findNode
+56	        - table
+57	          - []
+58	            - index
+59	        - x
+60	    - RETURN
+61	      - !=
+62	        - node
+63	        - null
+64	  - bool insertIfNotContain(int[] table, int x)
+65	    - DECLARE
+66	      - TYPE
+67	        - int
+68	      - LHS
+69	        - index
+70	      - RHS
+71	        - calculateIndex
+72	        - table
+73	        - x
+74	    - DECLARE
+75	      - TYPE
+76	        - int
+77	      - LHS
+78	        - node
+79	      - RHS
+80	        - findNode
+81	        - table
+82	          - []
+83	            - index
+84	        - x
+85	    - IF
+86	      - CONDITION
+87	        - !=
+88	          - node
+89	          - null
+90	      - THEN
+91	        - RETURN
+92	          - false
+93	      - ELSE
+94	        - DECLARE
+95	          - TYPE
+96	            - int
+97	          - LHS
+98	            - p
+99	          - RHS
+100	            - NEW_PAIR
+101	              - FST
+102	                - x
+103	              - SND
+104	                - table
+105	                  - []
+106	                    - index
+107	        - ASSIGNMENT
+108	          - LHS
+109	            - table
+110	              - []
+111	                - index
+112	          - RHS
+113	            - p
+114	        - RETURN
+115	          - true
+116	  - bool remove(int[] table, int x)
+117	    - DECLARE
+118	      - TYPE
+119	        - int
+120	      - LHS
+121	        - index
+122	      - RHS
+123	        - calculateIndex
+124	        - table
+125	        - x
+126	    - DECLARE
+127	      - TYPE
+128	        - int
+129	      - LHS
+130	        - node
+131	      - RHS
+132	        - findNode
+133	        - table
+134	          - []
+135	            - index
+136	        - x
+137	    - IF
+138	      - CONDITION
+139	        - ==
+140	          - node
+141	          - null
+142	      - THEN
+143	        - RETURN
+144	          - false
+145	      - ELSE
+146	        - ASSIGNMENT
+147	          - LHS
+148	            - table
+149	              - []
+150	                - index
+151	          - RHS
+152	            - removeNode
+153	            - table
+154	              - []
+155	                - index
+156	            - node
+157	        - RETURN
+158	          - true
+159	  - bool removeAll(int[] table)
+160	    - DECLARE
+161	      - TYPE
+162	        - int
+163	      - LHS
+164	        - length
+165	      - RHS
+166	        - len
+167	          - table
+168	    - DECLARE
+169	      - TYPE
+170	        - int
+171	      - LHS
+172	        - i
+173	      - RHS
+174	        - 0
+175	    - LOOP
+176	      - CONDITION
+177	        - <
+178	          - i
+179	          - length
+180	      - DO
+181	        - DECLARE
+182	          - TYPE
+183	            - int
+184	          - LHS
+185	            - p
+186	          - RHS
+187	            - table
+188	              - []
+189	                - i
+190	        - LOOP
+191	          - CONDITION
+192	            - !=
+193	              - p
+194	              - null
+195	          - DO
+196	            - DECLARE
+197	              - TYPE
+198	                - int
+199	              - LHS
+200	                - p2
+201	              - RHS
+202	                - SND
+203	                  - p
+204	            - FREE
+205	              - p
+206	            - ASSIGNMENT
+207	              - LHS
+208	                - p
+209	              - RHS
+210	                - p2
+211	        - ASSIGNMENT
+212	          - LHS
+213	            - table
+214	              - []
+215	                - i
+216	          - RHS
+217	            - null
+218	        - ASSIGNMENT
+219	          - LHS
+220	            - i
+221	          - RHS
+222	            - +
+223	              - i
+224	              - 1
+225	    - RETURN
+226	      - true
+227	  - int count(int[] table)
+228	    - DECLARE
+229	      - TYPE
+230	        - int
+231	      - LHS
+232	        - length
+233	      - RHS
+234	        - len
+235	          - table
+236	    - DECLARE
+237	      - TYPE
+238	        - int
+239	      - LHS
+240	        - sum
+241	      - RHS
+242	        - 0
+243	    - DECLARE
+244	      - TYPE
+245	        - int
+246	      - LHS
+247	        - i
+248	      - RHS
+249	        - 0
+250	    - LOOP
+251	      - CONDITION
+252	        - <
+253	          - i
+254	          - length
+255	      - DO
+256	        - DECLARE
+257	          - TYPE
+258	            - int
+259	          - LHS
+260	            - subSum
+261	          - RHS
+262	            - countNodes
+263	            - table
+264	              - []
+265	                - i
+266	        - ASSIGNMENT
+267	          - LHS
+268	            - sum
+269	          - RHS
+270	            - +
+271	              - sum
+272	              - subSum
+273	        - ASSIGNMENT
+274	          - LHS
+275	            - i
+276	          - RHS
+277	            - +
+278	              - i
+279	              - 1
+280	    - RETURN
+281	      - sum
+282	  - bool printAll(int[] table)
+283	    - DECLARE
+284	      - TYPE
+285	        - int
+286	      - LHS
+287	        - length
+288	      - RHS
+289	        - len
+290	          - table
+291	    - DECLARE
+292	      - TYPE
+293	        - int
+294	      - LHS
+295	        - i
+296	      - RHS
+297	        - 0
+298	    - LOOP
+299	      - CONDITION
+300	        - <
+301	          - i
+302	          - length
+303	      - DO
+304	        - DECLARE
+305	          - TYPE
+306	            - bool
+307	          - LHS
+308	            - result
+309	          - RHS
+310	            - printAllNodes
+311	            - table
+312	              - []
+313	                - i
+314	        - ASSIGNMENT
+315	          - LHS
+316	            - i
+317	          - RHS
+318	            - +
+319	              - i
+320	              - 1
+321	    - PRINTLN
+322	      - ""
+323	    - RETURN
+324	      - true
+325	  - int calculateIndex(int[] table, int x)
+326	    - DECLARE
+327	      - TYPE
+328	        - int
+329	      - LHS
+330	        - length
+331	      - RHS
+332	        - len
+333	          - table
+334	    - RETURN
+335	      - %
+336	        - x
+337	        - length
+338	  - int findNode(int head, int x)
+339	    - LOOP
+340	      - CONDITION
+341	        - !=
+342	          - head
+343	          - null
+344	      - DO
+345	        - DECLARE
+346	          - TYPE
+347	            - int
+348	          - LHS
+349	            - y
+350	          - RHS
+351	            - FST
+352	              - head
+353	        - IF
+354	          - CONDITION
+355	            - ==
+356	              - y
+357	              - x
+358	          - THEN
+359	            - RETURN
+360	              - head
+361	          - ELSE
+362	            - ASSIGNMENT
+363	              - LHS
+364	                - head
+365	              - RHS
+366	                - SND
+367	                  - head
+368	    - RETURN
+369	      - null
+370	  - int removeNode(int head, int toRemove)
+371	    - IF
+372	      - CONDITION
+373	        - ==
+374	          - head
+375	          - null
+376	      - THEN
+377	        - RETURN
+378	          - null
+379	      - ELSE
+380	        - IF
+381	          - CONDITION
+382	            - ==
+383	              - head
+384	              - toRemove
+385	          - THEN
+386	            - ASSIGNMENT
+387	              - LHS
+388	                - head
+389	              - RHS
+390	                - SND
+391	                  - head
+392	            - FREE
+393	              - toRemove
+394	            - RETURN
+395	              - head
+396	          - ELSE
+397	            - DECLARE
+398	              - TYPE
+399	                - int
+400	              - LHS
+401	                - tail
+402	              - RHS
+403	                - SND
+404	                  - head
+405	            - ASSIGNMENT
+406	              - LHS
+407	                - SND
+408	                  - head
+409	              - RHS
+410	                - removeNode
+411	                - tail
+412	                - toRemove
+413	            - RETURN
+414	              - head
+415	  - int countNodes(int head)
+416	    - DECLARE
+417	      - TYPE
+418	        - int
+419	      - LHS
+420	        - sum
+421	      - RHS
+422	        - 0
+423	    - LOOP
+424	      - CONDITION
+425	        - !=
+426	          - head
+427	          - null
+428	      - DO
+429	        - ASSIGNMENT
+430	          - LHS
+431	            - sum
+432	          - RHS
+433	            - +
+434	              - sum
+435	              - 1
+436	        - ASSIGNMENT
+437	          - LHS
+438	            - head
+439	          - RHS
+440	            - SND
+441	              - head
+442	    - RETURN
+443	      - sum
+444	  - bool printAllNodes(int head)
+445	    - LOOP
+446	      - CONDITION
+447	        - !=
+448	          - head
+449	          - null
+450	      - DO
+451	        - DECLARE
+452	          - TYPE
+453	            - int
+454	          - LHS
+455	            - x
+456	          - RHS
+457	            - FST
+458	              - head
+459	        - PRINT
+460	          - x
+461	        - PRINT
+462	          - ' '
+463	        - ASSIGNMENT
+464	          - LHS
+465	            - head
+466	          - RHS
+467	            - SND
+468	              - head
+469	    - RETURN
+470	      - true
+471	  - char printMenu()
+472	    - PRINTLN
+473	      - "==========================================="
+474	    - PRINTLN
+475	      - "========== Hash Table Program ============="
+476	    - PRINTLN
+477	      - "==========================================="
+478	    - PRINTLN
+479	      - "=                                         ="
+480	    - PRINTLN
+481	      - "= Please choose the following options:    ="
+482	    - PRINTLN
+483	      - "=                                         ="
+484	    - PRINTLN
+485	      - "= a: insert an integer                    ="
+486	    - PRINTLN
+487	      - "= b: find an integer                      ="
+488	    - PRINTLN
+489	      - "= c: count the integers                   ="
+490	    - PRINTLN
+491	      - "= d: print all integers                   ="
+492	    - PRINTLN
+493	      - "= e: remove an integer                    ="
+494	    - PRINTLN
+495	      - "= f: remove all integers                  ="
+496	    - PRINTLN
+497	      - "= g: exit                                 ="
+498	    - PRINTLN
+499	      - "=                                         ="
+500	    - PRINTLN
+501	      - "==========================================="
+502	    - DECLARE
+503	      - TYPE
+504	        - int
+505	      - LHS
+506	        - minChoice
+507	      - RHS
+508	        - ord
+509	          - 'a'
+510	    - DECLARE
+511	      - TYPE
+512	        - int
+513	      - LHS
+514	        - maxChoice
+515	      - RHS
+516	        - ord
+517	          - 'g'
+518	    - LOOP
+519	      - CONDITION
+520	        - true
+521	      - DO
+522	        - PRINT
+523	          - "Your decision: "
+524	        - DECLARE
+525	          - TYPE
+526	            - char
+527	          - LHS
+528	            - d
+529	          - RHS
+530	            - '\0'
+531	        - READ
+532	          - d
+533	        - DECLARE
+534	          - TYPE
+535	            - int
+536	          - LHS
+537	            - dInt
+538	          - RHS
+539	            - ord
+540	              - d
+541	        - IF
+542	          - CONDITION
+543	            - &&
+544	              - <=
+545	                - minChoice
+546	                - dInt
+547	              - <=
+548	                - dInt
+549	                - maxChoice
+550	          - THEN
+551	            - RETURN
+552	              - d
+553	          - ELSE
+554	            - PRINT
+555	              - "You have entered: "
+556	            - PRINT
+557	              - d
+558	            - PRINTLN
+559	              - " which is invalid, please try again."
+560	    - RETURN
+561	      - '\0'
+562	  - int askForInt(char[] message)
+563	    - PRINT
+564	      - message
+565	    - DECLARE
+566	      - TYPE
+567	        - int
+568	      - LHS
+569	        - x
+570	      - RHS
+571	        - 0
+572	    - READ
+573	      - x
+574	    - PRINT
+575	      - "You have entered: "
+576	    - PRINTLN
+577	      - x
+578	    - RETURN
+579	      - x
+580	  - bool handleMenuInsert(int[] table)
+581	    - DECLARE
+582	      - TYPE
+583	        - int
+584	      - LHS
+585	        - x
+586	      - RHS
+587	        - askForInt
+588	        - "Please enter an integer to insert: "
+589	    - DECLARE
+590	      - TYPE
+591	        - bool
+592	      - LHS
+593	        - notContain
+594	      - RHS
+595	        - insertIfNotContain
+596	        - table
+597	        - x
+598	    - IF
+599	      - CONDITION
+600	        - notContain
+601	      - THEN
+602	        - PRINTLN
+603	          - "Successfully insert it. The integer is new."
+604	      - ELSE
+605	        - PRINTLN
+606	          - "The integer is already there. No insertion is made."
+607	    - RETURN
+608	      - true
+609	  - bool handleMenuFind(int[] table)
+610	    - DECLARE
+611	      - TYPE
+612	        - int
+613	      - LHS
+614	        - x
+615	      - RHS
+616	        - askForInt
+617	        - "Please enter an integer to find: "
+618	    - DECLARE
+619	      - TYPE
+620	        - bool
+621	      - LHS
+622	        - find
+623	      - RHS
+624	        - contain
+625	        - table
+626	        - x
+627	    - IF
+628	      - CONDITION
+629	        - find
+630	      - THEN
+631	        - PRINTLN
+632	          - "Find the integer."
+633	      - ELSE
+634	        - PRINTLN
+635	          - "The integer is not found."
+636	    - RETURN
+637	      - true
+638	  - bool handleMenuCount(int[] table)
+639	    - DECLARE
+640	      - TYPE
+641	        - int
+642	      - LHS
+643	        - size
+644	      - RHS
+645	        - count
+646	        - table
+647	    - IF
+648	      - CONDITION
+649	        - ==
+650	          - size
+651	          - 1
+652	      - THEN
+653	        - PRINTLN
+654	          - "There is only 1 integer."
+655	      - ELSE
+656	        - PRINT
+657	          - "There are "
+658	        - PRINT
+659	          - size
+660	        - PRINTLN
+661	          - " integers."
+662	    - RETURN
+663	      - true
+664	  - bool handleMenuPrint(int[] table)
+665	    - PRINT
+666	      - "Here are the integers: "
+667	    - DECLARE
+668	      - TYPE
+669	        - bool
+670	      - LHS
+671	        - junk
+672	      - RHS
+673	        - printAll
+674	        - table
+675	    - RETURN
+676	      - true
+677	  - bool handleMenuRemove(int[] table)
+678	    - DECLARE
+679	      - TYPE
+680	        - int
+681	      - LHS
+682	        - x
+683	      - RHS
+684	        - askForInt
+685	        - "Please enter an integer to remove: "
+686	    - DECLARE
+687	      - TYPE
+688	        - bool
+689	      - LHS
+690	        - find
+691	      - RHS
+692	        - remove
+693	        - table
+694	        - x
+695	    - IF
+696	      - CONDITION
+697	        - find
+698	      - THEN
+699	        - PRINTLN
+700	          - "The integer has been removed."
+701	      - ELSE
+702	        - PRINTLN
+703	          - "The integer is not found."
+704	    - RETURN
+705	      - true
+706	  - bool handleMenuRemoveAll(int[] table)
+707	    - DECLARE
+708	      - TYPE
+709	        - bool
+710	      - LHS
+711	        - junk
+712	      - RHS
+713	        - removeAll
+714	        - table
+715	    - PRINTLN
+716	      - "All integers have been removed."
+717	    - RETURN
+718	      - true
+719	  - int main()
+720	    - DECLARE
+721	      - TYPE
+722	        - int[]
+723	      - LHS
+724	        - table
+725	      - RHS
+726	        - ARRAY LITERAL
+727	          - null
+728	          - null
+729	          - null
+730	          - null
+731	          - null
+732	          - null
+733	          - null
+734	          - null
+735	          - null
+736	          - null
+737	          - null
+738	          - null
+739	          - null
+740	    - DECLARE
+741	      - TYPE
+742	        - bool
+743	      - LHS
+744	        - junk
+745	      - RHS
+746	        - init
+747	        - table
+748	    - DECLARE
+749	      - TYPE
+750	        - bool
+751	      - LHS
+752	        - continue
+753	      - RHS
+754	        - true
+755	    - LOOP
+756	      - CONDITION
+757	        - continue
+758	      - DO
+759	        - DECLARE
+760	          - TYPE
+761	            - char
+762	          - LHS
+763	            - choice
+764	          - RHS
+765	            - printMenu
+766	        - IF
+767	          - CONDITION
+768	            - ==
+769	              - choice
+770	              - 'a'
+771	          - THEN
+772	            - DECLARE
+773	              - TYPE
+774	                - bool
+775	              - LHS
+776	                - result
+777	              - RHS
+778	                - handleMenuInsert
+779	                - table
+780	          - ELSE
+781	            - IF
+782	              - CONDITION
+783	                - ==
+784	                  - choice
+785	                  - 'b'
+786	              - THEN
+787	                - DECLARE
+788	                  - TYPE
+789	                    - bool
+790	                  - LHS
+791	                    - result
+792	                  - RHS
+793	                    - handleMenuFind
+794	                    - table
+795	              - ELSE
+796	                - IF
+797	                  - CONDITION
+798	                    - ==
+799	                      - choice
+800	                      - 'c'
+801	                  - THEN
+802	                    - DECLARE
+803	                      - TYPE
+804	                        - bool
+805	                      - LHS
+806	                        - result
+807	                      - RHS
+808	                        - handleMenuCount
+809	                        - table
+810	                  - ELSE
+811	                    - IF
+812	                      - CONDITION
+813	                        - ==
+814	                          - choice
+815	                          - 'd'
+816	                      - THEN
+817	                        - DECLARE
+818	                          - TYPE
+819	                            - bool
+820	                          - LHS
+821	                            - result
+822	                          - RHS
+823	                            - handleMenuPrint
+824	                            - table
+825	                      - ELSE
+826	                        - IF
+827	                          - CONDITION
+828	                            - ==
+829	                              - choice
+830	                              - 'e'
+831	                          - THEN
+832	                            - DECLARE
+833	                              - TYPE
+834	                                - bool
+835	                              - LHS
+836	                                - result
+837	                              - RHS
+838	                                - handleMenuRemove
+839	                                - table
+840	                          - ELSE
+841	                            - IF
+842	                              - CONDITION
+843	                                - ==
+844	                                  - choice
+845	                                  - 'f'
+846	                              - THEN
+847	                                - DECLARE
+848	                                  - TYPE
+849	                                    - bool
+850	                                  - LHS
+851	                                    - result
+852	                                  - RHS
+853	                                    - handleMenuRemoveAll
+854	                                    - table
+855	                              - ELSE
+856	                                - IF
+857	                                  - CONDITION
+858	                                    - ==
+859	                                      - choice
+860	                                      - 'g'
+861	                                  - THEN
+862	                                    - PRINTLN
+863	                                      - "Goodbye Human"
+864	                                    - ASSIGNMENT
+865	                                      - LHS
+866	                                        - continue
+867	                                      - RHS
+868	                                        - false
+869	                                  - ELSE
+870	                                    - PRINT
+871	                                      - "Error: unknown choice ("
+872	                                    - PRINT
+873	                                      - choice
+874	                                    - PRINTLN
+875	                                      - ")"
+876	                                    - EXIT
+877	                                      - -1
+===========================================================
+-- Finished
+

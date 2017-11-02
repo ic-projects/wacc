@@ -1,0 +1,37 @@
+-- Test: createPair03.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# create a pair (int, char)
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  pair(int, char) p = newpair(10, 'a')
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+createPair03.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intchar
+5	      - LHS
+6	        - p
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - 10
+11	          - SND
+12	            - 'a'
+===========================================================
+-- Finished
+

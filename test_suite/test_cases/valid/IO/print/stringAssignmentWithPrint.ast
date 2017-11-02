@@ -1,0 +1,46 @@
+-- Test: stringAssignmentWithPrint.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# string assignment followed by print
+
+# Output:
+# foo
+# bar
+
+# Program:
+
+begin
+  string s = "foo" ;
+  println s ;
+  s = "bar" ;
+  println s
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+stringAssignmentWithPrint.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - s
+7	      - RHS
+8	        - "foo"
+9	    - PRINTLN
+10	      - s
+11	    - ASSIGNMENT
+12	      - LHS
+13	        - s
+14	      - RHS
+15	        - "bar"
+16	    - PRINTLN
+17	      - s
+===========================================================
+-- Finished
+

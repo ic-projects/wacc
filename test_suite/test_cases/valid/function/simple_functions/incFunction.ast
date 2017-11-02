@@ -1,0 +1,76 @@
+-- Test: incFunction.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a simple increment function definition and usage
+
+# Output:
+# 1
+# 4
+
+# Program:
+
+begin
+  int inc(int x) is
+    return x + 1
+  end
+  int x = 0 ;
+  x = call inc(x) ;
+  println x ;
+  x = call inc(x) ;
+  x = call inc(x) ;
+  x = call inc(x) ;
+  println x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+incFunction.ast contents are:
+===========================================================
+0	Program
+1	  - int inc(int x)
+2	    - RETURN
+3	      - +
+4	        - x
+5	        - 1
+6	  - int main()
+7	    - DECLARE
+8	      - TYPE
+9	        - int
+10	      - LHS
+11	        - x
+12	      - RHS
+13	        - 0
+14	    - ASSIGNMENT
+15	      - LHS
+16	        - x
+17	      - RHS
+18	        - inc
+19	        - x
+20	    - PRINTLN
+21	      - x
+22	    - ASSIGNMENT
+23	      - LHS
+24	        - x
+25	      - RHS
+26	        - inc
+27	        - x
+28	    - ASSIGNMENT
+29	      - LHS
+30	        - x
+31	      - RHS
+32	        - inc
+33	        - x
+34	    - ASSIGNMENT
+35	      - LHS
+36	        - x
+37	      - RHS
+38	        - inc
+39	        - x
+40	    - PRINTLN
+41	      - x
+===========================================================
+-- Finished
+

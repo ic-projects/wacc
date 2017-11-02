@@ -1,0 +1,39 @@
+-- Test: _VarNames.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# variable can have _ in their names
+
+# Output:
+# #empty#
+
+# Exit:
+# 19
+
+# Program:
+
+begin
+  int an_underscore = 19 ;
+  exit an_underscore
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+_VarNames.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - an_underscore
+7	      - RHS
+8	        - 19
+9	    - EXIT
+10	      - an_underscore
+===========================================================
+-- Finished
+

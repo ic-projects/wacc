@@ -1,0 +1,79 @@
+-- Test: negFunction.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a simple negation function definition and usage
+
+# Output:
+# true
+# false
+# true
+
+# Program:
+
+begin
+  bool neg(bool b) is
+    return !b 
+  end
+  bool b = true ;
+  println b ;
+  b = call neg(b) ;
+  println b ;
+  b = call neg(b) ;
+  b = call neg(b) ;
+  b = call neg(b) ;
+  println b
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+negFunction.ast contents are:
+===========================================================
+0	Program
+1	  - bool neg(bool b)
+2	    - RETURN
+3	      - !
+4	        - b
+5	  - int main()
+6	    - DECLARE
+7	      - TYPE
+8	        - bool
+9	      - LHS
+10	        - b
+11	      - RHS
+12	        - true
+13	    - PRINTLN
+14	      - b
+15	    - ASSIGNMENT
+16	      - LHS
+17	        - b
+18	      - RHS
+19	        - neg
+20	        - b
+21	    - PRINTLN
+22	      - b
+23	    - ASSIGNMENT
+24	      - LHS
+25	        - b
+26	      - RHS
+27	        - neg
+28	        - b
+29	    - ASSIGNMENT
+30	      - LHS
+31	        - b
+32	      - RHS
+33	        - neg
+34	        - b
+35	    - ASSIGNMENT
+36	      - LHS
+37	        - b
+38	      - RHS
+39	        - neg
+40	        - b
+41	    - PRINTLN
+42	      - b
+===========================================================
+-- Finished
+

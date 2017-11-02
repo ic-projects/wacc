@@ -1,0 +1,30 @@
+-- Test: plusMinusExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# +- should be recognised as two separate symbols
+
+# Output:
+# -1
+
+# Program:
+
+begin
+  println 1+-2
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+plusMinusExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - PRINTLN
+3	      - +
+4	        - 1
+5	        - -2
+===========================================================
+-- Finished
+

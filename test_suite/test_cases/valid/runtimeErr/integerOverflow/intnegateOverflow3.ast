@@ -1,0 +1,51 @@
+-- Test: intnegateOverflow3.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# multiplying a negative integer
+
+# Output:
+# -20000
+# #runtime_error#
+
+# Exit:
+# 255
+
+# Program:
+
+begin
+  int x = -20000 ;
+  println x ;
+  x = x*100000000; #err here? 
+  println x 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intnegateOverflow3.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - -20000
+9	    - PRINTLN
+10	      - x
+11	    - ASSIGNMENT
+12	      - LHS
+13	        - x
+14	      - RHS
+15	        - *
+16	          - x
+17	          - 100000000
+18	    - PRINTLN
+19	      - x
+===========================================================
+-- Finished
+

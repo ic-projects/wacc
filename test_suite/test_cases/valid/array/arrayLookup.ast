@@ -1,0 +1,42 @@
+-- Test: arrayLookup.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# check first element of array
+
+# Output:
+# 43
+
+# Program:
+
+begin
+  int[] a = [43, 2, 18, 1] ;
+  println a[0]
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+arrayLookup.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 43
+10	          - 2
+11	          - 18
+12	          - 1
+13	    - PRINTLN
+14	      - a
+15	        - []
+16	          - 0
+===========================================================
+-- Finished
+

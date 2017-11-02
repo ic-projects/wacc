@@ -1,0 +1,34 @@
+-- Test: intsAndKeywords.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# checking handling of ints and keywords 
+
+# Output:
+# #empty#
+
+# Program:
+begin
+  begin
+    int x = 125end
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+intsAndKeywords.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - SCOPE
+3	      - DECLARE
+4	        - TYPE
+5	          - int
+6	        - LHS
+7	          - x
+8	        - RHS
+9	          - 125
+===========================================================
+-- Finished
+

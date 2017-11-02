@@ -1,0 +1,58 @@
+-- Test: orExpr.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# evaluating or
+
+# Output:
+# true
+# true
+# false
+
+# Program:
+
+begin
+  bool a = true ;
+  bool b = false ;
+  println a || b ;
+  println a || true ;
+  println b || false
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+orExpr.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - true
+9	    - DECLARE
+10	      - TYPE
+11	        - bool
+12	      - LHS
+13	        - b
+14	      - RHS
+15	        - false
+16	    - PRINTLN
+17	      - ||
+18	        - a
+19	        - b
+20	    - PRINTLN
+21	      - ||
+22	        - a
+23	        - true
+24	    - PRINTLN
+25	      - ||
+26	        - b
+27	        - false
+===========================================================
+-- Finished
+

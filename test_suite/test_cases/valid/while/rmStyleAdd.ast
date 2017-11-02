@@ -1,0 +1,85 @@
+-- Test: rmStyleAdd.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# register machine style addition
+
+# Output:
+# initial value of x: 3
+# (+)(+)(+)(+)(+)(+)(+)
+# final value of x: 10
+
+# Program:
+
+begin
+  int x = 3 ;
+  int y = 7 ;
+  print "initial value of x: " ;
+  println x ;
+  while y > 0 do
+    print "(+)" ;
+    x = x + 1 ;
+    y = y - 1
+  done ;
+  println "" ;
+  print "final value of x: " ;
+  println x
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+rmStyleAdd.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - 3
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 7
+16	    - PRINT
+17	      - "initial value of x: "
+18	    - PRINTLN
+19	      - x
+20	    - LOOP
+21	      - CONDITION
+22	        - >
+23	          - y
+24	          - 0
+25	      - DO
+26	        - PRINT
+27	          - "(+)"
+28	        - ASSIGNMENT
+29	          - LHS
+30	            - x
+31	          - RHS
+32	            - +
+33	              - x
+34	              - 1
+35	        - ASSIGNMENT
+36	          - LHS
+37	            - y
+38	          - RHS
+39	            - -
+40	              - y
+41	              - 1
+42	    - PRINTLN
+43	      - ""
+44	    - PRINT
+45	      - "final value of x: "
+46	    - PRINTLN
+47	      - x
+===========================================================
+-- Finished
+

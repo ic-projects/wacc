@@ -1,0 +1,553 @@
+-- Test: printAllTypes.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Tests scoping with most variable types
+
+# Output:
+# ( [1, 2, 3] , [a, b, c] )
+# [ #addrs# = (a, true), #addrs# = (b, false) ]
+# 1, 2
+# array, of, strings
+# true, false, true
+# xyz
+# 1, 2, 3
+# this is a string
+# true
+# x
+# 5
+
+# Program:
+
+begin
+
+  string comma = ", ";
+  int x = 5;
+  begin
+    char x = 'x';    
+    begin
+      bool x = true;    
+      begin
+        string x = "this is a string";    
+        begin
+          int[] x = [1,2,3];    
+          begin
+            char[] x = ['x', 'y', 'z'];    
+            begin
+              bool[] x = [true, false, true];
+              begin
+                string[] x = ["array", "of", "strings"];
+                begin
+                  pair(int, int) x = newpair(1, 2);
+                  begin
+                    pair(char, bool) y = newpair('a', true);
+                    pair(char, bool) z = newpair('b', false);
+                    pair(char, bool)[] x = [y, z];
+                    begin
+                      int[] y = [1, 2, 3];
+                      char[] z = ['a', 'b', 'c'];
+                      pair(int[], char[]) x = newpair(y, z);
+                      begin
+                        skip
+                      end;
+                      int[] a = fst x;
+                      char[] b = snd x;
+                      print "( [";
+                      print a[0];
+                      print comma;
+                      print a[1];
+                      print comma;
+                      print a[2];
+                      print "] , [";
+                      print b[0];
+                      print comma;
+                      print b[1];
+                      print comma;
+                      print b[2];
+                      println "] )" # ( [fst x] , [snd x] )
+                    end;
+                    pair(char, bool) a = x[0];
+                    char aa = fst a;
+                    bool ab = snd a;
+                    pair(char, bool) b = x[1];
+                    char ba = fst b;
+                    bool bb = snd b;
+                    print "[ ";
+                    print a;
+                    print " = (";
+                    print aa;
+                    print comma;
+                    print ab;
+                    print "), ";
+                    print b;
+                    print " = (";
+                    print ba;
+                    print comma;
+                    print bb;
+                    println ") ]" # [ x[0], x[1] ]
+                  end;
+                  int y = fst x;
+                  int z = snd x;
+                  print y; 
+                  print comma;
+                  println z # fst x, snd x
+                end;
+                string a = x[0];
+                string b = x[1];
+                string c = x[2];
+                print a;
+                print comma;
+                print b;
+                print comma;
+                println c # string[]
+              end;
+              print x[0];
+              print comma;
+              print x[1];
+              print comma;
+              println x[2] # bool[]
+            end;
+            println x # char[]
+          end;
+          int a = x[0];
+          int b = x[1];
+          int c = x[2];
+          print a;
+          print comma;
+          print b;
+          print comma;
+          println c # int[]
+        end;
+        println x # string
+      end;
+      println x # bool
+    end;
+    println x # char
+  end;
+  println x # int
+
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+printAllTypes.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - string
+5	      - LHS
+6	        - comma
+7	      - RHS
+8	        - ", "
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - x
+14	      - RHS
+15	        - 5
+16	    - SCOPE
+17	      - DECLARE
+18	        - TYPE
+19	          - char
+20	        - LHS
+21	          - x
+22	        - RHS
+23	          - 'x'
+24	      - SCOPE
+25	        - DECLARE
+26	          - TYPE
+27	            - bool
+28	          - LHS
+29	            - x
+30	          - RHS
+31	            - true
+32	        - SCOPE
+33	          - DECLARE
+34	            - TYPE
+35	              - string
+36	            - LHS
+37	              - x
+38	            - RHS
+39	              - "this is a string"
+40	          - SCOPE
+41	            - DECLARE
+42	              - TYPE
+43	                - int[]
+44	              - LHS
+45	                - x
+46	              - RHS
+47	                - ARRAY LITERAL
+48	                  - 1
+49	                  - 2
+50	                  - 3
+51	            - SCOPE
+52	              - DECLARE
+53	                - TYPE
+54	                  - char[]
+55	                - LHS
+56	                  - x
+57	                - RHS
+58	                  - ARRAY LITERAL
+59	                    - 'x'
+60	                    - 'y'
+61	                    - 'z'
+62	              - SCOPE
+63	                - DECLARE
+64	                  - TYPE
+65	                    - bool[]
+66	                  - LHS
+67	                    - x
+68	                  - RHS
+69	                    - ARRAY LITERAL
+70	                      - true
+71	                      - false
+72	                      - true
+73	                - SCOPE
+74	                  - DECLARE
+75	                    - TYPE
+76	                      - string[]
+77	                    - LHS
+78	                      - x
+79	                    - RHS
+80	                      - ARRAY LITERAL
+81	                        - "array"
+82	                        - "of"
+83	                        - "strings"
+84	                  - SCOPE
+85	                    - DECLARE
+86	                      - TYPE
+87	                        - intint
+88	                      - LHS
+89	                        - x
+90	                      - RHS
+91	                        - NEW_PAIR
+92	                          - FST
+93	                            - 1
+94	                          - SND
+95	                            - 2
+96	                    - SCOPE
+97	                      - DECLARE
+98	                        - TYPE
+99	                          - charbool
+100	                        - LHS
+101	                          - y
+102	                        - RHS
+103	                          - NEW_PAIR
+104	                            - FST
+105	                              - 'a'
+106	                            - SND
+107	                              - true
+108	                      - DECLARE
+109	                        - TYPE
+110	                          - charbool
+111	                        - LHS
+112	                          - z
+113	                        - RHS
+114	                          - NEW_PAIR
+115	                            - FST
+116	                              - 'b'
+117	                            - SND
+118	                              - false
+119	                      - DECLARE
+120	                        - TYPE
+121	                          - charbool[]
+122	                        - LHS
+123	                          - x
+124	                        - RHS
+125	                          - ARRAY LITERAL
+126	                            - y
+127	                            - z
+128	                      - SCOPE
+129	                        - DECLARE
+130	                          - TYPE
+131	                            - int[]
+132	                          - LHS
+133	                            - y
+134	                          - RHS
+135	                            - ARRAY LITERAL
+136	                              - 1
+137	                              - 2
+138	                              - 3
+139	                        - DECLARE
+140	                          - TYPE
+141	                            - char[]
+142	                          - LHS
+143	                            - z
+144	                          - RHS
+145	                            - ARRAY LITERAL
+146	                              - 'a'
+147	                              - 'b'
+148	                              - 'c'
+149	                        - DECLARE
+150	                          - TYPE
+151	                            - int[]char[]
+152	                          - LHS
+153	                            - x
+154	                          - RHS
+155	                            - NEW_PAIR
+156	                              - FST
+157	                                - y
+158	                              - SND
+159	                                - z
+160	                        - SCOPE
+161	                          - SKIP
+162	                        - DECLARE
+163	                          - TYPE
+164	                            - int[]
+165	                          - LHS
+166	                            - a
+167	                          - RHS
+168	                            - FST
+169	                              - x
+170	                        - DECLARE
+171	                          - TYPE
+172	                            - char[]
+173	                          - LHS
+174	                            - b
+175	                          - RHS
+176	                            - SND
+177	                              - x
+178	                        - PRINT
+179	                          - "( ["
+180	                        - PRINT
+181	                          - a
+182	                            - []
+183	                              - 0
+184	                        - PRINT
+185	                          - comma
+186	                        - PRINT
+187	                          - a
+188	                            - []
+189	                              - 1
+190	                        - PRINT
+191	                          - comma
+192	                        - PRINT
+193	                          - a
+194	                            - []
+195	                              - 2
+196	                        - PRINT
+197	                          - "] , ["
+198	                        - PRINT
+199	                          - b
+200	                            - []
+201	                              - 0
+202	                        - PRINT
+203	                          - comma
+204	                        - PRINT
+205	                          - b
+206	                            - []
+207	                              - 1
+208	                        - PRINT
+209	                          - comma
+210	                        - PRINT
+211	                          - b
+212	                            - []
+213	                              - 2
+214	                        - PRINTLN
+215	                          - "] )"
+216	                      - DECLARE
+217	                        - TYPE
+218	                          - charbool
+219	                        - LHS
+220	                          - a
+221	                        - RHS
+222	                          - x
+223	                            - []
+224	                              - 0
+225	                      - DECLARE
+226	                        - TYPE
+227	                          - char
+228	                        - LHS
+229	                          - aa
+230	                        - RHS
+231	                          - FST
+232	                            - a
+233	                      - DECLARE
+234	                        - TYPE
+235	                          - bool
+236	                        - LHS
+237	                          - ab
+238	                        - RHS
+239	                          - SND
+240	                            - a
+241	                      - DECLARE
+242	                        - TYPE
+243	                          - charbool
+244	                        - LHS
+245	                          - b
+246	                        - RHS
+247	                          - x
+248	                            - []
+249	                              - 1
+250	                      - DECLARE
+251	                        - TYPE
+252	                          - char
+253	                        - LHS
+254	                          - ba
+255	                        - RHS
+256	                          - FST
+257	                            - b
+258	                      - DECLARE
+259	                        - TYPE
+260	                          - bool
+261	                        - LHS
+262	                          - bb
+263	                        - RHS
+264	                          - SND
+265	                            - b
+266	                      - PRINT
+267	                        - "[ "
+268	                      - PRINT
+269	                        - a
+270	                      - PRINT
+271	                        - " = ("
+272	                      - PRINT
+273	                        - aa
+274	                      - PRINT
+275	                        - comma
+276	                      - PRINT
+277	                        - ab
+278	                      - PRINT
+279	                        - "), "
+280	                      - PRINT
+281	                        - b
+282	                      - PRINT
+283	                        - " = ("
+284	                      - PRINT
+285	                        - ba
+286	                      - PRINT
+287	                        - comma
+288	                      - PRINT
+289	                        - bb
+290	                      - PRINTLN
+291	                        - ") ]"
+292	                    - DECLARE
+293	                      - TYPE
+294	                        - int
+295	                      - LHS
+296	                        - y
+297	                      - RHS
+298	                        - FST
+299	                          - x
+300	                    - DECLARE
+301	                      - TYPE
+302	                        - int
+303	                      - LHS
+304	                        - z
+305	                      - RHS
+306	                        - SND
+307	                          - x
+308	                    - PRINT
+309	                      - y
+310	                    - PRINT
+311	                      - comma
+312	                    - PRINTLN
+313	                      - z
+314	                  - DECLARE
+315	                    - TYPE
+316	                      - string
+317	                    - LHS
+318	                      - a
+319	                    - RHS
+320	                      - x
+321	                        - []
+322	                          - 0
+323	                  - DECLARE
+324	                    - TYPE
+325	                      - string
+326	                    - LHS
+327	                      - b
+328	                    - RHS
+329	                      - x
+330	                        - []
+331	                          - 1
+332	                  - DECLARE
+333	                    - TYPE
+334	                      - string
+335	                    - LHS
+336	                      - c
+337	                    - RHS
+338	                      - x
+339	                        - []
+340	                          - 2
+341	                  - PRINT
+342	                    - a
+343	                  - PRINT
+344	                    - comma
+345	                  - PRINT
+346	                    - b
+347	                  - PRINT
+348	                    - comma
+349	                  - PRINTLN
+350	                    - c
+351	                - PRINT
+352	                  - x
+353	                    - []
+354	                      - 0
+355	                - PRINT
+356	                  - comma
+357	                - PRINT
+358	                  - x
+359	                    - []
+360	                      - 1
+361	                - PRINT
+362	                  - comma
+363	                - PRINTLN
+364	                  - x
+365	                    - []
+366	                      - 2
+367	              - PRINTLN
+368	                - x
+369	            - DECLARE
+370	              - TYPE
+371	                - int
+372	              - LHS
+373	                - a
+374	              - RHS
+375	                - x
+376	                  - []
+377	                    - 0
+378	            - DECLARE
+379	              - TYPE
+380	                - int
+381	              - LHS
+382	                - b
+383	              - RHS
+384	                - x
+385	                  - []
+386	                    - 1
+387	            - DECLARE
+388	              - TYPE
+389	                - int
+390	              - LHS
+391	                - c
+392	              - RHS
+393	                - x
+394	                  - []
+395	                    - 2
+396	            - PRINT
+397	              - a
+398	            - PRINT
+399	              - comma
+400	            - PRINT
+401	              - b
+402	            - PRINT
+403	              - comma
+404	            - PRINTLN
+405	              - c
+406	          - PRINTLN
+407	            - x
+408	        - PRINTLN
+409	          - x
+410	      - PRINTLN
+411	        - x
+412	    - PRINTLN
+413	      - x
+===========================================================
+-- Finished
+

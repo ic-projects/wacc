@@ -1,0 +1,35 @@
+-- Test: indentationNotImportant.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# consistent indentation is for readability purposes only
+
+# Output:
+# #empty#
+
+# Program:
+
+           begin
+ while 
+false 
+         do
+    skip
+done
+                    end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+indentationNotImportant.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - LOOP
+3	      - CONDITION
+4	        - false
+5	      - DO
+6	        - SKIP
+===========================================================
+-- Finished
+

@@ -1,0 +1,33 @@
+-- Test: boolDeclaration2.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple true boolean variable declaration
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  bool b = true
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+boolDeclaration2.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - bool
+5	      - LHS
+6	        - b
+7	      - RHS
+8	        - true
+===========================================================
+-- Finished
+

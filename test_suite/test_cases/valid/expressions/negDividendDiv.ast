@@ -1,0 +1,46 @@
+-- Test: negDividendDiv.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# division of a negative number
+
+# Output:
+# -2
+
+# Program:
+
+begin
+  int x = -4 ;
+  int y = 2 ;
+  println x / y
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+negDividendDiv.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - -4
+9	    - DECLARE
+10	      - TYPE
+11	        - int
+12	      - LHS
+13	        - y
+14	      - RHS
+15	        - 2
+16	    - PRINTLN
+17	      - /
+18	        - x
+19	        - y
+===========================================================
+-- Finished
+

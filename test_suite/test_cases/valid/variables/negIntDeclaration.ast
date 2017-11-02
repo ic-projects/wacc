@@ -1,0 +1,33 @@
+-- Test: negIntDeclaration.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# simple negative integer variable declaration
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int x = -1
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+negIntDeclaration.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - -1
+===========================================================
+-- Finished
+

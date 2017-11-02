@@ -1,0 +1,47 @@
+-- Test: doubleFree.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# Create and double free a pair
+
+# Output:
+# #runtime_error#
+
+# Exit:
+# 134
+
+# Program:
+
+begin
+  pair(int, char) a = newpair(10, 'a') ;
+  free a ;
+  free a
+end
+
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+doubleFree.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intchar
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - 10
+11	          - SND
+12	            - 'a'
+13	    - FREE
+14	      - a
+15	    - FREE
+16	      - a
+===========================================================
+-- Finished
+
