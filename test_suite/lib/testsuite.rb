@@ -73,7 +73,7 @@ class TestSuite
 
     expected = `#{@refCompile} -t #{source}`
     run_results = Utils.run3("/usr/bin/timeout",
-                       ["--kill-after=5", "3", @compile, source],
+                       ["--kill-after=5", "3", @compile, "-t", source],
                        nil, 1024 * 1024 * 100)
 
     passed = (expected == run_results[:stdout]) &&
