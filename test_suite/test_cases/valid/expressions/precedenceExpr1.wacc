@@ -1,10 +1,10 @@
-# tests whether the compiler can handle long expressions
+# tests whether the compiler can handle precedence in expressions
 
 # Output:
-# #empty#
+# #numbers#
 
 # Exit:
-# 153
+# 0
 
 begin
   println 1 + 2 + 3 + 4 + 5 ;
