@@ -23,6 +23,10 @@ import (
 
 */
 
+type ProgramNode interface {
+
+}
+
 type Program struct {
 	functions []FunctionNode
 }
