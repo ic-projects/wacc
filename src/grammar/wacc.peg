@@ -85,8 +85,12 @@ NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 CALL <- "call" __ IDENT _ '(' _ ARGLIST? _ ')'
 ARGLIST <- EXPR (_ ',' _ EXPR)*
 PAIRELEM <- FST / SND
-FST <- "fst" __ EXPR
-SND <- "snd" __ EXPR
+FST <- "fst" __ e:EXPR {
+    return ast.NewPairFirstElementNode(c.pos.getPosition(), e.(ast.ExpressionNode)), nil
+}
+SND <- "snd" __ e:EXPR {
+    return ast.NewPairSecondElementNode(c.pos.getPosition(), e.(ast.ExpressionNode)), nil
+}
 
 TYPE <- t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
     if (len(array.([]interface{})) > 0) {
