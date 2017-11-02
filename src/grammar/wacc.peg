@@ -17,7 +17,7 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" {
     main := ast.NewFunctionNode(
         c.pos.getPosition(),
         ast.NewBaseTypeNode(ast.INT),
-        "main",
+        ast.NewIdentifierNode(c.pos.getPosition(), "main"),
         []ast.ParameterNode{},
         stat.([]ast.StatementNode),
     )
@@ -44,7 +44,7 @@ SKIP <- "skip" {
     return ast.NewSkipNode(c.pos.getPosition()), nil
 }
 NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
-  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(string), rhs.(ast.RHSNode)), nil
+  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(ast.IdentifierNode), rhs.(ast.RHSNode)), nil
 }
 ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
   return ast.NewAssignNode(c.pos.getPosition(), lhs.(ast.LHSNode), rhs.(ast.LHSNode)), nil
@@ -210,7 +210,7 @@ ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
   for _, e := range exprs.([]interface{}) {
       expressionNodes = append(expressionNodes, e.([]interface{})[3].(ast.ExpressionNode))
   }
-  return ast.NewArrayElementNode(c.pos.getPosition(), ident.(string), expressionNodes), nil
+  return ast.NewArrayElementNode(c.pos.getPosition(), ident.(ast.IdentifierNode), expressionNodes), nil
 }
 INTLITER <- INTSIGN? _ DIGIT+ {
   i, _ := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
