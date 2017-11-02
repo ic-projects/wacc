@@ -44,7 +44,7 @@ func main() {
 		fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
 		fmt.Println(".ast contents are:")
 		fmt.Println("===========================================================")
-		fmt.Print(tree)
+		fmt.Print(number(fmt.Sprintf("%s", tree)))
 		fmt.Println("===========================================================")
 	}
 	fmt.Println("-- Finished")

@@ -24,16 +24,6 @@ import (
 
 */
 
-func number(s string) string {
-	var buf bytes.Buffer
-	for i, line := range strings.Split(s, "\n") {
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%d\t%s\n", i, line))
-		}
-	}
-	return buf.String()
-}
-
 func indent(s string, sep string) string {
 	var buf bytes.Buffer
 	for _, line := range strings.Split(s, "\n") {
@@ -60,7 +50,7 @@ func (program Program) String() string {
 	for _, f := range program.functions {
 		buf.WriteString(indent(fmt.Sprintf("%s", f), "  "))
 	}
-	return number(buf.String())
+	return buf.String()
 }
 
 type FunctionNode struct {
@@ -411,7 +401,7 @@ func NewIdentifierNode(pos Position, ident string) IdentifierNode {
 }
 
 func (node IdentifierNode) String() string {
-	return fmt.Sprintf("- %s\n", node.ident)
+	return fmt.Sprintf("%s", node.ident)
 }
 
 type PairFirstElementNode struct {
