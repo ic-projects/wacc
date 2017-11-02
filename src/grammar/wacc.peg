@@ -195,12 +195,10 @@ UNARYEXPR <- op:UNARYOPER _ expr:EXPR {
   return ast.NewUnaryOperatorNode(c.pos.getPosition(), op.(ast.UnaryOperator), expr.(ast.ExpressionNode)), nil
 }
 
-BREXPR <- '(' _ expr:(EXPR) {
+BREXPR <- '(' _ expr:EXPR {
   return expr, nil
 }
-UNARYOPER <- op:(NOT / NEG / LEN / ORD / CHR) {
-  return op, nil
-}
+UNARYOPER <- NOT / NEG / LEN / ORD / CHR
 NOT <- '!' {
   return ast.NOT, nil
 }
@@ -215,9 +213,6 @@ ORD <- "ord" {
 }
 CHR <- "chr" {
   return ast.CHR, nil
-}
-BINARYOPER <- op:(MULT / DIV / MOD / PLUS / SUB / GEQ / GT / LEQ / LT / EQ / NEQ / AND / OR) {
-  return op, nil
 }
 MULT <- '*' {
   return ast.MUL, nil
