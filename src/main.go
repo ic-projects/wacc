@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -31,7 +30,7 @@ func main() {
 		tree, err = ParseFile(filepath)
 		fmt.Println("-- Compiling...")
 		if err != nil {
-			log.Fatal(err)
+			os.Exit(100)
 		}
 	} else {
 		fmt.Println("Error: No file provided")
