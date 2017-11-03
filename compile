@@ -64,6 +64,8 @@ if files == [] then
   exit 1
 end
 
+exitstatus = 0
+
 # now process each target file
 files.each do |file_path|
   puts "-- Test: #{File.basename file_path}"
@@ -75,6 +77,9 @@ files.each do |file_path|
   puts ""
   puts "-- Compiler Output:"
   output = %x(src/wacc #{$opts.join(" ")} #{file_path})
+  exitstatus = $?.exitstatus
   puts output
   puts ""
 end
+
+exit exitstatus
