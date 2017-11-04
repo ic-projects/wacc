@@ -30,6 +30,8 @@ func main() {
 		tree, err = ParseFile(filepath)
 		fmt.Println("-- Compiling...")
 		if err != nil {
+			fmt.Println("Errors detected during compilation! Exit code 100 returned.")
+			fmt.Println(err)
 			os.Exit(100)
 		}
 	} else {

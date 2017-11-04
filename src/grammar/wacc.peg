@@ -270,9 +270,11 @@ OR <- "||" {
 }
 
 
-IDENT <- s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
+IDENT <- !RESERVED s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
   return ast.NewIdentifierNode(c.pos.getPosition(), string(c.text)), nil
 }
+
+RESERVED <- ("int" / "bool" / "char" / "string" / "pair") !('_' / [a-z] / [A-Z] / [0-9])
 
 ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
   var expressionNodes  []ast.ExpressionNode
