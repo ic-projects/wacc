@@ -392,6 +392,13 @@ func (node ScopeNode) String() string {
 type LHSNode interface {
 }
 
+type LHSNodeStruct struct {
+}
+
+func NewLHSNode() LHSNode {
+	return LHSNodeStruct{}
+}
+
 type IdentifierNode struct {
 	pos   Position
 	ident string
@@ -473,6 +480,13 @@ func (node ArrayElementNode) String() string {
 /**** RHSNodes ****/
 
 type RHSNode interface {
+}
+
+type RHSNodeStruct struct {
+}
+
+func NewRHSNode() RHSNode {
+	return RHSNodeStruct{}
 }
 
 // ExpressionNode

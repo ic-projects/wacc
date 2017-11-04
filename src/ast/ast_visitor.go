@@ -81,6 +81,8 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		}
 	case BaseType:
 
+	case BaseTypeNode:
+
 	case ArrayTypeNode:
 
 	case PairTypeNode:
