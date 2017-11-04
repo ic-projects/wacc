@@ -77,8 +77,7 @@ class TestSuite
                        ["--kill-after=5", "3", @compile, "-t", source],
                        nil, 1024 * 1024 * 100)
 
-    passed = (expected == run_results[:stdout]) &&
-             (run_results[:exit_status] == 0)
+    passed = (expected == run_results[:stdout])
 
     return { :result => :ran,
              :passed => passed,
