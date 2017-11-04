@@ -46,12 +46,21 @@ function Results($scope, $http, $timeout) {
   };
 
   $scope.status_as_severity = function() {
+    if(window.qiang) {
+      var severities = { "loading...": "info"
+                       , "not_run_yet": "info"
+                       , "running": "warning"
+                       , "ran": "info"
+                       , "error": "warning"
+                       };
+    } else {
     var severities = { "loading...": "info"
                      , "not_run_yet": "info"
                      , "running": "warning"
                      , "ran": "success"
                      , "error": "important"
                      };
+    }
     return severities[$scope.status.status];
   };
 
@@ -106,18 +115,60 @@ function Results($scope, $http, $timeout) {
     return 0;
   }
 
+  $scope.toggle_colorblindness = function() {
+    if(window.qiang) {
+      window.qiang = !window.qiang
+    } else {
+      window.qiang = true
+    }
+  }
+
+  $scope.bar = function(success) {
+    if(success) {
+      if(window.qiang){
+        return "primary";
+      }
+        return "success";
+    } else {
+      if(window.qiang){
+        return "warning";
+      }
+      return "danger";
+    }
+  }
   $scope.test_case_as_severity = function(name) {
     if ("test_results" in $scope.status) {
       result = $scope.status.test_results[name];
       if (result) {
         if (result.passed) {
+          if(window.qiang){
+            return "info";
+          }
             return "success";
+        }
+
+        if(window.qiang){
+          return "warning";
         }
         return "important";
       }
 
       return "warning";
     }
+  }
+
+  $scope.qiang = function(passed) {
+        if (passed) {
+          if(window.qiang){
+            return "info";
+          }
+            return "success";
+        } else {
+          if(window.qiang){
+            return "warning";
+          }
+          return "important";
+        }
   }
 
   $scope.test_case_as_label = function(name) {

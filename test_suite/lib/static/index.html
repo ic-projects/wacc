@@ -46,13 +46,19 @@
               </form>
             </li>
             <li class="divider-vertical"></li>
+            <li>
+              <form class="navbar-form pull-left" ng-submit="toggle_colorblindness()">
+                <input type="submit" class="btn" value="Qiang"></input>
+              </form>
+            </li>
+            <li class="divider-vertical"></li>
           </ul>
           <div class="progress" style="margin-top: 10px;">
-            <div class="bar bar-success"
+            <div class="bar bar-{{bar(true)}}"
                  style="width:{{percent_tests_success()}}%;"></div>
             <div class="bar bar-warning"
                  style="width:{{percent_tests_partial_success()}}%;"></div>
-            <div class="bar bar-danger"
+            <div class="bar bar-{{bar(false)}}"
                  style="width:{{percent_tests_failure()}}%;"></div>
           </div>
       </div>
@@ -82,15 +88,12 @@
                 <ul class="nav nav-pills">
                   <li class="divider-vertical"></li>
                   <li><a href="#testcase{{$index}}">Test Case</a></li>
-                  <li><a href="#compile{{$index}}">compile</a></li>
+                  <li><a href="#compile{{$index}}">front-end</a></li>
                   <!-- <li><a href="#debug{{$index}}">Debug</a></li> -->
                 </ul>
               </div>
               <h1>{{test_case_as_label(test_result.source)}}
-                <span class="label"
-                      ng-class="{ 'label-success': test_result.compile.passed,
-                                  'label-important': !test_result.compile.passed
-                                }">compile</span>
+                <span class="label label-{{qiang(test_result.compile.passed)}}">front-end</span>
                                 <button class="btn" ng-click="run_one($index)">Run</button>
                               </h1>
             </div>
