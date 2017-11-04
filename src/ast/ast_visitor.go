@@ -8,8 +8,13 @@ type Visitor interface {
 	Visit(ProgramNode) Visitor
 }
 
+type EntryExitVisitor interface {
+	Visit(ProgramNode) Visitor
+	Leave(ProgramNode) Visitor
+}
+
 func Walk(visitor Visitor, programNode ProgramNode) {
-	visitor.Visit(programNode)
+	visitor = visitor.Visit(programNode)
 	switch node := programNode.(type) {
 	case []StatementNode:
 		for _, s := range node {
@@ -101,6 +106,9 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		Walk(visitor, node.expr2)
 	default:
 
+	}
+	if v, ok := visitor.(EntryExitVisitor); ok {
+		v.Leave(programNode)
 	}
 }
 
