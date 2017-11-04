@@ -1,0 +1,70 @@
+-- Test: functionForwardRef.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# a simple function definition and call
+
+# Output:
+# 0
+
+# Program:
+
+begin
+  int f() is
+    int x = call g() ;
+    return 0
+  end	
+  int h() is
+    return 0
+  end
+  int g() is
+    int x = call h() ;
+    return 0
+  end	
+  int x = call f() ;
+  println x 
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+functionForwardRef.ast contents are:
+===========================================================
+0	Program
+1	  - int f()
+2	    - DECLARE
+3	      - TYPE
+4	        - int
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - g
+9	    - RETURN
+10	      - 0
+11	  - int h()
+12	    - RETURN
+13	      - 0
+14	  - int g()
+15	    - DECLARE
+16	      - TYPE
+17	        - int
+18	      - LHS
+19	        - x
+20	      - RHS
+21	        - h
+22	    - RETURN
+23	      - 0
+24	  - int main()
+25	    - DECLARE
+26	      - TYPE
+27	        - int
+28	      - LHS
+29	        - x
+30	      - RHS
+31	        - f
+32	    - PRINTLN
+33	      - x
+===========================================================
+-- Finished
+
