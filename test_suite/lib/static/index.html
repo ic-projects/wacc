@@ -141,9 +141,11 @@
 
                   <div class="row-fluid">
                     <div class="span6">
-                      <h5>exit code: <small><code>{{ test_result.compile.run_results.exit_status }} - {{ exit_status_name(test_result.compile.run_results.exit_status) }}</code></small></h5>
+                      <h5>exit code: <small><code>{{ test_result.compile.run_results.exit_status }}</code></small></h5>
                     </div>
-
+                    <div class="span6">
+                      <h5>expected: <small><code>{{ test_result.compile.expected.exit_status }}</code></small></h5>
+                    </div>
                   </div>
 
                 </div>
