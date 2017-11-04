@@ -24,6 +24,27 @@ import (
 
 */
 
+func FinalStatIsValid(s StatementNode) bool {
+	switch s.(type) {
+	case ReturnNode:
+		return true
+	case ExitNode:
+		return true
+	case ScopeNode:
+		stats := s.(ScopeNode).stats
+		finalStat := stats[len(stats)-1]
+		return FinalStatIsValid(finalStat)
+	case IfNode:
+		ifStats := s.(IfNode).ifStats
+		ifFinalStat := ifStats[len(ifStats)-1]
+		elseStats := s.(IfNode).elseStats
+		elseFinalStat := elseStats[len(elseStats)-1]
+		return FinalStatIsValid(ifFinalStat) && FinalStatIsValid(elseFinalStat)
+	default:
+		return false
+	}
+}
+
 type ProgramNode interface {
 }
 

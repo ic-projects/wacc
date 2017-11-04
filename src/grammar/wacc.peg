@@ -32,10 +32,16 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
 }
 
 FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
-    if (params != nil) {
-        return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), s.([]ast.StatementNode)), nil
+    stats := s.([]ast.StatementNode)
+    finalStat := stats[len(stats)-1]
+    var err error
+    if (!ast.FinalStatIsValid(finalStat)) {
+      err = errors.New(fmt.Sprintf("Syntactic Error at %d:%d -- Function %s is not ended with a return or an exit statement.", c.pos.line, c.pos.col - 1, strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
     }
-    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, s.([]ast.StatementNode)), nil
+    if (params != nil) {
+      return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), stats), err
+    }
+    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, stats), err
 }
 PARAMLIST <- param:PARAM params:(_ ',' _ PARAM)* {
     paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
