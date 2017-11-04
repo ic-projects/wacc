@@ -76,13 +76,25 @@ class TestSuite
     run_results = Utils.run3("/usr/bin/timeout",
                        ["--kill-after=5", "3", @compile, "-t", source],
                        nil, 1024 * 1024 * 100)
+    expected_exit = "0"
+    if(expected =~ /#\s?Exit:\n#\s?(\d+)\s?\n/)
+      expected_exit = expected.match(/#\s?Exit:\n#\s?(\d+)\s?\n/)[1]
+    end
 
-    passed = (expected == run_results[:stdout])
+    if(expected_exit == "100" || expected_exit == "200")
+      passed = (run_results[:exit_status].to_s == expected_exit)
+    elsif(expected_exit != "0")
+      passed = (expected == run_results[:stdout])
+      # Uncomment to check for proper exit code returns and runtime errors
+      #passed = (expected == run_results[:stdout] && run_results[:exit_status].to_s == expected_exit)
+    else
+      passed = (expected == run_results[:stdout] && run_results[:exit_status].to_s == expected_exit)
+    end
 
     return { :result => :ran,
              :passed => passed,
              :run_results => run_results,
-             :expected    => { :stdout => expected }
+             :expected    => { :stdout => expected, :exit_status => expected_exit}
            }
   end
 
