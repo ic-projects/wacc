@@ -79,7 +79,7 @@ function Results($scope, $http, $timeout) {
       var count = 0;
       for(key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
-        var e = value.compile.passed;
+        var e = false;
 
         if (e) {
           count++;
