@@ -1,0 +1,13 @@
+# reserved keywords
+
+# Output:
+# #syntax_error#
+
+# Exit:
+# 100
+
+# Program:
+
+begin
+  bool null = true
+end

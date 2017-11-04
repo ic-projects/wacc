@@ -281,7 +281,7 @@ IDENT <- !RESERVED s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
   return ast.NewIdentifierNode(c.pos.getPosition(), string(c.text)), nil
 }
 
-RESERVED <- ("int" / "bool" / "char" / "string" / "pair") !('_' / [a-z] / [A-Z] / [0-9])
+RESERVED <- ("int" / "bool" / "char" / "string" / "pair" / "false" / "true" / "newpair" / "null" / "begin" / "end" / "is" / "len" / "ord" / "chr" / "fst" / "snd" / "skip" / "read" / "free" / "return" / "exit" / "print" / "println" / "if" / "then" / "else" / "while" / "do" / "done" / "call") !('_' / [a-z] / [A-Z] / [0-9])
 
 ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
   var expressionNodes  []ast.ExpressionNode
