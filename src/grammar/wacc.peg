@@ -3,9 +3,10 @@
 
     import (
         "ast"
-        "unicode/utf8"
+        "fmt"
         "strconv"
         "strings"
+        "unicode/utf8"
     )
 
     func (p position) getPosition() ast.Position {
@@ -284,8 +285,13 @@ ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
   return ast.NewArrayElementNode(c.pos.getPosition(), ident.(ast.IdentifierNode), expressionNodes), nil
 }
 INTLITER <- INTSIGN? _ DIGIT+ {
-  i, _ := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
-  return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), nil
+  i, err := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
+
+  if err != nil {
+    err = errors.New(fmt.Sprintf("Integer value %s on line %d is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer)\nParsing aborted, no further compilation attempted.", string(c.text), c.pos.line))
+  }
+
+  return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), err
 }
 DIGIT <- [0-9]
 INTSIGN <- '+' / '-'
