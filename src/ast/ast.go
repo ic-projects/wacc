@@ -433,6 +433,9 @@ func NewIdentifierNode(pos Position, ident string) IdentifierNode {
 }
 
 func (node IdentifierNode) String() string {
+	if node.ident == "" {
+		return "- main"
+	}
 	return fmt.Sprintf("- %s", node.ident)
 }
 
