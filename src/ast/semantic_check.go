@@ -1,8 +1,8 @@
 package ast
 
 type SemanticCheck struct {
-	symbolTable  SymbolTable
-	typeChecker  *TypeChecker
+	symbolTable SymbolTable
+	typeChecker *TypeChecker
 }
 
 func NewSemanticCheck() SemanticCheck {
@@ -16,29 +16,28 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	switch node := programNode.(type) {
 	case Program:
 
-	/*case FunctionNode:
-		_, ok := v.symbolTable.SearchFor(node.ident.ident)
+	case FunctionNode:
+		_, ok := v.symbolTable.SearchForFunction(node.ident.ident)
 		if ok {
 
 		} else {
-			v.symbolTable.AddToScope(node.ident.ident, node)
+			v.symbolTable.AddFunction(node.ident.ident, node)
 		}
 		v.symbolTable.MoveDownScope()
 	case ParameterNode:
-		_, ok := v.symbolTable.SearchFor(node.ident.ident)
+		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if ok {
 
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
-	case SkipNode:*/
+	case SkipNode:
 	case DeclareNode:
-		_, ok := v.symbolTable.SearchFor(node.ident.ident)
+		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if ok {
 
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
-
 		}
 
 		switch ty := node.t.(type) {
@@ -77,13 +76,12 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case ScopeNode:
 	case IdentifierNode:
-		programNode, ok := v.symbolTable.SearchFor(node.ident)
+		identDec, ok := v.symbolTable.SearchForIdent(node.ident)
 		if !ok {
 
-		} else if declareNode, ok := programNode.(DeclareNode); ok {
-			v.typeChecker.seen(declareNode.t)
+		} else {
+			v.typeChecker.seen(identDec.t)
 		}
-
 	case PairFirstElementNode:
 		//LOOK UP TYPE FOR PAIR CALL SEEN
 		v.typeChecker.expect(NewBaseTypeNode(PAIR))
@@ -94,25 +92,25 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	case ArrayElementNode:
 		//Check identifier
 		/*
-		v.typeChecker.seen(type of array)
-		for i := 0; i < dimensions of array; i++ {
-			v.typeChecker.expect(NewBaseTypeNode(INT))
-		}*/
+			v.typeChecker.seen(type of array)
+			for i := 0; i < dimensions of array; i++ {
+				v.typeChecker.expect(NewBaseTypeNode(INT))
+			}*/
 
 	case ArrayLiteralNode:
 		v.typeChecker.seen(ArrayTypeNode{})
 	case NewPairNode:
 		v.typeChecker.seen(PairTypeNode{})
 	/*
-	case FunctionCallNode:
-		programNode, ok := v.symbolTable.SearchFor(node.ident.ident)
-		if !ok {
+		case FunctionCallNode:
+			programNode, ok := v.symbolTable.SearchFor(node.ident.ident)
+			if !ok {
 
-		} else if functionNode, ok := programNode.(FunctionNode); ok {
+			} else if functionNode, ok := programNode.(FunctionNode); ok {
 
-		} else if reflect.DeepEqual(v.expectedType[0], functionNode.t) {
-			//Add expected types for the paramaters
-		}*/
+			} else if reflect.DeepEqual(v.expectedType[0], functionNode.t) {
+				//Add expected types for the paramaters
+			}*/
 	case BaseTypeNode:
 
 	case ArrayTypeNode:
