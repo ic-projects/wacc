@@ -137,7 +137,7 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 			v.typeChecker.expect(NewBaseTypeNode(CHAR))
 		case CHR:
 			v.typeChecker.seen(NewBaseTypeNode(CHAR))
-			v.typeChecker.seen(NewBaseTypeNode(INT))
+			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}
 	case BinaryOperatorNode:
 		switch node.op {
