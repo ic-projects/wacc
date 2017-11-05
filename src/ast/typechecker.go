@@ -24,12 +24,42 @@ func NewSetExpectance(ts []TypeNode) SetExpectance {
 	}
 }
 
+func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode) bool {
+	_, match := validTypes[t]
+	nilArray := ArrayTypeNode{}
+	setHasNil := false
+	findNil := t == nilArray
+	var found ArrayTypeNode
+	for key, _ := range validTypes {
+		if StripType(key) == nilArray {
+			found = key.(ArrayTypeNode)
+			setHasNil = true
+			break
+		}
+	}
+	// setHasNil is true when validTypes was because of free / len
+	// findNil is true when checking becuase of ArrayLiteralNode [1,2,3...]
+	if findNil {
+		check.expectRepeatUntilForce(found.t)
+		return true
+	}
+	return setHasNil || match
+}
+
 func (exp SetExpectance) seen(check *TypeChecker, t TypeNode) {
 	validTypes := exp.set
 
-	_, found := validTypes[t]
-	if !found {
-		typeErr(t, validTypes)
+	switch t.(type) {
+	case ArrayTypeNode:
+		found := arrayCase(check, validTypes, t.(ArrayTypeNode))
+		if !found {
+			typeErr(t, validTypes)
+		}
+	default:
+		_, found := validTypes[t]
+		if !found {
+			typeErr(t, validTypes)
+		}
 	}
 }
 
@@ -89,14 +119,14 @@ func (check *TypeChecker) seen(t TypeNode) {
 	}
 
 	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Found %s\n", StripType(t)))
-	fmt.Println(b.String())
+	b.WriteString(fmt.Sprintf("Found %s\n", t))
+	//fmt.Println(b.String())
 
 	expectance := check.stack[len(check.stack) - 1]
 	check.stack = check.stack[:len(check.stack) - 1]
 
 
-	expectance.seen(check, StripType(t))
+	expectance.seen(check, t)
 }
 
 func StripType(t TypeNode) TypeNode {
@@ -135,14 +165,14 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
 	var b bytes.Buffer
 	b.WriteString(fmt.Sprintf("Adding repeat %s\n", t))
-	fmt.Println(b.String())
+	//fmt.Println(b.String())
 	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
 }
 
 func (check *TypeChecker) expect(t TypeNode) {
 	var b bytes.Buffer
 	b.WriteString(fmt.Sprintf("Adding %s\n", t))
-	fmt.Println(b.String())
+	//fmt.Println(b.String())
 
 	check.expectSet([]TypeNode{t})
 }

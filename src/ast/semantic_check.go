@@ -41,10 +41,6 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		}
 
 		switch ty := node.t.(type) {
-		case ArrayTypeNode:
-			// TODO FIX FOR NESTED ARRAYS
-			v.typeChecker.expectRepeatUntilForce(ty.t)
-			v.typeChecker.expect(ArrayTypeNode{})
 		case PairTypeNode:
 			v.typeChecker.expect(ty.t2)
 			v.typeChecker.expect(ty.t1)
@@ -80,7 +76,14 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		if !ok {
 
 		} else {
-			v.typeChecker.seen(identDec.t)
+			switch ty := identDec.t.(type) {
+			case PairTypeNode:
+				v.typeChecker.seen(PairTypeNode{})
+				v.typeChecker.seen(ty.t1)
+				v.typeChecker.seen(ty.t2)
+			default:
+				v.typeChecker.seen(ty)
+			}
 		}
 	case PairFirstElementNode:
 		//LOOK UP TYPE FOR PAIR CALL SEEN
@@ -141,7 +144,6 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
 			v.typeChecker.seen(NewBaseTypeNode(INT))
-			v.typeChecker.expectAny()
 			v.typeChecker.expect(ArrayTypeNode{})
 		case ORD:
 			v.typeChecker.seen(NewBaseTypeNode(INT))

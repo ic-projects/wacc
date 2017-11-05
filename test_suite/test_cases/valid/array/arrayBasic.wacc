@@ -8,3 +8,4 @@
 begin
   int[] a = [0]
 end
+
