@@ -40,14 +40,29 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 
 		}
-		v.typeChecker.expect(StripType(node.t))
+
+		switch ty := node.t.(type) {
+		case ArrayTypeNode:
+			//needs fixing
+			for i:=0; i < ty.dim; i++ {
+				v.typeChecker.expect(ty.t)
+			}
+			v.typeChecker.expect(ArrayTypeNode{})
+		case PairTypeNode:
+			v.typeChecker.expect(ty.t2)
+			v.typeChecker.expect(ty.t1)
+			v.typeChecker.expect(PairTypeNode{})
+		default:
+			v.typeChecker.expect(ty)
+		}
+
 	case AssignNode:
 
 		// Not sure...
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 
 	case ReadNode:
-		v.typeChecker.expectAny()
+		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
 	case FreeNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(PAIR), ArrayTypeNode{}})
 	case ReturnNode:
@@ -68,7 +83,7 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		if !ok {
 
 		} else if declareNode, ok := programNode.(DeclareNode); ok {
-			v.typeChecker.seen(StripType(declareNode.t))
+			v.typeChecker.seen(declareNode.t)
 		}
 
 	case PairFirstElementNode:

@@ -73,8 +73,14 @@ func (check *TypeChecker) seen(t TypeNode) {
 		//Oh no
 	}
 
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Found %s\n", StripType(t)))
+	fmt.Println(b.String())
+
 	expectance := check.stack[len(check.stack) - 1]
 	check.stack = check.stack[:len(check.stack) - 1]
+
+
 
 	expectance.seen(check, StripType(t))
 }
@@ -109,6 +115,10 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 }
 
 func (check *TypeChecker) expect(t TypeNode) {
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Adding %s\n", t))
+	fmt.Println(b.String())
+
 	check.expectSet([]TypeNode{t})
 }
 
