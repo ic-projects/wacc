@@ -73,17 +73,20 @@ func (check *TypeChecker) seen(t TypeNode) {
 		//Oh no
 	}
 
-	switch t.(type) {
-	case ArrayTypeNode:
-		t = ArrayTypeNode{}
-	case PairTypeNode:
-		t = PairTypeNode{}
-	}
-
 	expectance := check.stack[len(check.stack) - 1]
 	check.stack = check.stack[:len(check.stack) - 1]
 
-	expectance.seen(check, t)
+	expectance.seen(check, StripType(t))
+}
+
+func StripType(t TypeNode) TypeNode {
+	switch t.(type) {
+	case ArrayTypeNode:
+		return ArrayTypeNode{}
+	case PairTypeNode:
+		return PairTypeNode{}
+	}
+	return t
 }
 
 func typeErr(got TypeNode, validTypes map[TypeNode] bool) {

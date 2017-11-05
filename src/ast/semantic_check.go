@@ -40,17 +40,18 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 
 		}
-		v.typeChecker.expect(node.t)
+		v.typeChecker.expect(StripType(node.t))
 	case AssignNode:
-		//v.expectedType[0] = NewLHSNode() //Maybe use list instead of empty struct
-		//v.expectedType[1] = NewRHSNode()
+
+		// Not sure...
+		v.typeChecker.expectTwiceSame(NewAnyExpectance())
+
 	case ReadNode:
-		//v.expectedType[0] = NewLHSNode()
+		v.typeChecker.expectAny()
 	case FreeNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(PAIR), ArrayTypeNode{}})
-		//v.typeChecker.expect("pair") //Or array
 	case ReturnNode:
-
+		// Need to know return type of function somehow?
 	case ExitNode:
 		v.typeChecker.expect(NewBaseTypeNode(INT))
 	case PrintNode:
@@ -67,7 +68,7 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		if !ok {
 
 		} else if declareNode, ok := programNode.(DeclareNode); ok {
-			v.typeChecker.seen(declareNode.t)
+			v.typeChecker.seen(StripType(declareNode.t))
 		}
 
 	case PairFirstElementNode:
@@ -81,14 +82,14 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		//Check identifier
 		/*
 		v.typeChecker.seen(type of array)
-		for i := 0; i < dimensions; i++ {
+		for i := 0; i < dimensions of array; i++ {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}*/
 
 	case ArrayLiteralNode:
 		v.typeChecker.seen(ArrayTypeNode{})
 	case NewPairNode:
-
+		v.typeChecker.seen(PairTypeNode{})
 	/*
 	case FunctionCallNode:
 		programNode, ok := v.symbolTable.SearchFor(node.ident.ident)
