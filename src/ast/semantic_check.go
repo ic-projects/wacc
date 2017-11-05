@@ -1,19 +1,14 @@
 package ast
 
-import (
-	"fmt"
-	"reflect"
-)
-
 type SemanticCheck struct {
 	symbolTable  SymbolTable
-	expectedType []TypeNode
+	typeChecker  *TypeChecker
 }
 
 func NewSemanticCheck() SemanticCheck {
 	return SemanticCheck{
-		symbolTable:  NewSymbolTable(),
-		expectedType: make([]TypeNode, 0, 2),
+		symbolTable: NewSymbolTable(),
+		typeChecker: NewTypeChecker(),
 	}
 }
 
@@ -21,7 +16,7 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	switch node := programNode.(type) {
 	case Program:
 
-	case FunctionNode:
+	/*case FunctionNode:
 		_, ok := v.symbolTable.SearchFor(node.ident.ident)
 		if ok {
 
@@ -36,54 +31,65 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
-	case SkipNode:
+	case SkipNode:*/
 	case DeclareNode:
 		_, ok := v.symbolTable.SearchFor(node.ident.ident)
 		if ok {
 
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
+
 		}
+		v.typeChecker.expect(node.t)
 	case AssignNode:
-		v.expectedType[0] = NewLHSNode() //Maybe use list instead of empty struct
-		v.expectedType[1] = NewRHSNode()
+		//v.expectedType[0] = NewLHSNode() //Maybe use list instead of empty struct
+		//v.expectedType[1] = NewRHSNode()
 	case ReadNode:
-		v.expectedType[0] = NewLHSNode()
+		//v.expectedType[0] = NewLHSNode()
 	case FreeNode:
-		v.expectedType[0] = NewBaseTypeNode(PAIR) //Or array
+		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(PAIR), ArrayTypeNode{}})
+		//v.typeChecker.expect("pair") //Or array
 	case ReturnNode:
 
 	case ExitNode:
-		v.expectedType[0] = NewBaseTypeNode(INT)
+		v.typeChecker.expect(NewBaseTypeNode(INT))
 	case PrintNode:
-		v.expectedType[0] = nil
+		v.typeChecker.expectAny()
 	case PrintlnNode:
-		v.expectedType[0] = nil
+		v.typeChecker.expectAny()
 	case IfNode:
-		v.expectedType[0] = NewBaseTypeNode(BOOL)
+		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case LoopNode:
-		v.expectedType[0] = NewBaseTypeNode(BOOL)
+		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case ScopeNode:
 	case IdentifierNode:
 		programNode, ok := v.symbolTable.SearchFor(node.ident)
 		if !ok {
 
 		} else if declareNode, ok := programNode.(DeclareNode); ok {
-
-		} else if reflect.DeepEqual(v.expectedType[0], declareNode.t) {
-
+			v.typeChecker.seen(declareNode.t)
 		}
+
 	case PairFirstElementNode:
-		v.expectedType[0] = NewBaseTypeNode(PAIR)
+		//LOOK UP TYPE FOR PAIR CALL SEEN
+		v.typeChecker.expect(NewBaseTypeNode(PAIR))
 		//Is it a assignlhs or assign rhs
 	case PairSecondElementNode:
-		v.expectedType[0] = NewBaseTypeNode(PAIR)
+		//LOOK UP TYPE FOR PAIR CALL SEEN
+		v.typeChecker.expect(NewBaseTypeNode(PAIR))
 	case ArrayElementNode:
 		//Check identifier
-		v.expectedType[0] = NewBaseTypeNode(INT)
+		/*
+		v.typeChecker.seen(type of array)
+		for i := 0; i < dimensions; i++ {
+			v.typeChecker.expect(NewBaseTypeNode(INT))
+		}*/
+
 	case ArrayLiteralNode:
-		v.expectedType[1] = v.expectedType[0] //For as length of epressions
+		v.typeChecker.seen(ArrayTypeNode{})
 	case NewPairNode:
+
+	/*
 	case FunctionCallNode:
 		programNode, ok := v.symbolTable.SearchFor(node.ident.ident)
 		if !ok {
@@ -92,7 +98,7 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 
 		} else if reflect.DeepEqual(v.expectedType[0], functionNode.t) {
 			//Add expected types for the paramaters
-		}
+		}*/
 	case BaseTypeNode:
 
 	case ArrayTypeNode:
@@ -104,103 +110,55 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	case BinaryOperator:
 
 	case IntegerLiteralNode:
-		if v.expectedType[0] != NewBaseTypeNode(INT) {
-
-		} else {
-
-		}
+		v.typeChecker.seen(NewBaseTypeNode(INT))
 	case BooleanLiteralNode:
-		if v.expectedType[0] != NewBaseTypeNode(BOOL) {
-
-		} else {
-
-		}
+		v.typeChecker.seen(NewBaseTypeNode(BOOL))
 	case CharacterLiteralNode:
-		if v.expectedType[0] != NewBaseTypeNode(CHAR) {
-
-		} else {
-
-		}
+		v.typeChecker.seen(NewBaseTypeNode(CHAR))
 	case StringLiteralNode:
-		if v.expectedType[0] != NewBaseTypeNode(STRING) {
-
-		} else {
-
-		}
+		v.typeChecker.seen(NewBaseTypeNode(STRING))
 	case PairLiteralNode:
-		if v.expectedType[0] != NewBaseTypeNode(PAIR) {
-
-		} else {
-
-		}
+		v.typeChecker.seen(NewBaseTypeNode(PAIR))
 	case UnaryOperatorNode:
 		switch node.op {
 		case NOT:
-			if v.expectedType[0] != NewBaseTypeNode(BOOL) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(BOOL)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(BOOL))
+			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		case NEG:
-			if v.expectedType[0] != NewBaseTypeNode(INT) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(INT)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(INT))
+			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
-			if v.expectedType[0] != NewBaseTypeNode(INT) {
-
-			} else {
-				v.expectedType[0] = NewArrayTypeNode(nil, 1) //Can be any
-			}
+			v.typeChecker.seen(NewBaseTypeNode(INT))
+			v.typeChecker.expectAny()
+			v.typeChecker.expect(ArrayTypeNode{})
 		case ORD:
-			if v.expectedType[0] != NewBaseTypeNode(INT) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(CHAR)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(INT))
+			v.typeChecker.expect(NewBaseTypeNode(CHAR))
 		case CHR:
-			if v.expectedType[0] != NewBaseTypeNode(CHAR) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(INT)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(CHAR))
+			v.typeChecker.seen(NewBaseTypeNode(INT))
 		}
 	case BinaryOperatorNode:
 		switch node.op {
 		case MUL, DIV, MOD, ADD, SUB:
-			if v.expectedType[0] != NewBaseTypeNode(INT) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(INT)
-				v.expectedType[0] = NewBaseTypeNode(INT)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(INT))
+			v.typeChecker.expect(NewBaseTypeNode(INT))
+			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case GT, GEQ, LT, LEQ:
-			if v.expectedType[0] != NewBaseTypeNode(BOOL) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(INT) //Or Char
-				v.expectedType[0] = NewBaseTypeNode(INT) //Has to be the same as the first
-			}
+			v.typeChecker.seen(NewBaseTypeNode(BOOL))
+			v.typeChecker.expectTwiceSame(NewSetExpectance([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)}))
 		case EQ, NEQ:
-			if v.expectedType[0] != NewBaseTypeNode(BOOL) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(BOOL) //Or any other
-				v.expectedType[0] = NewBaseTypeNode(BOOL) //The same as the first
-			}
+			v.typeChecker.seen(NewBaseTypeNode(BOOL))
+			v.typeChecker.expectTwiceSame(NewAnyExpectance())
 		case AND, OR:
-			if v.expectedType[0] != NewBaseTypeNode(BOOL) {
-
-			} else {
-				v.expectedType[0] = NewBaseTypeNode(BOOL)
-				v.expectedType[0] = NewBaseTypeNode(BOOL)
-			}
+			v.typeChecker.seen(NewBaseTypeNode(BOOL))
+			v.typeChecker.expect(NewBaseTypeNode(BOOL))
+			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		}
 	case []StatementNode:
 		v.symbolTable.MoveDownScope()
 	default:
-		fmt.Println("UnknownNode")
+		//fmt.Println("UnknownNode")
 	}
 	return v
 }

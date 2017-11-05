@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"ast"
 )
 
 func number(s string) string {
@@ -38,7 +39,8 @@ func main() {
 		fmt.Println("Error: No file provided")
 	}
 	if *semanticCheck {
-
+		checker := ast.NewSemanticCheck()
+		ast.Walk(checker, tree)
 	}
 	if *printTree {
 		fmt.Println("-- Printing AST...")

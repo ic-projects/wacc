@@ -74,7 +74,7 @@ class TestSuite
     ast_file = File.dirname(source) + "/" +  File.basename(source, ".wacc") + ".ast"
     expected = File.read(ast_file)
     run_results = Utils.run3("/usr/bin/timeout",
-                       ["--kill-after=5", "3", @compile, "-t", source],
+                       ["--kill-after=5", "3", @compile, "-t" , "-s", source],
                        nil, 1024 * 1024 * 100)
     expected_exit = "0"
     if(expected =~ /#\s?Exit:\n#\s?(\d+)\s?\n/)
