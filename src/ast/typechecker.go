@@ -48,6 +48,21 @@ func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) {
 	check.expect(t)
 }
 
+type RepeatExpectance struct {
+	exp Expectance
+}
+
+func NewRepeatExpectance(exp Expectance) RepeatExpectance {
+	return RepeatExpectance{
+		exp: exp,
+	}
+}
+
+func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) {
+	exp.exp.seen(check, t)
+	check.stack = append(check.stack, exp)
+}
+
 type AnyExpectance struct {}
 
 func NewAnyExpectance() AnyExpectance {
@@ -81,7 +96,6 @@ func (check *TypeChecker) seen(t TypeNode) {
 	check.stack = check.stack[:len(check.stack) - 1]
 
 
-
 	expectance.seen(check, StripType(t))
 }
 
@@ -106,12 +120,23 @@ func typeErr(got TypeNode, validTypes map[TypeNode] bool) {
 	os.Exit(200)
 }
 
+func (check *TypeChecker) forcePop() {
+	check.stack = check.stack[:len(check.stack) - 1]
+}
+
 func (check *TypeChecker) expectAny() {
 	check.stack = append(check.stack, NewAnyExpectance())
 }
 
 func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 	check.stack = append(check.stack, NewTwiceSameExpectance(ex))
+}
+
+func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Adding repeat %s\n", t))
+	fmt.Println(b.String())
+	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
 }
 
 func (check *TypeChecker) expect(t TypeNode) {

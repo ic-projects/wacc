@@ -43,10 +43,8 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 
 		switch ty := node.t.(type) {
 		case ArrayTypeNode:
-			//needs fixing
-			for i:=0; i < ty.dim; i++ {
-				v.typeChecker.expect(ty.t)
-			}
+			// TODO FIX FOR NESTED ARRAYS
+			v.typeChecker.expectRepeatUntilForce(ty.t)
 			v.typeChecker.expect(ArrayTypeNode{})
 		case PairTypeNode:
 			v.typeChecker.expect(ty.t2)
@@ -185,6 +183,8 @@ func (v SemanticCheck) Leave(programNode ProgramNode) Visitor {
 		v.symbolTable.MoveUpScope()
 	case FunctionNode:
 		v.symbolTable.MoveUpScope()
+	case ArrayLiteralNode:
+		v.typeChecker.forcePop()
 	}
 	return v
 }
