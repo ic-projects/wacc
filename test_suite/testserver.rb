@@ -9,7 +9,7 @@ require 'testsuite_runner.rb'
 require 'servlets.rb'
 
 STATIC_PATH           = File.absolute_path(File.join(File.dirname(__FILE__), "lib", "static"))
-TEST_CASES_PATH       = File.absolute_path(File.join(File.dirname(__FILE__), "test_cases"))
+TEST_CASES_PATH       = File.absolute_path(File.join(File.dirname(__FILE__), "syntax_test_cases"))
 
 DEFAULT_PORT = 18000
 
