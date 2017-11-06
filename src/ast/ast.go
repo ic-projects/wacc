@@ -600,6 +600,7 @@ const (
 	CHAR
 	STRING
 	PAIR
+	VOID
 )
 
 func (t BaseType) String() string {
@@ -614,6 +615,8 @@ func (t BaseType) String() string {
 		return "string"
 	case PAIR:
 		return ""
+	case VOID:
+		return "int"
 	}
 	return ""
 }

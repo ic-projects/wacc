@@ -1,13 +1,13 @@
 package main
 
 import (
+	"ast"
 	"bytes"
 	"flag"
 	"fmt"
 	"os"
 	"path"
 	"strings"
-	"ast"
 )
 
 func number(s string) string {
