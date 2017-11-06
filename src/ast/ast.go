@@ -145,7 +145,19 @@ func NewPosition(lineNumber int, colNumber int, offset int) Position {
 }
 
 func (p Position) String() string {
-	return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, p.colNumber, p.offset)
+	colNum := p.colNumber
+	if colNum != 0 {
+		colNum--
+	}
+
+	if DEBUG_MODE {
+		offsetNum := p.offset
+		if offsetNum != 0 {
+			offsetNum--
+		}
+		return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, colNum, offsetNum)
+	}
+	return fmt.Sprintf("line %d, column %d", p.lineNumber, colNum)
 }
 
 /**** StatementNodes ****/

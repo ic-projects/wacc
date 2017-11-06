@@ -9,12 +9,14 @@ import (
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
+	Errors []TypeError
 }
 
-func NewSemanticCheck() SemanticCheck {
-	return SemanticCheck{
+func NewSemanticCheck() *SemanticCheck {
+	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
 		typeChecker: NewTypeChecker(),
+		Errors: make([]TypeError, 0),
 	}
 }
 
@@ -37,7 +39,7 @@ func (e TypeError) String() string {
 	for key, _ := range e.expected {
 		b.WriteString(fmt.Sprintf("%s ", key))
 	}
-	b.WriteString(fmt.Sprintf("but got type %s at %s\n", e.got, e.pos))
+	b.WriteString(fmt.Sprintf("but got type %s at %s", e.got, e.pos))
 	return b.String()
 }
 
@@ -46,7 +48,7 @@ func (e TypeError) addPos(pos Position) TypeError {
 	return e
 }
 
-func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
+func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	var typeError TypeError
 	switch node := programNode.(type) {
 	case Program:
@@ -246,14 +248,11 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	}
 
 	if typeError.got != nil {
-		fmt.Println(typeError)
-		os.Exit(200)
+		v.Errors = append(v.Errors, typeError)
 	}
-
-	return v
 }
 
-func (v SemanticCheck) Leave(programNode ProgramNode) Visitor {
+func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	switch programNode.(type) {
 	case []StatementNode:
 		v.symbolTable.MoveUpScope()
@@ -263,5 +262,4 @@ func (v SemanticCheck) Leave(programNode ProgramNode) Visitor {
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	}
-	return v
 }

@@ -41,6 +41,18 @@ func main() {
 	if *semanticCheck {
 		checker := ast.NewSemanticCheck()
 		ast.Walk(checker, tree)
+
+		// Print out all errors that occur
+		if len(checker.Errors) > 0 {
+			for i, e := range checker.Errors {
+				if (i > 5) {
+					fmt.Printf("And %d other errors", len(checker.Errors))
+					break
+				}
+				fmt.Println(e)
+			}
+			os.Exit(200)
+		}
 	}
 	if *printTree {
 		fmt.Println("-- Printing AST...")
