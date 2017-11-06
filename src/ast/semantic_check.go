@@ -1,7 +1,7 @@
 package ast
 
 type SemanticCheck struct {
-	symbolTable SymbolTable
+	symbolTable *SymbolTable
 	typeChecker *TypeChecker
 }
 
