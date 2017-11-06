@@ -36,6 +36,7 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 	case DeclareNode:
 		Walk(visitor, node.rhs)
 	case AssignNode:
+		Walk(visitor, node.lhs)
 		Walk(visitor, node.rhs)
 	case ReadNode:
 		Walk(visitor, node.expr)
