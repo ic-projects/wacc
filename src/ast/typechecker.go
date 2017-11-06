@@ -1,9 +1,8 @@
 package ast
 
 import (
-	"fmt"
-	"os"
 	"bytes"
+	"fmt"
 )
 
 var DEBUG_MODE = false
