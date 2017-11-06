@@ -22,7 +22,7 @@ func number(s string) string {
 
 func main() {
 	printTree := flag.Bool("t", false, "Prints the AST created by the parser")
-	semanticCheck := flag.Bool("s", false, "Parse the file for syntax and symantic errors and generate an AST")
+	semanticCheck := flag.Bool("s", true, "Parse the file for syntax and symantic errors and generate an AST")
 	filepath := os.Args[len(os.Args)-1]
 	flag.Parse()
 	var tree interface{}
