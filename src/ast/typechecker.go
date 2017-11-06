@@ -9,11 +9,11 @@ import (
 var DEBUG_MODE = false
 
 type Expectance interface {
-	seen(*TypeChecker, TypeNode)
+	seen(*TypeChecker, TypeNode) TypeError
 }
 
 type SetExpectance struct {
-	set map[TypeNode] bool
+	set map[TypeNode]bool
 }
 
 func NewSetExpectance(ts []TypeNode) SetExpectance {
@@ -39,30 +39,84 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 			break
 		}
 	}
-	// setHasNil is true when validTypes was because of free / len
-	// findNil is true when checking becuase of ArrayLiteralNode [1,2,3...]
+
 	if findNil {
-		check.expectRepeatUntilForce(found.t)
+		if found.dim == 1 {
+			check.expectRepeatUntilForce(found.t)
+		} else {
+			check.expectRepeatUntilForce(NewArrayTypeNode(found.t, found.dim-1))
+		}
 		return true
 	}
 	return setHasNil || match
 }
 
-func (exp SetExpectance) seen(check *TypeChecker, t TypeNode) {
+func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t PairTypeNode) bool {
+	_, match := validTypes[t]
+	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]
+	nilPair := PairTypeNode{}
+	findNil := t == nilPair
+	var nilMatch PairTypeNode
+	hasNilMatch := false
+	for key, _ := range validTypes {
+		if StripType(key) == nilPair {
+			nilMatch = key.(PairTypeNode)
+			hasNilMatch = true
+			break
+		}
+	}
+
+	if findNil {
+		if !hasNilMatch {
+			return false
+		}
+		if !basePairMatch {
+			check.expect(nilMatch.t2)
+			check.expect(nilMatch.t1)
+		}
+		return true
+	}
+
+	return match || matchBase || hasNilMatch
+}
+
+func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
 
-	switch t.(type) {
+	switch t := typeNode.(type) {
 	case ArrayTypeNode:
-		found := arrayCase(check, validTypes, t.(ArrayTypeNode))
+		found := arrayCase(check, validTypes, t)
 		if !found {
-			typeErr(t, validTypes)
+			return NewTypeError(t, validTypes)
+		}
+	case PairTypeNode:
+		found := pairCase(check, validTypes, false, t)
+		if !found {
+			return NewTypeError(t, validTypes)
+		}
+	case BaseTypeNode:
+		if t.t == PAIR {
+			_, found := validTypes[t]
+			if !found {
+				found = pairCase(check, validTypes, true, PairTypeNode{})
+			}
+			if !found {
+				return NewTypeError(t, validTypes)
+			}
+		} else {
+			_, found := validTypes[t]
+			if !found {
+				return NewTypeError(t, validTypes)
+			}
 		}
 	default:
 		_, found := validTypes[t]
 		if !found {
-			typeErr(t, validTypes)
+			return NewTypeError(t, validTypes)
 		}
 	}
+
+	return TypeError{}
 }
 
 type TwiceSameExpectance struct {
@@ -75,9 +129,10 @@ func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 	}
 }
 
-func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) {
-	exp.exp.seen(check, t)
+func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
+	typeError := exp.exp.seen(check, t)
 	check.expect(t)
+	return typeError
 }
 
 type RepeatExpectance struct {
@@ -90,18 +145,20 @@ func NewRepeatExpectance(exp Expectance) RepeatExpectance {
 	}
 }
 
-func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) {
-	exp.exp.seen(check, t)
+func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	check.stack = append(check.stack, exp)
+	return exp.exp.seen(check, t) // ERROR: Probably this
 }
 
-type AnyExpectance struct {}
+type AnyExpectance struct{}
 
 func NewAnyExpectance() AnyExpectance {
 	return AnyExpectance{}
 }
 
-func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) {}
+func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
+	return TypeError{}
+}
 
 type TypeChecker struct {
 	stack []Expectance
@@ -114,21 +171,22 @@ func NewTypeChecker() *TypeChecker {
 	}
 }
 
-
-func (check *TypeChecker) seen(t TypeNode) {
+func (check *TypeChecker) seen(t TypeNode) TypeError {
 	if len(check.stack) < 1 {
-		//Oh no
+		fmt.Println("Oh no! Seen type when nun expected.")
+		return TypeError{}
 	}
 
 	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Found %s\n", t))
-	//fmt.Println(b.String())
+	b.WriteString(fmt.Sprintf("Seen %s\n", t))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
 
-	expectance := check.stack[len(check.stack) - 1]
-	check.stack = check.stack[:len(check.stack) - 1]
+	expectance := check.stack[len(check.stack)-1]
+	check.stack = check.stack[:len(check.stack)-1]
 
-
-	expectance.seen(check, t)
+	return expectance.seen(check, t)
 }
 
 func StripType(t TypeNode) TypeNode {
@@ -141,19 +199,13 @@ func StripType(t TypeNode) TypeNode {
 	return t
 }
 
-func typeErr(got TypeNode, validTypes map[TypeNode] bool) {
-	var b bytes.Buffer
-	b.WriteString("Expected type ")
-	for key, _ := range validTypes {
-			b.WriteString(fmt.Sprintf("%s ", key))
-	}
-	b.WriteString(fmt.Sprintf("but got type %s\n", got))
-	fmt.Println(b.String())
-	os.Exit(200)
-}
-
 func (check *TypeChecker) forcePop() {
-	check.stack = check.stack[:len(check.stack) - 1]
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Force pop\n"))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
+	check.stack = check.stack[:len(check.stack)-1]
 }
 
 func (check *TypeChecker) expectAny() {
