@@ -20,19 +20,24 @@ func NewSemanticCheck() SemanticCheck {
 func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 	switch node := programNode.(type) {
 	case Program:
-
-	case FunctionNode:
-		_, ok := v.symbolTable.SearchForFunction(node.ident.ident)
-		if ok {
-
-		} else {
-			v.symbolTable.AddFunction(node.ident.ident, node)
+		for _, f := range node.functions {
+			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
+			if ok {
+				fmt.Printf("Redefined function name")
+				os.Exit(200)
+			} else {
+				v.symbolTable.AddFunction(f.ident.ident, f)
+			}
 		}
+	case FunctionNode:
 		v.symbolTable.MoveDownScope()
+		v.typeChecker.expectRepeatUntilForce(node.t)
 	case ParameterNode:
 		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if ok {
 
+			fmt.Printf("Identifier already exists in current scope")
+			os.Exit(200)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
@@ -81,6 +86,8 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		identDec, ok := v.symbolTable.SearchForIdent(node.ident)
 		if !ok {
 
+			fmt.Printf("Undeclared variable %s", node.ident)
+			os.Exit(200)
 		} else {
 			switch ty := identDec.t.(type) {
 			case PairTypeNode:
@@ -189,6 +196,7 @@ func (v SemanticCheck) Leave(programNode ProgramNode) Visitor {
 		v.symbolTable.MoveUpScope()
 	case FunctionNode:
 		v.symbolTable.MoveUpScope()
+		v.typeChecker.forcePop()
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	}
