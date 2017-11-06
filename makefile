@@ -9,7 +9,7 @@ PIGEON = $(GOBIN)/pigeon
 GOCYCLO = $(GOBIN)/gocyclo
 MISSPELL = $(GOBIN)/misspell
 
-SRC = src/main.go src/ast/ast.go
+SRC = src/main.go src/ast/*.go
 BUILD = src/wacc.go
 
 all: pigeon build

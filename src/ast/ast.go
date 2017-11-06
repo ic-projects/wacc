@@ -144,6 +144,10 @@ func NewPosition(lineNumber int, colNumber int, offset int) Position {
 	}
 }
 
+func (p Position) String() string {
+	return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, p.colNumber, p.offset)
+}
+
 /**** StatementNodes ****/
 
 type StatementNode interface {
@@ -413,6 +417,13 @@ func (node ScopeNode) String() string {
 type LHSNode interface {
 }
 
+type LHSNodeStruct struct {
+}
+
+func NewLHSNode() LHSNode {
+	return LHSNodeStruct{}
+}
+
 type IdentifierNode struct {
 	pos   Position
 	ident string
@@ -426,6 +437,9 @@ func NewIdentifierNode(pos Position, ident string) IdentifierNode {
 }
 
 func (node IdentifierNode) String() string {
+	if node.ident == "" {
+		return "- main"
+	}
 	return fmt.Sprintf("- %s", node.ident)
 }
 
@@ -494,6 +508,13 @@ func (node ArrayElementNode) String() string {
 /**** RHSNodes ****/
 
 type RHSNode interface {
+}
+
+type RHSNodeStruct struct {
+}
+
+func NewRHSNode() RHSNode {
+	return RHSNodeStruct{}
 }
 
 // ExpressionNode
@@ -583,6 +604,7 @@ const (
 	CHAR
 	STRING
 	PAIR
+	VOID
 )
 
 func (t BaseType) String() string {
@@ -596,7 +618,12 @@ func (t BaseType) String() string {
 	case STRING:
 		return "string"
 	case PAIR:
+		if DEBUG_MODE {
+			return "basePair"
+		}
 		return ""
+	case VOID:
+		return "int"
 	}
 	return ""
 }
@@ -649,6 +676,9 @@ func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
 }
 
 func (node PairTypeNode) String() string {
+	if DEBUG_MODE {
+		return fmt.Sprintf("pair(%s,%s)", node.t1, node.t2)
+	}
 	return fmt.Sprintf("%s%s", node.t1, node.t2)
 }
 

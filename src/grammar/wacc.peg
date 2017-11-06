@@ -17,8 +17,8 @@
 PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
     main := ast.NewFunctionNode(
         c.pos.getPosition(),
-        ast.NewBaseTypeNode(ast.INT),
-        ast.NewIdentifierNode(c.pos.getPosition(), "main"),
+        ast.NewBaseTypeNode(ast.VOID),
+        ast.NewIdentifierNode(c.pos.getPosition(), ""),
         []ast.ParameterNode{},
         stat.([]ast.StatementNode),
     )

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ast"
 	"bytes"
 	"flag"
 	"fmt"
@@ -38,7 +39,8 @@ func main() {
 		fmt.Println("Error: No file provided")
 	}
 	if *semanticCheck {
-
+		checker := ast.NewSemanticCheck()
+		ast.Walk(checker, tree)
 	}
 	if *printTree {
 		fmt.Println("-- Printing AST...")
