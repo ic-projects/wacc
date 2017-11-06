@@ -82,7 +82,7 @@ class TestSuite
     end
 
     if(expected_exit == "100" || expected_exit == "200")
-      passed = (run_results[:exit_status].to_s == expected_exit)
+      passed = (run_results[:exit_status].to_s == expected_exit && expected == run_results[:stdout])
     elsif(expected_exit != "0")
       passed = (expected == run_results[:stdout])
       # Uncomment to check for proper exit code returns and runtime errors

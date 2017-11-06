@@ -50,8 +50,8 @@ function Results($scope, $http, $timeout) {
       var severities = { "loading...": "info"
                        , "not_run_yet": "info"
                        , "running": "warning"
-                       , "ran": "info"
-                       , "error": "warning"
+                       , "ran": "success"
+                       , "error": "default"
                        };
     } else {
     var severities = { "loading...": "info"
@@ -125,13 +125,10 @@ function Results($scope, $http, $timeout) {
 
   $scope.bar = function(success) {
     if(success) {
-      if(window.qiang){
-        return "primary";
-      }
-        return "success";
+      return "success";
     } else {
       if(window.qiang){
-        return "warning";
+        return "default";
       }
       return "danger";
     }
@@ -141,14 +138,11 @@ function Results($scope, $http, $timeout) {
       result = $scope.status.test_results[name];
       if (result) {
         if (result.passed) {
-          if(window.qiang){
-            return "info";
-          }
-            return "success";
+          return "success";
         }
 
         if(window.qiang){
-          return "warning";
+          return "default";
         }
         return "important";
       }
@@ -159,13 +153,10 @@ function Results($scope, $http, $timeout) {
 
   $scope.qiang = function(passed) {
         if (passed) {
-          if(window.qiang){
-            return "info";
-          }
-            return "success";
+          return "success";
         } else {
           if(window.qiang){
-            return "warning";
+            return "default";
           }
           return "important";
         }
