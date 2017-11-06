@@ -165,6 +165,27 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		typeError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.pos)
 	case NewPairNode:
 		typeError = v.typeChecker.seen(PairTypeNode{}).addPos(node.pos)
+	case FunctionCallNode:
+		f, ok := v.symbolTable.SearchForFunction(node.ident.ident)
+		if !ok {
+			fmt.Printf("Undeclared function name")
+			os.Exit(200)
+		} else if len(f.params) != len(node.exprs) {
+			typeError = v.typeChecker.seen(f.t).addPos(node.pos)
+			fmt.Printf("Incorrect number of parameters in")
+			os.Exit(200)
+		} else {
+			typeError = v.typeChecker.seen(f.t).addPos(node.pos)
+			for i := len(f.params) - 1; i >= 0; i-- {
+				typeNode := f.params[i].t
+				if baseType, ok := typeNode.(BaseTypeNode); ok {
+					if baseType.t == STRING {
+						typeNode = NewArrayTypeNode(NewBaseTypeNode(CHAR), 1)
+					}
+				}
+				v.typeChecker.expect(typeNode)
+			}
+		}
 	case BaseTypeNode:
 
 	case ArrayTypeNode:
