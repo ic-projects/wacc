@@ -46,7 +46,7 @@ golint:
 	@go get github.com/golang/lint/golint
 
 pigeon:
-	@go get github.com/mna/pigeon
+	@go get github.com/ic-projects/pigeon
 
 gocyclo:
 	@go get github.com/fzipp/gocyclo
