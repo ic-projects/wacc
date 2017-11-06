@@ -1,5 +1,9 @@
 package ast
 
+import (
+	"fmt"
+)
+
 type SymbolTable struct {
 	head         SymbolTableNode
 	currentScope *SymbolTableNode
@@ -87,4 +91,25 @@ func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode)
 
 func (table *SymbolTable) AddFunction(identifier string, node FunctionNode) {
 	table.functions[identifier] = node
+}
+
+func (node SymbolTableNode) Print() {
+	for _, ident := range node.scope {
+		fmt.Printf("%s of type %s\n", ident.ident, ident.t)
+	}
+	fmt.Println("Parent Scope ---------------------")
+	if node.parentScope != nil {
+		node.parentScope.Print()
+	}
+}
+
+func (table *SymbolTable) Print() {
+	fmt.Println("------- Begin Symbol table -------")
+	fmt.Println("Functions ------------------------")
+	for _, f := range table.functions {
+		fmt.Printf("%s of type %s\n", f.ident, f.t)
+	}
+	fmt.Println("Scopes ---------------------------")
+	table.currentScope.Print()
+	fmt.Println("-------- End Symbol table --------")
 }
