@@ -1,7 +1,9 @@
 function Results($scope, $http, $timeout) {
   var self = this;
 
-  $scope.status = { status: "loading..." }
+  $scope.status = {
+    status: "loading..."
+  }
 
   self.load_status = function() {
     $http.get('api/status').success(function(data) {
@@ -17,7 +19,9 @@ function Results($scope, $http, $timeout) {
       console.log("error on load!");
       console.log(data);
       console.log(s);
-      $scope.status = { status: "error" }
+      $scope.status = {
+        status: "error"
+      }
     });
   }
 
@@ -32,7 +36,9 @@ function Results($scope, $http, $timeout) {
 
   $scope.run = function() {
     confettiful.deactivate()
-    $scope.status = { status: "loading..." };
+    $scope.status = {
+      status: "loading..."
+    };
     $http.post('api/run').success(function() {
       self.load_status();
     });
@@ -48,20 +54,22 @@ function Results($scope, $http, $timeout) {
   };
 
   $scope.status_as_severity = function() {
-    if(window.qiang) {
-      var severities = { "loading...": "info"
-                       , "not_run_yet": "info"
-                       , "running": "warning"
-                       , "ran": "success"
-                       , "error": "default"
-                       };
+    if (window.qiang) {
+      var severities = {
+        "loading...": "info",
+        "not_run_yet": "info",
+        "running": "warning",
+        "ran": "success",
+        "error": "default"
+      };
     } else {
-    var severities = { "loading...": "info"
-                     , "not_run_yet": "info"
-                     , "running": "warning"
-                     , "ran": "success"
-                     , "error": "important"
-                     };
+      var severities = {
+        "loading...": "info",
+        "not_run_yet": "info",
+        "running": "warning",
+        "ran": "success",
+        "error": "important"
+      };
     }
     return severities[$scope.status.status];
   };
@@ -74,13 +82,13 @@ function Results($scope, $http, $timeout) {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
 
       var count = 0;
-      for(key in $scope.status.test_results) {
+      for (key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
         if (value.passed) {
           count++;
         }
       }
-      if(count == $scope.status.test_cases.length && count != 0) {
+      if (count == $scope.status.test_cases.length && count != 0) {
         confettiful.activate()
       } else {
         confettiful.deactivate()
@@ -93,7 +101,7 @@ function Results($scope, $http, $timeout) {
   $scope.percent_tests_partial_success = function() {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
       var count = 0;
-      for(key in $scope.status.test_results) {
+      for (key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
         var e = false;
 
@@ -109,7 +117,7 @@ function Results($scope, $http, $timeout) {
   $scope.percent_tests_failure = function() {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
       var count = 0;
-      for(key in $scope.status.test_results) {
+      for (key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
         var e = value.compile.passed;
 
@@ -123,7 +131,7 @@ function Results($scope, $http, $timeout) {
   }
 
   $scope.toggle_colorblindness = function() {
-    if(window.qiang) {
+    if (window.qiang) {
       window.qiang = !window.qiang
     } else {
       window.qiang = true
@@ -131,10 +139,10 @@ function Results($scope, $http, $timeout) {
   }
 
   $scope.bar = function(success) {
-    if(success) {
+    if (success) {
       return "success";
     } else {
-      if(window.qiang){
+      if (window.qiang) {
         return "default";
       }
       return "danger";
@@ -148,7 +156,7 @@ function Results($scope, $http, $timeout) {
           return "success";
         }
 
-        if(window.qiang){
+        if (window.qiang) {
           return "default";
         }
         return "important";
@@ -159,14 +167,14 @@ function Results($scope, $http, $timeout) {
   }
 
   $scope.qiang = function(passed) {
-        if (passed) {
-          return "success";
-        } else {
-          if(window.qiang){
-            return "default";
-          }
-          return "important";
-        }
+    if (passed) {
+      return "success";
+    } else {
+      if (window.qiang) {
+        return "default";
+      }
+      return "important";
+    }
   }
 
   $scope.test_case_as_label = function(name) {
@@ -213,11 +221,15 @@ function Results($scope, $http, $timeout) {
   self.load_status();
 
   $scope.exit_status_name = function(s) {
-    switch(s) {
-      case 0:   return "OK";
-      case 139: return "segfault";
-      case 124: return "timeout";
-      default:  return "unknown";
+    switch (s) {
+      case 0:
+        return "OK";
+      case 139:
+        return "segfault";
+      case 124:
+        return "timeout";
+      default:
+        return "unknown";
     }
   }
 }
