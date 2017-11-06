@@ -26,9 +26,9 @@ func main() {
 	flag.Parse()
 	var tree interface{}
 	if len(os.Args) > 1 {
+		fmt.Println("-- Compiling...")
 		var err error
 		tree, err = ParseFile(filepath)
-		fmt.Println("-- Compiling...")
 		if err != nil {
 			fmt.Println("Errors detected during compilation! Exit code 100 returned.")
 			fmt.Println(err)
