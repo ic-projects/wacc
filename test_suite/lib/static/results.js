@@ -31,6 +31,7 @@ function Results($scope, $http, $timeout) {
   }
 
   $scope.run = function() {
+    confettiful.deactivate()
     $scope.status = { status: "loading..." };
     $http.post('api/run').success(function() {
       self.load_status();
@@ -38,6 +39,7 @@ function Results($scope, $http, $timeout) {
   }
 
   $scope.run_one = function(index) {
+    confettiful.deactivate()
     $scope.status.status = "loading...";
     var tc = $scope.status.test_cases[index];
     $http.post('api/run_one' + tc).success(function() {
@@ -77,6 +79,11 @@ function Results($scope, $http, $timeout) {
         if (value.passed) {
           count++;
         }
+      }
+      if(count == $scope.status.test_cases.length && count != 0) {
+        confettiful.activate()
+      } else {
+        confettiful.deactivate()
       }
       return 100 * count / $scope.status.test_cases.length;
     }
