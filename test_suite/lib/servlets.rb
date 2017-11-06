@@ -60,7 +60,7 @@ class ServletTestSourceFile < WEBrick::HTTPServlet::AbstractServlet
     if target_file.start_with?(@test_cases_path) and
        target_file.end_with?(".wacc") then
 
-      contents = IO.popen(["/usr/bin/nl", "-w3", target_file]) { |io| io.read }
+      contents = IO.popen(["/usr/bin/nl", "-w3", "-ba", target_file]) { |io| io.read }
 
       resp['content-type'] = 'text/plain';
       resp.body = contents
