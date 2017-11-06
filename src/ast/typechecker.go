@@ -6,6 +6,8 @@ import (
 	"bytes"
 )
 
+var DEBUG_MODE = false
+
 type Expectance interface {
 	seen(*TypeChecker, TypeNode)
 }
@@ -155,24 +157,38 @@ func (check *TypeChecker) forcePop() {
 }
 
 func (check *TypeChecker) expectAny() {
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Expecting any\n"))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
 	check.stack = append(check.stack, NewAnyExpectance())
 }
 
 func (check *TypeChecker) expectTwiceSame(ex Expectance) {
+	var b bytes.Buffer
+	b.WriteString(fmt.Sprintf("Expecting twice\n"))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
 	check.stack = append(check.stack, NewTwiceSameExpectance(ex))
 }
 
 func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
 	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Adding repeat %s\n", t))
-	//fmt.Println(b.String())
+	b.WriteString(fmt.Sprintf("Expecting repeat %s\n", t))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
 	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
 }
 
 func (check *TypeChecker) expect(t TypeNode) {
 	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Adding %s\n", t))
-	//fmt.Println(b.String())
+	b.WriteString(fmt.Sprintf("Expecting %s\n", t))
+	if DEBUG_MODE {
+		fmt.Println(b.String())
+	}
 
 	check.expectSet([]TypeNode{t})
 }
