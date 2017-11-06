@@ -1,5 +1,10 @@
 package ast
 
+import (
+	"fmt"
+	"os"
+)
+
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
