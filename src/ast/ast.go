@@ -144,6 +144,10 @@ func NewPosition(lineNumber int, colNumber int, offset int) Position {
 	}
 }
 
+func (p Position) String() string {
+	return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, p.colNumber, p.offset)
+}
+
 /**** StatementNodes ****/
 
 type StatementNode interface {
