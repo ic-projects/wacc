@@ -80,6 +80,11 @@ func (table *SymbolTable) SearchForIdent(identifier string) (IdentifierDeclarati
 	return IdentifierDeclaration{}, false
 }
 
+func (table *SymbolTable) SearchForIdentInCurrentScope(identifier string) (IdentifierDeclaration, bool) {
+	node, ok := table.currentScope.scope[identifier]
+	return node, ok
+}
+
 func (table *SymbolTable) SearchForFunction(identifier string) (FunctionNode, bool) {
 	node, ok := table.functions[identifier]
 	return node, ok

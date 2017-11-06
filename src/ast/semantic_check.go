@@ -33,9 +33,10 @@ func (v SemanticCheck) Visit(programNode ProgramNode) Visitor {
 		}
 	case SkipNode:
 	case DeclareNode:
-		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
+		_, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
 		if ok {
-
+			fmt.Printf("Identifier already exists in current scope")
+			os.Exit(200)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
