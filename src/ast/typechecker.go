@@ -146,7 +146,7 @@ func NewRepeatExpectance(exp Expectance) RepeatExpectance {
 
 func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	check.stack = append(check.stack, exp)
-	return exp.exp.seen(check, t) // ERROR: Probably this
+	return exp.exp.seen(check, t)
 }
 
 type AnyExpectance struct{}

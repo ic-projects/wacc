@@ -37,7 +37,7 @@ func (e TypeError) String() string {
 	var b bytes.Buffer
 	b.WriteString("Expected type ")
 	for key, _ := range e.expected {
-		b.WriteString(fmt.Sprintf("%s ", key))
+		b.WriteString(fmt.Sprintf("%s or ", key))
 	}
 	b.WriteString(fmt.Sprintf("but got type %s at %s", e.got, e.pos))
 	return b.String()
