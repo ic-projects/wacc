@@ -6,12 +6,15 @@ import (
 	"os"
 )
 
+// SemanticCheck is a struct that implements EntryExitVisitor to be called with
+// Walk. It stores a SymbolTable, a TypeChecker, and a list of GenericErrors.
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
 	Errors      []GenericError
 }
 
+// NewSemanticCheck returns an initialised SemanticCheck
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
@@ -20,25 +23,32 @@ func NewSemanticCheck() *SemanticCheck {
 	}
 }
 
+// GenericError is an interface that errors implement, which allows for elegent
+// printing of errors.
 type GenericError interface {
 	String() string
 	Pos() Position
 }
 
+// TypeError is a struct for a TypeError, storing a list of acceptable TypeNode,
+// and the actual (wrong) TypeNode the semantic checker saw.
 type TypeError struct {
 	pos      Position
 	got      TypeNode
 	expected map[TypeNode]bool
 }
 
+// Pos returns the position of the error.
 func (e TypeError) Pos() Position {
 	return e.pos
 }
 
+// Pos returns the position of the error.
 func (e DeclarationError) Pos() Position {
 	return e.pos
 }
 
+// String prints the error in a nice format.
 func (e TypeError) String() string {
 	var b bytes.Buffer
 	b.WriteString("Expected type ")
@@ -56,6 +66,7 @@ func (e TypeError) String() string {
 	return b.String()
 }
 
+// NewTypeError returns an initialised TypeError.
 func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
 	return TypeError{
 		got:      got,
@@ -63,11 +74,14 @@ func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
 	}
 }
 
+// addPos is used to add the Position to the TypeError.
 func (e TypeError) addPos(pos Position) TypeError {
 	e.pos = pos
 	return e
 }
 
+// DeclarationError is a struct for a declaration error, for example, using an
+// identifier before it is declared. It implements GenericError.
 type DeclarationError struct {
 	pos      Position
 	isFunction bool
@@ -75,6 +89,7 @@ type DeclarationError struct {
 	identifier string
 }
 
+// NewDeclarationError returns an initialised DeclarationError.
 func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
 	return DeclarationError{
 		pos: pos,
@@ -84,6 +99,7 @@ func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifi
 	}
 }
 
+// String prints the error in a nice format.
 func (e DeclarationError) String() string {
 	var b bytes.Buffer
 	if e.isFunction {
@@ -102,16 +118,20 @@ func (e DeclarationError) String() string {
 	return b.String()
 }
 
+// PrintSymbolTable prints the symbolTable.
 func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
 
-
+// Visit will apply the correct rule for the programNode given, to be used with
+// Walk.
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	var typeError TypeError
 	var declarationError DeclarationError
 	switch node := programNode.(type) {
 	case Program:
+    // Add the functions when hitting program instead of each function so that
+    // functions can be declared in any order.
 		for _, f := range node.functions {
 			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
 			if ok {
@@ -121,11 +141,11 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			}
 		}
 	case FunctionNode:
+    // Move down scope so that the paramaters are on a new scope.
 		v.symbolTable.MoveDownScope()
 		v.typeChecker.expectRepeatUntilForce(node.t)
 	case ParameterNode:
-		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
-		if ok {
+		if _, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
 			declarationError = NewDeclarationError(node.pos, false, true, node.ident.ident)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
@@ -142,7 +162,6 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
-
 	case ReadNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
 	case FreeNode:
@@ -160,8 +179,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case ScopeNode:
 	case IdentifierNode:
-		identDec, ok := v.symbolTable.SearchForIdent(node.ident)
-		if !ok {
+		if identDec, ok := v.symbolTable.SearchForIdent(node.ident); !ok {
 			declarationError = NewDeclarationError(node.pos, false, false, node.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -169,7 +187,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			typeError = v.typeChecker.seen(identDec.t).addPos(node.pos)
 		}
 	case PairFirstElementNode:
-		// Look up type for pair call seen
+		//  Look up type for pair call seen
 		if identNode, ok := node.expr.(IdentifierNode); !ok {
 			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
 			os.Exit(200)
@@ -194,9 +212,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.expect(identDec.t)
 		}
 	case ArrayElementNode:
-		// Check identifier
-		identDec, ok := v.symbolTable.SearchForIdent(node.ident.ident)
-		if !ok {
+		if identDec, ok := v.symbolTable.SearchForIdent(node.ident.ident); !ok {
 			declarationError = NewDeclarationError(node.pos, false, false, node.ident.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -204,6 +220,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Array access on non-array variable %s", node.ident.ident)
 			os.Exit(200)
 		} else {
+      // If we have an array or a single element (for use in newsted arrays).
 			if dimLeft := arrayNode.dim - len(node.exprs); dimLeft == 0 {
 				typeError = v.typeChecker.seen(arrayNode.t).addPos(node.pos)
 			} else {
@@ -213,14 +230,12 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		for i := 0; i < len(node.exprs); i++ {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}
-
 	case ArrayLiteralNode:
 		typeError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.pos)
 	case NewPairNode:
 		typeError = v.typeChecker.seen(PairTypeNode{}).addPos(node.pos)
 	case FunctionCallNode:
-		f, ok := v.symbolTable.SearchForFunction(node.ident.ident)
-		if !ok {
+		if f, ok := v.symbolTable.SearchForFunction(node.ident.ident); !ok {
 			declarationError = NewDeclarationError(node.pos, true, false, node.ident.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -293,6 +308,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 	}
 
+  // If we have an error, add it to the list of errors.
 	if declarationError != (DeclarationError{}) {
 		v.Errors = append(v.Errors, declarationError)
 	} else if typeError.got != nil {
@@ -300,6 +316,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	}
 }
 
+// Leave will be called to leave the current node.
 func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	switch programNode.(type) {
 	case []StatementNode:
