@@ -175,13 +175,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		} else {
 			typeError = v.typeChecker.seen(f.t).addPos(node.pos)
 			for i := len(f.params) - 1; i >= 0; i-- {
-				typeNode := f.params[i].t
-				if baseType, ok := typeNode.(BaseTypeNode); ok {
-					if baseType.t == STRING {
-						typeNode = NewArrayTypeNode(NewBaseTypeNode(CHAR), 1)
-					}
-				}
-				v.typeChecker.expect(typeNode)
+				v.typeChecker.expect(f.params[i].t)
 			}
 		}
 	case BaseTypeNode:
