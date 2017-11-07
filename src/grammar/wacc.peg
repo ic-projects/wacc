@@ -172,9 +172,11 @@ PAIRELEMTYPE <- (t:BASETYPE array:(_ ARRAYTYPE)*) {
         return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
     }
     return t, nil
+} / (t:PAIRTYPE array:(_ ARRAYTYPE)+) {
+    return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
 } / PAIR
 PAIR <- "pair" {
-  return ast.NewBaseTypeNode(ast.PAIR), nil
+    return ast.NewBaseTypeNode(ast.PAIR), nil
 }
 
 EXPR <- e1:PREC2 e2:(_ OR _ PREC2)* {
