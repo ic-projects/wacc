@@ -8,7 +8,7 @@ import (
 var DEBUG_MODE = false
 
 type Expectance interface {
-	seen(*TypeChecker, TypeNode) TypeError
+	seen(*TypeChecker, TypeNode) *TypeError
 }
 
 type SetExpectance struct {
@@ -79,7 +79,7 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 	return match || matchBase || hasNilMatch
 }
 
-func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
+func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) *TypeError {
 	validTypes := exp.set
 
 	switch t := typeNode.(type) {
@@ -115,7 +115,8 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 		}
 	}
 
-	return TypeError{}
+	// TODO: Should we replace with new(TypeError)?
+	return &TypeError{}
 }
 
 type TwiceSameExpectance struct {
@@ -128,7 +129,7 @@ func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 	}
 }
 
-func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
+func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) *TypeError {
 	typeError := exp.exp.seen(check, t)
 	check.expect(t)
 	return typeError
@@ -144,7 +145,7 @@ func NewRepeatExpectance(exp Expectance) RepeatExpectance {
 	}
 }
 
-func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
+func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) *TypeError {
 	check.stack = append(check.stack, exp)
 	return exp.exp.seen(check, t)
 }
@@ -155,8 +156,8 @@ func NewAnyExpectance() AnyExpectance {
 	return AnyExpectance{}
 }
 
-func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
-	return TypeError{}
+func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) *TypeError {
+	return &TypeError{}
 }
 
 type TypeChecker struct {
@@ -170,10 +171,10 @@ func NewTypeChecker() *TypeChecker {
 	}
 }
 
-func (check *TypeChecker) seen(t TypeNode) TypeError {
+func (check *TypeChecker) seen(t TypeNode) *TypeError {
 	if len(check.stack) < 1 {
 		fmt.Println("Oh no! Seen type when nun expected.")
-		return TypeError{}
+		return &TypeError{}
 	}
 
 	var b bytes.Buffer

@@ -76,16 +76,17 @@ func main() {
 
 				var b bytes.Buffer
 				b.WriteString("\nSemantic Error at ")
-				b.WriteString(fmt.Sprintf("%s\n", e.Pos))
+				b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
 
-				b.WriteString(getLine(filepath, e.Pos.LineNumber()))
-				b.WriteString(strings.Repeat(" ", e.Pos.ColNumber() - 1))
+				// TODO: Remove leading tabs and spaces before printing out line
+				b.WriteString(getLine(filepath, e.Pos().LineNumber()))
+				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()))
 				b.WriteString("^\n")
 
 				b.WriteString("Expected type ")
 				i := 1
-				for t := range e.Expected {
-					if i == len(e.Expected) {
+				for t := range e.Expected() {
+					if i == len(e.Expected()) {
 						b.WriteString(fmt.Sprintf("\"%s\"", t))
 					} else {
 						b.WriteString(fmt.Sprintf("\"%s\" or ", t))
@@ -93,7 +94,7 @@ func main() {
 					i++
 				}
 
-				b.WriteString(fmt.Sprintf(" but got type \"%s\"", e.Got))
+				b.WriteString(fmt.Sprintf(" but got type \"%s\"", e.Got()))
 				fmt.Println(b.String())
 			}
 			os.Exit(200)

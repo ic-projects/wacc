@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 )
@@ -9,14 +8,14 @@ import (
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
-	Errors []TypeError
+	Errors []*TypeError
 }
 
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
 		typeChecker: NewTypeChecker(),
-		Errors: make([]TypeError, 0),
+		Errors: make([]*TypeError, 0),
 	}
 }
 
@@ -26,30 +25,32 @@ type TypeError struct {
 	expected map[TypeNode]bool
 }
 
-func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
-	return TypeError{
+func (e TypeError) Pos() Position {
+	return e.pos
+}
+
+func (e TypeError) Got() TypeNode {
+	return e.got
+}
+
+func (e TypeError) Expected() map[TypeNode]bool {
+	return e.expected
+}
+
+func NewTypeError(got TypeNode, expected map[TypeNode]bool) *TypeError {
+	return &TypeError{
 		got:      got,
 		expected: expected,
 	}
 }
 
-func (e TypeError) String() string {
-	var b bytes.Buffer
-	b.WriteString("Expected type ")
-	for key, _ := range e.expected {
-		b.WriteString(fmt.Sprintf("%s or ", key))
-	}
-	b.WriteString(fmt.Sprintf("but got type %s at %s", e.got, e.pos))
-	return b.String()
-}
-
-func (e TypeError) addPos(pos Position) TypeError {
+func (e *TypeError) addPos(pos Position) *TypeError {
 	e.pos = pos
 	return e
 }
 
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
-	var typeError TypeError
+	typeError := &TypeError{}
 	switch node := programNode.(type) {
 	case Program:
 		for _, f := range node.functions {
@@ -247,7 +248,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 	}
 
-	if typeError.got != nil {
+	if typeError.Got() != nil {
 		v.Errors = append(v.Errors, typeError)
 	}
 }

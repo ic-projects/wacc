@@ -136,6 +136,14 @@ type Position struct {
 	offset     int
 }
 
+func (p Position) LineNumber() int {
+	return p.lineNumber
+}
+
+func (p Position) ColNumber() int {
+	return p.colNumber
+}
+
 func NewPosition(lineNumber int, colNumber int, offset int) Position {
 	return Position{
 		lineNumber: lineNumber,
