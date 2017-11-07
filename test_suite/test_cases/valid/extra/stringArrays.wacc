@@ -1,0 +1,17 @@
+# spooky strings
+
+# Output:
+# true
+# true
+# true
+
+# Program:
+
+begin
+	string a = "fst";
+	string b = "snd";
+	string[] c = [a, b];
+	println c[0] == a ;
+	println c[0][1] == 'f';
+	println c[1][2] == 'd'
+end
