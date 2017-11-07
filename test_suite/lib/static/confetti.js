@@ -15,7 +15,7 @@ const Confettiful = function(el) {
   this.activate = () => {
     if(!window.active) {
     window.active = true;
-    window.speed = 10;
+    window.speed = 25;
     setTimeout(this.confettiInterval, window.speed)
     }
   }

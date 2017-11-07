@@ -98,21 +98,6 @@ function Results($scope, $http, $timeout) {
     return 0;
   }
 
-  $scope.percent_tests_partial_success = function() {
-    if ("test_cases" in $scope.status && "test_results" in $scope.status) {
-      var count = 0;
-      for (key in $scope.status.test_results) {
-        var value = $scope.status.test_results[key];
-        var e = false;
-
-        if (e) {
-          count++;
-        }
-      }
-      return 100 * count / $scope.status.test_cases.length;
-    }
-    return 0;
-  }
 
   $scope.percent_tests_failure = function() {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
