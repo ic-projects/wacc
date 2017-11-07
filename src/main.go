@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"bufio"
 )
 
 func number(s string) string {
@@ -18,6 +19,29 @@ func number(s string) string {
 		}
 	}
 	return buf.String()
+}
+
+func getLine(path string, n int) string {
+	// Open the WACC source file
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error: Unable to open the specified WACC source file")
+		os.Exit(100)
+	}
+
+	reader := bufio.NewReader(f)
+	var line string
+
+	for i := 0; i < n; i++ {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Error: Unable to read specified line")
+			os.Exit(100)
+		}
+	}
+
+	return line
 }
 
 func main() {
@@ -46,10 +70,31 @@ func main() {
 		if len(checker.Errors) > 0 {
 			for i, e := range checker.Errors {
 				if (i > 5) {
-					fmt.Printf("And %d other errors", len(checker.Errors))
+					fmt.Printf("And %d other errors\n", len(checker.Errors) - 5)
 					break
 				}
-				fmt.Println(e)
+
+				var b bytes.Buffer
+				b.WriteString("\nSemantic Error at ")
+				b.WriteString(fmt.Sprintf("%s\n", e.Pos))
+
+				b.WriteString(getLine(filepath, e.Pos.LineNumber()))
+				b.WriteString(strings.Repeat(" ", e.Pos.ColNumber() - 1))
+				b.WriteString("^\n")
+
+				b.WriteString("Expected type ")
+				i := 1
+				for t := range e.Expected {
+					if i == len(e.Expected) {
+						b.WriteString(fmt.Sprintf("\"%s\"", t))
+					} else {
+						b.WriteString(fmt.Sprintf("\"%s\" or ", t))
+					}
+					i++
+				}
+
+				b.WriteString(fmt.Sprintf(" but got type \"%s\"", e.Got))
+				fmt.Println(b.String())
 			}
 			os.Exit(200)
 		}

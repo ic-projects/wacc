@@ -157,7 +157,8 @@ func (p Position) String() string {
 		}
 		return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, colNum, offsetNum)
 	}
-	return fmt.Sprintf("line %d, column %d", p.lineNumber, colNum)
+
+	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)
 }
 
 /**** StatementNodes ****/
