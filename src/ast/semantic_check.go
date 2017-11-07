@@ -29,6 +29,7 @@ type GenericError interface {
 	Pos() Position
 }
 
+// CustomError is a struct that stores a paticular error message.
 type CustomError struct {
 	pos  Position
 	text string
@@ -57,17 +58,14 @@ type TypeError struct {
 	expected map[TypeNode]bool
 }
 
-// Pos returns the position of the error.
 func (e TypeError) Pos() Position {
 	return e.pos
 }
 
-// Pos returns the position of the error.
 func (e DeclarationError) Pos() Position {
 	return e.pos
 }
 
-// String prints the error in a nice format.
 func (e TypeError) String() string {
 	var b bytes.Buffer
 	b.WriteString("Expected type ")
@@ -93,7 +91,6 @@ func (e TypeError) addPos(pos Position) GenericError {
 	return e
 }
 
-// NewTypeError returns an initialised TypeError.
 func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
 	return TypeError{
 		got:      got,
@@ -110,7 +107,6 @@ type DeclarationError struct {
 	identifier string
 }
 
-// NewDeclarationError returns an initialised DeclarationError.
 func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
 	return DeclarationError{
 		pos:        pos,
@@ -120,7 +116,6 @@ func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifi
 	}
 }
 
-// String prints the error in a nice format.
 func (e DeclarationError) String() string {
 	var b bytes.Buffer
 	if e.isFunction {
@@ -139,7 +134,6 @@ func (e DeclarationError) String() string {
 	return b.String()
 }
 
-// PrintSymbolTable prints the symbolTable.
 func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
@@ -273,15 +267,10 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			}
 		}
 	case BaseTypeNode:
-
 	case ArrayTypeNode:
-
 	case PairTypeNode:
-
 	case UnaryOperator:
-
 	case BinaryOperator:
-
 	case IntegerLiteralNode:
 		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
 	case BooleanLiteralNode:

@@ -1,20 +1,15 @@
 package ast
 
 import (
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
 )
 
+// LHSNode is an empty interface for lhs nodes to implement.
 type LHSNode interface {
 }
 
-type LHSNodeStruct struct {
-}
-
-func NewLHSNode() LHSNode {
-	return LHSNodeStruct{}
-}
-
+// IdentifierNode is a struct that stores the position and string of an identifier.
 type IdentifierNode struct {
 	pos   Position
 	ident string
@@ -34,6 +29,8 @@ func (node IdentifierNode) String() string {
 	return fmt.Sprintf("- %s", node.ident)
 }
 
+// PairFirstElementNode is a struct that stores the position and expression of
+// an access to a pair's first element. i.e. fst i
 type PairFirstElementNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -53,6 +50,8 @@ func (node PairFirstElementNode) String() string {
 	return buf.String()
 }
 
+// PairSecondElementNode is a struct that stores the position and expression of
+// an access to a pair's second element. i.e. snd i
 type PairSecondElementNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -72,6 +71,8 @@ func (node PairSecondElementNode) String() string {
 	return buf.String()
 }
 
+// ArrayElementNode is a struct that stores the position, identifier and expressions of
+// an access to an array. i.e. i[4][3+2]
 type ArrayElementNode struct {
 	pos   Position
 	ident IdentifierNode

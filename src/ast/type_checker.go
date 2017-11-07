@@ -131,7 +131,6 @@ type TwiceSameExpectance struct {
 	exp Expectance
 }
 
-// NewTwiceSameExpectance returns an initialised TwiceSameExpectance.
 func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 	return TwiceSameExpectance{
 		exp: exp,
@@ -157,7 +156,6 @@ type RepeatExpectance struct {
 	exp Expectance
 }
 
-// NewRepeatExpectance returns an initialised RepeatExpectance.
 func NewRepeatExpectance(exp Expectance) RepeatExpectance {
 	return RepeatExpectance{
 		exp: exp,
@@ -175,7 +173,6 @@ func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 // AnyExpectance is an empty struct, allowing for any type.
 type AnyExpectance struct{}
 
-// NewAnyExpectance reuturns an initialised AnyExpectance.
 func NewAnyExpectance() AnyExpectance {
 	return AnyExpectance{}
 }
@@ -191,7 +188,7 @@ func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 // It can be frozen at a ProgramNode to prevent incorrect errors which can
 // happen after some errors.
 type TypeChecker struct {
-	stack []Expectance
+	stack      []Expectance
 	frozenNode ProgramNode
 }
 
@@ -206,7 +203,9 @@ func NewTypeChecker() *TypeChecker {
 // seen will pop the type from the stack, and return a TypeError corresponding
 // to the mismatch between the type popped off the stack and the TypeNode given.
 func (check *TypeChecker) seen(t TypeNode) TypeError {
-	if check.frozen() { return TypeError{} }
+	if check.frozen() {
+		return TypeError{}
+	}
 	if len(check.stack) < 1 {
 		fmt.Println("Internal type checker error")
 		return TypeError{}
@@ -236,29 +235,35 @@ func StripType(t TypeNode) TypeNode {
 // forcePop will force an expectance off the stack, useful for RepeatExpectance.
 // It will only change the stack if it is not frozen.
 func (check *TypeChecker) forcePop() {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Println("Force pop")
 	}
-  if len(check.stack) < 1 {
-    fmt.Println("Internal type checker error")
-    return
-  }
+	if len(check.stack) < 1 {
+		fmt.Println("Internal type checker error")
+		return
+	}
 	check.stack = check.stack[:len(check.stack)-1]
 }
 
 // expectAny adds a AnyExpectance to the stack, if not frozen.
 func (check *TypeChecker) expectAny() {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Println("Expecting any")
 	}
 	check.stack = append(check.stack, NewAnyExpectance())
 }
 
-// expectTwiceSame adds a Twi to the stack, if not frozen.
+// expectTwiceSame adds a TwiceSameExpectance to the stack, if not frozen.
 func (check *TypeChecker) expectTwiceSame(ex Expectance) {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Println("Expecting twice")
 	}
@@ -268,7 +273,9 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 // expectRepeatUntilForce adds a RepeatExpectance to the stack, if not
 // frozen.
 func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Printf("Expecting repeat %s\n", t)
 	}
@@ -278,7 +285,9 @@ func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
 // expect adds a SetExpectance with the given TypeNode the only element in the set,
 // if not frozen.
 func (check *TypeChecker) expect(t TypeNode) {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Printf("Expecting %s\n", t)
 	}
@@ -287,7 +296,9 @@ func (check *TypeChecker) expect(t TypeNode) {
 
 // expectSet adds an SetExpectance to the stack, if not frozen.
 func (check *TypeChecker) expectSet(ts []TypeNode) {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	check.stack = append(check.stack, NewSetExpectance(ts))
 }
 
@@ -298,27 +309,28 @@ func (check *TypeChecker) frozen() bool {
 
 // freeze freezes the type checker on a node.
 func (check *TypeChecker) freeze(node ProgramNode) {
-	if check.frozen() { return }
+	if check.frozen() {
+		return
+	}
 	if DEBUG_MODE {
 		fmt.Printf("Frozen on %s\n", node)
 	}
 	check.frozenNode = node
 }
 
-
 // isSameNode Compares eqaulity of ProgramNodes. As FunctionCallNode and ArrayElementNode
 // are not comparable with the == operator, we define our own function that compares types first.
-func isSameNode(n1 ProgramNode, n2 ProgramNode) bool{
+func isSameNode(n1 ProgramNode, n2 ProgramNode) bool {
 	_, n1FunctionCall := n1.(FunctionCallNode)
 	_, n2FunctionCall := n2.(FunctionCallNode)
 	_, n1ArrayElement := n1.(ArrayElementNode)
 	_, n2ArrayElement := n2.(ArrayElementNode)
 
 	if (n1FunctionCall && n2FunctionCall) ||
-		 (n1ArrayElement && n2ArrayElement)  {
+		(n1ArrayElement && n2ArrayElement) {
 		return true
 	} else if !n1FunctionCall && !n2FunctionCall &&
-						!n1ArrayElement && !n2ArrayElement {
+		!n1ArrayElement && !n2ArrayElement {
 		return n1 == n2
 	} else {
 		return false
