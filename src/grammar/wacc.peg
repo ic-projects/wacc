@@ -14,7 +14,11 @@
     }
 }
 
-PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
+START <- _ p:PROGRAM {
+  return p, nil
+}
+
+PROGRAM <- "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
     main := ast.NewFunctionNode(
         c.pos.getPosition(),
         ast.NewBaseTypeNode(ast.VOID),
@@ -29,6 +33,14 @@ PROGRAM <- _ "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
     functions = append(functions, main)
 
     return ast.NewProgram(functions), nil
+} / "begin" fs:(__ FUNC)* _ "end" _ !. {
+  functions := []ast.FunctionNode{}
+  for _, f := range fs.([]interface{}) {
+      functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
+  }
+  err := errors.New("Program body empty")
+
+  return ast.NewProgram(functions), err
 }
 
 FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
@@ -36,13 +48,16 @@ FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "en
     finalStat := stats[len(stats)-1]
     var err error
     if (!ast.FinalStatIsValid(finalStat)) {
-      err = errors.New(fmt.Sprintf("Syntactic Error at %d:%d -- Function %s is not ended with a return or an exit statement.", c.pos.line, c.pos.col - 1, strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
+      err = errors.New(fmt.Sprintf("Function %s is not ended with a return or an exit statement.", strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
     }
     if (params != nil) {
       return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), stats), err
     }
     return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, stats), err
-}
+} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
+    err := errors.New(fmt.Sprintf("Invalid identifier, '%s' (reserved)", string(ident.([]interface{})[0].([]byte))))
+    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), []ast.ParameterNode{}, []ast.StatementNode{}), err
+  }
 PARAMLIST <- param:PARAM params:(_ ',' _ PARAM)* {
     paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
     for _, p := range params.([]interface{}) {
@@ -54,7 +69,7 @@ PARAM <- t:TYPE __ i:IDENT {
     return ast.NewParameterNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode)), nil
 }
 
-STAT <- stat:(SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE) stats:(_ ';' _ (SKIP / NEWASSIGN / ASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE))* {
+STAT <- stat:(SKIP / NEWASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE / ASSIGN) stats:(_ ';' _ (SKIP / NEWASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE / ASSIGN))* {
     statements := []ast.StatementNode{stat}
     for _, s := range stats.([]interface{}) {
         statements = append(statements, s.([]interface{})[3].(ast.StatementNode))
@@ -67,6 +82,9 @@ SKIP <- "skip" {
 }
 NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
   return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(ast.IdentifierNode), rhs.(ast.RHSNode)), nil
+} / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
+  err := errors.New(fmt.Sprintf("Invalid identifier, '%s' (reserved)", string(ident.([]interface{})[0].([]byte))))
+  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), rhs.(ast.RHSNode)), err
 }
 ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
   return ast.NewAssignNode(c.pos.getPosition(), lhs.(ast.LHSNode), rhs.(ast.LHSNode)), nil
@@ -99,7 +117,7 @@ SCOPE <- "begin" __ stats:STAT _ "end" {
   return ast.NewScopeNode(c.pos.getPosition(), stats.(ast.StatementNode).([]ast.StatementNode)), nil
 }
 
-ASSIGNLHS <- PAIRELEM / ARRAYELEM / IDENT
+ASSIGNLHS <- lhs:(PAIRELEM / ARRAYELEM / IDENT)
 ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
 NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
     return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
@@ -201,9 +219,14 @@ PREC6 <- e1:PREC7 e2:(_ MULOP _ PREC7)* {
   return e1, nil
 }
 
-PREC7 <- e:BREXPR _ ')' {
-    return e, nil
-} / INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT
+PREC7 <- bre:BREXPR _ ')' {
+  return bre, nil
+} / e:(INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) {
+  return e, nil
+} / p:PAIRELEM {
+  err := errors.New(fmt.Sprintf("Invalid expression, %s (pair element)", string(c.text)))
+  return p, err
+}
 
 MULOP <- MULT / DIV / MOD
 
@@ -276,7 +299,6 @@ OR <- "||" {
   return ast.OR, nil
 }
 
-
 IDENT <- !RESERVED s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
   return ast.NewIdentifierNode(c.pos.getPosition(), string(c.text)), nil
 }
@@ -294,7 +316,7 @@ INTLITER <- INTSIGN? _ DIGIT+ {
   i, err := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
 
   if err != nil {
-    err = errors.New(fmt.Sprintf("Integer value %s on line %d is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer)\nParsing aborted, no further compilation attempted.", string(c.text), c.pos.line))
+    err = errors.New(fmt.Sprintf("Integer value '%s' is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer).", string(c.text)))
   }
 
   return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), err
@@ -311,6 +333,10 @@ FALSE <- "false" {
 CHARLITER <- "'" char:CHARACTER "'" {
   r, _ := utf8.DecodeRune(char.([]byte))
   return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), nil
+} / "'" char:[""''\\] "'" { 
+  r, _ := utf8.DecodeRune(char.([]byte))
+  err := errors.New(fmt.Sprintf("Invalid character, %s (must be escaped)", c.text))
+  return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), err
 }
 STRLITER <- '"' CHARACTER* '"' {
   return ast.NewStringLiteralNode(c.pos.getPosition(), string(c.text)), nil
@@ -334,7 +360,11 @@ CHARACTER <- char:[^""''\\] {
     default:
       return char, nil
     }
+} / '\\' char:. {
+    err := errors.New(fmt.Sprintf("Invalid escaped character, '%s'", c.text))
+    return char, err
 }
+
 ESCAPEDCHAR <- [0btnfr""''\\]
 ARRAYLITER <- '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
   var expressions []ast.ExpressionNode
