@@ -30,13 +30,13 @@ type GenericError interface {
 }
 
 type CustomError struct {
-	pos Position
+	pos  Position
 	text string
 }
 
 func NewCustomError(pos Position, text string) CustomError {
 	return CustomError{
-		pos: pos,
+		pos:  pos,
 		text: text,
 	}
 }
@@ -86,7 +86,9 @@ func (e TypeError) String() string {
 }
 
 func (e TypeError) addPos(pos Position) GenericError {
-	if e.got == nil { return nil }
+	if e.got == nil {
+		return nil
+	}
 	e.pos = pos
 	return e
 }
@@ -102,18 +104,18 @@ func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
 // DeclarationError is a struct for a declaration error, for example, using an
 // identifier before it is declared. It implements GenericError.
 type DeclarationError struct {
-	pos      Position
+	pos        Position
 	isFunction bool
-	isDefined bool
+	isDefined  bool
 	identifier string
 }
 
 // NewDeclarationError returns an initialised DeclarationError.
 func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
 	return DeclarationError{
-		pos: pos,
+		pos:        pos,
 		isFunction: isFunction,
-		isDefined: isDefined,
+		isDefined:  isDefined,
 		identifier: identifier,
 	}
 }
@@ -149,8 +151,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	foundError = nil
 	switch node := programNode.(type) {
 	case Program:
-    // Add the functions when hitting program instead of each function so that
-    // functions can be declared in any order.
+		// Add the functions when hitting program instead of each function so that
+		// functions can be declared in any order.
 		for _, f := range node.functions {
 			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
 			if ok {
@@ -160,7 +162,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			}
 		}
 	case FunctionNode:
-    // Move down scope so that the paramaters are on a new scope.
+		// Move down scope so that the paramaters are on a new scope.
 		v.symbolTable.MoveDownScope()
 		v.typeChecker.expectRepeatUntilForce(node.t)
 	case ParameterNode:
@@ -171,8 +173,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case SkipNode:
 	case DeclareNode:
-		_, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
-		if ok {
+		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); ok {
 			foundError = NewDeclarationError(node.pos, false, true, node.ident.ident)
 			v.typeChecker.freeze(node)
 		} else {
@@ -242,7 +243,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-      // If we have an array or a single element (for use in newsted arrays).
+			// If we have an array or a single element (for use in newsted arrays).
 			if dimLeft := arrayNode.dim - len(node.exprs); dimLeft == 0 {
 				foundError = v.typeChecker.seen(arrayNode.t).addPos(node.pos)
 			} else {
@@ -262,7 +263,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if len(f.params) != len(node.exprs) {
-			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\"", node.ident.ident))
+			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\" (Expected: %d, Given: %d)", node.ident.ident, len(f.params), len(node.exprs)))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
@@ -288,7 +289,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case CharacterLiteralNode:
 		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.pos)
 	case StringLiteralNode:
-		foundError = v.typeChecker.seen(NewArrayTypeNode(NewBaseTypeNode(CHAR), 1)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.pos)
 	case PairLiteralNode:
 		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.pos)
 	case UnaryOperatorNode:
@@ -330,7 +331,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 	}
 
-  // If we have an error, add it to the list of errors.
+	// If we have an error, add it to the list of errors.
 	if foundError != nil {
 		v.Errors = append(v.Errors, foundError)
 	}

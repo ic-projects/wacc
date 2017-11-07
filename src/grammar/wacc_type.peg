@@ -32,7 +32,7 @@ CHAR ← "char" {
 }
 
 STRING ← "string" {
-	return ret(ast.NewStringArrayTypeNode(ast.NewBaseTypeNode(ast.CHAR), 1))
+	return ret(ast.NewStringArrayTypeNode())
 }
 
 PAIR ← "pair" {

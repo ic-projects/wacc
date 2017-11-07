@@ -17,5 +17,6 @@ begin
   string x = call f(s) ;
 	s = call f(c) ;
 	c = call f2(s) ;
-	x = call f2(c)
+	x = call f2(c) ;
+	char[] test = "test"
 end

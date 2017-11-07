@@ -1,8 +1,8 @@
 package ast
 
 import (
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
 )
 
 type TypeNode interface {
@@ -54,25 +54,28 @@ func (node BaseTypeNode) String() string {
 	return fmt.Sprintf("%s", node.t)
 }
 
-
 type ArrayTypeNode struct {
-	t   TypeNode
-	dim int
+	t        TypeNode
+	dim      int
 	isString bool
 }
 
 func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
+	if array, ok := t.(ArrayTypeNode); ok {
+		array.dim += dim
+		return array
+	}
 	return ArrayTypeNode{
-		t:   t,
-		dim: dim,
+		t:        t,
+		dim:      dim,
 		isString: false,
 	}
 }
 
-func NewStringArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
+func NewStringArrayTypeNode() ArrayTypeNode {
 	return ArrayTypeNode{
-		t:   t,
-		dim: dim,
+		t:        NewBaseTypeNode(CHAR),
+		dim:      1,
 		isString: true,
 	}
 }
@@ -81,7 +84,7 @@ func (node ArrayTypeNode) String() string {
 	var buf bytes.Buffer
 	if node.isString {
 		buf.WriteString(fmt.Sprintf("string"))
-		for i := 0; i < node.dim - 1; i++ {
+		for i := 0; i < node.dim-1; i++ {
 			buf.WriteString("[]")
 		}
 	} else {
