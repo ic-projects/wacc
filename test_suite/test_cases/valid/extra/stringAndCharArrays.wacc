@@ -1,0 +1,28 @@
+# spooky strings
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+	string f(char[] x) is
+		return x
+	end
+	char[] f2(string x) is
+		return x
+	end
+	string s = "hello" ;
+	println s ;
+	char[] c = ['a','b','c'] ;
+	println c ;
+  string x = call f(s) ;
+	s = call f(c) ;
+	c = call f2(s) ;
+	x = call f2(c) ;
+	println s ;
+	println c
+end

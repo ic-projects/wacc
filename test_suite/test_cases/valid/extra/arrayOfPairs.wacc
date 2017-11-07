@@ -1,0 +1,34 @@
+# spooky strings
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+	pair(pair, pair)[] f(pair(pair, pair)[] x) is
+		return x
+	end
+	pair(pair, pair) n = null ;
+	pair(pair, pair) n2 = fst n ;
+	pair(pair, pair) n3 = n ;
+	pair(pair, pair) n4 = newpair(n, n2) ;
+	pair(pair, pair) n5 = newpair(n4, null) ;
+	pair(pair, pair) n6 = newpair(null, null) ;
+	pair(pair, pair) n7 = n6 ;
+	pair(pair, pair) n8 = newpair(null, null) ;
+	pair(pair, pair)[] a = [n, n2, n3] ;
+	pair(pair, pair)[] a2 = call f(a) ;
+	pair(pair, pair)[] a3 = [null, null, n4] ;
+	pair(pair, pair)[][] aa = [a2, a3, a] ;
+	pair(pair, pair)[] a4 = [aa[0][len aa[len a3]], aa[1][2]] ;
+	pair(pair, pair)[][] aa2 = [aa[len a3], a2] ;
+	pair(pair, pair) n9 = newpair(aa2[1][2], null) ;
+	pair(pair, pair) n10 = newpair(null, a4[len aa[len aa[len aa[len aa]]]]) ;
+	pair(int, int) intpair = fst n ;
+	int i = fst intpair ;
+	pair(int, pair(pair, pair)[]) wow = newpair(i, aa2[0])
+end
