@@ -654,26 +654,45 @@ func (node BaseTypeNode) String() string {
 	return fmt.Sprintf("%s", node.t)
 }
 
+
 type ArrayTypeNode struct {
 	t   TypeNode
 	dim int
+	isString bool
 }
 
 func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 	return ArrayTypeNode{
 		t:   t,
 		dim: dim,
+		isString: false,
+	}
+}
+
+func NewStringArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
+	return ArrayTypeNode{
+		t:   t,
+		dim: dim,
+		isString: true,
 	}
 }
 
 func (node ArrayTypeNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s", node.t))
-	for i := 0; i < node.dim; i++ {
-		buf.WriteString("[]")
+	if node.isString {
+		buf.WriteString(fmt.Sprintf("string"))
+		for i := 0; i < node.dim - 1; i++ {
+			buf.WriteString("[]")
+		}
+	} else {
+		buf.WriteString(fmt.Sprintf("%s", node.t))
+		for i := 0; i < node.dim; i++ {
+			buf.WriteString("[]")
+		}
 	}
 	return buf.String()
 }
+
 
 type PairTypeNode struct {
 	t1 TypeNode

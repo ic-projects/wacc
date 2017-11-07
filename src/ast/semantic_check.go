@@ -52,6 +52,7 @@ func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
 
+
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	var typeError TypeError
 	switch node := programNode.(type) {
@@ -83,15 +84,6 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Identifier already exists in current scope")
 			os.Exit(200)
 		} else {
-			if baseType, ok := node.t.(BaseTypeNode); ok {
-				if baseType.t == STRING {
-					node.t = NewArrayTypeNode(NewBaseTypeNode(CHAR), 1)
-				}
-			} else if arrayType, ok := node.t.(ArrayTypeNode); ok {
-				if arrayType.t == NewBaseTypeNode(STRING) {
-					node.t = NewArrayTypeNode(NewBaseTypeNode(CHAR), arrayType.dim+1)
-				}
-			}
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
 

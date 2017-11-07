@@ -160,7 +160,7 @@ CHAR <- "char" {
     return ast.NewBaseTypeNode(ast.CHAR), nil
 }
 STRING <- "string" {
-    return ast.NewBaseTypeNode(ast.STRING), nil
+    return ast.NewStringArrayTypeNode(ast.NewBaseTypeNode(ast.CHAR), 1), nil
 }
 ARRAYTYPE <- '[' _ ']'
 PAIRTYPE <- "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
@@ -335,7 +335,7 @@ FALSE <- "false" {
 CHARLITER <- "'" char:CHARACTER "'" {
   r, _ := utf8.DecodeRune(char.([]byte))
   return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), nil
-} / "'" char:[""''\\] "'" { 
+} / "'" char:[""''\\] "'" {
   r, _ := utf8.DecodeRune(char.([]byte))
   err := errors.New(fmt.Sprintf("Invalid character, %s (must be escaped)", c.text))
   return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), err
