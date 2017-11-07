@@ -23,6 +23,7 @@ func number(s string) string {
 func main() {
 	printTree := flag.Bool("t", false, "Prints the AST created by the parser")
 	semanticCheck := flag.Bool("s", true, "Parse the file for syntax and symantic errors and generate an AST")
+	symbolTable := flag.Bool("table", false, "Print the generated symbol table, if created")
 	filepath := os.Args[len(os.Args)-1]
 	flag.Parse()
 	var tree interface{}
@@ -44,14 +45,18 @@ func main() {
 
 		// Print out all errors that occur
 		if len(checker.Errors) > 0 {
+			maxErrors := 5
 			for i, e := range checker.Errors {
-				if (i > 5) {
-					fmt.Printf("And %d other errors", len(checker.Errors))
+				if i > maxErrors {
+					fmt.Printf("And %d other errors", len(checker.Errors)-maxErrors)
 					break
 				}
 				fmt.Println(e)
 			}
 			os.Exit(200)
+		}
+		if *symbolTable {
+			checker.PrintSymbolTable()
 		}
 	}
 	if *printTree {
