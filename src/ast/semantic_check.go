@@ -9,14 +9,14 @@ import (
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
-	Errors []TypeError
+	Errors      []TypeError
 }
 
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
 		typeChecker: NewTypeChecker(),
-		Errors: make([]TypeError, 0),
+		Errors:      make([]TypeError, 0),
 	}
 }
 
@@ -46,6 +46,10 @@ func (e TypeError) String() string {
 func (e TypeError) addPos(pos Position) TypeError {
 	e.pos = pos
 	return e
+}
+
+func (v *SemanticCheck) PrintSymbolTable() {
+	fmt.Println(v.symbolTable.String())
 }
 
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
