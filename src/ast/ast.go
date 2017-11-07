@@ -141,7 +141,11 @@ func (p Position) LineNumber() int {
 }
 
 func (p Position) ColNumber() int {
-	return p.colNumber
+	colNum := p.colNumber
+	if colNum != 0 {
+		colNum--
+	}
+	return colNum
 }
 
 func NewPosition(lineNumber int, colNumber int, offset int) Position {

@@ -78,9 +78,18 @@ func main() {
 				b.WriteString("\nSemantic Error at ")
 				b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
 
-				// TODO: Remove leading tabs and spaces before printing out line
-				b.WriteString(getLine(filepath, e.Pos().LineNumber()))
-				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()))
+				// Remove leading spaces and tabs
+				line := getLine(filepath, e.Pos().LineNumber())
+				leadingChars := 0
+				for _, c := range line {
+					if (c == '\t' || c == ' ') {
+						leadingChars++
+					} else {
+						break
+					}
+				}
+				b.WriteString(line[leadingChars:])
+				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber() - leadingChars))
 				b.WriteString("^\n")
 
 				b.WriteString("Expected type ")
