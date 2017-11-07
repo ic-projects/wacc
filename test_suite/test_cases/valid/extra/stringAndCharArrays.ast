@@ -1,0 +1,86 @@
+-- Test: stringAndCharArrays.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# spooky strings
+
+# Output:
+#
+
+# Program:
+
+begin
+	string f(char[] x) is
+		return x
+	end
+	char[] f2(string x) is
+		return x
+	end
+	string s = "hello" ;
+	char[] c = ['a','b','c'] ;
+  string x = call f(s) ;
+	s = call f(c) ;
+	c = call f2(s) ;
+	x = call f2(c)
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+stringAndCharArrays.ast contents are:
+===========================================================
+0	Program
+1	  - string f(char[] x)
+2	    - RETURN
+3	      - x
+4	  - char[] f2(string x)
+5	    - RETURN
+6	      - x
+7	  - int main()
+8	    - DECLARE
+9	      - TYPE
+10	        - string
+11	      - LHS
+12	        - s
+13	      - RHS
+14	        - "hello"
+15	    - DECLARE
+16	      - TYPE
+17	        - char[]
+18	      - LHS
+19	        - c
+20	      - RHS
+21	        - ARRAY LITERAL
+22	          - 'a'
+23	          - 'b'
+24	          - 'c'
+25	    - DECLARE
+26	      - TYPE
+27	        - string
+28	      - LHS
+29	        - x
+30	      - RHS
+31	        - f
+32	        - s
+33	    - ASSIGNMENT
+34	      - LHS
+35	        - s
+36	      - RHS
+37	        - f
+38	        - c
+39	    - ASSIGNMENT
+40	      - LHS
+41	        - c
+42	      - RHS
+43	        - f2
+44	        - s
+45	    - ASSIGNMENT
+46	      - LHS
+47	        - x
+48	      - RHS
+49	        - f2
+50	        - c
+===========================================================
+-- Finished
+

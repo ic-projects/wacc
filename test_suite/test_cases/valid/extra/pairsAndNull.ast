@@ -1,0 +1,159 @@
+-- Test: pairsAndNull.wacc
+
+-- Uploaded file: 
+---------------------------------------------------------------
+# spooky strings
+
+# Output:
+#
+
+# Program:
+
+begin
+	pair(pair, pair) f(pair(pair, pair) x) is
+		return x
+	end
+	pair(int, pair) f2(pair(int, pair) x) is
+		return x
+	end
+	pair(pair, pair) n = null ;
+	pair(pair, pair) n2 = fst n ;
+	pair(pair, pair) n3 = call f(n2) ;
+	pair(pair, pair) n4 = newpair(n, n2) ;
+	pair(pair, pair) n5 = newpair(n4, null) ;
+	pair(pair, pair) n6 = newpair(null, null) ;
+	pair(pair, pair) n7 = call f(null) ;
+	pair(int, pair) s = newpair(1, null) ;
+	pair(int, pair) s2 = newpair(1, s) ;
+	pair(int, pair) s3 = snd s2 ;
+	pair(int, pair) s4 = call f2(s) ;
+	pair(int, pair) s5 = fst n
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+-- Printing AST...
+pairsAndNull.ast contents are:
+===========================================================
+0	Program
+1	  -  f( x)
+2	    - RETURN
+3	      - x
+4	  - int f2(int x)
+5	    - RETURN
+6	      - x
+7	  - int main()
+8	    - DECLARE
+9	      - TYPE
+10	        - 
+11	      - LHS
+12	        - n
+13	      - RHS
+14	        - null
+15	    - DECLARE
+16	      - TYPE
+17	        - 
+18	      - LHS
+19	        - n2
+20	      - RHS
+21	        - FST
+22	          - n
+23	    - DECLARE
+24	      - TYPE
+25	        - 
+26	      - LHS
+27	        - n3
+28	      - RHS
+29	        - f
+30	        - n2
+31	    - DECLARE
+32	      - TYPE
+33	        - 
+34	      - LHS
+35	        - n4
+36	      - RHS
+37	        - NEW_PAIR
+38	          - FST
+39	            - n
+40	          - SND
+41	            - n2
+42	    - DECLARE
+43	      - TYPE
+44	        - 
+45	      - LHS
+46	        - n5
+47	      - RHS
+48	        - NEW_PAIR
+49	          - FST
+50	            - n4
+51	          - SND
+52	            - null
+53	    - DECLARE
+54	      - TYPE
+55	        - 
+56	      - LHS
+57	        - n6
+58	      - RHS
+59	        - NEW_PAIR
+60	          - FST
+61	            - null
+62	          - SND
+63	            - null
+64	    - DECLARE
+65	      - TYPE
+66	        - 
+67	      - LHS
+68	        - n7
+69	      - RHS
+70	        - f
+71	        - null
+72	    - DECLARE
+73	      - TYPE
+74	        - int
+75	      - LHS
+76	        - s
+77	      - RHS
+78	        - NEW_PAIR
+79	          - FST
+80	            - 1
+81	          - SND
+82	            - null
+83	    - DECLARE
+84	      - TYPE
+85	        - int
+86	      - LHS
+87	        - s2
+88	      - RHS
+89	        - NEW_PAIR
+90	          - FST
+91	            - 1
+92	          - SND
+93	            - s
+94	    - DECLARE
+95	      - TYPE
+96	        - int
+97	      - LHS
+98	        - s3
+99	      - RHS
+100	        - SND
+101	          - s2
+102	    - DECLARE
+103	      - TYPE
+104	        - int
+105	      - LHS
+106	        - s4
+107	      - RHS
+108	        - f2
+109	        - s
+110	    - DECLARE
+111	      - TYPE
+112	        - int
+113	      - LHS
+114	        - s5
+115	      - RHS
+116	        - FST
+117	          - n
+===========================================================
+-- Finished
+

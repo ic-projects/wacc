@@ -1,10 +1,7 @@
 # spooky strings
 
 # Output:
-# #semantic_error#
-
-# Exit:
-# 200
+#
 
 # Program:
 
@@ -22,7 +19,6 @@ begin
 	pair(pair, pair) n5 = newpair(n4, null) ;
 	pair(pair, pair) n6 = newpair(null, null) ;
 	pair(pair, pair) n7 = call f(null) ;
-	pair(pair, pair) n8 = newpair(null, newpair(null, null)) ;
 	pair(int, pair) s = newpair(1, null) ;
 	pair(int, pair) s2 = newpair(1, s) ;
 	pair(int, pair) s3 = snd s2 ;

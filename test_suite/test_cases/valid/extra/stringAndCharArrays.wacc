@@ -1,10 +1,7 @@
 # spooky strings
 
 # Output:
-# #semantic_error#
-
-# Exit:
-# 200
+#
 
 # Program:
 
@@ -16,13 +13,9 @@ begin
 		return x
 	end
 	string s = "hello" ;
-	println s ;
 	char[] c = ['a','b','c'] ;
-	println c ;
   string x = call f(s) ;
 	s = call f(c) ;
 	c = call f2(s) ;
-	x = call f2(c) ;
-	println s ;
-	println c
+	x = call f2(c)
 end
