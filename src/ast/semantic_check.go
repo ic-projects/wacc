@@ -9,15 +9,19 @@ import (
 type SemanticCheck struct {
 	symbolTable *SymbolTable
 	typeChecker *TypeChecker
-	Errors      []TypeError
+	Errors      []GenericError
 }
 
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
 		typeChecker: NewTypeChecker(),
-		Errors:      make([]TypeError, 0),
+		Errors:      make([]GenericError, 0),
 	}
+}
+
+type GenericError interface {
+	String() string
 }
 
 type TypeError struct {
@@ -48,6 +52,40 @@ func (e TypeError) addPos(pos Position) TypeError {
 	return e
 }
 
+type DeclerationError struct {
+	pos      Position
+	isFunction bool
+	isDefined bool
+	identifier string
+}
+
+func NewDeclerationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclerationError {
+	return DeclerationError{
+		pos: pos,
+		isFunction: isFunction,
+		isDefined: isDefined,
+		identifier: identifier,
+	}
+}
+
+func (e DeclerationError) String() string {
+	var b bytes.Buffer
+	if e.isFunction {
+		if e.isDefined {
+			b.WriteString(fmt.Sprintf("Function \"%s\" is already defined", e.identifier))
+		} else {
+			b.WriteString(fmt.Sprintf("Function \"%s\" is not defined", e.identifier))
+		}
+	} else {
+		if e.isDefined {
+			b.WriteString(fmt.Sprintf("Variable \"%s\" is already defined in the current scope", e.identifier))
+		} else {
+			b.WriteString(fmt.Sprintf("Variable \"%s\" is not defined in the current scope", e.identifier))
+		}
+	}
+	return b.String()
+}
+
 func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
@@ -55,13 +93,13 @@ func (v *SemanticCheck) PrintSymbolTable() {
 
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	var typeError TypeError
+	var declerationError DeclerationError
 	switch node := programNode.(type) {
 	case Program:
 		for _, f := range node.functions {
 			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
 			if ok {
-				fmt.Printf("Redefined function name")
-				os.Exit(200)
+				declerationError = NewDeclerationError(f.pos, true, true, f.ident.ident)
 			} else {
 				v.symbolTable.AddFunction(f.ident.ident, f)
 			}
@@ -72,8 +110,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case ParameterNode:
 		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if ok {
-			fmt.Printf("Identifier already exists in current scope")
-			os.Exit(200)
+			declerationError = NewDeclerationError(node.pos, false, true, node.ident.ident)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
@@ -81,14 +118,12 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case DeclareNode:
 		_, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
 		if ok {
-			fmt.Printf("Identifier already exists in current scope")
-			os.Exit(200)
+			declerationError = NewDeclerationError(node.pos, false, true, node.ident.ident)
+			v.typeChecker.freeze(node)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
+			v.typeChecker.expect(node.t)
 		}
-
-		v.typeChecker.expect(node.t)
-
 	case AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 
@@ -111,8 +146,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case IdentifierNode:
 		identDec, ok := v.symbolTable.SearchForIdent(node.ident)
 		if !ok {
-			fmt.Printf("Undeclared variable %s", node.ident)
-			os.Exit(200)
+			declerationError = NewDeclerationError(node.pos, false, false, node.ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else {
 			typeError = v.typeChecker.seen(identDec.t).addPos(node.pos)
 		}
@@ -122,8 +158,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
 			os.Exit(200)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			fmt.Printf("Undeclared variable %s", identNode.ident)
-			os.Exit(200)
+			declerationError = NewDeclerationError(identNode.pos, false, false, identNode.ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else {
 			typeError = v.typeChecker.seen(identDec.t.(PairTypeNode).t1).addPos(node.pos)
 			v.typeChecker.expect(identDec.t)
@@ -133,8 +170,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
 			os.Exit(200)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			fmt.Printf("Undeclared variable %s", identNode.ident)
-			os.Exit(200)
+			declerationError = NewDeclerationError(identNode.pos, false, false, identNode.ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else {
 			v.typeChecker.seen(identDec.t.(PairTypeNode).t2)
 			v.typeChecker.expect(identDec.t)
@@ -143,8 +181,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		// Check identifier
 		identDec, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if !ok {
-			fmt.Printf("Undeclared variable %s", node.ident.ident)
-			os.Exit(200)
+			declerationError = NewDeclerationError(node.pos, false, false, node.ident.ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else if arrayNode, ok := identDec.t.(ArrayTypeNode); !ok {
 			fmt.Printf("Array access on non-array variable %s", node.ident.ident)
 			os.Exit(200)
@@ -166,8 +205,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case FunctionCallNode:
 		f, ok := v.symbolTable.SearchForFunction(node.ident.ident)
 		if !ok {
-			fmt.Printf("Undeclared function name")
-			os.Exit(200)
+			declerationError = NewDeclerationError(node.pos, true, false, node.ident.ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else if len(f.params) != len(node.exprs) {
 			typeError = v.typeChecker.seen(f.t).addPos(node.pos)
 			fmt.Printf("Incorrect number of parameters in")
@@ -237,7 +277,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 	}
 
-	if typeError.got != nil {
+	if declerationError != (DeclerationError{}) {
+		v.Errors = append(v.Errors, declerationError)
+	} else if typeError.got != nil {
 		v.Errors = append(v.Errors, typeError)
 	}
 }
@@ -252,4 +294,5 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	}
+	v.typeChecker.unfreeze(programNode)
 }

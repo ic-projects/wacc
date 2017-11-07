@@ -130,7 +130,12 @@ func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 
 func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	typeError := exp.exp.seen(check, t)
-	check.expect(t)
+	if t == nil {
+		check.expectAny()
+	} else {
+		check.expect(t)
+	}
+
 	return typeError
 }
 
@@ -161,6 +166,7 @@ func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 
 type TypeChecker struct {
 	stack []Expectance
+	frozenNode ProgramNode
 }
 
 func NewTypeChecker() *TypeChecker {
@@ -171,15 +177,13 @@ func NewTypeChecker() *TypeChecker {
 }
 
 func (check *TypeChecker) seen(t TypeNode) TypeError {
+	if check.frozen() { return TypeError{} }
 	if len(check.stack) < 1 {
-		fmt.Println("Oh no! Seen type when nun expected.")
+		fmt.Println("Internal type checker error")
 		return TypeError{}
 	}
-
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Seen %s\n", t))
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Printf("Seen %s\n", t)
 	}
 
 	expectance := check.stack[len(check.stack)-1]
@@ -199,51 +203,67 @@ func StripType(t TypeNode) TypeNode {
 }
 
 func (check *TypeChecker) forcePop() {
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Force pop\n"))
+	if check.frozen() { return }
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Println("Force pop")
 	}
 	check.stack = check.stack[:len(check.stack)-1]
 }
 
 func (check *TypeChecker) expectAny() {
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Expecting any\n"))
+	if check.frozen() { return }
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Println("Expecting any")
 	}
 	check.stack = append(check.stack, NewAnyExpectance())
 }
 
 func (check *TypeChecker) expectTwiceSame(ex Expectance) {
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Expecting twice\n"))
+	if check.frozen() { return }
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Println("Expecting twice")
 	}
 	check.stack = append(check.stack, NewTwiceSameExpectance(ex))
 }
 
 func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Expecting repeat %s\n", t))
+	if check.frozen() { return }
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Printf("Expecting repeat %s\n", t)
 	}
 	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
 }
 
 func (check *TypeChecker) expect(t TypeNode) {
-	var b bytes.Buffer
-	b.WriteString(fmt.Sprintf("Expecting %s\n", t))
+	if check.frozen() { return }
 	if DEBUG_MODE {
-		fmt.Println(b.String())
+		fmt.Printf("Expecting %s\n", t)
 	}
-
 	check.expectSet([]TypeNode{t})
 }
 
 func (check *TypeChecker) expectSet(ts []TypeNode) {
+	if check.frozen() { return }
 	check.stack = append(check.stack, NewSetExpectance(ts))
+}
+
+func (check *TypeChecker) frozen() bool {
+	return check.frozenNode != nil
+}
+
+func (check *TypeChecker) freeze(node ProgramNode) {
+	if check.frozen() { return }
+	if DEBUG_MODE {
+		fmt.Printf("Frozen on %s\n", node)
+	}
+	check.frozenNode = node
+}
+
+func (check *TypeChecker) unfreeze(node ProgramNode) {
+	if node == check.frozenNode {
+		if DEBUG_MODE {
+			fmt.Printf("Unfrozen on %s\n", node)
+		}
+		check.frozenNode = nil
+	}
 }
