@@ -85,7 +85,7 @@ func main() {
 				line := getLine(filepath, e.Pos().LineNumber())
 				leadingChars := 0
 				for _, c := range line {
-					if (c == '\t' || c == ' ') {
+					if c == '\t' || c == ' ' {
 						leadingChars++
 					} else {
 						break

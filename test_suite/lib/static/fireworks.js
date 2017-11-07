@@ -228,9 +228,13 @@ function loop() {
 	}
 
 	// launch fireworks automatically to random coordinates, when the mouse isn't down
-	if( timerTick*100 >= window.speed && window.active && window.speed < 20000) {
+	if( timerTick*500 >= window.speed && window.active && window.speed < 20000) {
 			// start the firework at the bottom middle of the screen, then set the random target coordinates, the random y coordinates will be set within the range of the top half of the screen
-			fireworks.push( new Firework( cw / 2, ch, random( 0, cw ), random( 0, ch / 2 ) ) );
+			if(Math.random() > 0.5) {
+        fireworks.push( new Firework( 0, ch, random( cw/8, 5*cw/8 ), random( 0, ch / 2 ) ) );
+      } else {
+        fireworks.push( new Firework( cw, ch, random( 3*cw/8, 7*cw/8 ), random( 0, ch / 2 ) ) );
+      }
 			timerTick = 0;
 	} else {
 		timerTick++;
