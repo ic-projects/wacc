@@ -1,0 +1,31 @@
+-- Test: multiplePairErrs.wacc
+
+-- Uploaded file:
+---------------------------------------------------------------
+# multiple pair type mismatches:
+
+# Output:
+# #semantic_error#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+	pair(int, int) p = newpair(1, 2) ;
+	int i2 = fst p ;
+	i2 = fst null ;
+	i2 = 7 ;
+	i2 = snd null ;
+	i2 = snd p ;
+  int i = true ;
+  bool b = 'a' ;
+  char c = 10
+end
+---------------------------------------------------------------
+
+-- Compiler Output:
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 14:6 -- accessing element of a null pair
