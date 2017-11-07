@@ -13,7 +13,8 @@ type SymbolTable struct {
 	functions    map[string]FunctionNode
 }
 
-// NewSymbolTable returns an initialized SymbolTable
+// NewSymbolTable returns an initialised SymbolTable, with an empty scope. The
+// current scope is initialised to the top level scope.
 func NewSymbolTable() *SymbolTable {
 	head := NewSymbolTableNode(nil)
 	return &SymbolTable{
@@ -31,7 +32,6 @@ type SymbolTableNode struct {
 	parentScope *SymbolTableNode
 }
 
-// NewSymbolTableNode returns an initialized SymbolTableNode
 func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	return &SymbolTableNode{
 		scope:       make(map[string]IdentifierDeclaration),
@@ -47,7 +47,6 @@ type IdentifierDeclaration struct {
 	ident IdentifierNode
 }
 
-// NewIdentifierDeclaration returns an initialized IdentifierDeclaration.
 func NewIdentifierDeclaration(programNode ProgramNode) IdentifierDeclaration {
 	switch node := programNode.(type) {
 	case ParameterNode:
@@ -144,7 +143,8 @@ func (table *SymbolTable) Print() {
 	fmt.Println("-------- End Symbol table --------")
 }
 
-// String will return a string representation of the SymbolTable.
+// String will return a string representation of the SymbolTable, from the
+// top level scope down.
 func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Functions:\n")
@@ -160,14 +160,14 @@ func (table *SymbolTable) String() string {
 		buf.WriteString(fmt.Sprintln(")"))
 	}
 	buf.WriteString("- Scopes:\n")
-	//buf.WriteString(indent(fmt.Sprintf("%s\n", table.head), "  "))
 	for _, s := range table.head.childScopes {
 		buf.WriteString(indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
 }
 
-// String will return a string representation of the SymbolTableNode.
+// String will return a string representation of the SymbolTableNode, and all
+// of its children.
 func (node *SymbolTableNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Scope:\n")

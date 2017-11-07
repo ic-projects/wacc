@@ -5,20 +5,24 @@ import (
 	"fmt"
 )
 
+// TypeNode is an empty interface for all types to implement.
 type TypeNode interface {
 }
 
 type BaseType int
 
 const (
-	INT BaseType = iota
-	BOOL
-	CHAR
-	STRING
-	PAIR
-	VOID
+	INT    BaseType = iota // int
+	BOOL                   // bool
+	CHAR                   // char
+	STRING                 // string, but internally represented as an array of chars
+	PAIR                   // pair
+	VOID                   // void, used for the return type of the main function, as you cannot return from main.
 )
 
+// String will return the string format of the BaseType. Pair returns empty
+// string to match the refCompile ast printing. Void returns int for the same
+// reason.
 func (t BaseType) String() string {
 	switch t {
 	case INT:
@@ -40,6 +44,7 @@ func (t BaseType) String() string {
 	return ""
 }
 
+// BaseTypeNode is a struct that stores a BaseType.
 type BaseTypeNode struct {
 	t BaseType
 }
@@ -54,12 +59,17 @@ func (node BaseTypeNode) String() string {
 	return fmt.Sprintf("%s", node.t)
 }
 
+// ArrayTypeNode stores the type, and dimension of the array. It stores if it is
+// a string additionally to distinguish between a char array and a string.
 type ArrayTypeNode struct {
 	t        TypeNode
 	dim      int
 	isString bool
 }
 
+// NewArrayTypeNode returns an initialised ArrayTypeNode. If the type provided
+// is an array, it will increase the dimensions of the given array, and return
+// it.
 func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 	if array, ok := t.(ArrayTypeNode); ok {
 		array.dim += dim
@@ -72,6 +82,7 @@ func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 	}
 }
 
+// NewStringArrayTypeNode returns an initialised ArrayTypeNode for a string.
 func NewStringArrayTypeNode() ArrayTypeNode {
 	return ArrayTypeNode{
 		t:        NewBaseTypeNode(CHAR),
@@ -96,6 +107,8 @@ func (node ArrayTypeNode) String() string {
 	return buf.String()
 }
 
+// PairTypeNode is a struct that stores the types of the first and second
+// elements of the pair.
 type PairTypeNode struct {
 	t1 TypeNode
 	t2 TypeNode

@@ -5,18 +5,14 @@ import (
 	"fmt"
 )
 
+// RHSNode is an empty interface for lhs nodes to implement.
 type RHSNode interface {
-}
-
-type RHSNodeStruct struct {
-}
-
-func NewRHSNode() RHSNode {
-	return RHSNodeStruct{}
 }
 
 // ExpressionNode - defined in expression_node.go
 
+// ArrayLiteralNode stores the position and elements of an array literal. e.g.
+// [2, 4]
 type ArrayLiteralNode struct {
 	pos   Position
 	exprs []ExpressionNode
@@ -38,6 +34,7 @@ func (node ArrayLiteralNode) String() string {
 	return buf.String()
 }
 
+// NewPairNode stores the position and elements of a newpair call. e.g. newpair(4, 2)
 type NewPairNode struct {
 	pos Position
 	fst ExpressionNode
@@ -66,6 +63,8 @@ func (node NewPairNode) String() string {
 
 // PairSecondElementNode - defined in lhs_node.go
 
+// FunctionCallNode stores the position, identifier and passed in paramaters for
+// a function call. e.g. call f(true, false)
 type FunctionCallNode struct {
 	pos   Position
 	ident IdentifierNode
