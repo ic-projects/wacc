@@ -17,8 +17,8 @@ all: pigeon build
 
 build: $(SRC) $(BUILD)
 
-src/wacc.go: src/grammar/wacc.peg
-	$(PIGEON) $^ > $@
+src/wacc.go: src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
+	cat $^ | $(PIGEON) > $@
 
 check: spellcheck fmt vet lint cyclo
 

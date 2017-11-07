@@ -1,8 +1,8 @@
 package ast
 
 import (
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
 )
 
 type RHSNode interface {
@@ -15,7 +15,7 @@ func NewRHSNode() RHSNode {
 	return RHSNodeStruct{}
 }
 
-// ExpressionNode
+// ExpressionNode - defined in expression_node.go
 
 type ArrayLiteralNode struct {
 	pos   Position
@@ -62,9 +62,9 @@ func (node NewPairNode) String() string {
 	return buf.String()
 }
 
-// PairFirstElementNode
+// PairFirstElementNode - defined in lhs_node.go
 
-// PairSecondElementNode
+// PairSecondElementNode - defined in lhs_node.go
 
 type FunctionCallNode struct {
 	pos   Position

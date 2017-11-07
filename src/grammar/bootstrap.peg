@@ -1,0 +1,39 @@
+{
+    package main
+
+    import (
+        "ast"
+        "fmt"
+        "strconv"
+        "strings"
+        "unicode/utf8"
+    )
+
+    func (c *current) getPosition() ast.Position {
+        return ast.NewPosition(c.pos.line, c.pos.col, c.pos.offset)
+    }
+
+    func toSlice(slice interface{}) []interface{} {
+        return slice.([]interface{})
+    }
+
+    func getItem(slice interface{}, index int) interface{} {
+        return toSlice(slice)[index]
+    }
+
+    func ret(val interface{}) (interface{}, error) {
+        return val, nil
+    }
+
+    func parseBinOps(e1 interface{}, e2 interface{}, p ast.Position) (interface{}, error) {
+        if (len(toSlice(e2)) > 0) {
+            return ret(ast.BuildBinOpTree(
+                e1,
+                toSlice(e2),
+                p,
+            ))
+        }
+
+        return e1, nil
+    }
+}

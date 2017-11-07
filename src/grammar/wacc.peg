@@ -1,393 +1,114 @@
-{
-    package main
-
-    import (
-        "ast"
-        "fmt"
-        "strconv"
-        "strings"
-        "unicode/utf8"
-    )
-
-    func (p position) getPosition() ast.Position {
-        return ast.NewPosition(p.line, p.col, p.offset)
-    }
+START ←_ p:PROGRAM {
+    return ret(p)
 }
 
-START <- _ p:PROGRAM {
-  return p, nil
-}
+// ProgramNode
+PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
 
-PROGRAM <- "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
-    main := ast.NewFunctionNode(
-        c.pos.getPosition(),
-        ast.NewBaseTypeNode(ast.VOID),
-        ast.NewIdentifierNode(c.pos.getPosition(), ""),
-        []ast.ParameterNode{},
-        stat.([]ast.StatementNode),
-    )
-    functions := []ast.FunctionNode{}
-    for _, f := range fs.([]interface{}) {
-        functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
-    }
-    functions = append(functions, main)
+	main := ast.NewFunctionNode(
+		c.getPosition(),
+		ast.NewBaseTypeNode(ast.VOID),
+		ast.NewIdentifierNode(c.getPosition(), ""),
+		[]ast.ParameterNode{},
+		stat.([]ast.StatementNode),
+	)
 
-    return ast.NewProgram(functions), nil
+	functions := []ast.FunctionNode{}
+	for _, f := range toSlice(fs) {
+		functions = append(functions, getItem(f, 1).(ast.FunctionNode))
+	}
+	functions = append(functions, main)
+
+	return ret(ast.NewProgram(functions))
+
 } / "begin" fs:(__ FUNC)* _ "end" _ !. {
-  functions := []ast.FunctionNode{}
-  for _, f := range fs.([]interface{}) {
-      functions = append(functions, f.([]interface{})[1].(ast.FunctionNode))
-  }
-  err := errors.New("Program body empty")
 
-  return ast.NewProgram(functions), err
-}
+	functions := []ast.FunctionNode{}
+	for _, f := range toSlice(fs) {
+		functions = append(functions, getItem(f, 1).(ast.FunctionNode))
+	}
 
-FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
-    stats := s.([]ast.StatementNode)
-    finalStat := stats[len(stats)-1]
-    var err error
-    if (!ast.FinalStatIsValid(finalStat)) {
-      err = errors.New(fmt.Sprintf("Function \"%s\" is not ended with a return or an exit statement.", strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
-    }
-    if (params != nil) {
-      return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), stats), err
-    }
-    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, stats), err
-} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
-    err := errors.New(fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", string(ident.([]interface{})[0].([]byte))))
-    return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), []ast.ParameterNode{}, []ast.StatementNode{}), err
-  }
-PARAMLIST <- param:PARAM params:(_ ',' _ PARAM)* {
-    paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
-    for _, p := range params.([]interface{}) {
-        paramList = append(paramList, p.([]interface{})[3].(ast.ParameterNode))
-    }
-    return paramList, nil
-}
-PARAM <- t:TYPE __ i:IDENT {
-    return ast.NewParameterNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode)), nil
+	err := errors.New("Program body empty")
+
+	return ast.NewProgram(functions), err
+
 }
 
-STAT <- stat:(SKIP / NEWASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE / ASSIGN) stats:(_ ';' _ (SKIP / NEWASSIGN / READ / FREE / RETURN / EXIT / PRINT / PRINTLN / IF / WHILE / SCOPE / ASSIGN))* {
-    statements := []ast.StatementNode{stat}
-    for _, s := range stats.([]interface{}) {
-        statements = append(statements, s.([]interface{})[3].(ast.StatementNode))
-    }
-    return statements, nil
+// FunctionNode
+FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT 
+       _ "end" {
+
+	stats := s.([]ast.StatementNode)
+	finalStat := stats[len(stats)-1]
+
+	var err error
+	if (!ast.FinalStatIsValid(finalStat)) {
+		name := strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")
+		errmsg := fmt.Sprintf(
+			"Function \"%s\" is not ended with a return or an exit statement.", 
+			name,
+		)
+		err = errors.New(errmsg)
+	}
+
+	if (params != nil) {
+		return ast.NewFunctionNode(
+			c.getPosition(), 
+			t.(ast.TypeNode), 
+			i.(ast.IdentifierNode), 
+			params.([]ast.ParameterNode), 
+			stats,
+		), err
+	}
+
+	return ast.NewFunctionNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		i.(ast.IdentifierNode),
+		[]ast.ParameterNode{},
+		stats,
+	), err
+
+} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT 
+    _ "end" {
+
+	name := string(getItem(ident, 0).([]byte))
+	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
+	err := errors.New(errmsg)
+
+	return ast.NewFunctionNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		ast.NewIdentifierNode(c.getPosition(), name),
+		[]ast.ParameterNode{},
+		[]ast.StatementNode{},
+	), err
+
 }
 
-SKIP <- "skip" {
-    return ast.NewSkipNode(c.pos.getPosition()), nil
-}
-NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
-  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(ast.IdentifierNode), rhs.(ast.RHSNode)), nil
-} / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
-  err := errors.New(fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", string(ident.([]interface{})[0].([]byte))))
-  return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), rhs.(ast.RHSNode)), err
-}
-ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
-  return ast.NewAssignNode(c.pos.getPosition(), lhs.(ast.LHSNode), rhs.(ast.LHSNode)), nil
-}
-READ <- "read" __ lhs:ASSIGNLHS {
-  return ast.NewReadNode(c.pos.getPosition(), lhs.(ast.LHSNode)), nil
-}
-FREE <- "free" __ expr:EXPR {
-  return ast.NewFreeNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
-}
-RETURN <- "return" __ expr:EXPR {
-  return ast.NewReturnNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
-}
-EXIT <- "exit" __ expr:EXPR {
-  return ast.NewExitNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
-}
-PRINT <- "print" __ expr:EXPR {
-  return ast.NewPrintNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
-}
-PRINTLN <- "println" __ expr:EXPR {
-  return ast.NewPrintlnNode(c.pos.getPosition(), expr.(ast.ExpressionNode)), nil
-}
-IF <- "if" __ cond:EXPR _ "then" __ ifStats:STAT _ "else" __ elseStats:STAT _ "fi" {
-  return ast.NewIfNode(c.pos.getPosition(), cond.(ast.ExpressionNode), ifStats.(ast.StatementNode).([]ast.StatementNode), elseStats.(ast.StatementNode).([]ast.StatementNode)), nil
-}
-WHILE <- "while" __ cond:EXPR _ "do" __ stats:STAT _ "done" {
-  return ast.NewLoopNode(c.pos.getPosition(), cond.(ast.ExpressionNode), stats.(ast.StatementNode).([]ast.StatementNode)), nil
-}
-SCOPE <- "begin" __ stats:STAT _ "end" {
-  return ast.NewScopeNode(c.pos.getPosition(), stats.(ast.StatementNode).([]ast.StatementNode)), nil
+PARAMLIST ← param:PARAM params:(_ ',' _ PARAM)* {
+
+	paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
+	for _, p := range toSlice(params) {
+		paramList = append(paramList, getItem(p, 3).(ast.ParameterNode))
+	}
+
+	return ret(paramList)
+
 }
 
-ASSIGNLHS <- lhs:(PAIRELEM / ARRAYELEM / IDENT)
-ASSIGNRHS <- ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
-NEWPAIR <- "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
-    return ast.NewNewPairNode(c.pos.getPosition(), t1.(ast.ExpressionNode), t2.(ast.ExpressionNode)), nil
-}
-CALL <- "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
-    if(args == nil) {
-      return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), []ast.ExpressionNode{}), nil
-    }
-    return ast.NewFunctionCallNode(c.pos.getPosition(), i.(ast.IdentifierNode), args.([]ast.ExpressionNode)), nil
-}
-ARGLIST <- expr:EXPR exprs:(_ ',' _ EXPR)* {
-    argList := []ast.ExpressionNode{expr}
-    for _, e := range exprs.([]interface{}) {
-        argList = append(argList, e.([]interface{})[3].(ast.ExpressionNode))
-    }
-    return argList, nil
-}
-PAIRELEM <- FST / SND
-FST <- "fst" __ e:EXPR {
-    return ast.NewPairFirstElementNode(c.pos.getPosition(), e.(ast.ExpressionNode)), nil
-}
-SND <- "snd" __ e:EXPR {
-    return ast.NewPairSecondElementNode(c.pos.getPosition(), e.(ast.ExpressionNode)), nil
+// Parameter Node
+PARAM ← t:TYPE __ i:IDENT {
+
+	return ret(ast.NewParameterNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		i.(ast.IdentifierNode),
+	))
+
 }
 
-TYPE <- t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
-    if (len(array.([]interface{})) > 0) {
-        return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
-    }
-    return t, nil
-}
-BASETYPE <- INT / BOOL / CHAR / STRING
-INT <- "int" {
-    return ast.NewBaseTypeNode(ast.INT), nil
-}
-BOOL <- "bool" {
-    return ast.NewBaseTypeNode(ast.BOOL), nil
-}
-CHAR <- "char" {
-    return ast.NewBaseTypeNode(ast.CHAR), nil
-}
-STRING <- "string" {
-    return ast.NewStringArrayTypeNode(ast.NewBaseTypeNode(ast.CHAR), 1), nil
-}
-ARRAYTYPE <- '[' _ ']'
-PAIRTYPE <- "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
-    return ast.NewPairTypeNode(t1.(ast.TypeNode), t2.(ast.TypeNode)), nil
-}
-
-PAIRELEMTYPE <- (t:BASETYPE array:(_ ARRAYTYPE)*) {
-    if (len(array.([]interface{})) > 0) {
-        return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
-    }
-    return t, nil
-} / (t:PAIRTYPE array:(_ ARRAYTYPE)+) {
-    return ast.NewArrayTypeNode(t.(ast.TypeNode), len(array.([]interface{}))), nil
-} / PAIR
-PAIR <- "pair" {
-    return ast.NewBaseTypeNode(ast.PAIR), nil
-}
-
-EXPR <- e1:PREC2 e2:(_ OR _ PREC2)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC2 <- e1:PREC3 e2:(_ AND _ PREC3)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC3 <- e1:PREC4 e2:(_ EQUOP _ PREC4)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC4 <- e1:PREC5 e2:(_ COMPOP _ PREC5)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC5 <- e1:PREC6 e2:(_ ADDOP _ PREC6)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC6 <- e1:PREC7 e2:(_ MULOP _ PREC7)* {
-  if (len(e2.([]interface{})) > 0) {
-    return ast.BuildBinOpTree(e1, e2.([]interface{}), c.pos.getPosition()), nil
-  }
-  return e1, nil
-}
-
-PREC7 <- bre:BREXPR _ ')' {
-  return bre, nil
-} / e:(INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) {
-  return e, nil
-} / p:PAIRELEM {
-  err := errors.New(fmt.Sprintf("Invalid expression, \"%s\" (pair element)", string(c.text)))
-  return p, err
-}
-
-MULOP <- MULT / DIV / MOD
-
-ADDOP <- SUB / PLUS
-
-COMPOP <- GEQ / GT / LEQ / LT
-
-EQUOP <- EQ / NEQ
-
-UNARYEXPR <- op:UNARYOPER _ expr:EXPR {
-  return ast.NewUnaryOperatorNode(c.pos.getPosition(), op.(ast.UnaryOperator), expr.(ast.ExpressionNode)), nil
-}
-
-BREXPR <- '(' _ expr:EXPR {
-  return expr, nil
-}
-UNARYOPER <- NOT / NEG / LEN / ORD / CHR
-NOT <- '!' {
-  return ast.NOT, nil
-}
-NEG <- '-' {
-  return ast.NEG, nil
-}
-LEN <- "len" __ {
-  return ast.LEN, nil
-}
-ORD <- "ord" __ {
-  return ast.ORD, nil
-}
-CHR <- "chr" __ {
-  return ast.CHR, nil
-}
-MULT <- '*' {
-  return ast.MUL, nil
-}
-DIV <- '/' {
-  return ast.DIV, nil
-}
-MOD <- '%' {
-  return ast.MOD, nil
-}
-PLUS <- '+' {
-  return ast.ADD, nil
-}
-SUB <- '-' {
-  return ast.SUB, nil
-}
-GT <- '>' {
-  return ast.GT, nil
-}
-GEQ <- ">=" {
-  return ast.GEQ, nil
-}
-LT <- '<' {
-  return ast.LT, nil
-}
-LEQ <- "<=" {
-  return ast.LEQ, nil
-}
-EQ <- "==" {
-  return ast.EQ, nil
-}
-NEQ <- "!=" {
-  return ast.NEQ, nil
-}
-AND <- "&&" {
-  return ast.AND, nil
-}
-OR <- "||" {
-  return ast.OR, nil
-}
-
-IDENT <- !RESERVED s:(('_' / [a-z] / [A-Z]) ('_' / [a-z] / [A-Z] / [0-9])*) {
-  return ast.NewIdentifierNode(c.pos.getPosition(), string(c.text)), nil
-}
-
-RESERVED <- ("int" / "bool" / "char" / "string" / "pair" / "false" / "true" / "newpair" / "null" / "begin" / "end" / "is" / "len" / "ord" / "chr" / "fst" / "snd" / "skip" / "read" / "free" / "return" / "exit" / "print" / "println" / "if" / "then" / "else" / "while" / "do" / "done" / "call") !('_' / [a-z] / [A-Z] / [0-9])
-
-ARRAYELEM <- ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
-  var expressionNodes  []ast.ExpressionNode
-  for _, e := range exprs.([]interface{}) {
-      expressionNodes = append(expressionNodes, e.([]interface{})[3].(ast.ExpressionNode))
-  }
-  return ast.NewArrayElementNode(c.pos.getPosition(), ident.(ast.IdentifierNode), expressionNodes), nil
-}
-INTLITER <- INTSIGN? _ DIGIT+ {
-  i, err := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
-
-  if err != nil {
-    err = errors.New(fmt.Sprintf("Integer value \"%s\" is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer).", string(c.text)))
-  }
-
-  return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), err
-}
-DIGIT <- [0-9]
-INTSIGN <- '+' / '-'
-BOOLLITER <- TRUE / FALSE
-TRUE <- "true" {
-  return ast.NewBooleanLiteralNode(c.pos.getPosition(), true), nil
-}
-FALSE <- "false" {
-  return ast.NewBooleanLiteralNode(c.pos.getPosition(), false), nil
-}
-CHARLITER <- "'" char:CHARACTER "'" {
-  r, _ := utf8.DecodeRune(char.([]byte))
-  return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), nil
-} / "'" char:[""''\\] "'" {
-  r, _ := utf8.DecodeRune(char.([]byte))
-  err := errors.New(fmt.Sprintf("Invalid character, \"%s\" (must be escaped)", c.text))
-  return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), err
-}
-STRLITER <- '"' CHARACTER* '"' {
-  return ast.NewStringLiteralNode(c.pos.getPosition(), string(c.text)), nil
-}
-CHARACTER <- char:[^""''\\] {
-  return char, nil
-} / '\\' char:ESCAPEDCHAR {
-    switch char.([]byte)[0] {
-    case '0':
-      return []byte{'\000'}, nil
-    case 'b':
-      return '\b', nil
-    case 't':
-      return '\t', nil
-    case 'n':
-      return '\n', nil
-    case 'f':
-      return '\f', nil
-    case 'r':
-      return '\r', nil
-    default:
-      return char, nil
-    }
-} / '\\' char:. {
-    err := errors.New(fmt.Sprintf("Invalid escaped character, \"%s\"", c.text))
-    return char, err
-}
-
-ESCAPEDCHAR <- [0btnfr""''\\]
-ARRAYLITER <- '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
-  var expressions []ast.ExpressionNode
-  if (exprs == nil) {
-    expressions = nil
-  } else {
-    firstExpression := exprs.([]interface{})[0].(ast.ExpressionNode)
-    expressions = []ast.ExpressionNode{firstExpression}
-    for _, e := range exprs.([]interface{})[1].([]interface{}) {
-        expressions = append(expressions, e.([]interface{})[3].(ast.ExpressionNode))
-    }
-  }
-  return ast.NewArrayLiteralNode(c.pos.getPosition(), expressions), nil
-}
-PAIRLITER <- "null" {
-  return ast.NewPairLiteralNode(c.pos.getPosition()), nil
-}
-
-/**** Comments and Spacing ****/
-
-Comment <- '#' ([^\n])* '\n'
-
-_ "Optional Space" <- ([ \n\t\r] / Comment)*
-__ "Obligatory Space" <- ([ \n\t\r] / Comment)+
+// Spacing and Comments
+_ "Optional Space" ← ([ \n\t\r] / COMMENT)*
+__ "Obligatory Space" ← ([ \n\t\r] / COMMENT)+
+COMMENT ← '#' ([^\n])* '\n'

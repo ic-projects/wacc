@@ -1,8 +1,8 @@
 package ast
 
 import (
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
 )
 
 type StatementNode interface {
@@ -40,7 +40,7 @@ func NewDeclareNode(pos Position, t TypeNode, ident IdentifierNode, rhs RHSNode)
 
 func (node DeclareNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- DECLARE"))/**** StatementNodes ****/
+	buf.WriteString(fmt.Sprintln("- DECLARE"))
 	buf.WriteString(fmt.Sprintln("  - TYPE"))
 	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.t), "    "))
 	buf.WriteString(fmt.Sprintln("  - LHS"))

@@ -1,9 +1,9 @@
 package ast
 
 import (
-  "bytes"
+	"bytes"
+	"fmt"
 	"strconv"
-  "fmt"
 )
 
 type ExpressionNode interface {
@@ -55,32 +55,32 @@ const (
 
 func (binOp BinaryOperator) String() string {
 	switch binOp {
+	case OR:
+		return "- ||"
+	case AND:
+		return "- &&"
 	case MUL:
 		return "- *"
 	case DIV:
 		return "- /"
 	case MOD:
 		return "- %"
-	case ADD:
-		return "- +"
 	case SUB:
 		return "- -"
-	case GT:
-		return "- >"
-	case LT:
-		return "- <"
-	case LEQ:
-		return "- <="
+	case ADD:
+		return "- +"
 	case GEQ:
 		return "- >="
+	case GT:
+		return "- >"
+	case LEQ:
+		return "- <="
+	case LT:
+		return "- <"
 	case EQ:
 		return "- =="
 	case NEQ:
 		return "- !="
-	case AND:
-		return "- &&"
-	case OR:
-		return "- ||"
 	}
 	return "ERROR"
 }
@@ -169,9 +169,9 @@ func (node PairLiteralNode) String() string {
 	return "- null\n"
 }
 
-// IdentifierNode
+// IdentifierNode - defined in lhs_node.go
 
-// ArrayElementNode
+// ArrayElementNode - defined in lhs_node.go
 
 type UnaryOperatorNode struct {
 	pos  Position
