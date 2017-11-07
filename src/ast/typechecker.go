@@ -233,7 +233,7 @@ func StripType(t TypeNode) TypeNode {
 	return t
 }
 
-// forcePop will force an expectance off the stack, useful for RepeatExpectance. 
+// forcePop will force an expectance off the stack, useful for RepeatExpectance.
 // It will only change the stack if it is not frozen.
 func (check *TypeChecker) forcePop() {
 	if check.frozen() { return }
@@ -305,9 +305,25 @@ func (check *TypeChecker) freeze(node ProgramNode) {
 	check.frozenNode = node
 }
 
+
+// isSameNode Compares eqaulity of ProgramNodes. As FunctionCallNode is not
+// comparable with the == operator, we define our own function that compares types first.
+func isSameNode(n1 ProgramNode, n2 ProgramNode) bool{
+	_, n1FunctionCall := n1.(FunctionCallNode)
+	_, n2FunctionCall := n2.(FunctionCallNode)
+
+	if n1FunctionCall && n2FunctionCall {
+		return true
+	} else if !n1FunctionCall && !n2FunctionCall {
+		return n1 == n2
+	} else {
+		return false
+	}
+}
+
 // unfreeze will unfreeze the checker, if the given node is the same as the frozen node.
 func (check *TypeChecker) unfreeze(node ProgramNode) {
-	if node == check.frozenNode {
+	if isSameNode(node, check.frozenNode) {
 		if DEBUG_MODE {
 			fmt.Printf("Unfrozen on %s\n", node)
 		}

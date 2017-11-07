@@ -3,7 +3,6 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"os"
 )
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with
@@ -209,8 +208,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case PairFirstElementNode:
 		//  Look up type for pair call seen
 		if identNode, ok := node.expr.(IdentifierNode); !ok {
-			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
-			os.Exit(200)
+			foundError = NewCustomError(node.pos, "Cannot access first element of null")
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
 			foundError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
 			v.typeChecker.seen(nil)
@@ -221,8 +221,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case PairSecondElementNode:
 		if identNode, ok := node.expr.(IdentifierNode); !ok {
-			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
-			os.Exit(200)
+			foundError = NewCustomError(node.pos, "Cannot access second element of null")
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
 			foundError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
 			v.typeChecker.seen(nil)
@@ -237,8 +238,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if arrayNode, ok := identDec.t.(ArrayTypeNode); !ok {
-			fmt.Printf("Array access on non-array variable %s", node.ident.ident)
-			os.Exit(200)
+			foundError = NewCustomError(node.pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.ident.ident))
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else {
       // If we have an array or a single element (for use in newsted arrays).
 			if dimLeft := arrayNode.dim - len(node.exprs); dimLeft == 0 {
@@ -260,8 +262,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if len(f.params) != len(node.exprs) {
-			fmt.Printf("Incorrect number of parameters in")
-			os.Exit(200)
+			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\"", node.ident.ident))
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
 		} else {
 			foundError = v.typeChecker.seen(f.t).addPos(node.pos)
 			for i := len(f.params) - 1; i >= 0; i-- {
