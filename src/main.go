@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"bufio"
 )
 
 func number(s string) string {
@@ -18,6 +19,29 @@ func number(s string) string {
 		}
 	}
 	return buf.String()
+}
+
+func getLine(path string, n int) string {
+	// Open the WACC source file
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error: Unable to open the specified WACC source file")
+		os.Exit(100)
+	}
+
+	reader := bufio.NewReader(f)
+	var line string
+
+	for i := 0; i < n; i++ {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Error: Unable to read specified line")
+			os.Exit(100)
+		}
+	}
+
+	return line
 }
 
 func main() {
@@ -45,12 +69,32 @@ func main() {
 
 		// Print out all errors that occur
 		if len(checker.Errors) > 0 {
-			maxErrors := 5
+			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
+			maxErrors := 4
 			for i, e := range checker.Errors {
-				if i > maxErrors {
-					fmt.Printf("And %d other errors", len(checker.Errors)-maxErrors)
+				if i >= maxErrors {
+					fmt.Printf("And %d other error(s)", len(checker.Errors)-maxErrors)
 					break
 				}
+
+				var b bytes.Buffer
+				b.WriteString("\nSemantic Error at ")
+				b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
+
+				// Remove leading spaces and tabs
+				line := getLine(filepath, e.Pos().LineNumber())
+				leadingChars := 0
+				for _, c := range line {
+					if (c == '\t' || c == ' ') {
+						leadingChars++
+					} else {
+						break
+					}
+				}
+				b.WriteString(line[leadingChars:])
+				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber() - leadingChars))
+				b.WriteString("^")
+				fmt.Println(b.String())
 				fmt.Println(e)
 			}
 			os.Exit(200)

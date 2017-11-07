@@ -22,12 +22,38 @@ func NewSemanticCheck() *SemanticCheck {
 
 type GenericError interface {
 	String() string
+	Pos() Position
 }
 
 type TypeError struct {
 	pos      Position
 	got      TypeNode
 	expected map[TypeNode]bool
+}
+
+func (e TypeError) Pos() Position {
+	return e.pos
+}
+
+func (e DeclarationError) Pos() Position {
+	return e.pos
+}
+
+func (e TypeError) String() string {
+	var b bytes.Buffer
+	b.WriteString("Expected type ")
+	i := 1
+	for t := range e.expected {
+		if i == len(e.expected) {
+			b.WriteString(fmt.Sprintf("\"%s\"", t))
+		} else {
+			b.WriteString(fmt.Sprintf("\"%s\" or ", t))
+		}
+		i++
+	}
+
+	b.WriteString(fmt.Sprintf(" but got type \"%s\"", e.got))
+	return b.String()
 }
 
 func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
@@ -37,30 +63,20 @@ func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
 	}
 }
 
-func (e TypeError) String() string {
-	var b bytes.Buffer
-	b.WriteString("Expected type ")
-	for key, _ := range e.expected {
-		b.WriteString(fmt.Sprintf("%s ", key))
-	}
-	b.WriteString(fmt.Sprintf("but got type %s at %s", e.got, e.pos))
-	return b.String()
-}
-
 func (e TypeError) addPos(pos Position) TypeError {
 	e.pos = pos
 	return e
 }
 
-type DeclerationError struct {
+type DeclarationError struct {
 	pos      Position
 	isFunction bool
 	isDefined bool
 	identifier string
 }
 
-func NewDeclerationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclerationError {
-	return DeclerationError{
+func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
+	return DeclarationError{
 		pos: pos,
 		isFunction: isFunction,
 		isDefined: isDefined,
@@ -68,7 +84,7 @@ func NewDeclerationError(pos Position, isFunction bool, isDefined bool, identifi
 	}
 }
 
-func (e DeclerationError) String() string {
+func (e DeclarationError) String() string {
 	var b bytes.Buffer
 	if e.isFunction {
 		if e.isDefined {
@@ -93,13 +109,13 @@ func (v *SemanticCheck) PrintSymbolTable() {
 
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	var typeError TypeError
-	var declerationError DeclerationError
+	var declarationError DeclarationError
 	switch node := programNode.(type) {
 	case Program:
 		for _, f := range node.functions {
 			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
 			if ok {
-				declerationError = NewDeclerationError(f.pos, true, true, f.ident.ident)
+				declarationError = NewDeclarationError(f.pos, true, true, f.ident.ident)
 			} else {
 				v.symbolTable.AddFunction(f.ident.ident, f)
 			}
@@ -110,7 +126,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case ParameterNode:
 		_, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if ok {
-			declerationError = NewDeclerationError(node.pos, false, true, node.ident.ident)
+			declarationError = NewDeclarationError(node.pos, false, true, node.ident.ident)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
@@ -118,7 +134,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case DeclareNode:
 		_, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
 		if ok {
-			declerationError = NewDeclerationError(node.pos, false, true, node.ident.ident)
+			declarationError = NewDeclarationError(node.pos, false, true, node.ident.ident)
 			v.typeChecker.freeze(node)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
@@ -146,7 +162,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case IdentifierNode:
 		identDec, ok := v.symbolTable.SearchForIdent(node.ident)
 		if !ok {
-			declerationError = NewDeclerationError(node.pos, false, false, node.ident)
+			declarationError = NewDeclarationError(node.pos, false, false, node.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
@@ -158,7 +174,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
 			os.Exit(200)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			declerationError = NewDeclerationError(identNode.pos, false, false, identNode.ident)
+			declarationError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
@@ -170,7 +186,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			fmt.Printf("Not an identifier for a pair %s", identNode.ident)
 			os.Exit(200)
 		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			declerationError = NewDeclerationError(identNode.pos, false, false, identNode.ident)
+			declarationError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
@@ -181,7 +197,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		// Check identifier
 		identDec, ok := v.symbolTable.SearchForIdent(node.ident.ident)
 		if !ok {
-			declerationError = NewDeclerationError(node.pos, false, false, node.ident.ident)
+			declarationError = NewDeclarationError(node.pos, false, false, node.ident.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if arrayNode, ok := identDec.t.(ArrayTypeNode); !ok {
@@ -205,7 +221,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case FunctionCallNode:
 		f, ok := v.symbolTable.SearchForFunction(node.ident.ident)
 		if !ok {
-			declerationError = NewDeclerationError(node.pos, true, false, node.ident.ident)
+			declarationError = NewDeclarationError(node.pos, true, false, node.ident.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if len(f.params) != len(node.exprs) {
@@ -277,8 +293,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 	}
 
-	if declerationError != (DeclerationError{}) {
-		v.Errors = append(v.Errors, declerationError)
+	if declarationError != (DeclarationError{}) {
+		v.Errors = append(v.Errors, declarationError)
 	} else if typeError.got != nil {
 		v.Errors = append(v.Errors, typeError)
 	}

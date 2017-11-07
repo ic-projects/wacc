@@ -135,6 +135,18 @@ type Position struct {
 	offset     int
 }
 
+func (p Position) LineNumber() int {
+	return p.lineNumber
+}
+
+func (p Position) ColNumber() int {
+	colNum := p.colNumber
+	if colNum != 0 {
+		colNum--
+	}
+	return colNum
+}
+
 func NewPosition(lineNumber int, colNumber int, offset int) Position {
 	return Position{
 		lineNumber: lineNumber,
@@ -156,5 +168,6 @@ func (p Position) String() string {
 		}
 		return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, colNum, offsetNum)
 	}
-	return fmt.Sprintf("line %d, column %d", p.lineNumber, colNum)
+
+	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)
 }
