@@ -48,14 +48,14 @@ FUNC <- t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "en
     finalStat := stats[len(stats)-1]
     var err error
     if (!ast.FinalStatIsValid(finalStat)) {
-      err = errors.New(fmt.Sprintf("Function %s is not ended with a return or an exit statement.", strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
+      err = errors.New(fmt.Sprintf("Function \"%s\" is not ended with a return or an exit statement.", strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")))
     }
     if (params != nil) {
       return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), params.([]ast.ParameterNode), stats), err
     }
     return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), i.(ast.IdentifierNode), []ast.ParameterNode{}, stats), err
 } / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT _ "end" {
-    err := errors.New(fmt.Sprintf("Invalid identifier, '%s' (reserved)", string(ident.([]interface{})[0].([]byte))))
+    err := errors.New(fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", string(ident.([]interface{})[0].([]byte))))
     return ast.NewFunctionNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), []ast.ParameterNode{}, []ast.StatementNode{}), err
   }
 PARAMLIST <- param:PARAM params:(_ ',' _ PARAM)* {
@@ -83,7 +83,7 @@ SKIP <- "skip" {
 NEWASSIGN <- t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
   return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ident.(ast.IdentifierNode), rhs.(ast.RHSNode)), nil
 } / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
-  err := errors.New(fmt.Sprintf("Invalid identifier, '%s' (reserved)", string(ident.([]interface{})[0].([]byte))))
+  err := errors.New(fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", string(ident.([]interface{})[0].([]byte))))
   return ast.NewDeclareNode(c.pos.getPosition(), t.(ast.TypeNode), ast.NewIdentifierNode(c.pos.getPosition(), string(ident.([]interface{})[0].([]byte))), rhs.(ast.RHSNode)), err
 }
 ASSIGN <- lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
@@ -226,7 +226,7 @@ PREC7 <- bre:BREXPR _ ')' {
 } / e:(INTLITER / BOOLLITER / CHARLITER / STRLITER / PAIRLITER / UNARYEXPR / ARRAYELEM / IDENT) {
   return e, nil
 } / p:PAIRELEM {
-  err := errors.New(fmt.Sprintf("Invalid expression, %s (pair element)", string(c.text)))
+  err := errors.New(fmt.Sprintf("Invalid expression, \"%s\" (pair element)", string(c.text)))
   return p, err
 }
 
@@ -318,7 +318,7 @@ INTLITER <- INTSIGN? _ DIGIT+ {
   i, err := strconv.ParseInt(strings.Replace(string(c.text), " ", "", -1), 10, 32)
 
   if err != nil {
-    err = errors.New(fmt.Sprintf("Integer value '%s' is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer).", string(c.text)))
+    err = errors.New(fmt.Sprintf("Integer value \"%s\" is badly formatted (either it has a badly defined sign or it is too large for a 32-bit signed integer).", string(c.text)))
   }
 
   return ast.NewIntegerLiteralNode(c.pos.getPosition(), int(i)), err
@@ -337,7 +337,7 @@ CHARLITER <- "'" char:CHARACTER "'" {
   return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), nil
 } / "'" char:[""''\\] "'" {
   r, _ := utf8.DecodeRune(char.([]byte))
-  err := errors.New(fmt.Sprintf("Invalid character, %s (must be escaped)", c.text))
+  err := errors.New(fmt.Sprintf("Invalid character, \"%s\" (must be escaped)", c.text))
   return ast.NewCharacterLiteralNode(c.pos.getPosition(), r), err
 }
 STRLITER <- '"' CHARACTER* '"' {
@@ -363,7 +363,7 @@ CHARACTER <- char:[^""''\\] {
       return char, nil
     }
 } / '\\' char:. {
-    err := errors.New(fmt.Sprintf("Invalid escaped character, '%s'", c.text))
+    err := errors.New(fmt.Sprintf("Invalid escaped character, \"%s\"", c.text))
     return char, err
 }
 
