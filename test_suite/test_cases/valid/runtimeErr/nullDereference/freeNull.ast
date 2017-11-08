@@ -28,7 +28,7 @@ freeNull.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - 
+4	        - pair(basePair, basePair)
 5	      - LHS
 6	        - a
 7	      - RHS

@@ -27,7 +27,7 @@ readNull2.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - intint
+4	        - pair(int, int)
 5	      - LHS
 6	        - p
 7	      - RHS

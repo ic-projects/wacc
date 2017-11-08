@@ -221,7 +221,7 @@ printAllTypes.ast contents are:
 84	                  - SCOPE
 85	                    - DECLARE
 86	                      - TYPE
-87	                        - intint
+87	                        - pair(int, int)
 88	                      - LHS
 89	                        - x
 90	                      - RHS
@@ -233,7 +233,7 @@ printAllTypes.ast contents are:
 96	                    - SCOPE
 97	                      - DECLARE
 98	                        - TYPE
-99	                          - charbool
+99	                          - pair(char, bool)
 100	                        - LHS
 101	                          - y
 102	                        - RHS
@@ -244,7 +244,7 @@ printAllTypes.ast contents are:
 107	                              - true
 108	                      - DECLARE
 109	                        - TYPE
-110	                          - charbool
+110	                          - pair(char, bool)
 111	                        - LHS
 112	                          - z
 113	                        - RHS
@@ -255,7 +255,7 @@ printAllTypes.ast contents are:
 118	                              - false
 119	                      - DECLARE
 120	                        - TYPE
-121	                          - charbool[]
+121	                          - pair(char, bool)[]
 122	                        - LHS
 123	                          - x
 124	                        - RHS
@@ -285,7 +285,7 @@ printAllTypes.ast contents are:
 148	                              - 'c'
 149	                        - DECLARE
 150	                          - TYPE
-151	                            - int[]char[]
+151	                            - pair(int[], char[])
 152	                          - LHS
 153	                            - x
 154	                          - RHS
@@ -352,7 +352,7 @@ printAllTypes.ast contents are:
 215	                          - "] )"
 216	                      - DECLARE
 217	                        - TYPE
-218	                          - charbool
+218	                          - pair(char, bool)
 219	                        - LHS
 220	                          - a
 221	                        - RHS
@@ -377,7 +377,7 @@ printAllTypes.ast contents are:
 240	                            - a
 241	                      - DECLARE
 242	                        - TYPE
-243	                          - charbool
+243	                          - pair(char, bool)
 244	                        - LHS
 245	                          - b
 246	                        - RHS
