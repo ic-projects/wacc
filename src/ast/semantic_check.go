@@ -71,6 +71,13 @@ func (e TypeError) String() string {
 	b.WriteString("Expected type ")
 	i := 1
 	for t := range e.expected {
+		// If type mismatch on VOID, then trying to return from global scope
+		if node, ok := t.(BaseTypeNode); ok {
+			if node.t == VOID {
+				return "Cannot return from global scope"
+			}
+		}
+
 		if i == len(e.expected) {
 			b.WriteString(fmt.Sprintf("\"%s\"", t))
 		} else {
