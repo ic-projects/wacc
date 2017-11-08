@@ -7,7 +7,7 @@ import (
 )
 
 // FinalStatIsValid given the last statement from a statement list, this function
-// traverses to the last statment checks that statment is a valid end statement,
+// traverses to the last statement checks that statement is a valid end statement,
 // such as a return or exit.
 func FinalStatIsValid(s StatementNode) bool {
 	switch s.(type) {
@@ -49,7 +49,7 @@ func indent(s string, sep string) string {
 // the AST.
 type Program struct {
 	// functions the list of all the functions in the program in the order they are
-	// delcared, the last function will be the "main" function.
+	// declared, the last function will be the "main" function.
 	functions []FunctionNode
 }
 

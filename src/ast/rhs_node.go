@@ -63,7 +63,7 @@ func (node NewPairNode) String() string {
 
 // PairSecondElementNode - defined in lhs_node.go
 
-// FunctionCallNode stores the position, identifier and passed in paramaters for
+// FunctionCallNode stores the position, identifier and passed in parameters for
 // a function call. e.g. call f(true, false)
 type FunctionCallNode struct {
 	pos   Position
