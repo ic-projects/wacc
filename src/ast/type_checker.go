@@ -32,18 +32,19 @@ func NewSetExpectance(ts []TypeNode) SetExpectance {
 func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode) bool {
 	_, match := validTypes[t]
 	nilArray := ArrayTypeNode{}
-	setHasNil := false
-	findNil := t == nilArray
+	expectingAnyArray := false
+	matchOnAnyArray := t == nilArray
 	var found ArrayTypeNode
 	for key, _ := range validTypes {
 		if StripType(key) == nilArray {
 			found = key.(ArrayTypeNode)
-			setHasNil = true
+			expectingAnyArray = true
 			break
 		}
 	}
 
-	if findNil {
+	// ArrayLiteral case, so expect an unknown amount of expressions
+	if matchOnAnyArray {
 		if found.dim == 1 {
 			check.expectRepeatUntilForce(found.t)
 		} else {
@@ -51,7 +52,7 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 		}
 		return true
 	}
-	return setHasNil || match
+	return expectingAnyArray || match
 }
 
 // arrayCase handles the multiple options where we have seen an pair.
@@ -59,21 +60,23 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 	_, match := validTypes[t]
 	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]
 	nilPair := PairTypeNode{}
-	findNil := t == nilPair
+	matchOnAnyPair := t == nilPair
 	var nilMatch PairTypeNode
-	hasNilMatch := false
+	expectingAnyPair := false
 	for key, _ := range validTypes {
 		if StripType(key) == nilPair {
 			nilMatch = key.(PairTypeNode)
-			hasNilMatch = true
+			expectingAnyPair = true
 			break
 		}
 	}
 
-	if findNil {
-		if !hasNilMatch {
+	if matchOnAnyPair {
+		if !expectingAnyPair {
 			return false
 		}
+
+		// newpair case, expect first and second types of pair
 		if !basePairMatch {
 			check.expect(nilMatch.t2)
 			check.expect(nilMatch.t1)
@@ -81,7 +84,7 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 		return true
 	}
 
-	return match || matchBase || hasNilMatch
+	return match || matchBase || expectingAnyPair
 }
 
 // seen is called when we have seen a SetExpectance.
