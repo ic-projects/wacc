@@ -95,8 +95,26 @@ func main() {
 				b.WriteString(line[leadingChars:])
 				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
 				b.WriteString("^")
-				fmt.Println(b.String())
+				if typeDeclarationError, ok := e.(ast.TypeErrorDeclaration); ok {
+					b.WriteString("\nDeclared at ")
+					b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
+
+					// Remove leading spaces and tabs
+					line := getLine(filepath, typeDeclarationError.PosDeclared().LineNumber())
+					leadingChars := 0
+					for _, c := range line {
+						if c == '\t' || c == ' ' {
+							leadingChars++
+						} else {
+							break
+						}
+					}
+					b.WriteString(line[leadingChars:])
+					b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
+					b.WriteString("^")
+				}
 				fmt.Println(e)
+				fmt.Println(b.String())
 			}
 			os.Exit(200)
 		}
