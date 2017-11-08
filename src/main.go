@@ -2,13 +2,13 @@ package main
 
 import (
 	"ast"
+	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
 	"os"
 	"path"
 	"strings"
-	"bufio"
 )
 
 func number(s string) string {
@@ -73,7 +73,7 @@ func main() {
 			maxErrors := 4
 			for i, e := range checker.Errors {
 				if i >= maxErrors {
-					fmt.Printf("And %d other error(s)", len(checker.Errors)-maxErrors)
+					fmt.Printf("\nAnd %d other error(s)", len(checker.Errors)-maxErrors)
 					break
 				}
 
@@ -92,7 +92,7 @@ func main() {
 					}
 				}
 				b.WriteString(line[leadingChars:])
-				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber() - leadingChars))
+				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
 				b.WriteString("^")
 				fmt.Println(b.String())
 				fmt.Println(e)
