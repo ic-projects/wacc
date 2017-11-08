@@ -88,6 +88,9 @@ func NewStringArrayTypeNode() ArrayTypeNode {
 }
 
 func (node ArrayTypeNode) String() string {
+	if node == (ArrayTypeNode{}) {
+		return fmt.Sprintf("array")
+	}
 	var buf bytes.Buffer
 	if node.isString {
 		buf.WriteString(fmt.Sprintf("string"))
@@ -122,5 +125,8 @@ func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
 }
 
 func (node PairTypeNode) String() string {
+	if node == (PairTypeNode{}) {
+		return fmt.Sprintf("pair")
+	}
 	return fmt.Sprintf("pair(%s, %s)", node.t1, node.t2)
 }
