@@ -29,7 +29,7 @@ type GenericError interface {
 	Pos() Position
 }
 
-// CustomError is a struct that stores a paticular error message.
+// CustomError is a struct that stores a particular error message.
 type CustomError struct {
 	pos  Position
 	text string
@@ -163,7 +163,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			}
 		}
 	case FunctionNode:
-		// Move down scope so that the paramaters are on a new scope.
+		// Move down scope so that the parameters are on a new scope.
 		v.symbolTable.MoveDownScope()
 		v.typeChecker.expectRepeatUntilForce(node.t)
 	case ParameterNode:

@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// FinalStatIsValid given the last statement from a statement list, this function
+// traverses to the last statement checks that statement is a valid end statement,
+// such as a return or exit.
 func FinalStatIsValid(s StatementNode) bool {
 	switch s.(type) {
 	case ReturnNode:
@@ -30,6 +33,8 @@ func FinalStatIsValid(s StatementNode) bool {
 type ProgramNode interface {
 }
 
+// indent is a function to indent when printing the AST, given the string s, it indents
+// it with all previous indents plus the new indent (sep)
 func indent(s string, sep string) string {
 	var buf bytes.Buffer
 	for _, line := range strings.Split(s, "\n") {
@@ -40,7 +45,11 @@ func indent(s string, sep string) string {
 	return buf.String()
 }
 
+// Program the struct that encapsulates the entire program and will be the root of
+// the AST.
 type Program struct {
+	// functions the list of all the functions in the program in the order they are
+	// declared, the last function will be the "main" function.
 	functions []FunctionNode
 }
 
@@ -59,12 +68,22 @@ func (program Program) String() string {
 	return buf.String()
 }
 
+// FunctionNode is the struct that holds information about a function, the return type,
+// parameters and internal body.
 type FunctionNode struct {
-	pos    Position
-	t      TypeNode
-	ident  IdentifierNode
+	pos Position
+
+	// t is the return type of the function.
+	t TypeNode
+
+	// ident is the identifier used to reference the function.
+	ident IdentifierNode
+
+	// params is the list of parameters required to call the function.
 	params []ParameterNode
-	stats  []StatementNode
+
+	// stats is the list of statements contained within the function body.
+	stats []StatementNode
 }
 
 func NewFunctionNode(pos Position, t TypeNode, ident IdentifierNode, params []ParameterNode, stats []StatementNode) FunctionNode {
@@ -94,9 +113,15 @@ func (node FunctionNode) String() string {
 	return buf.String()
 }
 
+// ParameterNode is the struct that holds information about a parameter for a function,
+// the type and identifier of the single parameter.
 type ParameterNode struct {
-	pos   Position
-	t     TypeNode
+	pos Position
+
+	// t is the type of the parameter.
+	t TypeNode
+
+	// ident is the identifier used for the parameter.
 	ident IdentifierNode
 }
 
@@ -112,16 +137,20 @@ func (node ParameterNode) String() string {
 	return fmt.Sprintf("%s %s", node.t, node.ident.String()[2:])
 }
 
+// Position stores the position of a node within the original code. The linenumber,
+// column number and offset from the beginning of the file.
 type Position struct {
 	lineNumber int
 	colNumber  int
 	offset     int
 }
 
+// LineNumber returns the line number of a Position.
 func (p Position) LineNumber() int {
 	return p.lineNumber
 }
 
+// ColNumber returns the column number of a Position.
 func (p Position) ColNumber() int {
 	colNum := p.colNumber
 	if colNum != 0 {
