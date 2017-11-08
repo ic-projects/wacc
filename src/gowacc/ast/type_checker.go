@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var DEBUG_MODE = false
+var DEBUG_MODE bool
 
 // Expectance is an interface used to store what type is expected.
 type Expectance interface {
