@@ -62,8 +62,9 @@ The gowacc source is currently made up of three important parts:
 1. The main.go source. This file performs parsing and semantic checks.
 
 2. The src/grammar directory. This contains a full grammar for the wacc
-language, written using PEG syntax. Pigeon (https://github.com/mna/pigeon)
-is used to automatically generate the parser code, which is saved in the main
+language, written using PEG syntax. We use a forked version of pigeon
+(https://github.com/ic-projects/pigeon - our fork improves error reporting)
+to automatically generate the parser code, which is saved in the main
 package, as wacc.go. The generated parser is also responsible for performing
 lexical analysis - unlike in most other solutions, where this would be a
 separate stage. The AST is generated directly from excerpts of Go source code
