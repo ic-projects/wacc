@@ -231,7 +231,6 @@ func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position)
 		rest := BuildBinOpTree(first, toparse, position)
 		last := list[len(list)-1].([]interface{})
 		return NewBinaryOperatorNode(position, last[1].(BinaryOperator), rest, last[3])
-	} else {
-		return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
 	}
+	return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
 }
