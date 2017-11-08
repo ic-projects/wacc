@@ -14,11 +14,11 @@ type ExpressionNode interface {
 type UnaryOperator int
 
 const (
-	NOT UnaryOperator = iota
-	NEG
-	LEN
-	ORD
-	CHR
+	NOT UnaryOperator = iota // Not (!)
+	NEG                      // Negate (-)
+	LEN                      // Length (len)
+	ORD                      // Ordinate (ord)
+	CHR                      // Char (chr)
 )
 
 func (unOp UnaryOperator) String() string {
@@ -41,19 +41,19 @@ func (unOp UnaryOperator) String() string {
 type BinaryOperator int
 
 const (
-	MUL BinaryOperator = iota
-	DIV
-	MOD
-	ADD
-	SUB
-	GT
-	GEQ
-	LT
-	LEQ
-	EQ
-	NEQ
-	AND
-	OR
+	MUL BinaryOperator = iota // Multiply (*)
+	DIV                       // Divide (/)
+	MOD                       // Modulus (%)
+	ADD                       // Add (+)
+	SUB                       // Subtract (-)
+	GT                        // Greater than (>)
+	GEQ                       // Greater than or equal to (>=)
+	LT                        // Less than (<)
+	LEQ                       // Less than or equal to (<=)
+	EQ                        // Equal (==)
+	NEQ                       // Not equal (!=)
+	AND                       // And
+	OR                        // Or
 )
 
 func (binOp BinaryOperator) String() string {
@@ -89,7 +89,10 @@ func (binOp BinaryOperator) String() string {
 }
 
 // IntegerLiteralNode is a struct which stores the position and value of an
-// integer literal. e.g. 7
+// integer literal.
+//
+// E.g.
+//  7
 type IntegerLiteralNode struct {
 	pos Position
 	val int
@@ -107,7 +110,11 @@ func (node IntegerLiteralNode) String() string {
 }
 
 // BooleanLiteralNode is a struct which stores the position and value of a
-// boolean literal. e.g. false
+// boolean literal.
+//
+// E.g.
+//
+//  false
 type BooleanLiteralNode struct {
 	pos Position
 	val bool
@@ -125,7 +132,11 @@ func (node BooleanLiteralNode) String() string {
 }
 
 // CharacterLiteralNode is a struct which stores the position and value of a
-// character literal. e.g. 'c'
+// character literal.
+//
+// E.g.
+//
+//  'c'
 type CharacterLiteralNode struct {
 	pos Position
 	val rune
@@ -149,7 +160,10 @@ func (node CharacterLiteralNode) String() string {
 }
 
 // StringLiteralNode is a struct which stores the position and value of a string
-// literal. e.g. "Hello World!"
+// literal.
+//
+// E.g.
+//  "Hello World!"
 type StringLiteralNode struct {
 	pos Position
 	val string
@@ -189,7 +203,9 @@ func (node PairLiteralNode) String() string {
 
 // UnaryOperatorNode is a struct which stores the position, (unary) operator and
 // expression of a unary operator operation on an expression.
-// e.g. !true
+//
+// E.g.
+//  !true
 type UnaryOperatorNode struct {
 	pos  Position
 	op   UnaryOperator
@@ -215,7 +231,10 @@ func (node UnaryOperatorNode) String() string {
 
 // BinaryOperatorNode is a struct which stores the position, (binary) operator
 // and the two expressions of a binary operation on two expressions.
-// e.g. 5 + 2
+//
+// E.g.
+//
+//  5 + 2
 type BinaryOperatorNode struct {
 	pos   Position
 	op    BinaryOperator
