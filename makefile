@@ -1,26 +1,26 @@
-.PHONY = all build check lint clean clean-vendor
+.PHONY = all build check lint fmt vet cyclo spellcheck test doc clean clean-lib
 
-GOPATH := $(CURDIR)/src/vendor/:$(CURDIR)
+GOPATH := $(CURDIR)/lib/:$(CURDIR)
 export GOPATH
-GOBIN = $(CURDIR)/src/vendor/bin
+GOBIN = $(CURDIR)/lib/bin
 
 GOLINT = $(GOBIN)/golint
 PIGEON = $(GOBIN)/pigeon
 GOCYCLO = $(GOBIN)/gocyclo
 MISSPELL = $(GOBIN)/misspell
 
-SRC = src/main.go src/ast/*.go
-BUILD = src/wacc.go
+SRC = src/gowacc/main.go src/gowacc/ast/*.go
+BUILD = src/gowacc/wacc.go
 
 all: pigeon build
-	cd src && go build -o wacc
+	go build gowacc
 
 build: $(SRC) $(BUILD)
 
-src/wacc.go: src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
+src/gowacc/wacc.go: src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
 	cat $^ | $(PIGEON) > $@
 
-check: spellcheck fmt vet lint cyclo
+check: spellcheck fmt vet lint cyclo tests
 
 lint: golint
 	@echo "\n== Lint Checking =="
@@ -54,9 +54,17 @@ gocyclo:
 misspell:
 	@go get github.com/client9/misspell/cmd/misspell
 
+tests:
+	@echo "\n== To view the gowacc tests, visit http://localhost:18000/ =="
+	ruby test/testserver.rb .
+
+docs:
+	@echo "\n== To view the gowacc documentation, visit http://localhost:8080/pkg/gowacc/ =="
+	godoc -http=:8080 -goroot=$(CURDIR)
+
 clean:
 	rm -rf $(BUILD)
-	rm -rf src/wacc
+	rm -rf gowacc
 
-clean-vendor:
-	rm -rf src/vendor
+clean-lib:
+	rm -rf lib

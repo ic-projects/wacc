@@ -2,8 +2,8 @@
     package main
 
     import (
-        "ast"
         "fmt"
+        "gowacc/ast"
         "strconv"
         "strings"
         "unicode/utf8"
