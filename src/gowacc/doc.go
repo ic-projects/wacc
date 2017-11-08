@@ -4,7 +4,7 @@ Command gowacc compiles wacc source files to ARM assembly.
 Compilation
 
 To compile the gowacc tool, you should run the 'make' command from the project
-root directory. This builds a 'gowacc' executable within the src directory,
+root directory. This builds a 'gowacc' executable in the project root directory,
 and handles all required dependancies for you automatically.
 
 Alternatively, if you have set up your GOPATH and GOBIN correctly, you can use
