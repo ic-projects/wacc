@@ -1,9 +1,9 @@
+// ProgramNode
 START ←_ p:PROGRAM {
     return ret(p)
 }
 
-// ProgramNode
-PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
+PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 
 	main := ast.NewFunctionNode(
 		c.getPosition(),
@@ -35,7 +35,7 @@ PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STAT _ "end" _ !. {
 }
 
 // FunctionNode
-FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT 
+FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
        _ "end" {
 
 	stats := s.([]ast.StatementNode)
@@ -69,7 +69,7 @@ FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT
 		stats,
 	), err
 
-} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STAT 
+} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS 
     _ "end" {
 
 	name := string(getItem(ident, 0).([]byte))

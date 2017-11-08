@@ -1,31 +1,5 @@
 // StatementNode
-STAT ← stat:(
-	SKIP /
-	NEWASSIGN /
-	READ /
-	FREE /
-	RETURN /
-	EXIT /
-	PRINT /
-	PRINTLN /
-	IF /
-	WHILE /
-	SCOPE /
-	ASSIGN
-) stats:(_ ';' _ (
-	SKIP /
-	NEWASSIGN /
-	READ /
-	FREE /
-	RETURN /
-	EXIT /
-	PRINT /
-	PRINTLN /
-	IF /
-	WHILE /
-	SCOPE /
-	ASSIGN
-))* {
+STATS ← stat:STAT stats:(_ ';' _ STAT)* {
 
 	statements := []ast.StatementNode{stat}
 	for _, s := range toSlice(stats) {
@@ -35,6 +9,20 @@ STAT ← stat:(
 	return ret(statements)
 
 }
+
+STAT ←
+	SKIP /
+	NEWASSIGN /
+	READ /
+	FREE /
+	RETURN /
+	EXIT /
+	PRINT /
+	PRINTLN /
+	IF /
+	WHILE /
+	SCOPE /
+	ASSIGN
 
 // SkipNode
 SKIP ← "skip" {
@@ -142,7 +130,7 @@ PRINTLN ← "println" __ expr:EXPR {
 }
 
 // IfNode
-IF ← "if" __ cond:EXPR _ "then" __ ifStats:STAT _ "else" __ elseStats:STAT _ "fi" {
+IF ← "if" __ cond:EXPR _ "then" __ ifStats:STATS _ "else" __ elseStats:STATS _ "fi" {
 
 	return ret(ast.NewIfNode(
 		c.getPosition(),
@@ -154,7 +142,7 @@ IF ← "if" __ cond:EXPR _ "then" __ ifStats:STAT _ "else" __ elseStats:STAT _ "
 }
 
 // LoopNode
-WHILE ← "while" __ cond:EXPR _ "do" __ stats:STAT _ "done" {
+WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
 
 	return ret(ast.NewLoopNode(
 		c.getPosition(),
@@ -165,7 +153,7 @@ WHILE ← "while" __ cond:EXPR _ "do" __ stats:STAT _ "done" {
 }
 
 // ScopeNode
-SCOPE ← "begin" __ stats:STAT _ "end" {
+SCOPE ← "begin" __ stats:STATS _ "end" {
 
 	return ret(ast.NewScopeNode(
 		c.getPosition(),
