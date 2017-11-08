@@ -35,7 +35,7 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 	expectingAnyArray := false
 	matchOnAnyArray := t == nilArray
 	var found ArrayTypeNode
-	for key, _ := range validTypes {
+	for key := range validTypes {
 		if StripType(key) == nilArray {
 			found = key.(ArrayTypeNode)
 			expectingAnyArray = true
@@ -63,7 +63,7 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 	matchOnAnyPair := t == nilPair
 	var nilMatch PairTypeNode
 	expectingAnyPair := false
-	for key, _ := range validTypes {
+	for key := range validTypes {
 		if StripType(key) == nilPair {
 			nilMatch = key.(PairTypeNode)
 			expectingAnyPair = true
