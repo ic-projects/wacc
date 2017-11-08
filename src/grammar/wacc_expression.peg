@@ -167,7 +167,7 @@ INTLITER ← INTSIGN? _ DIGIT+ {
 		errmsg := fmt.Sprintf(
 			"Integer value \"%s\" is badly formatted " +
 			"(either it has a badly defined sign " +
-			"or it is too large for a 32-bit signed integer).", 
+			"or it is too large for a 32-bit signed integer)", 
 			val,
 		)
 		err = errors.New(errmsg)

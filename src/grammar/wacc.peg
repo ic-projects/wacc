@@ -45,7 +45,7 @@ FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 	if (!ast.FinalStatIsValid(finalStat)) {
 		name := strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")
 		errmsg := fmt.Sprintf(
-			"Function \"%s\" is not ended with a return or an exit statement.", 
+			"Function \"%s\" is not ended with a return or an exit statement", 
 			name,
 		)
 		err = errors.New(errmsg)
