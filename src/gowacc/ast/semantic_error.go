@@ -84,6 +84,12 @@ func (e TypeError) addPos(pos Position) GenericError {
 	return e
 }
 
+type ErrorDeclaration interface {
+	String() string
+	Pos() Position
+	PosDeclared() Position
+}
+
 // TypeErrorDeclaration is a struct that stores a TypeError and where an identifier
 // was declared, for more useful error messages.
 type TypeErrorDeclaration struct {
@@ -117,10 +123,11 @@ func (e TypeErrorDeclaration) addPos(pos Position) GenericError {
 // DeclarationError is a struct for a declaration error, for example, using an
 // identifier before it is declared. It implements GenericError.
 type DeclarationError struct {
-	pos        Position
-	isFunction bool
-	isDefined  bool
-	identifier string
+	pos         Position
+	isFunction  bool
+	isDefined   bool
+	identifier  string
+	posDeclared Position
 }
 
 func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
@@ -152,4 +159,28 @@ func (e DeclarationError) String() string {
 		}
 	}
 	return b.String()
+}
+
+type PreviouslyDelcared struct {
+	declarationError DeclarationError
+	posDeclared      Position
+}
+
+func NewPreviouslyDeclared(declarationError DeclarationError, posDeclared Position) PreviouslyDelcared {
+	return PreviouslyDelcared{
+		declarationError: declarationError,
+		posDeclared:      posDeclared,
+	}
+}
+
+func (e PreviouslyDelcared) String() string {
+	return e.declarationError.String()
+}
+
+func (e PreviouslyDelcared) Pos() Position {
+	return e.declarationError.pos
+}
+
+func (e PreviouslyDelcared) PosDeclared() Position {
+	return e.posDeclared
 }

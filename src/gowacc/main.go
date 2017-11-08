@@ -97,9 +97,10 @@ func main() {
 				}
 				b.WriteString(line[leadingChars:])
 				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
-				b.WriteString("^")
-				if typeDeclarationError, ok := e.(ast.TypeErrorDeclaration); ok {
-					b.WriteString("\nDeclared at ")
+				b.WriteString("^\n")
+				b.WriteString(fmt.Sprintln(e))
+				if typeDeclarationError, ok := e.(ast.ErrorDeclaration); ok {
+					b.WriteString("Declared at ")
 					b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
 
 					// Remove leading spaces and tabs
@@ -116,7 +117,6 @@ func main() {
 					b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
 					b.WriteString("^")
 				}
-				fmt.Println(e)
 				fmt.Println(b.String())
 			}
 			os.Exit(200)

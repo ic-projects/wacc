@@ -35,9 +35,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		// Add the functions when hitting program instead of each function so that
 		// functions can be declared in any order.
 		for _, f := range node.functions {
-			_, ok := v.symbolTable.SearchForFunction(f.ident.ident)
-			if ok {
-				foundError = NewDeclarationError(f.pos, true, true, f.ident.ident)
+			if functionNode, ok := v.symbolTable.SearchForFunction(f.ident.ident); ok {
+				foundError = NewPreviouslyDeclared(NewDeclarationError(f.pos, true, true, f.ident.ident), functionNode.pos)
 			} else {
 				v.symbolTable.AddFunction(f.ident.ident, f)
 			}
@@ -47,15 +46,15 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveDownScope()
 		v.typeChecker.expectRepeatUntilForce(node.t)
 	case ParameterNode:
-		if _, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
-			foundError = NewDeclarationError(node.pos, false, true, node.ident.ident)
+		if declareNode, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
 	case SkipNode:
 	case DeclareNode:
-		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); ok {
-			foundError = NewDeclarationError(node.pos, false, true, node.ident.ident)
+		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
 			v.typeChecker.freeze(node)
 		} else {
 			v.symbolTable.AddToScope(node.ident.ident, node)
