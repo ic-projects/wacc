@@ -242,16 +242,27 @@ func (node BinaryOperatorNode) String() string {
 	return buf.String()
 }
 
+// BuildBinOpTree is a function that builds the correct tree of binary operation
+// when given the first expression, a list of the remaining binary operators and
+// expressions and the position inside the source file (used for error messages).
+//
+// The list of remaining binary operators and expressions is given in the form
+// [[space, BinaryOperator, space, Expression], ...]
+// where space is ignored.
 func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position) ExpressionNode {
 	if len(list) > 1 {
+		// Generate the LHS expression node
 		var toParse []interface{}
 		for i := 0; i < len(list)-1; i++ {
 			toParse = append(toParse, list[i])
 		}
-		rest := BuildBinOpTree(first, toParse, position)
+		lhs := BuildBinOpTree(first, toParse, position)
+
+		// Get the RHS node
+		// Note that last is in the form [space, BinaryOperator, space, Expression],
+		// So we use last[1] to get the BinaryOperator and last[3] to get the Expression
 		last := list[len(list)-1].([]interface{})
 		return NewBinaryOperatorNode(position, last[1].(BinaryOperator), rest, last[3])
-	} else {
-		return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
 	}
+	return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
 }
