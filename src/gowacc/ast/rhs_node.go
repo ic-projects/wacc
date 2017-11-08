@@ -11,8 +11,11 @@ type RHSNode interface {
 
 // ExpressionNode - defined in expression_node.go
 
-// ArrayLiteralNode stores the position and elements of an array literal. e.g.
-// [2, 4]
+// ArrayLiteralNode stores the position and elements of an array literal.
+//
+// E.g.
+//
+//  [2, 4]
 type ArrayLiteralNode struct {
 	pos   Position
 	exprs []ExpressionNode
@@ -34,7 +37,10 @@ func (node ArrayLiteralNode) String() string {
 	return buf.String()
 }
 
-// NewPairNode stores the position and elements of a newpair call. e.g. newpair(4, 2)
+// NewPairNode stores the position and elements of a newpair call.
+//
+// E.g.
+//  newpair(4, 2)
 type NewPairNode struct {
 	pos Position
 	fst ExpressionNode
@@ -64,7 +70,10 @@ func (node NewPairNode) String() string {
 // PairSecondElementNode - defined in lhs_node.go
 
 // FunctionCallNode stores the position, identifier and passed in parameters for
-// a function call. e.g. call f(true, false)
+// a function call.
+//
+// E.g.
+//  call f(true, false)
 type FunctionCallNode struct {
 	pos   Position
 	ident IdentifierNode

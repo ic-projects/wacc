@@ -28,10 +28,10 @@ end
 functionReturnPair.ast contents are:
 ===========================================================
 0	Program
-1	  - intint getPair()
+1	  - pair(int, int) getPair()
 2	    - DECLARE
 3	      - TYPE
-4	        - intint
+4	        - pair(int, int)
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -45,7 +45,7 @@ functionReturnPair.ast contents are:
 15	  - int main()
 16	    - DECLARE
 17	      - TYPE
-18	        - intint
+18	        - pair(int, int)
 19	      - LHS
 20	        - p
 21	      - RHS

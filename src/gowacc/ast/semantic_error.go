@@ -84,6 +84,8 @@ func (e TypeError) addPos(pos Position) GenericError {
 	return e
 }
 
+// TypeErrorDeclaration is a struct that stores a TypeError and where an identifier
+// was declared, for more useful error messages.
 type TypeErrorDeclaration struct {
 	typeError   TypeError
 	posDeclared Position

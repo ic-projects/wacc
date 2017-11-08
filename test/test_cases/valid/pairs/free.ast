@@ -25,7 +25,7 @@ free.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - intchar
+4	        - pair(int, char)
 5	      - LHS
 6	        - a
 7	      - RHS

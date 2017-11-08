@@ -30,7 +30,7 @@ hiddenDoubleFree.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - intchar
+4	        - pair(int, char)
 5	      - LHS
 6	        - a
 7	      - RHS
@@ -41,7 +41,7 @@ hiddenDoubleFree.ast contents are:
 12	            - 'a'
 13	    - DECLARE
 14	      - TYPE
-15	        - intchar
+15	        - pair(int, char)
 16	      - LHS
 17	        - b
 18	      - RHS

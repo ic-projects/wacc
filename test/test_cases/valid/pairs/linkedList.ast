@@ -40,7 +40,7 @@ linkedList.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - int
+4	        - pair(int, basePair)
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -51,7 +51,7 @@ linkedList.ast contents are:
 12	            - null
 13	    - DECLARE
 14	      - TYPE
-15	        - int
+15	        - pair(int, basePair)
 16	      - LHS
 17	        - q
 18	      - RHS
@@ -62,7 +62,7 @@ linkedList.ast contents are:
 23	            - p
 24	    - DECLARE
 25	      - TYPE
-26	        - int
+26	        - pair(int, basePair)
 27	      - LHS
 28	        - r
 29	      - RHS
@@ -73,7 +73,7 @@ linkedList.ast contents are:
 34	            - q
 35	    - DECLARE
 36	      - TYPE
-37	        - int
+37	        - pair(int, basePair)
 38	      - LHS
 39	        - s
 40	      - RHS
@@ -86,14 +86,14 @@ linkedList.ast contents are:
 47	      - "list = {"
 48	    - DECLARE
 49	      - TYPE
-50	        - int
+50	        - pair(int, basePair)
 51	      - LHS
 52	        - x
 53	      - RHS
 54	        - s
 55	    - DECLARE
 56	      - TYPE
-57	        - int
+57	        - pair(int, basePair)
 58	      - LHS
 59	        - y
 60	      - RHS

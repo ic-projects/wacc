@@ -41,20 +41,20 @@ end
 arrayOfPairs.ast contents are:
 ===========================================================
 0	Program
-1	  - [] f([] x)
+1	  - pair(basePair, basePair)[] f(pair(basePair, basePair)[] x)
 2	    - RETURN
 3	      - x
 4	  - int main()
 5	    - DECLARE
 6	      - TYPE
-7	        - 
+7	        - pair(basePair, basePair)
 8	      - LHS
 9	        - n
 10	      - RHS
 11	        - null
 12	    - DECLARE
 13	      - TYPE
-14	        - 
+14	        - pair(basePair, basePair)
 15	      - LHS
 16	        - n2
 17	      - RHS
@@ -62,14 +62,14 @@ arrayOfPairs.ast contents are:
 19	          - n
 20	    - DECLARE
 21	      - TYPE
-22	        - 
+22	        - pair(basePair, basePair)
 23	      - LHS
 24	        - n3
 25	      - RHS
 26	        - n
 27	    - DECLARE
 28	      - TYPE
-29	        - 
+29	        - pair(basePair, basePair)
 30	      - LHS
 31	        - n4
 32	      - RHS
@@ -80,7 +80,7 @@ arrayOfPairs.ast contents are:
 37	            - n2
 38	    - DECLARE
 39	      - TYPE
-40	        - 
+40	        - pair(basePair, basePair)
 41	      - LHS
 42	        - n5
 43	      - RHS
@@ -91,7 +91,7 @@ arrayOfPairs.ast contents are:
 48	            - null
 49	    - DECLARE
 50	      - TYPE
-51	        - 
+51	        - pair(basePair, basePair)
 52	      - LHS
 53	        - n6
 54	      - RHS
@@ -102,14 +102,14 @@ arrayOfPairs.ast contents are:
 59	            - null
 60	    - DECLARE
 61	      - TYPE
-62	        - 
+62	        - pair(basePair, basePair)
 63	      - LHS
 64	        - n7
 65	      - RHS
 66	        - n6
 67	    - DECLARE
 68	      - TYPE
-69	        - 
+69	        - pair(basePair, basePair)
 70	      - LHS
 71	        - n8
 72	      - RHS
@@ -120,7 +120,7 @@ arrayOfPairs.ast contents are:
 77	            - null
 78	    - DECLARE
 79	      - TYPE
-80	        - []
+80	        - pair(basePair, basePair)[]
 81	      - LHS
 82	        - a
 83	      - RHS
@@ -130,7 +130,7 @@ arrayOfPairs.ast contents are:
 87	          - n3
 88	    - DECLARE
 89	      - TYPE
-90	        - []
+90	        - pair(basePair, basePair)[]
 91	      - LHS
 92	        - a2
 93	      - RHS
@@ -138,7 +138,7 @@ arrayOfPairs.ast contents are:
 95	        - a
 96	    - DECLARE
 97	      - TYPE
-98	        - []
+98	        - pair(basePair, basePair)[]
 99	      - LHS
 100	        - a3
 101	      - RHS
@@ -148,7 +148,7 @@ arrayOfPairs.ast contents are:
 105	          - n4
 106	    - DECLARE
 107	      - TYPE
-108	        - [][]
+108	        - pair(basePair, basePair)[][]
 109	      - LHS
 110	        - aa
 111	      - RHS
@@ -158,7 +158,7 @@ arrayOfPairs.ast contents are:
 115	          - a
 116	    - DECLARE
 117	      - TYPE
-118	        - []
+118	        - pair(basePair, basePair)[]
 119	      - LHS
 120	        - a4
 121	      - RHS
@@ -179,7 +179,7 @@ arrayOfPairs.ast contents are:
 136	              - 2
 137	    - DECLARE
 138	      - TYPE
-139	        - [][]
+139	        - pair(basePair, basePair)[][]
 140	      - LHS
 141	        - aa2
 142	      - RHS
@@ -191,7 +191,7 @@ arrayOfPairs.ast contents are:
 148	          - a2
 149	    - DECLARE
 150	      - TYPE
-151	        - 
+151	        - pair(basePair, basePair)
 152	      - LHS
 153	        - n9
 154	      - RHS
@@ -206,7 +206,7 @@ arrayOfPairs.ast contents are:
 163	            - null
 164	    - DECLARE
 165	      - TYPE
-166	        - 
+166	        - pair(basePair, basePair)
 167	      - LHS
 168	        - n10
 169	      - RHS
@@ -229,7 +229,7 @@ arrayOfPairs.ast contents are:
 186	                                    - aa
 187	    - DECLARE
 188	      - TYPE
-189	        - intint
+189	        - pair(int, int)
 190	      - LHS
 191	        - intpair
 192	      - RHS
@@ -245,7 +245,7 @@ arrayOfPairs.ast contents are:
 202	          - intpair
 203	    - DECLARE
 204	      - TYPE
-205	        - int[]
+205	        - pair(int, pair(basePair, basePair)[])
 206	      - LHS
 207	        - wow
 208	      - RHS

@@ -33,10 +33,7 @@ func (t BaseType) String() string {
 	case STRING:
 		return "string"
 	case PAIR:
-		if DEBUG_MODE {
-			return "basePair"
-		}
-		return ""
+		return "basePair"
 	case VOID:
 		return "int"
 	}
@@ -108,6 +105,10 @@ func (node ArrayTypeNode) String() string {
 
 // PairTypeNode is a struct that stores the types of the first and second
 // elements of the pair.
+//
+// E.g.
+//
+//  pair(int, int)
 type PairTypeNode struct {
 	t1 TypeNode
 	t2 TypeNode
@@ -121,8 +122,5 @@ func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
 }
 
 func (node PairTypeNode) String() string {
-	if DEBUG_MODE {
-		return fmt.Sprintf("pair(%s,%s)", node.t1, node.t2)
-	}
-	return fmt.Sprintf("%s%s", node.t1, node.t2)
+	return fmt.Sprintf("pair(%s, %s)", node.t1, node.t2)
 }
