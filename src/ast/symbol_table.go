@@ -40,7 +40,7 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	}
 }
 
-// IdentifierDecleration stores the type and identifier for a symbol.
+// IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
 	pos   Position
 	t     TypeNode
