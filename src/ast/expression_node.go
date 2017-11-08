@@ -6,9 +6,11 @@ import (
 	"strconv"
 )
 
+// ExpressionNode is an empty interface for expression nodes to implement.
 type ExpressionNode interface {
 }
 
+// UnaryOperator is an enum which defines the different unary operators.
 type UnaryOperator int
 
 const (
@@ -35,6 +37,7 @@ func (unOp UnaryOperator) String() string {
 	return "ERROR"
 }
 
+// BinaryOperator is an enum which defines the different binary operators.
 type BinaryOperator int
 
 const (
@@ -85,6 +88,8 @@ func (binOp BinaryOperator) String() string {
 	return "ERROR"
 }
 
+// IntegerLiteralNode is a struct which stores the position and value of an
+// integer literal. e.g. 7
 type IntegerLiteralNode struct {
 	pos Position
 	val int
@@ -101,6 +106,8 @@ func (node IntegerLiteralNode) String() string {
 	return fmt.Sprintf("- %d", node.val)
 }
 
+// BooleanLiteralNode is a struct which stores the position and value of a
+// boolean literal. e.g. false
 type BooleanLiteralNode struct {
 	pos Position
 	val bool
@@ -117,6 +124,8 @@ func (node BooleanLiteralNode) String() string {
 	return fmt.Sprintf("- %s", strconv.FormatBool(node.val))
 }
 
+// CharacterLiteralNode is a struct which stores the position and value of a
+// character literal. e.g. 'c'
 type CharacterLiteralNode struct {
 	pos Position
 	val rune
@@ -139,6 +148,8 @@ func (node CharacterLiteralNode) String() string {
 	return fmt.Sprintf("- %q", node.val)
 }
 
+// StringLiteralNode is a struct which stores the position and value of a string
+// literal. e.g. "Hello World!"
 type StringLiteralNode struct {
 	pos Position
 	val string
@@ -155,6 +166,9 @@ func (node StringLiteralNode) String() string {
 	return fmt.Sprintf("- %s", node.val)
 }
 
+// PairLiteralNode is a struct which stores the position of a pair literal.
+// This does not store the value of the pair literal since the value of a pair
+// literal is always null.
 type PairLiteralNode struct {
 	pos Position
 }
@@ -173,6 +187,9 @@ func (node PairLiteralNode) String() string {
 
 // ArrayElementNode - defined in lhs_node.go
 
+// UnaryOperatorNode is a struct which stores the position, (unary) operator and
+// expression of a unary operator operation on an expression.
+// e.g. !true
 type UnaryOperatorNode struct {
 	pos  Position
 	op   UnaryOperator
@@ -196,6 +213,9 @@ func (node UnaryOperatorNode) String() string {
 	return buf.String()
 }
 
+// BinaryOperatorNode is a struct which stores the position, (binary) operator
+// and the two expressions of a binary operation on two expressions.
+// e.g. 5 + 2
 type BinaryOperatorNode struct {
 	pos   Position
 	op    BinaryOperator
@@ -224,11 +244,11 @@ func (node BinaryOperatorNode) String() string {
 
 func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position) ExpressionNode {
 	if len(list) > 1 {
-		var toparse []interface{}
+		var toParse []interface{}
 		for i := 0; i < len(list)-1; i++ {
-			toparse = append(toparse, list[i])
+			toParse = append(toParse, list[i])
 		}
-		rest := BuildBinOpTree(first, toparse, position)
+		rest := BuildBinOpTree(first, toParse, position)
 		last := list[len(list)-1].([]interface{})
 		return NewBinaryOperatorNode(position, last[1].(BinaryOperator), rest, last[3])
 	} else {
