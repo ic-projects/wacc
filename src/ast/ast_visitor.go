@@ -112,7 +112,7 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 	default:
 
 	}
-  // If we have a EntryExitVisitor, use it to call leave.
+	// If we have a EntryExitVisitor, use it to call leave.
 	if v, ok := visitor.(EntryExitVisitor); ok {
 		v.Leave(programNode)
 	}
