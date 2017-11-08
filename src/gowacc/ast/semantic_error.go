@@ -84,6 +84,34 @@ func (e TypeError) addPos(pos Position) GenericError {
 	return e
 }
 
+type TypeErrorDeclaration struct {
+	typeError   TypeError
+	posDeclared Position
+}
+
+func NewTypeErrorDeclaration(err TypeError, pos Position) TypeErrorDeclaration {
+	return TypeErrorDeclaration{
+		typeError:   err,
+		posDeclared: pos,
+	}
+}
+
+func (e TypeErrorDeclaration) Pos() Position {
+	return e.typeError.pos
+}
+
+func (e TypeErrorDeclaration) PosDeclared() Position {
+	return e.posDeclared
+}
+
+func (e TypeErrorDeclaration) String() string {
+	return e.typeError.String()
+}
+
+func (e TypeErrorDeclaration) addPos(pos Position) GenericError {
+	return e.addPos(pos)
+}
+
 // DeclarationError is a struct for a declaration error, for example, using an
 // identifier before it is declared. It implements GenericError.
 type DeclarationError struct {

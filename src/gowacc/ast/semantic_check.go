@@ -86,6 +86,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.freeze(node)
 		} else {
 			foundError = v.typeChecker.seen(identDec.t).addPos(node.pos)
+			if foundError != nil {
+				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.pos)
+			}
 		}
 	case PairFirstElementNode:
 		//  Look up type for pair call seen
