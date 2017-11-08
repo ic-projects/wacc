@@ -109,7 +109,7 @@ func (table *SymbolTable) SearchForFunction(identifier string) (FunctionNode, bo
 	return node, ok
 }
 
-// AddToScope will add a identifier to the currentScope.
+// AddToScope will add an identifier to the currentScope.
 func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode) {
 	table.currentScope.scope[identifier] = NewIdentifierDeclaration(programNode)
 }

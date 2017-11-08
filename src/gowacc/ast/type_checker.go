@@ -11,13 +11,12 @@ type Expectance interface {
 	seen(*TypeChecker, TypeNode) TypeError
 }
 
-// SetExpectance a Expectance for a set of options.
+// SetExpectance is a struct that stores a set of acceptable types that can
+// be seen. It implements Expectance.
 type SetExpectance struct {
 	set map[TypeNode]bool
 }
 
-// NewSetExpectance returns an initialised SetExpectance, given an array of
-// nodes.
 func NewSetExpectance(ts []TypeNode) SetExpectance {
 	set := make(map[TypeNode]bool)
 	for _, t := range ts {
@@ -55,7 +54,7 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 	return expectingAnyArray || match
 }
 
-// arrayCase handles the multiple options where we have seen an pair.
+// pairCase handles the multiple options where we have seen an pair.
 func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t PairTypeNode) bool {
 	_, match := validTypes[t]
 	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]

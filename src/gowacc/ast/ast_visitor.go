@@ -7,7 +7,7 @@ type Visitor interface {
 
 // EntryExitVisitor is an extension of the Visitor interface to allow exiting
 // nodes. This is very useful for the semantic checker, for moving up scopes at
-// the end of the scope.
+// the end of the scope for example.
 type EntryExitVisitor interface {
 	Visit(ProgramNode)
 	Leave(ProgramNode)

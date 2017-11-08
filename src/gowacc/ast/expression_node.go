@@ -41,19 +41,19 @@ func (unOp UnaryOperator) String() string {
 type BinaryOperator int
 
 const (
-	MUL BinaryOperator = iota
-	DIV
-	MOD
-	ADD
-	SUB
-	GT
-	GEQ
-	LT
-	LEQ
-	EQ
-	NEQ
-	AND
-	OR
+	MUL BinaryOperator = iota // Multiply (*)
+	DIV                       // Divide (/)
+	MOD                       // Modulus (%)
+	ADD                       // Add (+)
+	SUB                       // Subtract (-)
+	GT                        // Greater than (>)
+	GEQ                       // Greater than or equal to (>=)
+	LT                        // Less than (<)
+	LEQ                       // Less than or equal to (<=)
+	EQ                        // Equal (==)
+	NEQ                       // Not equal (!=)
+	AND                       // And (&&)
+	OR                        // Or (||)
 )
 
 func (binOp BinaryOperator) String() string {
