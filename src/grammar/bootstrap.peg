@@ -9,22 +9,35 @@
         "unicode/utf8"
     )
 
+    // getPosition is a function to create an AST position reference from the 
+    // current pigeon object.
     func (c *current) getPosition() ast.Position {
         return ast.NewPosition(c.pos.line, c.pos.col, c.pos.offset)
     }
 
+    // toSlice is a helper function that asserts its argument is a slice.
+    // This is used whenever a grammar rule is multiple parts, and thus returns
+    // a slice that needs its type asserted.
     func toSlice(slice interface{}) []interface{} {
         return slice.([]interface{})
     }
 
+    // getItem is a helper function that asserts its first argument is a slice
+    // and returns the item at the given index.
+    // This combines the functionality of toSlice with a quick way to select
+    // the result from one part of a rule.
     func getItem(slice interface{}, index int) interface{} {
         return toSlice(slice)[index]
     }
 
+    // ret returns the given value without any errors.
+    // This is used to simplify returns throughout the grammar files.
     func ret(val interface{}) (interface{}, error) {
         return val, nil
     }
 
+    // parseBinOps is a helper function to build a binary operations tree
+    // given two expressions, which is used in wacc_expression.peg.
     func parseBinOps(e1 interface{}, e2 interface{}, p ast.Position) (interface{}, error) {
         if (len(toSlice(e2)) > 0) {
             return ret(ast.BuildBinOpTree(
