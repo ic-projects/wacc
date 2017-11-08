@@ -30,7 +30,11 @@ func (node IdentifierNode) String() string {
 }
 
 // PairFirstElementNode is a struct that stores the position and expression of
-// an access to a pair's first element. i.e. fst i
+// an access to a pair's first element.
+//
+// E.g.
+//
+//  fst i
 type PairFirstElementNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -51,7 +55,10 @@ func (node PairFirstElementNode) String() string {
 }
 
 // PairSecondElementNode is a struct that stores the position and expression of
-// an access to a pair's second element. i.e. snd i
+// an access to a pair's second element.
+//
+// E.g.
+//  snd i
 type PairSecondElementNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -72,7 +79,11 @@ func (node PairSecondElementNode) String() string {
 }
 
 // ArrayElementNode is a struct that stores the position, identifier and expressions of
-// an access to an array. i.e. i[4][3+2]
+// an access to an array.
+//
+// E.g.
+//
+//  i[4][3+2]
 type ArrayElementNode struct {
 	pos   Position
 	ident IdentifierNode

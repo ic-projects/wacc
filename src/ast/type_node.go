@@ -109,6 +109,10 @@ func (node ArrayTypeNode) String() string {
 
 // PairTypeNode is a struct that stores the types of the first and second
 // elements of the pair.
+//
+// E.g.
+//
+//  pair(int, int)
 type PairTypeNode struct {
 	t1 TypeNode
 	t2 TypeNode

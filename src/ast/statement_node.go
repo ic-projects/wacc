@@ -5,9 +5,11 @@ import (
 	"fmt"
 )
 
+// StatementNode is an empty interface for statement nodes to implement.
 type StatementNode interface {
 }
 
+// SkipNode is a struct that stores the position of a skip statement.
 type SkipNode struct {
 	pos Position
 }
@@ -22,6 +24,12 @@ func (node SkipNode) String() string {
 	return "- SKIP\n"
 }
 
+// DeclareNode is a struct that stores the position, type, identifier and
+// assignment of a declaration.
+//
+// E.g.
+//
+//  int i = 5
 type DeclareNode struct {
 	pos   Position
 	t     TypeNode
@@ -50,6 +58,11 @@ func (node DeclareNode) String() string {
 	return buf.String()
 }
 
+// AssignNode stores the position, left hand side and right hand side of an
+// assignment statement.
+//
+// E.g.
+//  i = 4
 type AssignNode struct {
 	pos Position
 	lhs LHSNode
@@ -74,6 +87,11 @@ func (node AssignNode) String() string {
 	return buf.String()
 }
 
+// ReadNode is a struct that stores the position and expression of a read
+// statement.
+//
+// E.g.
+//  read i
 type ReadNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -93,6 +111,11 @@ func (node ReadNode) String() string {
 	return buf.String()
 }
 
+// FreeNode stores the position and expression of a free statement.
+//
+// E.g.
+//
+//  free p
 type FreeNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -112,6 +135,11 @@ func (node FreeNode) String() string {
 	return buf.String()
 }
 
+// ReturnNode stores the position and expression of a return statement.
+//
+// E.g.
+//
+//  return 5
 type ReturnNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -131,6 +159,11 @@ func (node ReturnNode) String() string {
 	return buf.String()
 }
 
+// ExitNode stores the position and expression of an exit statement.
+//
+// E.g.
+//
+//  exit 255
 type ExitNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -150,6 +183,11 @@ func (node ExitNode) String() string {
 	return buf.String()
 }
 
+// PrintNode stores the position and expression of an print statement.
+//
+// E.g.
+//
+//  print "printing"
 type PrintNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -169,6 +207,11 @@ func (node PrintNode) String() string {
 	return buf.String()
 }
 
+// PrintlnNode stores the position and expression of an println statement.
+//
+// E.g.
+//
+//  println "printing"
 type PrintlnNode struct {
 	pos  Position
 	expr ExpressionNode
@@ -188,6 +231,12 @@ func (node PrintlnNode) String() string {
 	return buf.String()
 }
 
+// IfNode stores the position, condition and the two branches of an if else
+// statement.
+//
+// E.g.
+//
+//  if true then skip else skip fi
 type IfNode struct {
 	pos       Position
 	expr      ExpressionNode
@@ -220,6 +269,12 @@ func (node IfNode) String() string {
 	return buf.String()
 }
 
+// LoopNode stores the position, condition and loop statements for a loop
+// while loop statement.
+//
+// E.g.
+//
+//  while true do skip done
 type LoopNode struct {
 	pos   Position
 	expr  ExpressionNode
@@ -246,6 +301,11 @@ func (node LoopNode) String() string {
 	return buf.String()
 }
 
+// ScopeNode stores the position and statement of a new scope.
+//
+// E.g.
+//
+//  begin skip end
 type ScopeNode struct {
 	pos   Position
 	stats []StatementNode
