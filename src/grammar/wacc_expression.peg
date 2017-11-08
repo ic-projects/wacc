@@ -223,7 +223,7 @@ CHARLITER ← "'" char:CHARACTER "'" {
 
 	r, _ := utf8.DecodeRune(char.([]byte))
 
-	errmsg := fmt.Sprintf("Invalid character, \"%s\" (must be escaped)", c.text)
+	errmsg := fmt.Sprintf("Invalid character, %s (must be escaped)", c.text)
 	err := errors.New(errmsg)
 
 	return ast.NewCharacterLiteralNode(
@@ -258,7 +258,7 @@ CHARACTER ← char:[^""''\\] {
 
 } / '\\' char:. {
 
-	errmsg := fmt.Sprintf("Invalid escaped character, %s", c.text)
+	errmsg := fmt.Sprintf("Invalid escaped character, \"%s\"", c.text)
 	err := errors.New(errmsg)
 
 	return char, err
