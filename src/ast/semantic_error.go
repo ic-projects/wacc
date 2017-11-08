@@ -33,7 +33,7 @@ func (e CustomError) String() string {
 	return e.text
 }
 
-// TypeError is a struct for a TypeError, storing a list of acceptable TypeNode,
+// TypeError is a struct for a TypeError, storing a list of acceptable TypeNodes,
 // and the actual (wrong) TypeNode the semantic checker saw.
 type TypeError struct {
 	pos      Position

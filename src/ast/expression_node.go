@@ -52,8 +52,8 @@ const (
 	LEQ                       // Less than or equal to (<=)
 	EQ                        // Equal (==)
 	NEQ                       // Not equal (!=)
-	AND                       // And
-	OR                        // Or
+	AND                       // And (&&)
+	OR                        // Or (||)
 )
 
 func (binOp BinaryOperator) String() string {

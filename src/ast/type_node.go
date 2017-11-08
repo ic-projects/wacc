@@ -20,9 +20,8 @@ const (
 	VOID                   // void, used for the return type of the main function, as you cannot return from main.
 )
 
-// String will return the string format of the BaseType. Pair returns empty
-// string to match the refCompile ast printing. Void returns int for the same
-// reason.
+// String will return the string format of the BaseType. Void returns "int" to
+// match the refCompile ast printing.
 func (t BaseType) String() string {
 	switch t {
 	case INT:
