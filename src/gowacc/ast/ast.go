@@ -60,10 +60,16 @@ func NewProgram(functions []FunctionNode) Program {
 }
 
 func (program Program) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("Program"))
+	var tempbuf bytes.Buffer
+	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.functions {
-		buf.WriteString(indent(fmt.Sprintf("%s", f), "  "))
+		tempbuf.WriteString(indent(fmt.Sprintf("%s", f), "  "))
+	}
+	var buf bytes.Buffer
+	for i, line := range strings.Split(tempbuf.String(), "\n") {
+		if line != "" {
+			buf.WriteString(fmt.Sprintf("%d\t%s\n", i, line))
+		}
 	}
 	return buf.String()
 }

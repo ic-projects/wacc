@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"gowacc/ast"
@@ -9,16 +8,6 @@ import (
 	"path"
 	"strings"
 )
-
-func number(s string) string {
-	var buf bytes.Buffer
-	for i, line := range strings.Split(s, "\n") {
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%d\t%s\n", i, line))
-		}
-	}
-	return buf.String()
-}
 
 func main() {
 	parseOnly := flag.Bool("parse", false, "Parse the file for syntax and symantic errors and generate an AST.")
@@ -62,7 +51,7 @@ func main() {
 		fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
 		fmt.Println(".ast contents are:")
 		fmt.Println("===========================================================")
-		fmt.Print(number(fmt.Sprintf("%s", tree)))
+		fmt.Print(tree)
 		fmt.Println("===========================================================")
 	}
 	fmt.Println("-- Finished")
