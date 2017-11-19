@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"flag"
 	"fmt"
 	"gowacc/ast"
@@ -10,39 +8,6 @@ import (
 	"path"
 	"strings"
 )
-
-func number(s string) string {
-	var buf bytes.Buffer
-	for i, line := range strings.Split(s, "\n") {
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%d\t%s\n", i, line))
-		}
-	}
-	return buf.String()
-}
-
-func getLine(path string, n int) string {
-	// Open the WACC source file
-	f, err := os.Open(path)
-	if err != nil {
-		fmt.Println("Error: Unable to open the specified WACC source file")
-		os.Exit(100)
-	}
-
-	reader := bufio.NewReader(f)
-	var line string
-
-	for i := 0; i < n; i++ {
-		line, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Error: Unable to read specified line")
-			os.Exit(100)
-		}
-	}
-
-	return line
-}
 
 func main() {
 	parseOnly := flag.Bool("parse", false, "Parse the file for syntax and symantic errors and generate an AST.")
@@ -54,6 +19,8 @@ func main() {
 	if *debugMode {
 		ast.DEBUG_MODE = true
 	}
+
+	// Load the file and parse into an AST
 	var tree interface{}
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
@@ -67,70 +34,32 @@ func main() {
 	} else {
 		fmt.Println("Error: No file provided")
 	}
+
+	// Perform semantic error checking
 	if !*parseOnly {
 		checker := ast.NewSemanticCheck()
 		ast.Walk(checker, tree)
 
-		// Print out all errors that occur
+		// Print out all semantic errors that occur
 		if len(checker.Errors) > 0 {
 			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
-			maxErrors := 4
-			for i, e := range checker.Errors {
-				if i >= maxErrors {
-					fmt.Printf("\nAnd %d other error(s)", len(checker.Errors)-maxErrors)
-					break
-				}
-
-				var b bytes.Buffer
-				b.WriteString("\nSemantic Error at ")
-				b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
-
-				// Remove leading spaces and tabs
-				line := getLine(filepath, e.Pos().LineNumber())
-				leadingChars := 0
-				for _, c := range line {
-					if c == '\t' || c == ' ' {
-						leadingChars++
-					} else {
-						break
-					}
-				}
-				b.WriteString(line[leadingChars:])
-				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
-				b.WriteString("^\n")
-				b.WriteString(fmt.Sprintln(e))
-				if typeDeclarationError, ok := e.(ast.ErrorDeclaration); ok {
-					b.WriteString("Declared at ")
-					b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
-
-					// Remove leading spaces and tabs
-					line := getLine(filepath, typeDeclarationError.PosDeclared().LineNumber())
-					leadingChars := 0
-					for _, c := range line {
-						if c == '\t' || c == ' ' {
-							leadingChars++
-						} else {
-							break
-						}
-					}
-					b.WriteString(line[leadingChars:])
-					b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
-					b.WriteString("^")
-				}
-				fmt.Println(b.String())
-			}
+			checker.PrintErrors(filepath)
 			os.Exit(200)
 		}
+
+		// Print out the final symbol table
 		if *symbolTable {
 			checker.PrintSymbolTable()
 		}
 	}
+
+	// Print the AST
 	if *printTree {
 		fmt.Println("-- Printing AST...")
 		fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
 		fmt.Println(".ast contents are:")
 		fmt.Println("===========================================================")
-		fmt.Print(number(fmt.Sprintf("%s", tree)))
+		fmt.Print(tree)
 		fmt.Println("===========================================================")
 	}
 	fmt.Println("-- Finished")

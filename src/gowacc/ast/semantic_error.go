@@ -1,8 +1,11 @@
 package ast
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"os"
+	"strings"
 )
 
 // GenericError is an interface that errors implement, which allows for elegent
@@ -183,4 +186,75 @@ func (e PreviouslyDelcared) Pos() Position {
 
 func (e PreviouslyDelcared) PosDeclared() Position {
 	return e.posDeclared
+}
+
+func getLine(path string, n int) string {
+	// Open the WACC source file
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error: Unable to open the specified WACC source file")
+		os.Exit(100)
+	}
+
+	reader := bufio.NewReader(f)
+	var line string
+
+	for i := 0; i < n; i++ {
+		line, err = reader.ReadString('\n')
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Error: Unable to read specified line")
+			os.Exit(100)
+		}
+	}
+
+	return line
+}
+
+func PrintErrors(errors []GenericError, filepath string) {
+	maxErrors := 4
+	for i, e := range errors {
+		if i >= maxErrors {
+			fmt.Printf("\nAnd %d other error(s)", len(errors)-maxErrors)
+			break
+		}
+
+		var b bytes.Buffer
+		b.WriteString("\nSemantic Error at ")
+		b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
+
+		// Remove leading spaces and tabs
+		line := getLine(filepath, e.Pos().LineNumber())
+		leadingChars := 0
+		for _, c := range line {
+			if c == '\t' || c == ' ' {
+				leadingChars++
+			} else {
+				break
+			}
+		}
+		b.WriteString(line[leadingChars:])
+		b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
+		b.WriteString("^\n")
+		b.WriteString(fmt.Sprintln(e))
+		if typeDeclarationError, ok := e.(ErrorDeclaration); ok {
+			b.WriteString("Declared at ")
+			b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
+
+			// Remove leading spaces and tabs
+			line := getLine(filepath, typeDeclarationError.PosDeclared().LineNumber())
+			leadingChars := 0
+			for _, c := range line {
+				if c == '\t' || c == ' ' {
+					leadingChars++
+				} else {
+					break
+				}
+			}
+			b.WriteString(line[leadingChars:])
+			b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
+			b.WriteString("^")
+		}
+		fmt.Println(b.String())
+	}
 }
