@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -19,29 +18,6 @@ func number(s string) string {
 		}
 	}
 	return buf.String()
-}
-
-func getLine(path string, n int) string {
-	// Open the WACC source file
-	f, err := os.Open(path)
-	if err != nil {
-		fmt.Println("Error: Unable to open the specified WACC source file")
-		os.Exit(100)
-	}
-
-	reader := bufio.NewReader(f)
-	var line string
-
-	for i := 0; i < n; i++ {
-		line, err = reader.ReadString('\n')
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Error: Unable to read specified line")
-			os.Exit(100)
-		}
-	}
-
-	return line
 }
 
 func main() {
@@ -74,51 +50,7 @@ func main() {
 		// Print out all errors that occur
 		if len(checker.Errors) > 0 {
 			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
-			maxErrors := 4
-			for i, e := range checker.Errors {
-				if i >= maxErrors {
-					fmt.Printf("\nAnd %d other error(s)", len(checker.Errors)-maxErrors)
-					break
-				}
-
-				var b bytes.Buffer
-				b.WriteString("\nSemantic Error at ")
-				b.WriteString(fmt.Sprintf("%s\n", e.Pos()))
-
-				// Remove leading spaces and tabs
-				line := getLine(filepath, e.Pos().LineNumber())
-				leadingChars := 0
-				for _, c := range line {
-					if c == '\t' || c == ' ' {
-						leadingChars++
-					} else {
-						break
-					}
-				}
-				b.WriteString(line[leadingChars:])
-				b.WriteString(strings.Repeat(" ", e.Pos().ColNumber()-leadingChars))
-				b.WriteString("^\n")
-				b.WriteString(fmt.Sprintln(e))
-				if typeDeclarationError, ok := e.(ast.ErrorDeclaration); ok {
-					b.WriteString("Declared at ")
-					b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
-
-					// Remove leading spaces and tabs
-					line := getLine(filepath, typeDeclarationError.PosDeclared().LineNumber())
-					leadingChars := 0
-					for _, c := range line {
-						if c == '\t' || c == ' ' {
-							leadingChars++
-						} else {
-							break
-						}
-					}
-					b.WriteString(line[leadingChars:])
-					b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
-					b.WriteString("^")
-				}
-				fmt.Println(b.String())
-			}
+			checker.PrintErrors(filepath)
 			os.Exit(200)
 		}
 		if *symbolTable {

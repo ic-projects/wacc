@@ -228,3 +228,7 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	}
 	v.typeChecker.unfreeze(programNode)
 }
+
+func (v *SemanticCheck) PrintErrors(filepath string) {
+	PrintErrors(v.Errors, filepath)
+}
