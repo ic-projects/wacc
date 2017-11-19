@@ -19,6 +19,8 @@ func main() {
 	if *debugMode {
 		ast.DEBUG_MODE = true
 	}
+
+	// Load the file and parse into an AST
 	var tree interface{}
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
@@ -32,20 +34,26 @@ func main() {
 	} else {
 		fmt.Println("Error: No file provided")
 	}
+
+	// Perform semantic error checking
 	if !*parseOnly {
 		checker := ast.NewSemanticCheck()
 		ast.Walk(checker, tree)
 
-		// Print out all errors that occur
+		// Print out all semantic errors that occur
 		if len(checker.Errors) > 0 {
 			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
 			checker.PrintErrors(filepath)
 			os.Exit(200)
 		}
+
+		// Print out the final symbol table
 		if *symbolTable {
 			checker.PrintSymbolTable()
 		}
 	}
+
+	// Print the AST
 	if *printTree {
 		fmt.Println("-- Printing AST...")
 		fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
