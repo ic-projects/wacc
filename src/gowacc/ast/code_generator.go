@@ -25,17 +25,17 @@ func NewAssembly() *Assembly {
 // String will return the string format of the Assembly code with line numbers.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(".data")
+	buf.WriteString(".data\n")
 	for _, s := range asm.data {
 		buf.WriteString(indent(s, "  "))
 	}
-	buf.WriteString(".text")
+	buf.WriteString(".text\n")
 	for _, s := range asm.text {
 		buf.WriteString(indent(s, "  "))
 	}
-	buf.WriteString(".global main")
+	buf.WriteString(".global main\n")
 	for fname, f := range asm.global {
-		buf.WriteString(fname + ":")
+		buf.WriteString(fname + ":\n")
 		for _, s := range f {
 			buf.WriteString(indent(s, "  "))
 		}
@@ -101,9 +101,6 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 
 	Walk(codeGen, tree)
 
-	codeGen.addCode("code", "code2")
-	codeGen.addCode("assembly")
-
 	return codeGen.asm
 }
 
@@ -114,7 +111,7 @@ type CodeGenerator struct {
 	currentFunction string
 	symbolTable *SymbolTable
 	freeRegisters []Register
-	returnRegisters []Register
+	returnRegisters *RegisterStack
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -194,7 +191,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case FunctionNode:
     v.symbolTable.MoveNextScope()
-		v.addFunction("f_"+node.ident.ident)
+		if (node.ident.ident == "") {
+			v.addFunction("main")
+		} else {
+			v.addFunction("f_"+node.ident.ident)
+		}
 		v.addCode("PUSH {lr}")
 	case ParameterNode:
 
@@ -287,12 +288,15 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 // Leave will be called to leave the current node.
 func (v *CodeGenerator) Leave(programNode ProgramNode) {
-	switch programNode.(type) {
+	switch node := programNode.(type) {
 	case []StatementNode:
     v.symbolTable.MoveUpScope()
 
 	case FunctionNode:
     v.symbolTable.MoveUpScope()
+		if (node.ident.ident == "") {
+			v.addCode("LDR r0, =0")
+		}
 		v.addCode("POP {pc}", ".ltorg")
 	case ArrayLiteralNode:
 	}
