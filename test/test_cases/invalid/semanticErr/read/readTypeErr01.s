@@ -1,3 +1,0 @@
--- Compiling...
-Errors detected during compilation! Exit code 200 returned.
-Semantic Error at 13:2 -- Incompatible type Pair(INT, INT)

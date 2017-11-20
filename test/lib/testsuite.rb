@@ -15,7 +15,6 @@ class TestSuite
     @wacc_compile_script   = File.absolute_path(wacc_compile_script)
 
     @compile    = File.absolute_path(File.join(wacc_compile_script,"compile"))
-    @refCompile = File.absolute_path(File.join(wacc_compile_script,"test/refCompile"))
 
     sources
 
@@ -48,12 +47,10 @@ class TestSuite
 
   def test_source(source)
     frontend_results = run_frontend(source)
-    assembly_results = run_assembly(source)
     backend_results = run_backend(source)
 
     { :source => source,
       :frontend => frontend_results,
-      :assembly => assembly_results,
       :backend => backend_results,
       :passed => frontend_results[:passed] && backend_results[:passed]
     }
@@ -94,27 +91,6 @@ class TestSuite
            }
   end
 
-  def run_assembly(source)
-
-    unless File.exists?(@compile) then
-      return { :result => :error,
-               :passed => false,
-               :message => "compile script cannot be found"
-             }
-    end
-
-    out_file = File.dirname(source) + "/" +  File.basename(source, ".wacc") + ".s"
-    expected = File.read(out_file)
-
-    run_results = Utils.run3("/usr/bin/timeout",
-                       ["--kill-after=5", "3", @compile, "-a", source],
-                       nil, 1024 * 1024 * 100)
-
-    return { :run_results => run_results,
-             :expected    => { :stdout => expected }
-           }
-  end
-
   def run_backend(source)
 
     unless File.exists?(@compile) then
@@ -128,7 +104,7 @@ class TestSuite
     expected = File.read(out_file)
 
     run_results = Utils.run3("/usr/bin/timeout",
-                       ["--kill-after=5", "3", @compile, "-a", source],
+                       ["--kill-after=5", "3", @compile, "-x", source],
                        nil, 1024 * 1024 * 100)
 
     expected_exit = "0"
@@ -145,7 +121,25 @@ class TestSuite
       passed = (expected == run_results[:stdout])
     end
 
+    expected_asmFile = File.dirname(source) + "/" +  File.basename(source, ".wacc") + ".s"
+    if(File.file?(expected_asmFile))
+      expected_asm = File.read(expected_asmFile)
+    else
+      expected_asm = ""
+    end
+
+    asmFile = File.absolute_path(File.join(@wacc_compile_script, File.basename(source, ".wacc") + ".s"))
+    puts asmFile
+    if(File.file?(asmFile))
+      asm = File.read(asmFile)
+      removeAssembly = %x(rm #{asmFile})
+    else
+      asm = ""
+    end
+
     return { :result => :ran,
+             :asm => asm,
+             :expected_asm => expected_asm,
              :passed => passed,
              :run_results => run_results,
              :expected    => { :stdout => expected, :exit_status => expected_exit}

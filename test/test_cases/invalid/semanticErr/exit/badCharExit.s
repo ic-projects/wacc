@@ -1,3 +1,0 @@
--- Compiling...
-Errors detected during compilation! Exit code 200 returned.
-Semantic Error at 12:7 -- Incompatible type at 'a' (expected: INT, actual: CHAR)

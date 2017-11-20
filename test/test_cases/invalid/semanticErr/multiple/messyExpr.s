@@ -1,3 +1,0 @@
--- Compiling...
-Errors detected during compilation! Exit code 200 returned.
-Semantic Error at 13:10 -- Incompatible type at ((1+true)*(2-false))||17 (expected: INT, actual: BOOL)
