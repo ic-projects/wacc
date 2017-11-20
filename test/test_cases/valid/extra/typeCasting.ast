@@ -6,7 +6,7 @@ typeCasting.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - string
+4	        - pair(string, basePair)
 5	      - LHS
 6	        - s
 7	      - RHS
@@ -17,7 +17,7 @@ typeCasting.ast contents are:
 12	            - null
 13	    - DECLARE
 14	      - TYPE
-15	        - 
+15	        - pair(basePair, basePair)
 16	      - LHS
 17	        - n
 18	      - RHS
@@ -28,7 +28,7 @@ typeCasting.ast contents are:
 23	            - null
 24	    - DECLARE
 25	      - TYPE
-26	        - int
+26	        - pair(int, basePair)
 27	      - LHS
 28	        - casted
 29	      - RHS
@@ -46,7 +46,7 @@ typeCasting.ast contents are:
 41	      - nowInt
 42	    - DECLARE
 43	      - TYPE
-44	        - char
+44	        - pair(char, basePair)
 45	      - LHS
 46	        - casted2
 47	      - RHS
@@ -64,7 +64,7 @@ typeCasting.ast contents are:
 59	      - nowChar
 60	    - DECLARE
 61	      - TYPE
-62	        - bool
+62	        - pair(bool, basePair)
 63	      - LHS
 64	        - casted3
 65	      - RHS
@@ -82,7 +82,7 @@ typeCasting.ast contents are:
 77	      - nowBool
 78	    - DECLARE
 79	      - TYPE
-80	        - int
+80	        - pair(int, basePair)
 81	      - LHS
 82	        - ss
 83	      - RHS

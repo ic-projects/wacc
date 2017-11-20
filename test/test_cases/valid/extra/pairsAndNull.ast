@@ -3,23 +3,23 @@
 pairsAndNull.ast contents are:
 ===========================================================
 0	Program
-1	  -  f( x)
+1	  - pair(basePair, basePair) f(pair(basePair, basePair) x)
 2	    - RETURN
 3	      - x
-4	  - int f2(int x)
+4	  - pair(int, basePair) f2(pair(int, basePair) x)
 5	    - RETURN
 6	      - x
 7	  - int main()
 8	    - DECLARE
 9	      - TYPE
-10	        - 
+10	        - pair(basePair, basePair)
 11	      - LHS
 12	        - n
 13	      - RHS
 14	        - null
 15	    - DECLARE
 16	      - TYPE
-17	        - 
+17	        - pair(basePair, basePair)
 18	      - LHS
 19	        - n2
 20	      - RHS
@@ -27,7 +27,7 @@ pairsAndNull.ast contents are:
 22	          - n
 23	    - DECLARE
 24	      - TYPE
-25	        - 
+25	        - pair(basePair, basePair)
 26	      - LHS
 27	        - n3
 28	      - RHS
@@ -35,7 +35,7 @@ pairsAndNull.ast contents are:
 30	        - n2
 31	    - DECLARE
 32	      - TYPE
-33	        - 
+33	        - pair(basePair, basePair)
 34	      - LHS
 35	        - n4
 36	      - RHS
@@ -46,7 +46,7 @@ pairsAndNull.ast contents are:
 41	            - n2
 42	    - DECLARE
 43	      - TYPE
-44	        - 
+44	        - pair(basePair, basePair)
 45	      - LHS
 46	        - n5
 47	      - RHS
@@ -57,7 +57,7 @@ pairsAndNull.ast contents are:
 52	            - null
 53	    - DECLARE
 54	      - TYPE
-55	        - 
+55	        - pair(basePair, basePair)
 56	      - LHS
 57	        - n6
 58	      - RHS
@@ -68,7 +68,7 @@ pairsAndNull.ast contents are:
 63	            - null
 64	    - DECLARE
 65	      - TYPE
-66	        - 
+66	        - pair(basePair, basePair)
 67	      - LHS
 68	        - n7
 69	      - RHS
@@ -76,7 +76,7 @@ pairsAndNull.ast contents are:
 71	        - null
 72	    - DECLARE
 73	      - TYPE
-74	        - int
+74	        - pair(int, basePair)
 75	      - LHS
 76	        - s
 77	      - RHS
@@ -87,7 +87,7 @@ pairsAndNull.ast contents are:
 82	            - null
 83	    - DECLARE
 84	      - TYPE
-85	        - int
+85	        - pair(int, basePair)
 86	      - LHS
 87	        - s2
 88	      - RHS
@@ -98,7 +98,7 @@ pairsAndNull.ast contents are:
 93	            - s
 94	    - DECLARE
 95	      - TYPE
-96	        - int
+96	        - pair(int, basePair)
 97	      - LHS
 98	        - s3
 99	      - RHS
@@ -106,7 +106,7 @@ pairsAndNull.ast contents are:
 101	          - s2
 102	    - DECLARE
 103	      - TYPE
-104	        - int
+104	        - pair(int, basePair)
 105	      - LHS
 106	        - s4
 107	      - RHS
@@ -114,7 +114,7 @@ pairsAndNull.ast contents are:
 109	        - s
 110	    - DECLARE
 111	      - TYPE
-112	        - int
+112	        - pair(int, basePair)
 113	      - LHS
 114	        - s5
 115	      - RHS

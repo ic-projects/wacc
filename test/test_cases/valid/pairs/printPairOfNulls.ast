@@ -6,7 +6,7 @@ printPairOfNulls.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - 
+4	        - pair(basePair, basePair)
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -21,7 +21,7 @@ printPairOfNulls.ast contents are:
 16	      - " = ("
 17	    - DECLARE
 18	      - TYPE
-19	        - 
+19	        - pair(basePair, basePair)
 20	      - LHS
 21	        - q
 22	      - RHS
@@ -33,7 +33,7 @@ printPairOfNulls.ast contents are:
 28	      - ","
 29	    - DECLARE
 30	      - TYPE
-31	        - intbool
+31	        - pair(int, bool)
 32	      - LHS
 33	        - r
 34	      - RHS

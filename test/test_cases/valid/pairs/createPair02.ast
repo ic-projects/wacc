@@ -6,7 +6,7 @@ createPair02.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - charchar
+4	        - pair(char, char)
 5	      - LHS
 6	        - p
 7	      - RHS

@@ -3,10 +3,10 @@
 binarySortTree.ast contents are:
 ===========================================================
 0	Program
-1	  - int createNewNode(int value, int left, int right)
+1	  - pair(int, basePair) createNewNode(int value, pair(int, basePair) left, pair(int, basePair) right)
 2	    - DECLARE
 3	      - TYPE
-4	        - 
+4	        - pair(basePair, basePair)
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -17,7 +17,7 @@ binarySortTree.ast contents are:
 12	            - right
 13	    - DECLARE
 14	      - TYPE
-15	        - int
+15	        - pair(int, basePair)
 16	      - LHS
 17	        - q
 18	      - RHS
@@ -28,7 +28,7 @@ binarySortTree.ast contents are:
 23	            - p
 24	    - RETURN
 25	      - q
-26	  - int insert(int root, int n)
+26	  - pair(int, basePair) insert(pair(int, basePair) root, int n)
 27	    - IF
 28	      - CONDITION
 29	        - ==
@@ -46,7 +46,7 @@ binarySortTree.ast contents are:
 41	      - ELSE
 42	        - DECLARE
 43	          - TYPE
-44	            - 
+44	            - pair(basePair, basePair)
 45	          - LHS
 46	            - p
 47	          - RHS
@@ -62,7 +62,7 @@ binarySortTree.ast contents are:
 57	              - root
 58	        - DECLARE
 59	          - TYPE
-60	            - int
+60	            - pair(int, basePair)
 61	          - LHS
 62	            - q
 63	          - RHS
@@ -104,7 +104,7 @@ binarySortTree.ast contents are:
 99	                - n
 100	    - RETURN
 101	      - root
-102	  - int printTree(int root)
+102	  - int printTree(pair(int, basePair) root)
 103	    - IF
 104	      - CONDITION
 105	        - ==
@@ -116,7 +116,7 @@ binarySortTree.ast contents are:
 111	      - ELSE
 112	        - DECLARE
 113	          - TYPE
-114	            - 
+114	            - pair(basePair, basePair)
 115	          - LHS
 116	            - body
 117	          - RHS
@@ -124,7 +124,7 @@ binarySortTree.ast contents are:
 119	              - root
 120	        - DECLARE
 121	          - TYPE
-122	            - int
+122	            - pair(int, basePair)
 123	          - LHS
 124	            - p
 125	          - RHS
@@ -189,7 +189,7 @@ binarySortTree.ast contents are:
 184	        - 0
 185	    - DECLARE
 186	      - TYPE
-187	        - int
+187	        - pair(int, basePair)
 188	      - LHS
 189	        - root
 190	      - RHS

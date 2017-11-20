@@ -6,7 +6,7 @@ readPair.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - charint
+4	        - pair(char, int)
 5	      - LHS
 6	        - p
 7	      - RHS

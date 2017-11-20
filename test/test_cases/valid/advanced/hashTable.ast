@@ -3,7 +3,7 @@
 hashTable.ast contents are:
 ===========================================================
 0	Program
-1	  - bool init(int[] table)
+1	  - bool init(pair(int, basePair)[] table)
 2	    - DECLARE
 3	      - TYPE
 4	        - int
@@ -41,7 +41,7 @@ hashTable.ast contents are:
 36	              - 1
 37	    - RETURN
 38	      - true
-39	  - bool contain(int[] table, int x)
+39	  - bool contain(pair(int, basePair)[] table, int x)
 40	    - DECLARE
 41	      - TYPE
 42	        - int
@@ -53,7 +53,7 @@ hashTable.ast contents are:
 48	        - x
 49	    - DECLARE
 50	      - TYPE
-51	        - int
+51	        - pair(int, basePair)
 52	      - LHS
 53	        - node
 54	      - RHS
@@ -66,7 +66,7 @@ hashTable.ast contents are:
 61	      - !=
 62	        - node
 63	        - null
-64	  - bool insertIfNotContain(int[] table, int x)
+64	  - bool insertIfNotContain(pair(int, basePair)[] table, int x)
 65	    - DECLARE
 66	      - TYPE
 67	        - int
@@ -78,7 +78,7 @@ hashTable.ast contents are:
 73	        - x
 74	    - DECLARE
 75	      - TYPE
-76	        - int
+76	        - pair(int, basePair)
 77	      - LHS
 78	        - node
 79	      - RHS
@@ -98,7 +98,7 @@ hashTable.ast contents are:
 93	      - ELSE
 94	        - DECLARE
 95	          - TYPE
-96	            - int
+96	            - pair(int, basePair)
 97	          - LHS
 98	            - p
 99	          - RHS
@@ -118,7 +118,7 @@ hashTable.ast contents are:
 113	            - p
 114	        - RETURN
 115	          - true
-116	  - bool remove(int[] table, int x)
+116	  - bool remove(pair(int, basePair)[] table, int x)
 117	    - DECLARE
 118	      - TYPE
 119	        - int
@@ -130,7 +130,7 @@ hashTable.ast contents are:
 125	        - x
 126	    - DECLARE
 127	      - TYPE
-128	        - int
+128	        - pair(int, basePair)
 129	      - LHS
 130	        - node
 131	      - RHS
@@ -161,7 +161,7 @@ hashTable.ast contents are:
 156	            - node
 157	        - RETURN
 158	          - true
-159	  - bool removeAll(int[] table)
+159	  - bool removeAll(pair(int, basePair)[] table)
 160	    - DECLARE
 161	      - TYPE
 162	        - int
@@ -185,7 +185,7 @@ hashTable.ast contents are:
 180	      - DO
 181	        - DECLARE
 182	          - TYPE
-183	            - int
+183	            - pair(int, basePair)
 184	          - LHS
 185	            - p
 186	          - RHS
@@ -200,7 +200,7 @@ hashTable.ast contents are:
 195	          - DO
 196	            - DECLARE
 197	              - TYPE
-198	                - int
+198	                - pair(int, basePair)
 199	              - LHS
 200	                - p2
 201	              - RHS
@@ -229,7 +229,7 @@ hashTable.ast contents are:
 224	              - 1
 225	    - RETURN
 226	      - true
-227	  - int count(int[] table)
+227	  - int count(pair(int, basePair)[] table)
 228	    - DECLARE
 229	      - TYPE
 230	        - int
@@ -284,7 +284,7 @@ hashTable.ast contents are:
 279	              - 1
 280	    - RETURN
 281	      - sum
-282	  - bool printAll(int[] table)
+282	  - bool printAll(pair(int, basePair)[] table)
 283	    - DECLARE
 284	      - TYPE
 285	        - int
@@ -327,7 +327,7 @@ hashTable.ast contents are:
 322	      - ""
 323	    - RETURN
 324	      - true
-325	  - int calculateIndex(int[] table, int x)
+325	  - int calculateIndex(pair(int, basePair)[] table, int x)
 326	    - DECLARE
 327	      - TYPE
 328	        - int
@@ -340,7 +340,7 @@ hashTable.ast contents are:
 335	      - %
 336	        - x
 337	        - length
-338	  - int findNode(int head, int x)
+338	  - pair(int, basePair) findNode(pair(int, basePair) head, int x)
 339	    - LOOP
 340	      - CONDITION
 341	        - !=
@@ -372,7 +372,7 @@ hashTable.ast contents are:
 367	                  - head
 368	    - RETURN
 369	      - null
-370	  - int removeNode(int head, int toRemove)
+370	  - pair(int, basePair) removeNode(pair(int, basePair) head, pair(int, basePair) toRemove)
 371	    - IF
 372	      - CONDITION
 373	        - ==
@@ -401,7 +401,7 @@ hashTable.ast contents are:
 396	          - ELSE
 397	            - DECLARE
 398	              - TYPE
-399	                - int
+399	                - pair(int, basePair)
 400	              - LHS
 401	                - tail
 402	              - RHS
@@ -417,7 +417,7 @@ hashTable.ast contents are:
 412	                - toRemove
 413	            - RETURN
 414	              - head
-415	  - int countNodes(int head)
+415	  - int countNodes(pair(int, basePair) head)
 416	    - DECLARE
 417	      - TYPE
 418	        - int
@@ -446,7 +446,7 @@ hashTable.ast contents are:
 441	              - head
 442	    - RETURN
 443	      - sum
-444	  - bool printAllNodes(int head)
+444	  - bool printAllNodes(pair(int, basePair) head)
 445	    - LOOP
 446	      - CONDITION
 447	        - !=
@@ -582,7 +582,7 @@ hashTable.ast contents are:
 577	      - x
 578	    - RETURN
 579	      - x
-580	  - bool handleMenuInsert(int[] table)
+580	  - bool handleMenuInsert(pair(int, basePair)[] table)
 581	    - DECLARE
 582	      - TYPE
 583	        - int
@@ -611,7 +611,7 @@ hashTable.ast contents are:
 606	          - "The integer is already there. No insertion is made."
 607	    - RETURN
 608	      - true
-609	  - bool handleMenuFind(int[] table)
+609	  - bool handleMenuFind(pair(int, basePair)[] table)
 610	    - DECLARE
 611	      - TYPE
 612	        - int
@@ -640,7 +640,7 @@ hashTable.ast contents are:
 635	          - "The integer is not found."
 636	    - RETURN
 637	      - true
-638	  - bool handleMenuCount(int[] table)
+638	  - bool handleMenuCount(pair(int, basePair)[] table)
 639	    - DECLARE
 640	      - TYPE
 641	        - int
@@ -666,7 +666,7 @@ hashTable.ast contents are:
 661	          - " integers."
 662	    - RETURN
 663	      - true
-664	  - bool handleMenuPrint(int[] table)
+664	  - bool handleMenuPrint(pair(int, basePair)[] table)
 665	    - PRINT
 666	      - "Here are the integers: "
 667	    - DECLARE
@@ -679,7 +679,7 @@ hashTable.ast contents are:
 674	        - table
 675	    - RETURN
 676	      - true
-677	  - bool handleMenuRemove(int[] table)
+677	  - bool handleMenuRemove(pair(int, basePair)[] table)
 678	    - DECLARE
 679	      - TYPE
 680	        - int
@@ -708,7 +708,7 @@ hashTable.ast contents are:
 703	          - "The integer is not found."
 704	    - RETURN
 705	      - true
-706	  - bool handleMenuRemoveAll(int[] table)
+706	  - bool handleMenuRemoveAll(pair(int, basePair)[] table)
 707	    - DECLARE
 708	      - TYPE
 709	        - bool
@@ -724,7 +724,7 @@ hashTable.ast contents are:
 719	  - int main()
 720	    - DECLARE
 721	      - TYPE
-722	        - int[]
+722	        - pair(int, basePair)[]
 723	      - LHS
 724	        - table
 725	      - RHS
