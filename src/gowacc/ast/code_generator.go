@@ -373,3 +373,17 @@ func NewStackOffsetLocation(offset int) *Location {
 		stackOffset: offset,
 	}
 }
+
+func (location *Location) UpdateStackOffsetPush() {
+	// Only updating if the location is a StackOffsetLocation
+	if location.stackOffset != -1 {
+		location.stackOffset++
+	}
+}
+
+func (location *Location) UpdateStackOffsetPop() {
+	// Only updating if the location is a StackOffsetLocation
+	if location.stackOffset != -1 {
+		location.stackOffset--
+	}
+}
