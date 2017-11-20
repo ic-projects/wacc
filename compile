@@ -56,7 +56,6 @@ OptionParser.new do |opts|
   $options[:execute] = false
   opts.on("-x", "--execute",
     "Execute. Emulate the generated ARM code and display its output." ) do
-    $opts << "-execute"
     $options[:execute] = true
   end
 
@@ -92,6 +91,16 @@ files.each do |file_path|
   output = %x(./gowacc #{$opts.join(" ")} #{file_path})
   exitstatus = $?.exitstatus
   puts output
+  if $options[:execute] then
+    emulatedexitstatus = 0
+    puts "#{(File.basename file_path)[0..-6]}"
+    %x(arm-linux-gnueabi-gcc -o FILENAME1 -mcpu=arm1176jzf-s -mtune=arm1176jzf-s ./#{(File.basename file_path)[0..-6]}.s)
+    emulated = %x(qemu-arm -L /usr/arm-linux-gnueabi/ FILENAME1)
+    emulatedexitstatus = $?.exitstatus
+    puts "Emulated:"
+    puts emulated
+    puts "Exited with code: #{emulatedexitstatus}"
+  end
 end
 
 exit exitstatus

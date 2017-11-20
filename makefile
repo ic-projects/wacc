@@ -65,6 +65,8 @@ docs:
 clean:
 	rm -rf $(BUILD)
 	rm -rf gowacc
+	rm -rf *.s
+	rm -rf FILENAME1
 
 clean-lib:
 	rm -rf lib
