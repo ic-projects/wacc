@@ -37,8 +37,9 @@ func main() {
 		fmt.Println("Error: No file provided")
 	}
 
-	// Perform semantic error checking
 	if !*parseOnly {
+
+		// Perform semantic error checking
 		checker := ast.NewSemanticCheck()
 		ast.Walk(checker, tree)
 
@@ -52,6 +53,25 @@ func main() {
 		// Print out the final symbol table
 		if *symbolTable {
 			checker.PrintSymbolTable()
+		}
+
+		if !*semanticOnly {
+
+			// Generate assembly Code
+			asm := ast.GenerateCode(tree)
+
+			// Save assembly code to files
+
+
+			// Print assembly code
+			if *printAssembly {
+				fmt.Println("-- Printing Assembly...")
+				fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
+				fmt.Println(".s contents are:")
+				fmt.Println("===========================================================")
+				fmt.Print(asm)
+				fmt.Println("===========================================================")
+			}
 		}
 	}
 
