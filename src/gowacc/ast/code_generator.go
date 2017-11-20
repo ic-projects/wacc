@@ -268,7 +268,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		}
 	case []StatementNode:
-    v.symbolTable.moveNextScope()
+    v.symbolTable.MoveNextScope()
 	}
 }
 
