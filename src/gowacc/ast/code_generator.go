@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"strconv"
 )
@@ -385,4 +386,70 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.freeRegisters.Push(operand2)
 		v.returnRegisters.Push(returnRegister)
 	}
+}
+
+type Location struct {
+	register 		Register
+	address  		int
+	stackOffset int
+}
+
+func NewRegisterLocation(register Register) *Location {
+	return &Location{
+		register: 	 register,
+		address: 		 -1,
+		stackOffset: -1,
+	}
+}
+
+func NewAddressLocation(address int) *Location {
+	return &Location{
+		register: 	 UNDEFINED,
+		address: 		 address,
+		stackOffset: -1,
+	}
+}
+
+func NewStackOffsetLocation(offset int) *Location {
+	return &Location{
+		register: 	 UNDEFINED,
+		address: 		 -1,
+		stackOffset: offset,
+	}
+}
+
+func (location *Location) UpdateStackOffsetPush() {
+	// Only updating if the location is a StackOffsetLocation
+	if location.stackOffset != -1 {
+		location.stackOffset++
+	}
+}
+
+func (location *Location) UpdateStackOffsetPop() {
+	// Only updating if the location is a StackOffsetLocation
+	if location.stackOffset != -1 {
+		location.stackOffset--
+	}
+}
+
+func (location *Location) String() string {
+	// Location is a register
+	if location.register == UNDEFINED {
+		return location.register.String()
+	}
+
+	var buf bytes.Buffer
+
+	// Location is an address on the heap
+	if location.address != -1 {
+		buf.WriteString("#")
+		buf.WriteString(strconv.Itoa(location.address))
+		return buf.String()
+	}
+
+	// Location is a stack offset
+	buf.WriteString("[sp, #")
+	buf.WriteString(strconv.Itoa(location.stackOffset))
+	buf.WriteString("]")
+	return buf.String()
 }
