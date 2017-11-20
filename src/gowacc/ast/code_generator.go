@@ -8,16 +8,41 @@ import (
 	"strings"
 )
 
-type Assembly []string
+type Assembly struct {
+	data []string
+	text []string
+	global []string
+}
+
+func NewAssembly() *Assembly {
+	return &Assembly{
+		data: make([]string, 0),
+		text: make([]string, 0),
+		global: make([]string, 0),
+	}
+}
 
 // String will return the string format of the Assembly code with line numbers.
-func (asm Assembly) String() string {
-	var tempbuf bytes.Buffer
-	for _, s := range asm {
-		tempbuf.WriteString(indent(s, "  "))
-	}
+func (asm *Assembly) String() string {
 	var buf bytes.Buffer
-	for i, line := range strings.Split(tempbuf.String(), "\n") {
+	buf.WriteString(indent(".data", "  "))
+	for _, s := range asm.data {
+		buf.WriteString(indent(s, "  "))
+	}
+	buf.WriteString(indent(".text", "  "))
+	for _, s := range asm.text {
+		buf.WriteString(indent(s, "  "))
+	}
+	buf.WriteString(indent(".global main", "  "))
+	for _, s := range asm.global {
+		buf.WriteString(indent(s, "  "))
+	}
+	return buf.String()
+}
+
+func (asm *Assembly) NumberedCode() string {
+	var buf bytes.Buffer
+	for i, line := range strings.Split(asm.String(), "\n") {
 		if line != "" {
 			buf.WriteString(fmt.Sprintf("%d\t%s\n", i, line))
 		}
@@ -27,7 +52,7 @@ func (asm Assembly) String() string {
 
 // SaveToFile is a function that will save the assembly to the given savepath
 // overwriting any file already there.
-func (asm Assembly) SaveToFile(savepath string) error {
+func (asm *Assembly) SaveToFile(savepath string) error {
 	file, err := os.Create(savepath)
 	defer file.Close()
 	if err != nil {
@@ -36,24 +61,23 @@ func (asm Assembly) SaveToFile(savepath string) error {
 
 	w := bufio.NewWriter(file)
 	defer w.Flush()
-	for _, line := range asm {
-		_, err := w.WriteString(line)
-		if err != nil {
-				return err
-		}
+	_, err = w.WriteString(asm.String())
+	if err != nil {
+			return err
 	}
+
 	return nil
 }
 
 // GenerateCode is a function that will generate and return the finished assembly
 // code for a given AST.
-func GenerateCode(tree ProgramNode) Assembly {
-	codeGen := NewCodeGenerator()
+func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
+	codeGen := NewCodeGenerator(symbolTable)
 
 	Walk(codeGen, tree)
 
-	codeGen.add("code")
-	codeGen.add("assembly")
+	codeGen.addCode("code", "code2")
+	codeGen.addCode("assembly")
 
 	return codeGen.asm
 }
@@ -61,19 +85,40 @@ func GenerateCode(tree ProgramNode) Assembly {
 // CodeGenerator is a struct that implements EntryExitVisitor to be called with
 // Walk. It stores
 type CodeGenerator struct {
-	asm Assembly
+	asm *Assembly
+	symbolTable *SymbolTable
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
-func NewCodeGenerator() *CodeGenerator {
+func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
-		asm: make([]string, 0),
+		asm: NewAssembly(),
+		symbolTable: symbolTable,
 	}
 }
 
-// add adds a single line of assembly to the already generated assembly code
-func (v *CodeGenerator) add(line string) {
-	v.asm = append(v.asm, line + "\n")
+// addData add lines of assembly to the already data part of the generated
+// assembly code
+func (v *CodeGenerator) addData(lines ...string) {
+	for _, line := range lines {
+		v.asm.data = append(v.asm.data, line + "\n")
+	}
+}
+
+// addText add lines of assembly to the already text part of the generated
+// assembly code
+func (v *CodeGenerator) addText(lines ...string) {
+	for _, line := range lines {
+		v.asm.text = append(v.asm.text, line + "\n")
+	}
+}
+
+// addCode add lines of assembly to the already code part of the generated
+// assembly code
+func (v *CodeGenerator) addCode(lines ...string) {
+	for _, line := range lines {
+		v.asm.global = append(v.asm.global, line + "\n")
+	}
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with

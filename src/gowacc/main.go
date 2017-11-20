@@ -58,7 +58,7 @@ func main() {
 		if !*semanticOnly {
 
 			// Generate assembly Code
-			asm := ast.GenerateCode(tree)
+			asm := ast.GenerateCode(tree, checker.SymbolTable())
 
 			// Save assembly code to files
 			savepath := strings.TrimSuffix(path.Base(filepath), ".wacc") + ".s"
@@ -75,7 +75,7 @@ func main() {
 				fmt.Print(savepath)
 				fmt.Println(" contents are:")
 				fmt.Println("===========================================================")
-				fmt.Print(asm)
+				fmt.Print(asm.NumberedCode())
 				fmt.Println("===========================================================")
 			}
 		}

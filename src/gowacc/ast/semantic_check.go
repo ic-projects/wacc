@@ -25,6 +25,10 @@ func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
 
+func (v *SemanticCheck) SymbolTable() *SymbolTable {
+	return v.symbolTable
+}
+
 // Visit will apply the correct rule for the programNode given, to be used with
 // Walk.
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
