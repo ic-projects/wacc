@@ -1,1107 +1,3 @@
--- Test: ticTacToe.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# This is a program that allows a human to play Tic Tac Toe with a smart AI. 
-# The AI is implemented using minimax approach. The AI is a perfect one, meaning 
-# that it will never lose and if there is an immediate win, it will play that. 
-#
-# It takes quite a long time to initialise and free up the memory for the AI. 
-# All observed bugs have been fixed.
-#
-# In this program, we are very often need the memory from the heap. 
-# But because a pair is the only data type allocated on the heap, 
-# we have to use it. We very often need a data structure to store 
-# a set of 3 objects. We will use the format below. 
-# 
-#  root --\
-#         |
-#        \|/
-#          
-#  +----------+----------+
-#  |          |          |
-#  |  front   | object 3 |
-#  |          |          |
-#  +----------+----------+ 
-#       |
-#       |
-#      \|/
-#          
-#  +----------+----------+
-#  |          |          |
-#  | object 1 | object 2 |
-#  |          |          |
-#  +----------+----------+ 
-# 
-# We call this structure Pair4Three.
-
-# Program:
-
-begin
-	
-	############################## Interface Functions ######################
-	
-	# Print greeting message and ask the player to choose their symbol.
-	# Return either 'x' or 'o'. 'x' plays first.
-	char chooseSymbol() is
-		println "========= Tic Tac Toe ================" ;
-		println "=  Because we know you want to win   =" ;
-		println "======================================" ;
-		println "=                                    =" ;
-		println "= Who would you like to be?          =" ;
-		println "=   x  (play first)                  =" ;
-		println "=   o  (play second)                 =" ;
-		println "=   q  (quit)                        =" ;
-		println "=                                    =" ;
-		println "======================================" ;
-		
-		char chosen = '\0' ;
-		while chosen == '\0' do 
-			print "Which symbol you would like to choose: " ;
-			char c = '\0' ;
-			read c ;
-			if c == 'x' || c == 'X' then
-				chosen = 'x'
-			else
-				if c == 'o' || c == 'O' then
-					chosen = 'o'
-				else
-					if c == 'q' || c == 'Q' then
-						println "Goodbye safety." ;
-						exit 0
-					else
-						print "Invalid symbol: " ;
-						println c ;
-						println "Please try again."
-					fi 
-				fi
-			fi
-		done ;
-		print "You have chosen: " ;
-		println chosen ;
-		return chosen
-	end
-	
-	# Print the board out to the screen.
-	bool printBoard(pair(pair, pair) board) is
-		pair(pair, pair) front = fst board ;
-		pair(pair, char) row1 = fst front ;
-		pair(pair, char) row2 = snd front ;
-		pair(pair, char) row3 = snd board ;
-	
-    println " 1 2 3";
-    print "1";	
-		bool _ = call printRow(row1) ;
-		println " -+-+-" ;
-    print "2";	
-		_ = call printRow(row2) ;
-		println " -+-+-" ;
-    print "3";	
-		_ = call printRow(row3) ;
-		println "";
-		return true 
-	end
-	
-	# Print a row with a newline to the screen.
-	bool printRow(pair(pair, char) row) is
-		pair(char, char) front = fst row ;
-		
-		char cell1 = fst front ;
-		char cell2 = snd front ;
-		char cell3 = snd row ;
-		
-		bool _ = call printCell(cell1) ;
-		print '|' ;
-		_ = call printCell(cell2) ;
-		print '|' ;
-		_ = call printCell(cell3) ;
-		println "" ;
-		return true
-	end 
-	
-	# Print a given cell. Print an empty space if it is empty. Return true.
-	bool printCell(char cell) is
-		if cell == '\0' then
-			print ' ' 
-		else
-			print cell 
-		fi ;
-		return true
-	end
-	
-	# Ask for a move from the human player. The valid move is then stored in the given move array. 
-	# The row number is stored at move[0], the column number is stored at move[1]. Return true.
-	bool askForAMoveHuman(pair(pair, pair) board, int[] move) is
-		bool success = false ;
-		int row = 0 ;
-		int column = 0 ;
-			
-		while !success do
-			println "What is your next move?" ;
-			print " row (1-3): " ;
-			read row ;
-			print " column (1-3): " ;
-			read column ; 
-			success = call validateMove(board, row, column) ;
-			
-			if success then
-				println "" ; # Just print out an empty line
-				move[0] = row ;
-				move[1] = column ;
-				return true
-			else
-				println "Your move is invalid. Please try again."
-			fi			
-		done ; 
-		# Should not reach here
-		return true
-	end
-	
-	# Validate that the give move is valid. Returns true iff it is valid.
-	bool validateMove(pair(pair, pair) board, int moveRow, int moveColumn) is
-		if 1 <= moveRow && moveRow <= 3 && 1 <= moveColumn && moveColumn <= 3 then
-			char sym = call symbolAt(board, moveRow, moveColumn) ;
-			# Make sure that the cell is empty
-			return sym == '\0'
-		else
-			return false
-		fi
-	end
-	
-	# Print out to the screen about a recent move maid by the AI. Return true.
-	bool notifyMoveHuman(pair(pair, pair) board, char currentTurn, char playerSymbol, int moveRow, int moveColumn) is
-		print "The AI played at row " ;
-		print moveRow ;
-		print " column " ;
-		println moveColumn ;
-		return true
-	end
-	
-	############################### AI Functions #########################################
-	
-	# Initialise an AI data.
-	pair(pair, pair) initAI(char aiSymbol) is
-		
-		pair(char, pair) info = newpair(aiSymbol, null) ; # Don't know yet how to use the second element.
- 		pair(pair, int) stateTree = call generateAllPossibleStates(aiSymbol) ;
-		int value = call setValuesForAllStates(stateTree, aiSymbol, 'x') ;
-		
-		pair(pair, pair) aiData = newpair(info, stateTree) ;
-		return aiData
-	end
-	
-	# Generate the whole tree of all states. Then return the tree.
-	pair(pair, int) generateAllPossibleStates(char aiSymbol) is
-		pair(pair, pair) board = call allocateNewBoard() ;
-		pair(pair, int) rootState = call convertFromBoardToState(board) ;
-		rootState = call generateNextStates(rootState, 'x') ;
-		return rootState
-	end
-	
-	# Convert from a board to a state.
-	# A state consists of 3 objects: the board, the pointers to the next states, and the value for this state (int).
-	# Therefore, we use the Pair4Three structure.
-	pair(pair, int) convertFromBoardToState(pair(pair, pair) board) is
-		
-		pair(pair, pair) pointers = call generateEmptyPointerBoard() ;
-		pair(pair, pair) front = newpair(board, pointers) ;
-		pair(pair, int) state = newpair(front, 0) ; # The initial value of 0 will be replaced.
-		
-		return state
-	end
-	
-	# Allocate memory for the pointers to the next state.
-	# It looks like a board, but contains pointers (pairs) instead of chars.
-	pair(pair, pair) generateEmptyPointerBoard() is
-		
-		pair(pair, pair) row1 = call generateEmptyPointerRow() ;
-		pair(pair, pair) row2 = call generateEmptyPointerRow() ;
-		pair(pair, pair) row3 = call generateEmptyPointerRow() ;
-		
-		pair(pair, pair) front = newpair(row1, row2) ;
-		pair(pair, pair) root = newpair(front, row3) ;
-		return root
-		
-	end
-	
-	# Allocate memory for the 3 pointers to the next state of a row.
-	pair(pair, pair) generateEmptyPointerRow() is
-		pair(pair, pair) front = newpair(null, null) ;
-		pair(pair, pair) root = newpair(front, null) ;
-		return root 
-	end
-	
-	# Generate next states recursively. Returns the state.
-	pair(pair, int) generateNextStates(pair(pair, int) state, char currentPlayer) is
-		pair(pair, pair) front = fst state ;
-		
-		pair(pair, pair) board = fst front ;
-		pair(pair, pair) pointers = snd front ;
-		
-		char previousPlayer = call oppositeSymbol(currentPlayer) ;
-		
-		bool won = call hasWon(board, previousPlayer) ;
-		
-		if won then
-			# The game ends. The winner is known.
-			return state 
-		else
-			bool _ = call generateNextStatesBoard(board, pointers, currentPlayer) ;
-			return state
-		fi
-		
-	end
-	
-	# Generate Just the next states for every possible point on the board. Update the pointers accordingly. Return true.
-	bool generateNextStatesBoard(pair(pair, pair) board, pair(pair, pair) pointers, char currentPlayer) is
-		pair(pair, pair) front = fst board ;
-		
-		pair(pair, char) row1 = fst front ;
-		pair(pair, char) row2 = snd front ;
-		pair(pair, char) row3 = snd board ;
-		
-		pair(pair, pair) frontP = fst pointers ;
-		
-		pair(pair, pair) row1P = fst frontP ;
-		pair(pair, pair) row2P = snd frontP ;
-		pair(pair, pair) row3P = snd pointers ;
-		
-		bool _ = call generateNextStatesRow(board, row1, row1P, currentPlayer, 1) ;
-		_ = call generateNextStatesRow(board, row2, row2P, currentPlayer, 2) ;
-		_ = call generateNextStatesRow(board, row3, row3P, currentPlayer, 3) ;
-		
-		return true
-	end
-	
-	# Generate Just the next states for every possible point on the row. Update the pointers accordingly. Return true.
-	bool generateNextStatesRow(pair(pair, pair) board, pair(pair, char) row, pair(pair, pair) pointerRow, char currentPlayer, int rowNumber) is
-		pair(char, char) front = fst row ;
-		
-		char cell1 = fst front ;
-		char cell2 = snd front ;
-		char cell3 = snd row ;
-		
-		pair(pair, pair) frontP = fst pointerRow ;
-		
-		fst frontP = call generateNextStatesCell(board, cell1, currentPlayer, rowNumber, 1) ;
-		snd frontP = call generateNextStatesCell(board, cell2, currentPlayer, rowNumber, 2) ;
-		snd pointerRow = call generateNextStatesCell(board, cell3, currentPlayer, rowNumber, 3) ;
-		
-		return true
-	end
-	
-	# Generate Just the next states for the cell on the board. Returns the pointer to the next state.
-	pair(pair, int) generateNextStatesCell(pair(pair, pair) board, char cell, char currentPlayer, int rowNumber, int columnNumber) is
-		if cell == '\0' then
-			# If the cell is empty, generate the next state.
-			pair(pair, pair) board2 = call cloneBoard(board) ;
-			bool _ = call placeMove(board2, currentPlayer, rowNumber, columnNumber) ;
-			pair(pair, int) state = call convertFromBoardToState(board2) ;
-			char nextPlayer = call oppositeSymbol(currentPlayer) ;
-			
-			# Generate next states recursively and return it out.
-			state = call generateNextStates(state, nextPlayer) ;
-			return state
-		else
-			# If the cell is not empty, return null.
-			return null
-		fi
-	end
-	
-	# Clone board.
-	pair(pair, pair) cloneBoard(pair(pair, pair) board) is
-		pair(pair, pair) board2 = call allocateNewBoard() ; 
-		bool _ = call copyBoard(board, board2) ;
-		return board2 
-	end
-	
-	# Copy the content of one board to another. Return true.
-	bool copyBoard(pair(pair, pair) from, pair(pair, pair) to) is
-		pair(pair, pair) frontFrom = fst from ;
-		pair(pair, char) row1From = fst frontFrom ;
-		pair(pair, char) row2From = snd frontFrom ;
-		pair(pair, char) row3From = snd from ;
-		
-		pair(pair, pair) frontTo = fst to ;
-		pair(pair, char) row1To = fst frontTo ;
-		pair(pair, char) row2To = snd frontTo ;
-		pair(pair, char) row3To = snd to ;
-				
-		bool _ = call copyRow(row1From, row1To) ;		
-		_ = call copyRow(row2From, row2To) ;
-		_ = call copyRow(row3From, row3To) ;
-				
-		return true
-	end
-	
-	# Copy from one board row to another. Return true.
-	bool copyRow(pair(pair, char) from, pair(pair, char) to) is
-		pair(char, char) frontFrom = fst from ;
-		pair(char, char) frontTo = fst to ;
-		
-		fst frontTo = fst frontFrom ;
-		snd frontTo = snd frontFrom ;
-		snd to = snd from ;
-		return true
-	end
-	
-	# Calculate the value of how good each state is using Minimax approach. 
-	# If AI wins, value = 100.
-	# If AI lose, value = -100.
-	# If Stalemate, value = 0.
-	# Otherwise, combine the values from the next states.
-	# If this state is null, then return -101 if it is a max state, 101 if it is a min state (thus those values will not be picked).
-	# Return the value.
-	int setValuesForAllStates(pair(pair, int) state, char aiSymbol, char currentPlayer) is
-		int outValue = 0 ;
-		if state == null then
-			# The current state is impossible to reach.
-			# Assign a value that will not be picked in the future.
-			if currentPlayer == aiSymbol then
-				# Later on, we will pick the lowest value (min). So we set this value high so that it will not be picked.
-				outValue = 101
-			else
-				# Later on, we will pick the highest value (max). So we set this value low so that it will not be picked.
-				outValue = -101
-			fi
-		else 
-		
-			pair(pair, pair) front = fst state ;
-			
-			pair(pair, pair) board = fst front ;
-			pair(pair, pair) pointers = snd front ;
-			
-			char anotherPlayer = call oppositeSymbol(currentPlayer) ;
-			
-			# The current player is about to play. So if another player has won it already, the current player cannot play it.
-			bool won = call hasWon(board, anotherPlayer) ;
-		
-			if won then
-				if anotherPlayer == aiSymbol then
-					outValue = 100 # We won
-				else
-					outValue = -100 # We lost
-				fi 
-			else
-				bool hasEmptyCell = call containEmptyCell(board) ;
-				if hasEmptyCell then
-					# If can do next move, calculate the value from the next states.
-					outValue = call calculateValuesFromNextStates(pointers, aiSymbol, anotherPlayer) ;
-					
-					# In order for the AI to choose the winning move immediately, we have to reduce the value for those not winning yet.
-					# So if the next move has value 100, we set the value of this move 90.
-					if outValue == 100 then
-						outValue = 90 
-					else
-						skip
-					fi
-				else
-					# Otherwise, it is a stalemate.
-					outValue = 0 
-				fi 
-			fi ;
-			snd state = outValue
-		fi ;
-		return outValue
-	end
-	
-	# Calculate the values for each next state, then combine them to get the value of this state. Return the value.
-	int calculateValuesFromNextStates(pair(pair, pair) pointers, char aiSymbol, char playerOfNextState) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ;
-		pair(pair, pair) row3 = snd pointers ;
-		
-		int value1 = call calculateValuesFromNextStatesRow(row1, aiSymbol, playerOfNextState) ;
-		int value2 = call calculateValuesFromNextStatesRow(row2, aiSymbol, playerOfNextState) ;
-		int value3 = call calculateValuesFromNextStatesRow(row3, aiSymbol, playerOfNextState) ;
-		
-		int out = call combineValue(aiSymbol, playerOfNextState, value1, value2, value3) ;
-		return out
-	end
-	
-	# Calculate the values for each next state in a row, then combine them to get the value of this row. Return the value.
-	int calculateValuesFromNextStatesRow(pair(pair, pair) rowPointers, char aiSymbol, char playerOfNextState) is
-		pair(pair, pair) front = fst rowPointers ;
-		
-		pair(pair, int) state1 = fst front ;
-		pair(pair, int) state2 = snd front ; 
-		pair(pair, int) state3 = snd rowPointers ;
-		
-		int value1 = call setValuesForAllStates(state1, aiSymbol, playerOfNextState) ;
-		int value2 = call setValuesForAllStates(state2, aiSymbol, playerOfNextState) ;
-		int value3 = call setValuesForAllStates(state3, aiSymbol, playerOfNextState) ;
-		
-		int out = call combineValue(aiSymbol, playerOfNextState, value1, value2, value3) ;
-		return out
-	end
-	
-	int combineValue(char aiSymbol, char playerOfNextState, int value1, int value2, int value3) is
-		int out = 0 ;
-		if aiSymbol == playerOfNextState then
-			# We move next so the human moves now. Pick the lowest value.
-			out = call min3(value1, value2, value3)
-		else
-			# Human moves next so we move now. Pick the highest value.
-			out = call max3(value1, value2, value3)
-		fi ;
-		return out
-	end
-	
-	# Find the minimum of the three.
-	int min3(int a, int b, int c) is
-		if a < b then
-			if a < c then
-				return a 
-			else 
-				return c
-			fi
-		else
-			if b < c then
-				return b
-			else 
-				return c
-			fi
-		fi
-	end
-	
-	# Find the maximum of the three.
-	int max3(int a, int b, int c) is
-		if a > b then
-			if a > c then
-				return a 
-			else 
-				return c
-			fi
-		else
-			if b > c then
-				return b
-			else 
-				return c
-			fi
-		fi
-	end
-	
-	# Destroy all memory used by the AI. Return true.
-	bool destroyAI(pair(pair, pair) aiData) is
-		
-		pair(char, pair) info = fst aiData ;
- 		pair(pair, int) stateTree = snd aiData ;
-
-		bool _ = call deleteStateTreeRecursively(stateTree) ;
-		free info ;
-		free aiData ;
-		return true
-	end
-	
-	# Ask the AI for a new move. Return true.
-	bool askForAMoveAI(pair(pair, pair) board, char currentTurn, char playerSymbol, pair(pair, pair) aiData, int[] move) is
-		
-		pair(char, pair) info = fst aiData ;
- 		pair(pair, int) stateTree = snd aiData ;
-		
-		pair(pair, pair) front = fst stateTree ;
-		
-		pair(pair, pair) pointers = snd front ;
-		int stateValue = snd stateTree ;
-		
-		bool _ = call findTheBestMove(pointers, stateValue, move) ;		
-		
-		println "AI is cleaning up its memory..." ;
-		# Update the state tree by using the new move.
-		snd aiData = call deleteAllOtherChildren(pointers, move[0], move[1]) ;
-	
-		_ = call deleteThisStateOnly(stateTree) ;
-		return true
-	end
-	
-	# Given the pointers to all next states, pick the first one with the given stateValue and store the move in the the given array.
-	# Return true. 
-	bool findTheBestMove(pair(pair, pair) pointers, int stateValue, int[] move) is
-
-		# We have a hack by changing the state value to 90 if the next state is 100. 
-		# So if we have a state value of 90, look for the one with 100 first.
-		# If found, use it. Otherwise, look for the one with 90.
-		if stateValue == 90 then
-			bool found = call findMoveWithGivenValue(pointers, 100, move) ;
-			if found then
-				return true
-			else
-				skip
-			fi
-		else
-			skip
-		fi ;
-		
-		# Normal case. Or when cannot find the child with 100.
-		bool found = call findMoveWithGivenValue(pointers, stateValue, move) ;
-		if found then
-			return true
-		else
-			# Should not happen. Cannot find such move.
-			println "Internal Error: cannot find the next move for the AI" ;
-			exit -1
-		fi
-		
-	end
-
-	# Given the pointers to all next states, pick the first one with the given stateValue and store the move in the the given array.
-	# Return true in this case. Otherwise, the move array is untouched and return false. 
-	bool findMoveWithGivenValue(pair(pair, pair) pointers, int stateValue, int[] move) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ; 
-		pair(pair, pair) row3 = snd pointers ;
-		
-		bool find = call findMoveWithGivenValueRow(row1, stateValue, move) ;
-		if find then
-			move[0] = 1
-		else
-			find = call findMoveWithGivenValueRow(row2, stateValue, move) ;
-			if find then
-				move[0] = 2
-			else
-				find = call findMoveWithGivenValueRow(row3, stateValue, move) ;
-				if find then
-					move[0] = 3
-				else
-					# Not found, return false.
-					return false
-				fi
-			fi
-		fi ;
-		return true
-	end
-	
-	# Given a row of pointers, pick the first one with the given stateValue and store in move[1], return true if such child state is found. Otherwise, return false and move[1] is untouched.
-	bool findMoveWithGivenValueRow(pair(pair, pair) rowPointers, int stateValue, int[] move) is
-		
-		pair(pair, pair) front = fst rowPointers ;
-		
-		pair(pair, int) cell1 = fst front ;
-		pair(pair, int) cell2 = snd front ;
-		pair(pair, int) cell3 = snd rowPointers ;
-		
-		bool find = call hasGivenStateValue(cell1, stateValue) ;
-		if find then
-			move[1] = 1
-		else
-			find = call hasGivenStateValue(cell2, stateValue) ;
-			if find then
-				move[1] = 2 
-			else 
-				find = call hasGivenStateValue(cell3, stateValue) ;
-				if find then
-					move[1] = 3
-				else 
-					return false
-				fi
-			fi
-		fi ;
-		return true
-	end
-	
-	# Given a state, an a state value. Returns true iff the state has the given state value.
-	bool hasGivenStateValue(pair(pair, int) state, int stateValue) is
-		if state == null then
-			return false
-		else
-			int actual = snd state ;
-			return actual == stateValue
-		fi
-	end
-	
-	# Notify a move made by a human player to the AI. Return true.
-	bool notifyMoveAI(pair(pair, pair) board, char currentTurn, char playerSymbol, pair(pair, pair) aiData, int moveRow, int moveColumn) is
-		
-		#pair(char, pair) info = fst aiData ; #unused
-		pair(pair, int) stateTree = snd aiData ;
-		
-		pair(pair, pair) front = fst stateTree ;
-		
-		#pair(pair, pair) board = fst front ; #unused
-		pair(pair, pair) pointers = snd front ;
-		
-		println "AI is cleaning up its memory..." ;
-		
-		# Set new state tree, remove all other children created by making other moves.
-		snd aiData = call deleteAllOtherChildren(pointers, moveRow, moveColumn) ;
-		bool _ = call deleteThisStateOnly(stateTree) ;
-		return true
-	end
-	
-	# Delete all decendent states apart from those made by moving a given move. Return the child state of that given move.
-	pair(pair, int) deleteAllOtherChildren(pair(pair, pair) pointers, int moveRow, int moveColumn) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ;
-		pair(pair, pair) row3 = snd pointers ;
-
-		# Find which row to keep or which rows to delete.
-		pair(pair, pair) toKeepRow = null;
-		pair(pair, pair) toDeleteRow1 = null;
-		pair(pair, pair) toDeleteRow2 = null;
-		
-		if moveRow == 1 then
-			toKeepRow = row1 ; 
-			toDeleteRow1 = row2 ; 
-			toDeleteRow2 = row3
-		else 
-			toDeleteRow1 = row1 ;
-			if moveRow == 2 then
-				toKeepRow = row2 ; 
-				toDeleteRow2 = row3
-			else
-				# moveRow == 3
-				toKeepRow = row3 ; 
-				toDeleteRow2 = row2
-			fi
-		fi ;
-		
-		pair(pair, int) out = call deleteAllOtherChildrenRow(toKeepRow, moveColumn) ;
-		bool _ = call deleteChildrenStateRecursivelyRow(toDeleteRow1) ;
-		_ = call deleteChildrenStateRecursivelyRow(toDeleteRow2) ;
-		
-		return out
-	end
-	
-	pair(pair, int) deleteAllOtherChildrenRow(pair(pair, pair) rowPointers, int moveColumn) is
-		pair(pair, pair) front = fst rowPointers ;
-		
-		pair(pair, int) cell1 = fst front ;
-		pair(pair, int) cell2 = snd front ;
-		pair(pair, int) cell3 = snd rowPointers ;
-
-		# Find which cell to keep or which cells to delete.
-		pair(pair, int) toKeepCell = null;
-		pair(pair, int) toDeleteCell1 = null;
-		pair(pair, int) toDeleteCell2 = null;
-		
-		if moveColumn == 1 then
-			toKeepCell = cell1 ; 
-			toDeleteCell1 = cell2 ; 
-			toDeleteCell2 = cell3
-		else 
-			toDeleteCell1 = cell1 ;
-			if moveColumn == 2 then
-				toKeepCell = cell2 ; 
-				toDeleteCell2 = cell3
-			else
-				# moveColumn == 3
-				toKeepCell = cell3 ; 
-				toDeleteCell2 = cell2
-			fi
-		fi ;
-		
-		bool _ = call deleteStateTreeRecursively(toDeleteCell1) ;
-		_ = call deleteStateTreeRecursively(toDeleteCell2) ;
-		
-		return toKeepCell
-	end
-	
-	# Deallocate a given state and all its decendents.
-	bool deleteStateTreeRecursively(pair(pair, int) stateTree) is
-		if stateTree == null then
-			return true 
-		else
-			pair(pair, pair) front = fst stateTree ;
-			
-			pair(pair, pair) board = fst front ;
-			pair(pair, pair) pointers = snd front ;
-			
-			bool _ = call deleteChildrenStateRecursively(pointers) ;
-			_ = call deleteThisStateOnly(stateTree) ;
-			return true
-		fi		
-	end
-	
-	# Given a state tree, deallocate the board, the pointers and the other pairs of this state only. The childrens are preserved. Return true.
-	bool deleteThisStateOnly(pair(pair, int) stateTree) is	
-		pair(pair, pair) front = fst stateTree ;
-		
-		pair(pair, pair) board = fst front ;
-		pair(pair, pair) pointers = snd front ;
-
-		bool _ = call freeBoard(board) ;
-		_ = call freePointers(pointers) ;
-		free front ;
-		free stateTree ;
-		return true
-	end
-	
-	bool freePointers(pair(pair, pair) pointers) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ;
-		pair(pair, pair) row3 = snd pointers ;
-		
-		bool _ = call freePointersRow(row1) ;
-		_ = call freePointersRow(row2) ;
-		_ = call freePointersRow(row3) ;
-		
-		free front ;
-		free pointers ;
-		return true
-	end
-	
-	bool freePointersRow(pair(pair, pair) rowPointers) is
-		pair(pair, pair) front = fst rowPointers ;
-		
-		free front ;
-		free rowPointers ;
-		return true
-	end
-	
-	# Deallocate all decendent states.
-	bool deleteChildrenStateRecursively(pair(pair, pair) pointers) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ;
-		pair(pair, pair) row3 = snd pointers ;
-		
-		bool _ = call deleteChildrenStateRecursivelyRow(row1) ;
-		_ = call deleteChildrenStateRecursivelyRow(row2) ;
-		_ = call deleteChildrenStateRecursivelyRow(row3) ;
-		
-		return true
-	end
-	
-	# Deallocate all decendent states given a row of pointers.
-	bool deleteChildrenStateRecursivelyRow(pair(pair, pair) rowPointers) is
-		pair(pair, pair) front = fst rowPointers ;
-		pair(pair, int) cell1 = fst front ;
-		pair(pair, int) cell2 = snd front ;
-		pair(pair, int) cell3 = snd rowPointers ;
-		
-		bool _ = call deleteStateTreeRecursively(cell1) ;
-		_ = call deleteStateTreeRecursively(cell2) ;
-		_ = call deleteStateTreeRecursively(cell3) ;
-		
-		return true
-	end
-	
-	############################### Game Engine Functions ##################################
-	
-	# Ask for a move from the current player. The valid move is stored in the move array. Return true.
-	bool askForAMove(pair(pair, pair) board, char currentTurn, char playerSymbol, pair(pair, pair) aiData, int[] move) is
-		if currentTurn == playerSymbol then
-			bool _ = call askForAMoveHuman(board, move)
-		else 
-			bool _ = call askForAMoveAI(board, currentTurn, playerSymbol, aiData, move)
-		fi ;
-		return true
-	end
-	
-	# Place the given move of the currentTurn in the board. Return true.
-	bool placeMove(pair(pair, pair) board, char currentTurn, int moveRow, int moveColumn) is
-		
-		# Find the target row.
-		pair(pair, char) targetRow = null ;
-		if moveRow <= 2 then
-			pair(pair, pair) front = fst board ;
-			if moveRow == 1 then
-				targetRow = fst front
-			else
-				# moveRow == 2
-				targetRow = snd front
-			fi
-		else
-			# moveRow == 3
-			targetRow = snd board
-		fi ;
-		
-		# Set the target cell
-		if moveColumn <= 2 then
-			pair(char, char) front = fst targetRow ;
-			if moveColumn == 1 then
-				fst front = currentTurn
-			else
-				# moveColumn == 2
-				snd front = currentTurn
-			fi
-		else
-			# moveColumn == 3
-			snd targetRow = currentTurn
-		fi ;
-		return true
-		
-	end
-	
-	# Notify the opponent about a move of another party. Return true.
-	bool notifyMove(pair(pair, pair) board, char currentTurn, char playerSymbol, pair(pair, pair) aiData, int moveRow, int moveColumn) is
-		if currentTurn == playerSymbol then
-			bool _ = call notifyMoveAI(board, currentTurn, playerSymbol, aiData, moveRow, moveColumn)
-		else 
-			bool _ = call notifyMoveHuman(board, currentTurn, playerSymbol, moveRow, moveColumn)
-		fi ;
-		return true
-	end
-	
-	# Given either 'x' or 'o', returns another one.
-	char oppositeSymbol(char symbol) is
-		if symbol == 'x' then
-			return 'o' 
-		else
-			if symbol == 'o' then
-				return 'x'
-			else
-				# Should not happen!
-				println "Internal Error: symbol given is neither \'x\' or \'o\'" ;
-				exit -1 
-			fi 
-		fi
-	end
-	
-	# row = 1, 2 or 3
-	# column = 1, 2 or 3
-	char symbolAt(pair(pair, pair) board, int row, int column) is
-	
-		# Find the target row.
-		pair(pair, char) targetRow = null ;
-		if row <= 2 then
-			pair(pair, pair) front = fst board ;
-			if row == 1 then
-				targetRow = fst front
-			else
-				# row == 2
-				targetRow = snd front
-			fi
-		else
-			# row == 3
-			targetRow = snd board
-		fi ;
-		
-		# Now find the target cell.
-		char targetCell = '\0' ;
-		if column <= 2 then
-			pair(char, char) front = fst targetRow ;
-			if column == 1 then 
-				targetCell = fst front 
-			else
-				# column == 2
-				targetCell = snd front
-			fi
-		else
-			# column == 3
-			targetCell = snd targetRow
-		fi ;
-			
-		return targetCell	
-	end
-	
-	# Return true if there is at least one empty cell where the next player can place a move. Otherwise, return false (game ends).
-	bool containEmptyCell(pair(pair, pair) board) is
-		pair(pair, pair) front = fst board ;
-		
-		pair(pair, char) row1 = fst front ;
-		pair(pair, char) row2 = snd front ;
-		pair(pair, char) row3 = snd board ;
-		
-		bool row1ContainEmpty = call containEmptyCellRow(row1) ;
-		bool row2ContainEmpty = call containEmptyCellRow(row2) ;
-		bool row3ContainEmpty = call containEmptyCellRow(row3) ;
-		
-		return row1ContainEmpty || row2ContainEmpty || row3ContainEmpty
-	end
-	
-	bool containEmptyCellRow(pair(pair, char) row) is
-		pair(char, char) front = fst row ;
-		
-		char cell1 = fst front ;
-		char cell2 = snd front ;
-		char cell3 = snd row ;
-		
-		return cell1 == '\0' || cell2 == '\0' || cell3 == '\0'
-	end
-	
-	# Find if the candidate symbol ('x' or 'o') has won the game.
-	# Returns true if and only if it has won. 
-	bool hasWon(pair(pair, pair) board, char candidate) is
-		char c11 = call symbolAt(board, 1, 1) ;
-		char c12 = call symbolAt(board, 1, 2) ;
-		char c13 = call symbolAt(board, 1, 3) ;
-		char c21 = call symbolAt(board, 2, 1) ;
-		char c22 = call symbolAt(board, 2, 2) ;
-		char c23 = call symbolAt(board, 2, 3) ;
-		char c31 = call symbolAt(board, 3, 1) ;
-		char c32 = call symbolAt(board, 3, 2) ;
-		char c33 = call symbolAt(board, 3, 3) ;
-		
-		return 
-			# Row win
-			c11 == candidate && c12 == candidate && c13 == candidate ||
-			c21 == candidate && c22 == candidate && c23 == candidate ||
-			c31 == candidate && c32 == candidate && c33 == candidate ||
-			 
-			# Column win
-			c11 == candidate && c21 == candidate && c31 == candidate ||
-			c12 == candidate && c22 == candidate && c32 == candidate ||
-			c13 == candidate && c23 == candidate && c33 == candidate ||
-			
-			# Diagonal win
-			c11 == candidate && c22 == candidate && c33 == candidate ||
-			c13 == candidate && c22 == candidate && c31 == candidate
-	end
-	
-	# Allocate a new board. 
-	# We use a Pair4Three structure to store pointers to the 3 rows.
-	pair(pair, pair) allocateNewBoard() is
-		pair(pair, char) row1 = call allocateNewRow() ;
-		pair(pair, char) row2 = call allocateNewRow() ;
-		pair(pair, char) row3 = call allocateNewRow() ;
-		
-		pair(pair, pair) front = newpair(row1, row2) ;
-		pair(pair, pair) root = newpair(front, row3) ;
-		return root
-	end
-	
-	# Allocate a row of the board. 
-	# A row is represented by a Pair4Three structure.
-	# The default value in each cell is '\0'.
-	pair(pair, char) allocateNewRow() is
-		pair(char, char) front = newpair('\0', '\0') ;
-		pair(pair, char) root = newpair(front, '\0') ;
-		return root
-	end
-
-	# Free a memory used to store the whole board.
-	# Return true.
-	bool freeBoard(pair(pair, pair) board) is
-		pair(pair, pair) front = fst board ;
-		
-		pair(pair, char) row1 = fst front ;
-		pair(pair, char) row2 = snd front ;
-		pair(pair, char) row3 = snd board ;
-		
-		bool _ = call freeRow(row1) ;
-		_ = call freeRow(row2) ;
-		_ = call freeRow(row3) ;
-		
-		free front ;
-		free board ;
-		return true
-	end
-	
-	# Free the memory used for a row. Return true.
-	bool freeRow(pair(pair, char) row) is
-		pair(char, char) front = fst row ;
-		free front ;
-		free row ;
-		return true
-	end
-	
-	# For debugging purpose.
-	bool printAiData(pair(pair, pair) aiData) is
-		
-		pair(char, pair) info = fst aiData ;
-		pair(pair, int) stateTree = snd aiData ;
-		
-		bool _ = call printStateTreeRecursively(stateTree) ;
-		exit 0
-	end
-	
-	bool printStateTreeRecursively(pair(pair, int) stateTree) is
-		if stateTree == null then
-			return true 
-		else 
-			pair(pair, pair) front = fst stateTree ;
-			
-			pair(pair, pair) board = fst front ;
-			pair(pair, pair) pointers = snd front ;
-			int value = snd stateTree ;
-			
-			# Print the value
-			print 'v' ;
-			print '=' ;
-			println value ;
-			
-			bool _ = call printBoard(board) ;
-			_ = call printChildrenStateTree(pointers) ;
-			
-			println 'p' ;
-			return true
-		fi
-	end
-	
-	bool printChildrenStateTree(pair(pair, pair) pointers) is
-		pair(pair, pair) front = fst pointers ;
-		
-		pair(pair, pair) row1 = fst front ;
-		pair(pair, pair) row2 = snd front ;
-		pair(pair, pair) row3 = snd pointers ;
-		
-		bool _ = call printChildrenStateTreeRow(row1) ;
-		_ = call printChildrenStateTreeRow(row2) ;
-		_ = call printChildrenStateTreeRow(row3) ;
-		return true
-	end
-	
-	bool printChildrenStateTreeRow(pair(pair, pair) rowPointers) is
-		pair(pair, pair) front = fst rowPointers ;
-		
-		pair(pair, int) cell1 = fst front ;
-		pair(pair, int) cell2 = snd front ;
-		pair(pair, int) cell3 = snd rowPointers ;
-		
-		bool _ = call printStateTreeRecursively(cell1) ;
-		_ = call printStateTreeRecursively(cell2) ;
-		_ = call printStateTreeRecursively(cell3) ;
-		
-		return true
-	end
-	
-	############################## Main Function ############################
-	
-	char playerSymbol = call chooseSymbol() ;
-	char aiSymbol = call oppositeSymbol(playerSymbol) ;
-	char currentTurn = 'x' ;
-	
-	pair(pair, pair) board = call allocateNewBoard() ;
-	
-	println "Initialising AI. Please wait, this may take a few minutes." ;
-	pair(pair, pair) aiData = call initAI(aiSymbol) ;
-	
-	int turnCount = 0 ;
-	char winner = '\0' ;
-	
-	bool _ = call printBoard(board) ;
-	
-	while winner == '\0' && turnCount < 9 do
-		int[] move = [0, 0] ;
-		_ = call askForAMove(board, currentTurn, playerSymbol, aiData, move) ;
-		_ = call placeMove(board, currentTurn, move[0], move[1]) ;
-		_ = call notifyMove(board, currentTurn, playerSymbol, aiData, move[0], move[1]) ;
-		_ = call printBoard(board) ;
-		bool won = call hasWon(board, currentTurn) ;
-		if won then
-			winner = currentTurn
-		else 
-			skip
-		fi ;
-		
-		# Progress to the next turn
-		currentTurn = call oppositeSymbol(currentTurn) ;
-		turnCount = turnCount + 1
-	done ;
-	
-	_ = call freeBoard(board) ;
-	_ = call destroyAI(aiData) ;
-	
-	if winner != '\0' then
-		print winner ;
-		println " has won!" 
-	else 
-		println "Stalemate!" 
-	fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 ticTacToe.ast contents are:
@@ -1211,10 +107,10 @@ ticTacToe.ast contents are:
 102	      - chosen
 103	    - RETURN
 104	      - chosen
-105	  - bool printBoard(pair(basePair, basePair) board)
+105	  - bool printBoard( board)
 106	    - DECLARE
 107	      - TYPE
-108	        - pair(basePair, basePair)
+108	        - 
 109	      - LHS
 110	        - front
 111	      - RHS
@@ -1222,7 +118,7 @@ ticTacToe.ast contents are:
 113	          - board
 114	    - DECLARE
 115	      - TYPE
-116	        - pair(basePair, char)
+116	        - char
 117	      - LHS
 118	        - row1
 119	      - RHS
@@ -1230,7 +126,7 @@ ticTacToe.ast contents are:
 121	          - front
 122	    - DECLARE
 123	      - TYPE
-124	        - pair(basePair, char)
+124	        - char
 125	      - LHS
 126	        - row2
 127	      - RHS
@@ -1238,7 +134,7 @@ ticTacToe.ast contents are:
 129	          - front
 130	    - DECLARE
 131	      - TYPE
-132	        - pair(basePair, char)
+132	        - char
 133	      - LHS
 134	        - row3
 135	      - RHS
@@ -1280,10 +176,10 @@ ticTacToe.ast contents are:
 171	      - ""
 172	    - RETURN
 173	      - true
-174	  - bool printRow(pair(basePair, char) row)
+174	  - bool printRow(char row)
 175	    - DECLARE
 176	      - TYPE
-177	        - pair(char, char)
+177	        - charchar
 178	      - LHS
 179	        - front
 180	      - RHS
@@ -1355,7 +251,7 @@ ticTacToe.ast contents are:
 246	          - cell
 247	    - RETURN
 248	      - true
-249	  - bool askForAMoveHuman(pair(basePair, basePair) board, int[] move)
+249	  - bool askForAMoveHuman( board, int[] move)
 250	    - DECLARE
 251	      - TYPE
 252	        - bool
@@ -1427,7 +323,7 @@ ticTacToe.ast contents are:
 318	              - "Your move is invalid. Please try again."
 319	    - RETURN
 320	      - true
-321	  - bool validateMove(pair(basePair, basePair) board, int moveRow, int moveColumn)
+321	  - bool validateMove( board, int moveRow, int moveColumn)
 322	    - IF
 323	      - CONDITION
 324	        - &&
@@ -1463,7 +359,7 @@ ticTacToe.ast contents are:
 354	      - ELSE
 355	        - RETURN
 356	          - false
-357	  - bool notifyMoveHuman(pair(basePair, basePair) board, char currentTurn, char playerSymbol, int moveRow, int moveColumn)
+357	  - bool notifyMoveHuman( board, char currentTurn, char playerSymbol, int moveRow, int moveColumn)
 358	    - PRINT
 359	      - "The AI played at row "
 360	    - PRINT
@@ -1474,10 +370,10 @@ ticTacToe.ast contents are:
 365	      - moveColumn
 366	    - RETURN
 367	      - true
-368	  - pair(basePair, basePair) initAI(char aiSymbol)
+368	  -  initAI(char aiSymbol)
 369	    - DECLARE
 370	      - TYPE
-371	        - pair(char, basePair)
+371	        - char
 372	      - LHS
 373	        - info
 374	      - RHS
@@ -1488,7 +384,7 @@ ticTacToe.ast contents are:
 379	            - null
 380	    - DECLARE
 381	      - TYPE
-382	        - pair(basePair, int)
+382	        - int
 383	      - LHS
 384	        - stateTree
 385	      - RHS
@@ -1506,7 +402,7 @@ ticTacToe.ast contents are:
 397	        - 'x'
 398	    - DECLARE
 399	      - TYPE
-400	        - pair(basePair, basePair)
+400	        - 
 401	      - LHS
 402	        - aiData
 403	      - RHS
@@ -1517,17 +413,17 @@ ticTacToe.ast contents are:
 408	            - stateTree
 409	    - RETURN
 410	      - aiData
-411	  - pair(basePair, int) generateAllPossibleStates(char aiSymbol)
+411	  - int generateAllPossibleStates(char aiSymbol)
 412	    - DECLARE
 413	      - TYPE
-414	        - pair(basePair, basePair)
+414	        - 
 415	      - LHS
 416	        - board
 417	      - RHS
 418	        - allocateNewBoard
 419	    - DECLARE
 420	      - TYPE
-421	        - pair(basePair, int)
+421	        - int
 422	      - LHS
 423	        - rootState
 424	      - RHS
@@ -1542,17 +438,17 @@ ticTacToe.ast contents are:
 433	        - 'x'
 434	    - RETURN
 435	      - rootState
-436	  - pair(basePair, int) convertFromBoardToState(pair(basePair, basePair) board)
+436	  - int convertFromBoardToState( board)
 437	    - DECLARE
 438	      - TYPE
-439	        - pair(basePair, basePair)
+439	        - 
 440	      - LHS
 441	        - pointers
 442	      - RHS
 443	        - generateEmptyPointerBoard
 444	    - DECLARE
 445	      - TYPE
-446	        - pair(basePair, basePair)
+446	        - 
 447	      - LHS
 448	        - front
 449	      - RHS
@@ -1563,7 +459,7 @@ ticTacToe.ast contents are:
 454	            - pointers
 455	    - DECLARE
 456	      - TYPE
-457	        - pair(basePair, int)
+457	        - int
 458	      - LHS
 459	        - state
 460	      - RHS
@@ -1574,31 +470,31 @@ ticTacToe.ast contents are:
 465	            - 0
 466	    - RETURN
 467	      - state
-468	  - pair(basePair, basePair) generateEmptyPointerBoard()
+468	  -  generateEmptyPointerBoard()
 469	    - DECLARE
 470	      - TYPE
-471	        - pair(basePair, basePair)
+471	        - 
 472	      - LHS
 473	        - row1
 474	      - RHS
 475	        - generateEmptyPointerRow
 476	    - DECLARE
 477	      - TYPE
-478	        - pair(basePair, basePair)
+478	        - 
 479	      - LHS
 480	        - row2
 481	      - RHS
 482	        - generateEmptyPointerRow
 483	    - DECLARE
 484	      - TYPE
-485	        - pair(basePair, basePair)
+485	        - 
 486	      - LHS
 487	        - row3
 488	      - RHS
 489	        - generateEmptyPointerRow
 490	    - DECLARE
 491	      - TYPE
-492	        - pair(basePair, basePair)
+492	        - 
 493	      - LHS
 494	        - front
 495	      - RHS
@@ -1609,7 +505,7 @@ ticTacToe.ast contents are:
 500	            - row2
 501	    - DECLARE
 502	      - TYPE
-503	        - pair(basePair, basePair)
+503	        - 
 504	      - LHS
 505	        - root
 506	      - RHS
@@ -1620,10 +516,10 @@ ticTacToe.ast contents are:
 511	            - row3
 512	    - RETURN
 513	      - root
-514	  - pair(basePair, basePair) generateEmptyPointerRow()
+514	  -  generateEmptyPointerRow()
 515	    - DECLARE
 516	      - TYPE
-517	        - pair(basePair, basePair)
+517	        - 
 518	      - LHS
 519	        - front
 520	      - RHS
@@ -1634,7 +530,7 @@ ticTacToe.ast contents are:
 525	            - null
 526	    - DECLARE
 527	      - TYPE
-528	        - pair(basePair, basePair)
+528	        - 
 529	      - LHS
 530	        - root
 531	      - RHS
@@ -1645,10 +541,10 @@ ticTacToe.ast contents are:
 536	            - null
 537	    - RETURN
 538	      - root
-539	  - pair(basePair, int) generateNextStates(pair(basePair, int) state, char currentPlayer)
+539	  - int generateNextStates(int state, char currentPlayer)
 540	    - DECLARE
 541	      - TYPE
-542	        - pair(basePair, basePair)
+542	        - 
 543	      - LHS
 544	        - front
 545	      - RHS
@@ -1656,7 +552,7 @@ ticTacToe.ast contents are:
 547	          - state
 548	    - DECLARE
 549	      - TYPE
-550	        - pair(basePair, basePair)
+550	        - 
 551	      - LHS
 552	        - board
 553	      - RHS
@@ -1664,7 +560,7 @@ ticTacToe.ast contents are:
 555	          - front
 556	    - DECLARE
 557	      - TYPE
-558	        - pair(basePair, basePair)
+558	        - 
 559	      - LHS
 560	        - pointers
 561	      - RHS
@@ -1706,10 +602,10 @@ ticTacToe.ast contents are:
 597	            - currentPlayer
 598	        - RETURN
 599	          - state
-600	  - bool generateNextStatesBoard(pair(basePair, basePair) board, pair(basePair, basePair) pointers, char currentPlayer)
+600	  - bool generateNextStatesBoard( board,  pointers, char currentPlayer)
 601	    - DECLARE
 602	      - TYPE
-603	        - pair(basePair, basePair)
+603	        - 
 604	      - LHS
 605	        - front
 606	      - RHS
@@ -1717,7 +613,7 @@ ticTacToe.ast contents are:
 608	          - board
 609	    - DECLARE
 610	      - TYPE
-611	        - pair(basePair, char)
+611	        - char
 612	      - LHS
 613	        - row1
 614	      - RHS
@@ -1725,7 +621,7 @@ ticTacToe.ast contents are:
 616	          - front
 617	    - DECLARE
 618	      - TYPE
-619	        - pair(basePair, char)
+619	        - char
 620	      - LHS
 621	        - row2
 622	      - RHS
@@ -1733,7 +629,7 @@ ticTacToe.ast contents are:
 624	          - front
 625	    - DECLARE
 626	      - TYPE
-627	        - pair(basePair, char)
+627	        - char
 628	      - LHS
 629	        - row3
 630	      - RHS
@@ -1741,7 +637,7 @@ ticTacToe.ast contents are:
 632	          - board
 633	    - DECLARE
 634	      - TYPE
-635	        - pair(basePair, basePair)
+635	        - 
 636	      - LHS
 637	        - frontP
 638	      - RHS
@@ -1749,7 +645,7 @@ ticTacToe.ast contents are:
 640	          - pointers
 641	    - DECLARE
 642	      - TYPE
-643	        - pair(basePair, basePair)
+643	        - 
 644	      - LHS
 645	        - row1P
 646	      - RHS
@@ -1757,7 +653,7 @@ ticTacToe.ast contents are:
 648	          - frontP
 649	    - DECLARE
 650	      - TYPE
-651	        - pair(basePair, basePair)
+651	        - 
 652	      - LHS
 653	        - row2P
 654	      - RHS
@@ -1765,7 +661,7 @@ ticTacToe.ast contents are:
 656	          - frontP
 657	    - DECLARE
 658	      - TYPE
-659	        - pair(basePair, basePair)
+659	        - 
 660	      - LHS
 661	        - row3P
 662	      - RHS
@@ -1805,10 +701,10 @@ ticTacToe.ast contents are:
 696	        - 3
 697	    - RETURN
 698	      - true
-699	  - bool generateNextStatesRow(pair(basePair, basePair) board, pair(basePair, char) row, pair(basePair, basePair) pointerRow, char currentPlayer, int rowNumber)
+699	  - bool generateNextStatesRow( board, char row,  pointerRow, char currentPlayer, int rowNumber)
 700	    - DECLARE
 701	      - TYPE
-702	        - pair(char, char)
+702	        - charchar
 703	      - LHS
 704	        - front
 705	      - RHS
@@ -1840,7 +736,7 @@ ticTacToe.ast contents are:
 731	          - row
 732	    - DECLARE
 733	      - TYPE
-734	        - pair(basePair, basePair)
+734	        - 
 735	      - LHS
 736	        - frontP
 737	      - RHS
@@ -1881,7 +777,7 @@ ticTacToe.ast contents are:
 772	        - 3
 773	    - RETURN
 774	      - true
-775	  - pair(basePair, int) generateNextStatesCell(pair(basePair, basePair) board, char cell, char currentPlayer, int rowNumber, int columnNumber)
+775	  - int generateNextStatesCell( board, char cell, char currentPlayer, int rowNumber, int columnNumber)
 776	    - IF
 777	      - CONDITION
 778	        - ==
@@ -1890,7 +786,7 @@ ticTacToe.ast contents are:
 781	      - THEN
 782	        - DECLARE
 783	          - TYPE
-784	            - pair(basePair, basePair)
+784	            - 
 785	          - LHS
 786	            - board2
 787	          - RHS
@@ -1909,7 +805,7 @@ ticTacToe.ast contents are:
 800	            - columnNumber
 801	        - DECLARE
 802	          - TYPE
-803	            - pair(basePair, int)
+803	            - int
 804	          - LHS
 805	            - state
 806	          - RHS
@@ -1935,10 +831,10 @@ ticTacToe.ast contents are:
 826	      - ELSE
 827	        - RETURN
 828	          - null
-829	  - pair(basePair, basePair) cloneBoard(pair(basePair, basePair) board)
+829	  -  cloneBoard( board)
 830	    - DECLARE
 831	      - TYPE
-832	        - pair(basePair, basePair)
+832	        - 
 833	      - LHS
 834	        - board2
 835	      - RHS
@@ -1954,10 +850,10 @@ ticTacToe.ast contents are:
 845	        - board2
 846	    - RETURN
 847	      - board2
-848	  - bool copyBoard(pair(basePair, basePair) from, pair(basePair, basePair) to)
+848	  - bool copyBoard( from,  to)
 849	    - DECLARE
 850	      - TYPE
-851	        - pair(basePair, basePair)
+851	        - 
 852	      - LHS
 853	        - frontFrom
 854	      - RHS
@@ -1965,7 +861,7 @@ ticTacToe.ast contents are:
 856	          - from
 857	    - DECLARE
 858	      - TYPE
-859	        - pair(basePair, char)
+859	        - char
 860	      - LHS
 861	        - row1From
 862	      - RHS
@@ -1973,7 +869,7 @@ ticTacToe.ast contents are:
 864	          - frontFrom
 865	    - DECLARE
 866	      - TYPE
-867	        - pair(basePair, char)
+867	        - char
 868	      - LHS
 869	        - row2From
 870	      - RHS
@@ -1981,7 +877,7 @@ ticTacToe.ast contents are:
 872	          - frontFrom
 873	    - DECLARE
 874	      - TYPE
-875	        - pair(basePair, char)
+875	        - char
 876	      - LHS
 877	        - row3From
 878	      - RHS
@@ -1989,7 +885,7 @@ ticTacToe.ast contents are:
 880	          - from
 881	    - DECLARE
 882	      - TYPE
-883	        - pair(basePair, basePair)
+883	        - 
 884	      - LHS
 885	        - frontTo
 886	      - RHS
@@ -1997,7 +893,7 @@ ticTacToe.ast contents are:
 888	          - to
 889	    - DECLARE
 890	      - TYPE
-891	        - pair(basePair, char)
+891	        - char
 892	      - LHS
 893	        - row1To
 894	      - RHS
@@ -2005,7 +901,7 @@ ticTacToe.ast contents are:
 896	          - frontTo
 897	    - DECLARE
 898	      - TYPE
-899	        - pair(basePair, char)
+899	        - char
 900	      - LHS
 901	        - row2To
 902	      - RHS
@@ -2013,7 +909,7 @@ ticTacToe.ast contents are:
 904	          - frontTo
 905	    - DECLARE
 906	      - TYPE
-907	        - pair(basePair, char)
+907	        - char
 908	      - LHS
 909	        - row3To
 910	      - RHS
@@ -2044,10 +940,10 @@ ticTacToe.ast contents are:
 935	        - row3To
 936	    - RETURN
 937	      - true
-938	  - bool copyRow(pair(basePair, char) from, pair(basePair, char) to)
+938	  - bool copyRow(char from, char to)
 939	    - DECLARE
 940	      - TYPE
-941	        - pair(char, char)
+941	        - charchar
 942	      - LHS
 943	        - frontFrom
 944	      - RHS
@@ -2055,7 +951,7 @@ ticTacToe.ast contents are:
 946	          - from
 947	    - DECLARE
 948	      - TYPE
-949	        - pair(char, char)
+949	        - charchar
 950	      - LHS
 951	        - frontTo
 952	      - RHS
@@ -2084,7 +980,7 @@ ticTacToe.ast contents are:
 975	          - from
 976	    - RETURN
 977	      - true
-978	  - int setValuesForAllStates(pair(basePair, int) state, char aiSymbol, char currentPlayer)
+978	  - int setValuesForAllStates(int state, char aiSymbol, char currentPlayer)
 979	    - DECLARE
 980	      - TYPE
 981	        - int
@@ -2118,7 +1014,7 @@ ticTacToe.ast contents are:
 1009	      - ELSE
 1010	        - DECLARE
 1011	          - TYPE
-1012	            - pair(basePair, basePair)
+1012	            - 
 1013	          - LHS
 1014	            - front
 1015	          - RHS
@@ -2126,7 +1022,7 @@ ticTacToe.ast contents are:
 1017	              - state
 1018	        - DECLARE
 1019	          - TYPE
-1020	            - pair(basePair, basePair)
+1020	            - 
 1021	          - LHS
 1022	            - board
 1023	          - RHS
@@ -2134,7 +1030,7 @@ ticTacToe.ast contents are:
 1025	              - front
 1026	        - DECLARE
 1027	          - TYPE
-1028	            - pair(basePair, basePair)
+1028	            - 
 1029	          - LHS
 1030	            - pointers
 1031	          - RHS
@@ -2226,10 +1122,10 @@ ticTacToe.ast contents are:
 1117	            - outValue
 1118	    - RETURN
 1119	      - outValue
-1120	  - int calculateValuesFromNextStates(pair(basePair, basePair) pointers, char aiSymbol, char playerOfNextState)
+1120	  - int calculateValuesFromNextStates( pointers, char aiSymbol, char playerOfNextState)
 1121	    - DECLARE
 1122	      - TYPE
-1123	        - pair(basePair, basePair)
+1123	        - 
 1124	      - LHS
 1125	        - front
 1126	      - RHS
@@ -2237,7 +1133,7 @@ ticTacToe.ast contents are:
 1128	          - pointers
 1129	    - DECLARE
 1130	      - TYPE
-1131	        - pair(basePair, basePair)
+1131	        - 
 1132	      - LHS
 1133	        - row1
 1134	      - RHS
@@ -2245,7 +1141,7 @@ ticTacToe.ast contents are:
 1136	          - front
 1137	    - DECLARE
 1138	      - TYPE
-1139	        - pair(basePair, basePair)
+1139	        - 
 1140	      - LHS
 1141	        - row2
 1142	      - RHS
@@ -2253,7 +1149,7 @@ ticTacToe.ast contents are:
 1144	          - front
 1145	    - DECLARE
 1146	      - TYPE
-1147	        - pair(basePair, basePair)
+1147	        - 
 1148	      - LHS
 1149	        - row3
 1150	      - RHS
@@ -2303,10 +1199,10 @@ ticTacToe.ast contents are:
 1194	        - value3
 1195	    - RETURN
 1196	      - out
-1197	  - int calculateValuesFromNextStatesRow(pair(basePair, basePair) rowPointers, char aiSymbol, char playerOfNextState)
+1197	  - int calculateValuesFromNextStatesRow( rowPointers, char aiSymbol, char playerOfNextState)
 1198	    - DECLARE
 1199	      - TYPE
-1200	        - pair(basePair, basePair)
+1200	        - 
 1201	      - LHS
 1202	        - front
 1203	      - RHS
@@ -2314,7 +1210,7 @@ ticTacToe.ast contents are:
 1205	          - rowPointers
 1206	    - DECLARE
 1207	      - TYPE
-1208	        - pair(basePair, int)
+1208	        - int
 1209	      - LHS
 1210	        - state1
 1211	      - RHS
@@ -2322,7 +1218,7 @@ ticTacToe.ast contents are:
 1213	          - front
 1214	    - DECLARE
 1215	      - TYPE
-1216	        - pair(basePair, int)
+1216	        - int
 1217	      - LHS
 1218	        - state2
 1219	      - RHS
@@ -2330,7 +1226,7 @@ ticTacToe.ast contents are:
 1221	          - front
 1222	    - DECLARE
 1223	      - TYPE
-1224	        - pair(basePair, int)
+1224	        - int
 1225	      - LHS
 1226	        - state3
 1227	      - RHS
@@ -2473,10 +1369,10 @@ ticTacToe.ast contents are:
 1364	          - ELSE
 1365	            - RETURN
 1366	              - c
-1367	  - bool destroyAI(pair(basePair, basePair) aiData)
+1367	  - bool destroyAI( aiData)
 1368	    - DECLARE
 1369	      - TYPE
-1370	        - pair(char, basePair)
+1370	        - char
 1371	      - LHS
 1372	        - info
 1373	      - RHS
@@ -2484,7 +1380,7 @@ ticTacToe.ast contents are:
 1375	          - aiData
 1376	    - DECLARE
 1377	      - TYPE
-1378	        - pair(basePair, int)
+1378	        - int
 1379	      - LHS
 1380	        - stateTree
 1381	      - RHS
@@ -2504,10 +1400,10 @@ ticTacToe.ast contents are:
 1395	      - aiData
 1396	    - RETURN
 1397	      - true
-1398	  - bool askForAMoveAI(pair(basePair, basePair) board, char currentTurn, char playerSymbol, pair(basePair, basePair) aiData, int[] move)
+1398	  - bool askForAMoveAI( board, char currentTurn, char playerSymbol,  aiData, int[] move)
 1399	    - DECLARE
 1400	      - TYPE
-1401	        - pair(char, basePair)
+1401	        - char
 1402	      - LHS
 1403	        - info
 1404	      - RHS
@@ -2515,7 +1411,7 @@ ticTacToe.ast contents are:
 1406	          - aiData
 1407	    - DECLARE
 1408	      - TYPE
-1409	        - pair(basePair, int)
+1409	        - int
 1410	      - LHS
 1411	        - stateTree
 1412	      - RHS
@@ -2523,7 +1419,7 @@ ticTacToe.ast contents are:
 1414	          - aiData
 1415	    - DECLARE
 1416	      - TYPE
-1417	        - pair(basePair, basePair)
+1417	        - 
 1418	      - LHS
 1419	        - front
 1420	      - RHS
@@ -2531,7 +1427,7 @@ ticTacToe.ast contents are:
 1422	          - stateTree
 1423	    - DECLARE
 1424	      - TYPE
-1425	        - pair(basePair, basePair)
+1425	        - 
 1426	      - LHS
 1427	        - pointers
 1428	      - RHS
@@ -2578,7 +1474,7 @@ ticTacToe.ast contents are:
 1469	        - stateTree
 1470	    - RETURN
 1471	      - true
-1472	  - bool findTheBestMove(pair(basePair, basePair) pointers, int stateValue, int[] move)
+1472	  - bool findTheBestMove( pointers, int stateValue, int[] move)
 1473	    - IF
 1474	      - CONDITION
 1475	        - ==
@@ -2626,10 +1522,10 @@ ticTacToe.ast contents are:
 1517	          - "Internal Error: cannot find the next move for the AI"
 1518	        - EXIT
 1519	          - -1
-1520	  - bool findMoveWithGivenValue(pair(basePair, basePair) pointers, int stateValue, int[] move)
+1520	  - bool findMoveWithGivenValue( pointers, int stateValue, int[] move)
 1521	    - DECLARE
 1522	      - TYPE
-1523	        - pair(basePair, basePair)
+1523	        - 
 1524	      - LHS
 1525	        - front
 1526	      - RHS
@@ -2637,7 +1533,7 @@ ticTacToe.ast contents are:
 1528	          - pointers
 1529	    - DECLARE
 1530	      - TYPE
-1531	        - pair(basePair, basePair)
+1531	        - 
 1532	      - LHS
 1533	        - row1
 1534	      - RHS
@@ -2645,7 +1541,7 @@ ticTacToe.ast contents are:
 1536	          - front
 1537	    - DECLARE
 1538	      - TYPE
-1539	        - pair(basePair, basePair)
+1539	        - 
 1540	      - LHS
 1541	        - row2
 1542	      - RHS
@@ -2653,7 +1549,7 @@ ticTacToe.ast contents are:
 1544	          - front
 1545	    - DECLARE
 1546	      - TYPE
-1547	        - pair(basePair, basePair)
+1547	        - 
 1548	      - LHS
 1549	        - row3
 1550	      - RHS
@@ -2725,10 +1621,10 @@ ticTacToe.ast contents are:
 1616	                  - false
 1617	    - RETURN
 1618	      - true
-1619	  - bool findMoveWithGivenValueRow(pair(basePair, basePair) rowPointers, int stateValue, int[] move)
+1619	  - bool findMoveWithGivenValueRow( rowPointers, int stateValue, int[] move)
 1620	    - DECLARE
 1621	      - TYPE
-1622	        - pair(basePair, basePair)
+1622	        - 
 1623	      - LHS
 1624	        - front
 1625	      - RHS
@@ -2736,7 +1632,7 @@ ticTacToe.ast contents are:
 1627	          - rowPointers
 1628	    - DECLARE
 1629	      - TYPE
-1630	        - pair(basePair, int)
+1630	        - int
 1631	      - LHS
 1632	        - cell1
 1633	      - RHS
@@ -2744,7 +1640,7 @@ ticTacToe.ast contents are:
 1635	          - front
 1636	    - DECLARE
 1637	      - TYPE
-1638	        - pair(basePair, int)
+1638	        - int
 1639	      - LHS
 1640	        - cell2
 1641	      - RHS
@@ -2752,7 +1648,7 @@ ticTacToe.ast contents are:
 1643	          - front
 1644	    - DECLARE
 1645	      - TYPE
-1646	        - pair(basePair, int)
+1646	        - int
 1647	      - LHS
 1648	        - cell3
 1649	      - RHS
@@ -2821,7 +1717,7 @@ ticTacToe.ast contents are:
 1712	                  - false
 1713	    - RETURN
 1714	      - true
-1715	  - bool hasGivenStateValue(pair(basePair, int) state, int stateValue)
+1715	  - bool hasGivenStateValue(int state, int stateValue)
 1716	    - IF
 1717	      - CONDITION
 1718	        - ==
@@ -2843,10 +1739,10 @@ ticTacToe.ast contents are:
 1734	          - ==
 1735	            - actual
 1736	            - stateValue
-1737	  - bool notifyMoveAI(pair(basePair, basePair) board, char currentTurn, char playerSymbol, pair(basePair, basePair) aiData, int moveRow, int moveColumn)
+1737	  - bool notifyMoveAI( board, char currentTurn, char playerSymbol,  aiData, int moveRow, int moveColumn)
 1738	    - DECLARE
 1739	      - TYPE
-1740	        - pair(basePair, int)
+1740	        - int
 1741	      - LHS
 1742	        - stateTree
 1743	      - RHS
@@ -2854,7 +1750,7 @@ ticTacToe.ast contents are:
 1745	          - aiData
 1746	    - DECLARE
 1747	      - TYPE
-1748	        - pair(basePair, basePair)
+1748	        - 
 1749	      - LHS
 1750	        - front
 1751	      - RHS
@@ -2862,7 +1758,7 @@ ticTacToe.ast contents are:
 1753	          - stateTree
 1754	    - DECLARE
 1755	      - TYPE
-1756	        - pair(basePair, basePair)
+1756	        - 
 1757	      - LHS
 1758	        - pointers
 1759	      - RHS
@@ -2889,10 +1785,10 @@ ticTacToe.ast contents are:
 1780	        - stateTree
 1781	    - RETURN
 1782	      - true
-1783	  - pair(basePair, int) deleteAllOtherChildren(pair(basePair, basePair) pointers, int moveRow, int moveColumn)
+1783	  - int deleteAllOtherChildren( pointers, int moveRow, int moveColumn)
 1784	    - DECLARE
 1785	      - TYPE
-1786	        - pair(basePair, basePair)
+1786	        - 
 1787	      - LHS
 1788	        - front
 1789	      - RHS
@@ -2900,7 +1796,7 @@ ticTacToe.ast contents are:
 1791	          - pointers
 1792	    - DECLARE
 1793	      - TYPE
-1794	        - pair(basePair, basePair)
+1794	        - 
 1795	      - LHS
 1796	        - row1
 1797	      - RHS
@@ -2908,7 +1804,7 @@ ticTacToe.ast contents are:
 1799	          - front
 1800	    - DECLARE
 1801	      - TYPE
-1802	        - pair(basePair, basePair)
+1802	        - 
 1803	      - LHS
 1804	        - row2
 1805	      - RHS
@@ -2916,7 +1812,7 @@ ticTacToe.ast contents are:
 1807	          - front
 1808	    - DECLARE
 1809	      - TYPE
-1810	        - pair(basePair, basePair)
+1810	        - 
 1811	      - LHS
 1812	        - row3
 1813	      - RHS
@@ -2924,21 +1820,21 @@ ticTacToe.ast contents are:
 1815	          - pointers
 1816	    - DECLARE
 1817	      - TYPE
-1818	        - pair(basePair, basePair)
+1818	        - 
 1819	      - LHS
 1820	        - toKeepRow
 1821	      - RHS
 1822	        - null
 1823	    - DECLARE
 1824	      - TYPE
-1825	        - pair(basePair, basePair)
+1825	        - 
 1826	      - LHS
 1827	        - toDeleteRow1
 1828	      - RHS
 1829	        - null
 1830	    - DECLARE
 1831	      - TYPE
-1832	        - pair(basePair, basePair)
+1832	        - 
 1833	      - LHS
 1834	        - toDeleteRow2
 1835	      - RHS
@@ -2999,7 +1895,7 @@ ticTacToe.ast contents are:
 1890	                - row2
 1891	    - DECLARE
 1892	      - TYPE
-1893	        - pair(basePair, int)
+1893	        - int
 1894	      - LHS
 1895	        - out
 1896	      - RHS
@@ -3022,10 +1918,10 @@ ticTacToe.ast contents are:
 1913	        - toDeleteRow2
 1914	    - RETURN
 1915	      - out
-1916	  - pair(basePair, int) deleteAllOtherChildrenRow(pair(basePair, basePair) rowPointers, int moveColumn)
+1916	  - int deleteAllOtherChildrenRow( rowPointers, int moveColumn)
 1917	    - DECLARE
 1918	      - TYPE
-1919	        - pair(basePair, basePair)
+1919	        - 
 1920	      - LHS
 1921	        - front
 1922	      - RHS
@@ -3033,7 +1929,7 @@ ticTacToe.ast contents are:
 1924	          - rowPointers
 1925	    - DECLARE
 1926	      - TYPE
-1927	        - pair(basePair, int)
+1927	        - int
 1928	      - LHS
 1929	        - cell1
 1930	      - RHS
@@ -3041,7 +1937,7 @@ ticTacToe.ast contents are:
 1932	          - front
 1933	    - DECLARE
 1934	      - TYPE
-1935	        - pair(basePair, int)
+1935	        - int
 1936	      - LHS
 1937	        - cell2
 1938	      - RHS
@@ -3049,7 +1945,7 @@ ticTacToe.ast contents are:
 1940	          - front
 1941	    - DECLARE
 1942	      - TYPE
-1943	        - pair(basePair, int)
+1943	        - int
 1944	      - LHS
 1945	        - cell3
 1946	      - RHS
@@ -3057,21 +1953,21 @@ ticTacToe.ast contents are:
 1948	          - rowPointers
 1949	    - DECLARE
 1950	      - TYPE
-1951	        - pair(basePair, int)
+1951	        - int
 1952	      - LHS
 1953	        - toKeepCell
 1954	      - RHS
 1955	        - null
 1956	    - DECLARE
 1957	      - TYPE
-1958	        - pair(basePair, int)
+1958	        - int
 1959	      - LHS
 1960	        - toDeleteCell1
 1961	      - RHS
 1962	        - null
 1963	    - DECLARE
 1964	      - TYPE
-1965	        - pair(basePair, int)
+1965	        - int
 1966	      - LHS
 1967	        - toDeleteCell2
 1968	      - RHS
@@ -3146,7 +2042,7 @@ ticTacToe.ast contents are:
 2037	        - toDeleteCell2
 2038	    - RETURN
 2039	      - toKeepCell
-2040	  - bool deleteStateTreeRecursively(pair(basePair, int) stateTree)
+2040	  - bool deleteStateTreeRecursively(int stateTree)
 2041	    - IF
 2042	      - CONDITION
 2043	        - ==
@@ -3158,7 +2054,7 @@ ticTacToe.ast contents are:
 2049	      - ELSE
 2050	        - DECLARE
 2051	          - TYPE
-2052	            - pair(basePair, basePair)
+2052	            - 
 2053	          - LHS
 2054	            - front
 2055	          - RHS
@@ -3166,7 +2062,7 @@ ticTacToe.ast contents are:
 2057	              - stateTree
 2058	        - DECLARE
 2059	          - TYPE
-2060	            - pair(basePair, basePair)
+2060	            - 
 2061	          - LHS
 2062	            - board
 2063	          - RHS
@@ -3174,7 +2070,7 @@ ticTacToe.ast contents are:
 2065	              - front
 2066	        - DECLARE
 2067	          - TYPE
-2068	            - pair(basePair, basePair)
+2068	            - 
 2069	          - LHS
 2070	            - pointers
 2071	          - RHS
@@ -3196,10 +2092,10 @@ ticTacToe.ast contents are:
 2087	            - stateTree
 2088	        - RETURN
 2089	          - true
-2090	  - bool deleteThisStateOnly(pair(basePair, int) stateTree)
+2090	  - bool deleteThisStateOnly(int stateTree)
 2091	    - DECLARE
 2092	      - TYPE
-2093	        - pair(basePair, basePair)
+2093	        - 
 2094	      - LHS
 2095	        - front
 2096	      - RHS
@@ -3207,7 +2103,7 @@ ticTacToe.ast contents are:
 2098	          - stateTree
 2099	    - DECLARE
 2100	      - TYPE
-2101	        - pair(basePair, basePair)
+2101	        - 
 2102	      - LHS
 2103	        - board
 2104	      - RHS
@@ -3215,7 +2111,7 @@ ticTacToe.ast contents are:
 2106	          - front
 2107	    - DECLARE
 2108	      - TYPE
-2109	        - pair(basePair, basePair)
+2109	        - 
 2110	      - LHS
 2111	        - pointers
 2112	      - RHS
@@ -3241,10 +2137,10 @@ ticTacToe.ast contents are:
 2132	      - stateTree
 2133	    - RETURN
 2134	      - true
-2135	  - bool freePointers(pair(basePair, basePair) pointers)
+2135	  - bool freePointers( pointers)
 2136	    - DECLARE
 2137	      - TYPE
-2138	        - pair(basePair, basePair)
+2138	        - 
 2139	      - LHS
 2140	        - front
 2141	      - RHS
@@ -3252,7 +2148,7 @@ ticTacToe.ast contents are:
 2143	          - pointers
 2144	    - DECLARE
 2145	      - TYPE
-2146	        - pair(basePair, basePair)
+2146	        - 
 2147	      - LHS
 2148	        - row1
 2149	      - RHS
@@ -3260,7 +2156,7 @@ ticTacToe.ast contents are:
 2151	          - front
 2152	    - DECLARE
 2153	      - TYPE
-2154	        - pair(basePair, basePair)
+2154	        - 
 2155	      - LHS
 2156	        - row2
 2157	      - RHS
@@ -3268,7 +2164,7 @@ ticTacToe.ast contents are:
 2159	          - front
 2160	    - DECLARE
 2161	      - TYPE
-2162	        - pair(basePair, basePair)
+2162	        - 
 2163	      - LHS
 2164	        - row3
 2165	      - RHS
@@ -3300,10 +2196,10 @@ ticTacToe.ast contents are:
 2191	      - pointers
 2192	    - RETURN
 2193	      - true
-2194	  - bool freePointersRow(pair(basePair, basePair) rowPointers)
+2194	  - bool freePointersRow( rowPointers)
 2195	    - DECLARE
 2196	      - TYPE
-2197	        - pair(basePair, basePair)
+2197	        - 
 2198	      - LHS
 2199	        - front
 2200	      - RHS
@@ -3315,10 +2211,10 @@ ticTacToe.ast contents are:
 2206	      - rowPointers
 2207	    - RETURN
 2208	      - true
-2209	  - bool deleteChildrenStateRecursively(pair(basePair, basePair) pointers)
+2209	  - bool deleteChildrenStateRecursively( pointers)
 2210	    - DECLARE
 2211	      - TYPE
-2212	        - pair(basePair, basePair)
+2212	        - 
 2213	      - LHS
 2214	        - front
 2215	      - RHS
@@ -3326,7 +2222,7 @@ ticTacToe.ast contents are:
 2217	          - pointers
 2218	    - DECLARE
 2219	      - TYPE
-2220	        - pair(basePair, basePair)
+2220	        - 
 2221	      - LHS
 2222	        - row1
 2223	      - RHS
@@ -3334,7 +2230,7 @@ ticTacToe.ast contents are:
 2225	          - front
 2226	    - DECLARE
 2227	      - TYPE
-2228	        - pair(basePair, basePair)
+2228	        - 
 2229	      - LHS
 2230	        - row2
 2231	      - RHS
@@ -3342,7 +2238,7 @@ ticTacToe.ast contents are:
 2233	          - front
 2234	    - DECLARE
 2235	      - TYPE
-2236	        - pair(basePair, basePair)
+2236	        - 
 2237	      - LHS
 2238	        - row3
 2239	      - RHS
@@ -3370,10 +2266,10 @@ ticTacToe.ast contents are:
 2261	        - row3
 2262	    - RETURN
 2263	      - true
-2264	  - bool deleteChildrenStateRecursivelyRow(pair(basePair, basePair) rowPointers)
+2264	  - bool deleteChildrenStateRecursivelyRow( rowPointers)
 2265	    - DECLARE
 2266	      - TYPE
-2267	        - pair(basePair, basePair)
+2267	        - 
 2268	      - LHS
 2269	        - front
 2270	      - RHS
@@ -3381,7 +2277,7 @@ ticTacToe.ast contents are:
 2272	          - rowPointers
 2273	    - DECLARE
 2274	      - TYPE
-2275	        - pair(basePair, int)
+2275	        - int
 2276	      - LHS
 2277	        - cell1
 2278	      - RHS
@@ -3389,7 +2285,7 @@ ticTacToe.ast contents are:
 2280	          - front
 2281	    - DECLARE
 2282	      - TYPE
-2283	        - pair(basePair, int)
+2283	        - int
 2284	      - LHS
 2285	        - cell2
 2286	      - RHS
@@ -3397,7 +2293,7 @@ ticTacToe.ast contents are:
 2288	          - front
 2289	    - DECLARE
 2290	      - TYPE
-2291	        - pair(basePair, int)
+2291	        - int
 2292	      - LHS
 2293	        - cell3
 2294	      - RHS
@@ -3425,7 +2321,7 @@ ticTacToe.ast contents are:
 2316	        - cell3
 2317	    - RETURN
 2318	      - true
-2319	  - bool askForAMove(pair(basePair, basePair) board, char currentTurn, char playerSymbol, pair(basePair, basePair) aiData, int[] move)
+2319	  - bool askForAMove( board, char currentTurn, char playerSymbol,  aiData, int[] move)
 2320	    - IF
 2321	      - CONDITION
 2322	        - ==
@@ -3456,10 +2352,10 @@ ticTacToe.ast contents are:
 2347	            - move
 2348	    - RETURN
 2349	      - true
-2350	  - bool placeMove(pair(basePair, basePair) board, char currentTurn, int moveRow, int moveColumn)
+2350	  - bool placeMove( board, char currentTurn, int moveRow, int moveColumn)
 2351	    - DECLARE
 2352	      - TYPE
-2353	        - pair(basePair, char)
+2353	        - char
 2354	      - LHS
 2355	        - targetRow
 2356	      - RHS
@@ -3472,7 +2368,7 @@ ticTacToe.ast contents are:
 2363	      - THEN
 2364	        - DECLARE
 2365	          - TYPE
-2366	            - pair(basePair, basePair)
+2366	            - 
 2367	          - LHS
 2368	            - front
 2369	          - RHS
@@ -3512,7 +2408,7 @@ ticTacToe.ast contents are:
 2403	      - THEN
 2404	        - DECLARE
 2405	          - TYPE
-2406	            - pair(char, char)
+2406	            - charchar
 2407	          - LHS
 2408	            - front
 2409	          - RHS
@@ -3546,7 +2442,7 @@ ticTacToe.ast contents are:
 2437	            - currentTurn
 2438	    - RETURN
 2439	      - true
-2440	  - bool notifyMove(pair(basePair, basePair) board, char currentTurn, char playerSymbol, pair(basePair, basePair) aiData, int moveRow, int moveColumn)
+2440	  - bool notifyMove( board, char currentTurn, char playerSymbol,  aiData, int moveRow, int moveColumn)
 2441	    - IF
 2442	      - CONDITION
 2443	        - ==
@@ -3604,10 +2500,10 @@ ticTacToe.ast contents are:
 2495	              - "Internal Error: symbol given is neither \'x\' or \'o\'"
 2496	            - EXIT
 2497	              - -1
-2498	  - char symbolAt(pair(basePair, basePair) board, int row, int column)
+2498	  - char symbolAt( board, int row, int column)
 2499	    - DECLARE
 2500	      - TYPE
-2501	        - pair(basePair, char)
+2501	        - char
 2502	      - LHS
 2503	        - targetRow
 2504	      - RHS
@@ -3620,7 +2516,7 @@ ticTacToe.ast contents are:
 2511	      - THEN
 2512	        - DECLARE
 2513	          - TYPE
-2514	            - pair(basePair, basePair)
+2514	            - 
 2515	          - LHS
 2516	            - front
 2517	          - RHS
@@ -3667,7 +2563,7 @@ ticTacToe.ast contents are:
 2558	      - THEN
 2559	        - DECLARE
 2560	          - TYPE
-2561	            - pair(char, char)
+2561	            - charchar
 2562	          - LHS
 2563	            - front
 2564	          - RHS
@@ -3701,10 +2597,10 @@ ticTacToe.ast contents are:
 2592	              - targetRow
 2593	    - RETURN
 2594	      - targetCell
-2595	  - bool containEmptyCell(pair(basePair, basePair) board)
+2595	  - bool containEmptyCell( board)
 2596	    - DECLARE
 2597	      - TYPE
-2598	        - pair(basePair, basePair)
+2598	        - 
 2599	      - LHS
 2600	        - front
 2601	      - RHS
@@ -3712,7 +2608,7 @@ ticTacToe.ast contents are:
 2603	          - board
 2604	    - DECLARE
 2605	      - TYPE
-2606	        - pair(basePair, char)
+2606	        - char
 2607	      - LHS
 2608	        - row1
 2609	      - RHS
@@ -3720,7 +2616,7 @@ ticTacToe.ast contents are:
 2611	          - front
 2612	    - DECLARE
 2613	      - TYPE
-2614	        - pair(basePair, char)
+2614	        - char
 2615	      - LHS
 2616	        - row2
 2617	      - RHS
@@ -3728,7 +2624,7 @@ ticTacToe.ast contents are:
 2619	          - front
 2620	    - DECLARE
 2621	      - TYPE
-2622	        - pair(basePair, char)
+2622	        - char
 2623	      - LHS
 2624	        - row3
 2625	      - RHS
@@ -3764,10 +2660,10 @@ ticTacToe.ast contents are:
 2655	          - row1ContainEmpty
 2656	          - row2ContainEmpty
 2657	        - row3ContainEmpty
-2658	  - bool containEmptyCellRow(pair(basePair, char) row)
+2658	  - bool containEmptyCellRow(char row)
 2659	    - DECLARE
 2660	      - TYPE
-2661	        - pair(char, char)
+2661	        - charchar
 2662	      - LHS
 2663	        - front
 2664	      - RHS
@@ -3809,7 +2705,7 @@ ticTacToe.ast contents are:
 2700	        - ==
 2701	          - cell3
 2702	          - '\0'
-2703	  - bool hasWon(pair(basePair, basePair) board, char candidate)
+2703	  - bool hasWon( board, char candidate)
 2704	    - DECLARE
 2705	      - TYPE
 2706	        - char
@@ -3996,31 +2892,31 @@ ticTacToe.ast contents are:
 2887	          - ==
 2888	            - c31
 2889	            - candidate
-2890	  - pair(basePair, basePair) allocateNewBoard()
+2890	  -  allocateNewBoard()
 2891	    - DECLARE
 2892	      - TYPE
-2893	        - pair(basePair, char)
+2893	        - char
 2894	      - LHS
 2895	        - row1
 2896	      - RHS
 2897	        - allocateNewRow
 2898	    - DECLARE
 2899	      - TYPE
-2900	        - pair(basePair, char)
+2900	        - char
 2901	      - LHS
 2902	        - row2
 2903	      - RHS
 2904	        - allocateNewRow
 2905	    - DECLARE
 2906	      - TYPE
-2907	        - pair(basePair, char)
+2907	        - char
 2908	      - LHS
 2909	        - row3
 2910	      - RHS
 2911	        - allocateNewRow
 2912	    - DECLARE
 2913	      - TYPE
-2914	        - pair(basePair, basePair)
+2914	        - 
 2915	      - LHS
 2916	        - front
 2917	      - RHS
@@ -4031,7 +2927,7 @@ ticTacToe.ast contents are:
 2922	            - row2
 2923	    - DECLARE
 2924	      - TYPE
-2925	        - pair(basePair, basePair)
+2925	        - 
 2926	      - LHS
 2927	        - root
 2928	      - RHS
@@ -4042,10 +2938,10 @@ ticTacToe.ast contents are:
 2933	            - row3
 2934	    - RETURN
 2935	      - root
-2936	  - pair(basePair, char) allocateNewRow()
+2936	  - char allocateNewRow()
 2937	    - DECLARE
 2938	      - TYPE
-2939	        - pair(char, char)
+2939	        - charchar
 2940	      - LHS
 2941	        - front
 2942	      - RHS
@@ -4056,7 +2952,7 @@ ticTacToe.ast contents are:
 2947	            - '\0'
 2948	    - DECLARE
 2949	      - TYPE
-2950	        - pair(basePair, char)
+2950	        - char
 2951	      - LHS
 2952	        - root
 2953	      - RHS
@@ -4067,10 +2963,10 @@ ticTacToe.ast contents are:
 2958	            - '\0'
 2959	    - RETURN
 2960	      - root
-2961	  - bool freeBoard(pair(basePair, basePair) board)
+2961	  - bool freeBoard( board)
 2962	    - DECLARE
 2963	      - TYPE
-2964	        - pair(basePair, basePair)
+2964	        - 
 2965	      - LHS
 2966	        - front
 2967	      - RHS
@@ -4078,7 +2974,7 @@ ticTacToe.ast contents are:
 2969	          - board
 2970	    - DECLARE
 2971	      - TYPE
-2972	        - pair(basePair, char)
+2972	        - char
 2973	      - LHS
 2974	        - row1
 2975	      - RHS
@@ -4086,7 +2982,7 @@ ticTacToe.ast contents are:
 2977	          - front
 2978	    - DECLARE
 2979	      - TYPE
-2980	        - pair(basePair, char)
+2980	        - char
 2981	      - LHS
 2982	        - row2
 2983	      - RHS
@@ -4094,7 +2990,7 @@ ticTacToe.ast contents are:
 2985	          - front
 2986	    - DECLARE
 2987	      - TYPE
-2988	        - pair(basePair, char)
+2988	        - char
 2989	      - LHS
 2990	        - row3
 2991	      - RHS
@@ -4126,10 +3022,10 @@ ticTacToe.ast contents are:
 3017	      - board
 3018	    - RETURN
 3019	      - true
-3020	  - bool freeRow(pair(basePair, char) row)
+3020	  - bool freeRow(char row)
 3021	    - DECLARE
 3022	      - TYPE
-3023	        - pair(char, char)
+3023	        - charchar
 3024	      - LHS
 3025	        - front
 3026	      - RHS
@@ -4141,10 +3037,10 @@ ticTacToe.ast contents are:
 3032	      - row
 3033	    - RETURN
 3034	      - true
-3035	  - bool printAiData(pair(basePair, basePair) aiData)
+3035	  - bool printAiData( aiData)
 3036	    - DECLARE
 3037	      - TYPE
-3038	        - pair(char, basePair)
+3038	        - char
 3039	      - LHS
 3040	        - info
 3041	      - RHS
@@ -4152,7 +3048,7 @@ ticTacToe.ast contents are:
 3043	          - aiData
 3044	    - DECLARE
 3045	      - TYPE
-3046	        - pair(basePair, int)
+3046	        - int
 3047	      - LHS
 3048	        - stateTree
 3049	      - RHS
@@ -4168,7 +3064,7 @@ ticTacToe.ast contents are:
 3059	        - stateTree
 3060	    - EXIT
 3061	      - 0
-3062	  - bool printStateTreeRecursively(pair(basePair, int) stateTree)
+3062	  - bool printStateTreeRecursively(int stateTree)
 3063	    - IF
 3064	      - CONDITION
 3065	        - ==
@@ -4180,7 +3076,7 @@ ticTacToe.ast contents are:
 3071	      - ELSE
 3072	        - DECLARE
 3073	          - TYPE
-3074	            - pair(basePair, basePair)
+3074	            - 
 3075	          - LHS
 3076	            - front
 3077	          - RHS
@@ -4188,7 +3084,7 @@ ticTacToe.ast contents are:
 3079	              - stateTree
 3080	        - DECLARE
 3081	          - TYPE
-3082	            - pair(basePair, basePair)
+3082	            - 
 3083	          - LHS
 3084	            - board
 3085	          - RHS
@@ -4196,7 +3092,7 @@ ticTacToe.ast contents are:
 3087	              - front
 3088	        - DECLARE
 3089	          - TYPE
-3090	            - pair(basePair, basePair)
+3090	            - 
 3091	          - LHS
 3092	            - pointers
 3093	          - RHS
@@ -4234,10 +3130,10 @@ ticTacToe.ast contents are:
 3125	          - 'p'
 3126	        - RETURN
 3127	          - true
-3128	  - bool printChildrenStateTree(pair(basePair, basePair) pointers)
+3128	  - bool printChildrenStateTree( pointers)
 3129	    - DECLARE
 3130	      - TYPE
-3131	        - pair(basePair, basePair)
+3131	        - 
 3132	      - LHS
 3133	        - front
 3134	      - RHS
@@ -4245,7 +3141,7 @@ ticTacToe.ast contents are:
 3136	          - pointers
 3137	    - DECLARE
 3138	      - TYPE
-3139	        - pair(basePair, basePair)
+3139	        - 
 3140	      - LHS
 3141	        - row1
 3142	      - RHS
@@ -4253,7 +3149,7 @@ ticTacToe.ast contents are:
 3144	          - front
 3145	    - DECLARE
 3146	      - TYPE
-3147	        - pair(basePair, basePair)
+3147	        - 
 3148	      - LHS
 3149	        - row2
 3150	      - RHS
@@ -4261,7 +3157,7 @@ ticTacToe.ast contents are:
 3152	          - front
 3153	    - DECLARE
 3154	      - TYPE
-3155	        - pair(basePair, basePair)
+3155	        - 
 3156	      - LHS
 3157	        - row3
 3158	      - RHS
@@ -4289,10 +3185,10 @@ ticTacToe.ast contents are:
 3180	        - row3
 3181	    - RETURN
 3182	      - true
-3183	  - bool printChildrenStateTreeRow(pair(basePair, basePair) rowPointers)
+3183	  - bool printChildrenStateTreeRow( rowPointers)
 3184	    - DECLARE
 3185	      - TYPE
-3186	        - pair(basePair, basePair)
+3186	        - 
 3187	      - LHS
 3188	        - front
 3189	      - RHS
@@ -4300,7 +3196,7 @@ ticTacToe.ast contents are:
 3191	          - rowPointers
 3192	    - DECLARE
 3193	      - TYPE
-3194	        - pair(basePair, int)
+3194	        - int
 3195	      - LHS
 3196	        - cell1
 3197	      - RHS
@@ -4308,7 +3204,7 @@ ticTacToe.ast contents are:
 3199	          - front
 3200	    - DECLARE
 3201	      - TYPE
-3202	        - pair(basePair, int)
+3202	        - int
 3203	      - LHS
 3204	        - cell2
 3205	      - RHS
@@ -4316,7 +3212,7 @@ ticTacToe.ast contents are:
 3207	          - front
 3208	    - DECLARE
 3209	      - TYPE
-3210	        - pair(basePair, int)
+3210	        - int
 3211	      - LHS
 3212	        - cell3
 3213	      - RHS
@@ -4369,7 +3265,7 @@ ticTacToe.ast contents are:
 3260	        - 'x'
 3261	    - DECLARE
 3262	      - TYPE
-3263	        - pair(basePair, basePair)
+3263	        - 
 3264	      - LHS
 3265	        - board
 3266	      - RHS
@@ -4378,7 +3274,7 @@ ticTacToe.ast contents are:
 3269	      - "Initialising AI. Please wait, this may take a few minutes."
 3270	    - DECLARE
 3271	      - TYPE
-3272	        - pair(basePair, basePair)
+3272	        - 
 3273	      - LHS
 3274	        - aiData
 3275	      - RHS
@@ -4529,4 +3425,3 @@ ticTacToe.ast contents are:
 3420	          - "Stalemate!"
 ===========================================================
 -- Finished
-

@@ -1,21 +1,3 @@
--- Test: charAssignment.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple character variable declaration and assignment
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  char c = 'a' ;
-  c = 'Z'
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 charAssignment.ast contents are:
@@ -36,4 +18,3 @@ charAssignment.ast contents are:
 13	        - 'Z'
 ===========================================================
 -- Finished
-

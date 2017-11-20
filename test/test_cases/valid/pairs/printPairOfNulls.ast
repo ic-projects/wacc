@@ -1,28 +1,3 @@
--- Test: printPairOfNulls.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# print a pair of null pairs 
-
-# Output:
-# #addrs# = ((nil),(nil))
-
-# Program:
-
-begin
-  pair(pair, pair) p = newpair(null, null) ;
-  print p ;
-  print " = (" ;
-  pair(pair, pair) q = fst p ;
-  print q ;
-  print "," ;
-  pair(int, bool) r = snd p ;
-  print r ; 
-  println ")"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 printPairOfNulls.ast contents are:
@@ -31,7 +6,7 @@ printPairOfNulls.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(basePair, basePair)
+4	        - 
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -46,7 +21,7 @@ printPairOfNulls.ast contents are:
 16	      - " = ("
 17	    - DECLARE
 18	      - TYPE
-19	        - pair(basePair, basePair)
+19	        - 
 20	      - LHS
 21	        - q
 22	      - RHS
@@ -58,7 +33,7 @@ printPairOfNulls.ast contents are:
 28	      - ","
 29	    - DECLARE
 30	      - TYPE
-31	        - pair(int, bool)
+31	        - intbool
 32	      - LHS
 33	        - r
 34	      - RHS
@@ -70,4 +45,3 @@ printPairOfNulls.ast contents are:
 40	      - ")"
 ===========================================================
 -- Finished
-

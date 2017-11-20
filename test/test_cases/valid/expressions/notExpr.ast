@@ -1,24 +1,3 @@
--- Test: notExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating not
-
-# Output:
-# false
-# true
-
-# Program:
-
-begin
-  bool a = true ;
-  bool b = false ;
-  println !a ;
-  println !b
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 notExpr.ast contents are:
@@ -47,4 +26,3 @@ notExpr.ast contents are:
 21	        - b
 ===========================================================
 -- Finished
-

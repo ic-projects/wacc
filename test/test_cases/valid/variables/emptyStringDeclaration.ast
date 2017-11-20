@@ -1,20 +1,3 @@
--- Test: emptyStringDeclaration.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple empty string variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  string s = ""
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 emptyStringDeclaration.ast contents are:
@@ -30,4 +13,3 @@ emptyStringDeclaration.ast contents are:
 8	        - ""
 ===========================================================
 -- Finished
-

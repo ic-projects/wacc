@@ -80,7 +80,6 @@ function Results($scope, $http, $timeout) {
 
   $scope.percent_tests_success = function() {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
-
       var count = 0;
       for (key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
@@ -98,13 +97,29 @@ function Results($scope, $http, $timeout) {
     return 0;
   }
 
+  $scope.percent_tests_partial_success = function() {
+    if ("test_cases" in $scope.status && "test_results" in $scope.status) {
+      var count = 0;
+      for(key in $scope.status.test_results) {
+        var value = $scope.status.test_results[key];
+        var e = value.frontend.passed;
+        var a = value.backend.passed;
+
+        if ((e || a) && !(e && a)) {
+          count++;
+        }
+      }
+      return 100 * count / $scope.status.test_cases.length;
+    }
+    return 0;
+  }
 
   $scope.percent_tests_failure = function() {
     if ("test_cases" in $scope.status && "test_results" in $scope.status) {
       var count = 0;
       for (key in $scope.status.test_results) {
         var value = $scope.status.test_results[key];
-        var e = value.compile.passed;
+        var e = value.frontend.passed || value.backend.passed;
 
         if (!e) {
           count++;
@@ -139,6 +154,10 @@ function Results($scope, $http, $timeout) {
       if (result) {
         if (result.passed) {
           return "success";
+        }
+
+        if (result.frontend.passed || result.backend.passed) {
+          return "warning";
         }
 
         if (window.qiang) {

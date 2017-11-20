@@ -1,37 +1,3 @@
--- Test: linkedList.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create and print a linked list using pairs
-
-# Output:
-# list = {1, 2, 4, 11}
-
-# Program:
-
-begin
-  pair(int, pair) p = newpair(11, null) ;
-    pair(int, pair) q = newpair(4, p) ;
-    pair(int, pair) r = newpair(2, q) ;
-    pair(int, pair) s = newpair(1, r) ;
-    print "list = {" ;
-    pair(int, pair) x = s ;
-    pair(int, pair) y = snd x ;
-    int f = 0;
-    while y != null do
-      f = fst x ;
-      print f ;
-      print ", " ;
-      x = y ;
-      y = snd x
-    done ;
-    f = fst x ;
-    print f ;
-    println "}"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 linkedList.ast contents are:
@@ -40,7 +6,7 @@ linkedList.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, basePair)
+4	        - int
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -51,7 +17,7 @@ linkedList.ast contents are:
 12	            - null
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(int, basePair)
+15	        - int
 16	      - LHS
 17	        - q
 18	      - RHS
@@ -62,7 +28,7 @@ linkedList.ast contents are:
 23	            - p
 24	    - DECLARE
 25	      - TYPE
-26	        - pair(int, basePair)
+26	        - int
 27	      - LHS
 28	        - r
 29	      - RHS
@@ -73,7 +39,7 @@ linkedList.ast contents are:
 34	            - q
 35	    - DECLARE
 36	      - TYPE
-37	        - pair(int, basePair)
+37	        - int
 38	      - LHS
 39	        - s
 40	      - RHS
@@ -86,14 +52,14 @@ linkedList.ast contents are:
 47	      - "list = {"
 48	    - DECLARE
 49	      - TYPE
-50	        - pair(int, basePair)
+50	        - int
 51	      - LHS
 52	        - x
 53	      - RHS
 54	        - s
 55	    - DECLARE
 56	      - TYPE
-57	        - pair(int, basePair)
+57	        - int
 58	      - LHS
 59	        - y
 60	      - RHS
@@ -145,4 +111,3 @@ linkedList.ast contents are:
 106	      - "}"
 ===========================================================
 -- Finished
-

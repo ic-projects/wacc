@@ -1,32 +1,3 @@
--- Test: stringAndCharArrays.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# spooky strings
-
-# Output:
-#
-
-# Program:
-
-begin
-	string f(char[] x) is
-		return x
-	end
-	char[] f2(string x) is
-		return x
-	end
-	string s = "hello" ;
-	char[] c = ['a','b','c'] ;
-  string x = call f(s) ;
-	s = call f(c) ;
-	c = call f2(s) ;
-	x = call f2(c) ;
-	char[] test = "test"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 stringAndCharArrays.ast contents are:
@@ -91,4 +62,3 @@ stringAndCharArrays.ast contents are:
 57	        - "test"
 ===========================================================
 -- Finished
-

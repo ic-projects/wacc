@@ -1,24 +1,3 @@
--- Test: longVarNames.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# variable can have very long names
-
-# Output:
-# #empty#
-
-# Exit:
-# 5
-
-# Program:
-
-begin
-  int this_variable_has_a_crazy_long_name_but_ought_to_still_be_valid = 5 ;
-  exit this_variable_has_a_crazy_long_name_but_ought_to_still_be_valid
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 longVarNames.ast contents are:
@@ -36,4 +15,3 @@ longVarNames.ast contents are:
 10	      - this_variable_has_a_crazy_long_name_but_ought_to_still_be_valid
 ===========================================================
 -- Finished
-

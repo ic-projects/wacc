@@ -1,21 +1,3 @@
--- Test: arrayEmpty.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# empty array declaration (seems to error currently)
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  int[] a = []
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 arrayEmpty.ast contents are:
@@ -31,4 +13,3 @@ arrayEmpty.ast contents are:
 8	        - ARRAY LITERAL
 ===========================================================
 -- Finished
-

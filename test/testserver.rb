@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby1.9.1
+#!/usr/bin/env ruby
 
 $:.unshift(File.join(File.dirname(__FILE__), "lib", "json_pure-1.5.3", "lib"))
 $:.unshift(File.join(File.dirname(__FILE__), "lib"))

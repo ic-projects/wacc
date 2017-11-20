@@ -1,30 +1,3 @@
--- Test: precedenceExpr1.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# tests whether the compiler can handle precedence in expressions
-
-# Output:
-# #numbers#
-
-# Exit:
-# 0
-
-begin
-  println 1 + 2 + 3 + 4 + 5 ;
-  println 1 * 2 * 3 * 4 * 5 ;
-  println 1 + 2 + 3 * 4 + 5 ;
-  println 1 + 2 - 3 * 4 / 5 + 6 - 7;
-  println ((((1 + 2) - ((3 * 4) / 5)) + 6) - 7);
-  println 1 * 2 + 3 * 4 ;
-  println 1 / 2 + 3 * 4 * 5 ;
-  println 1 + ( 2 + 3 ) * 4 + 5 ;
-  println (1 + 2 + 3) * 4 + 5 ;
-  println 1 / (2 + 3 * 4 + 5)
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 precedenceExpr1.ast contents are:
@@ -139,4 +112,3 @@ precedenceExpr1.ast contents are:
 107	          - 5
 ===========================================================
 -- Finished
-

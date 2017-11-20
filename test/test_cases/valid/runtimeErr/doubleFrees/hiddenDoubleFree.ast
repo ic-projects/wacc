@@ -1,27 +1,3 @@
--- Test: hiddenDoubleFree.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Create and double free a pair indirectly
-
-# Output:
-# #runtime_error#
-
-# Exit:
-# 134
-
-# Program:
-
-begin
-  pair(int, char) a = newpair(10, 'a') ;
-  pair(int, char) b = a ;
-  free a ;
-  free b
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 hiddenDoubleFree.ast contents are:
@@ -30,7 +6,7 @@ hiddenDoubleFree.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - a
 7	      - RHS
@@ -41,7 +17,7 @@ hiddenDoubleFree.ast contents are:
 12	            - 'a'
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(int, char)
+15	        - intchar
 16	      - LHS
 17	        - b
 18	      - RHS
@@ -52,4 +28,3 @@ hiddenDoubleFree.ast contents are:
 23	      - b
 ===========================================================
 -- Finished
-

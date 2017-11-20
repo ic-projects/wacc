@@ -1,22 +1,3 @@
--- Test: whitespace.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Whitespace only important between keyword and variable tokens
-
-# Output:
-# 1
-
-# Program:
-
-begin
-	int a=13;	
-  if a==13then a=1else a=0fi;
-  println a
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 whitespace.ast contents are:
@@ -51,4 +32,3 @@ whitespace.ast contents are:
 27	      - a
 ===========================================================
 -- Finished
-

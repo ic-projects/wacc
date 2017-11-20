@@ -1,24 +1,3 @@
--- Test: useNull2.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# attempt dereference of a null pair by using it
-
-# Output:
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-	pair(int, int) p = null ;
-	int x = snd p
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 useNull2.ast contents are:
@@ -27,7 +6,7 @@ useNull2.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, int)
+4	        - intint
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -42,4 +21,3 @@ useNull2.ast contents are:
 16	          - p
 ===========================================================
 -- Finished
-

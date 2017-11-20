@@ -1,27 +1,3 @@
--- Test: if6.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Simple conditional statement with character comparison test
-
-# Output:
-# correct
-
-# Program:
-
-begin
-  char c1 = 'f';
-  char c2 = 'F';	
-  if c1 == c2 
-  then 
-    println "incorrect"
-  else 
-    println "correct"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 if6.ast contents are:
@@ -55,4 +31,3 @@ if6.ast contents are:
 26	          - "correct"
 ===========================================================
 -- Finished
-

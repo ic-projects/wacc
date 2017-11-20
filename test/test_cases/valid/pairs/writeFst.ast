@@ -1,26 +1,3 @@
--- Test: writeFst.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create a pair and write to its first element
-
-# Output:
-# 10
-# 42
-
-# Program:
-
-begin
-  pair(int, char) p = newpair(10, 'a') ;
-  int f = fst p ;
-  println f ;
-  fst p = 42 ;
-  f = fst p ;
-  println f
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 writeFst.ast contents are:
@@ -29,7 +6,7 @@ writeFst.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -64,4 +41,3 @@ writeFst.ast contents are:
 36	      - f
 ===========================================================
 -- Finished
-

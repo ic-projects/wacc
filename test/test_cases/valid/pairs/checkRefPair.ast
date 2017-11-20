@@ -1,42 +1,3 @@
--- Test: checkRefPair.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create a pair(int, char) with a second reference to it and check it works
-
-# Output:
-# #addrs#
-# #addrs#
-# true
-# 10
-# 10
-# true
-# a
-# a
-# true
-
-# Program:
-
-begin
-  pair(int, char) p = newpair(10, 'a') ;
-  pair(int, char) q = p;
-  println p ;
-  println q ;
-  println p == q ;
-  int x = fst p ;
-  int y = fst q ;
-  println x ;
-  println y ;
-  println x == y ;
-  char c1 = snd p ;
-  char c2 = snd q ;
-  println c1 ;
-  println c2 ;
-  println c1 == c2
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 checkRefPair.ast contents are:
@@ -45,7 +6,7 @@ checkRefPair.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -56,7 +17,7 @@ checkRefPair.ast contents are:
 12	            - 'a'
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(int, char)
+15	        - intchar
 16	      - LHS
 17	        - q
 18	      - RHS
@@ -119,4 +80,3 @@ checkRefPair.ast contents are:
 75	        - c2
 ===========================================================
 -- Finished
-

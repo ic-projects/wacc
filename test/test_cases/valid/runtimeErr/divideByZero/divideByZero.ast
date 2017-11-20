@@ -1,25 +1,3 @@
--- Test: divideByZero.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# attempt divide by zero
-
-# Output:
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-	int x = 10 ;
-	int y = 0 ;
-	print x / y
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 divideByZero.ast contents are:
@@ -46,4 +24,3 @@ divideByZero.ast contents are:
 19	        - y
 ===========================================================
 -- Finished
-

@@ -17,16 +17,7 @@ files.each do |file_path|
                      ) do |response|
       json = JSON.load(response)
       File.open(File.dirname(file_path) + "/" +  File.basename(file_path, ".wacc") + ".ast" , 'w') { |file|
-          file.puts "-- Test: #{json['test']}"
-          file.puts ""
-          file.puts "-- Uploaded file: "
-          file.puts "---------------------------------------------------------------"
-          file.puts json['upload']
-          file.puts "---------------------------------------------------------------"
-          file.puts ""
-          file.puts "-- Compiler Output:"
           file.puts json['compiler_out']
-          file.puts ""
       }
     end
   end

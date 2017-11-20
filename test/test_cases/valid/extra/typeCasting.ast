@@ -1,54 +1,3 @@
--- Test: typeCasting.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# spooky type casting
-
-# Output:
-# 135228
-# <
-# true
-# 4
-# 
-# true
-
-# Program:
-
-begin
-	pair(string, pair) s = newpair("behold", null) ;
-	pair(pair, pair) n = newpair(s, null) ;
-
-	pair(int, pair) casted = fst n ;
-	int nowInt = fst casted ;
-	println nowInt ;
-
-	pair(char, pair) casted2 = fst n ;
-	char nowChar = fst casted2 ;
-	println nowChar ;
-
-	pair(bool, pair) casted3 = fst n ;
-	bool nowBool = fst casted3 ;
-	println nowBool ;
-
-
-	pair(int, pair) ss = newpair(4, null) ;
-	n = newpair(ss, null) ;
-
-	casted = fst n ;
-	nowInt = fst casted ;
-	println nowInt ;
-
-	casted2 = fst n ;
-	nowChar = fst casted2 ;
-	println nowChar ;
-
-	casted3 = fst n ;
-	nowBool = fst casted3 ;
-	println nowBool
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 typeCasting.ast contents are:
@@ -57,7 +6,7 @@ typeCasting.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(string, basePair)
+4	        - string
 5	      - LHS
 6	        - s
 7	      - RHS
@@ -68,7 +17,7 @@ typeCasting.ast contents are:
 12	            - null
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(basePair, basePair)
+15	        - 
 16	      - LHS
 17	        - n
 18	      - RHS
@@ -79,7 +28,7 @@ typeCasting.ast contents are:
 23	            - null
 24	    - DECLARE
 25	      - TYPE
-26	        - pair(int, basePair)
+26	        - int
 27	      - LHS
 28	        - casted
 29	      - RHS
@@ -97,7 +46,7 @@ typeCasting.ast contents are:
 41	      - nowInt
 42	    - DECLARE
 43	      - TYPE
-44	        - pair(char, basePair)
+44	        - char
 45	      - LHS
 46	        - casted2
 47	      - RHS
@@ -115,7 +64,7 @@ typeCasting.ast contents are:
 59	      - nowChar
 60	    - DECLARE
 61	      - TYPE
-62	        - pair(bool, basePair)
+62	        - bool
 63	      - LHS
 64	        - casted3
 65	      - RHS
@@ -133,7 +82,7 @@ typeCasting.ast contents are:
 77	      - nowBool
 78	    - DECLARE
 79	      - TYPE
-80	        - pair(int, basePair)
+80	        - int
 81	      - LHS
 82	        - ss
 83	      - RHS
@@ -195,4 +144,3 @@ typeCasting.ast contents are:
 139	      - nowBool
 ===========================================================
 -- Finished
-

@@ -1,28 +1,3 @@
--- Test: functionConditionalReturn.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# program has function which only contains an if statement and a return in each branch
-
-# Output:
-# true
-
-# Program:
-
-begin
-  bool f() is 
-    if true then
-      return true
-    else
-      return false
-    fi
-  end
-  bool x = call f();
-  println x
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 functionConditionalReturn.ast contents are:
@@ -50,4 +25,3 @@ functionConditionalReturn.ast contents are:
 20	      - x
 ===========================================================
 -- Finished
-

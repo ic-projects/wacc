@@ -1,21 +1,3 @@
--- Test: arrayLength.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# check length of array
-
-# Output:
-# 4
-
-# Program:
-
-begin
-  int[] a = [43, 2, 18, 1] ;
-  println len a
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 arrayLength.ast contents are:
@@ -38,4 +20,3 @@ arrayLength.ast contents are:
 15	        - a
 ===========================================================
 -- Finished
-

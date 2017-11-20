@@ -1,20 +1,3 @@
--- Test: print.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple print statement
-
-# Output:
-# Hello World!
-
-# Program:
-
-begin
-  print "Hello World!\n"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 print.ast contents are:
@@ -25,4 +8,3 @@ print.ast contents are:
 3	      - "Hello World!\n"
 ===========================================================
 -- Finished
-

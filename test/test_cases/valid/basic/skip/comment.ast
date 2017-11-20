@@ -1,21 +1,3 @@
--- Test: comment.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple skip program with comment line
-
-# Output:
-# #empty#
-
-# Program:
-
-begin 
-  # I can write stuff on a comment line
-  skip 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 comment.ast contents are:
@@ -25,4 +7,3 @@ comment.ast contents are:
 2	    - SKIP
 ===========================================================
 -- Finished
-

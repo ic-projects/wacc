@@ -1,22 +1,3 @@
--- Test: negDividendDiv.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# division of a negative number
-
-# Output:
-# -2
-
-# Program:
-
-begin
-  int x = -4 ;
-  int y = 2 ;
-  println x / y
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 negDividendDiv.ast contents are:
@@ -43,4 +24,3 @@ negDividendDiv.ast contents are:
 19	        - y
 ===========================================================
 -- Finished
-

@@ -1,20 +1,3 @@
--- Test: println.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple println statement
-
-# Output:
-# Hello World!
-
-# Program:
-
-begin
-  println "Hello World!"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 println.ast contents are:
@@ -25,4 +8,3 @@ println.ast contents are:
 3	      - "Hello World!"
 ===========================================================
 -- Finished
-

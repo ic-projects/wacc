@@ -1,26 +1,3 @@
--- Test: ifFalse.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple false if statement 
-
-# Output:
-# here
-
-# Program:
-
-begin
-  if false
-  then
-    println "not here"
-  else
-    println "here"
-  fi
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 ifFalse.ast contents are:
@@ -38,4 +15,3 @@ ifFalse.ast contents are:
 10	          - "here"
 ===========================================================
 -- Finished
-

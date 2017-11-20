@@ -1,20 +1,3 @@
--- Test: minusNoWhitespaceExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# subtraction expressions should not be whitespace sensitive
-
-# Output:
-# -1
-
-# Program:
-
-begin
-  println 1-2
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 minusNoWhitespaceExpr.ast contents are:
@@ -27,4 +10,3 @@ minusNoWhitespaceExpr.ast contents are:
 5	        - 2
 ===========================================================
 -- Finished
-

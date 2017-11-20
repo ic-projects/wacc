@@ -1,25 +1,3 @@
--- Test: printBool.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# basic Boolean printing
-
-# Output:
-# True is true
-# False is false
-
-# Program:
-
-begin
-  print "True is " ;
-  println true ;
-
-  print "False is " ;
-  println false
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 printBool.ast contents are:
@@ -36,4 +14,3 @@ printBool.ast contents are:
 9	      - false
 ===========================================================
 -- Finished
-

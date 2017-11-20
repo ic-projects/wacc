@@ -1,25 +1,3 @@
--- Test: sameArgName.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# program with function that has same parameter name as function
-
-# Output:
-# 99
-
-# Program:
-
-begin
-  int f(int f) is
-    return f
-  end
-  
-  int x = call f(99);
-  println x
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 sameArgName.ast contents are:
@@ -41,4 +19,3 @@ sameArgName.ast contents are:
 14	      - x
 ===========================================================
 -- Finished
-

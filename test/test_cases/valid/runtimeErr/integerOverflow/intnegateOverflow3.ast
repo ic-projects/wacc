@@ -1,27 +1,3 @@
--- Test: intnegateOverflow3.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# multiplying a negative integer
-
-# Output:
-# -20000
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-  int x = -20000 ;
-  println x ;
-  x = x*100000000; #err here? 
-  println x 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 intnegateOverflow3.ast contents are:
@@ -48,4 +24,3 @@ intnegateOverflow3.ast contents are:
 19	      - x
 ===========================================================
 -- Finished
-

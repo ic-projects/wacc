@@ -1,25 +1,3 @@
--- Test: lessCharExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating less-than on characters
-
-# Output:
-# true
-# false
-
-# Program:
-
-begin
-  char a = 'a' ;
-  char e = 'e' ;
-  char c = 'c' ;
-  println a < e ;
-  println e < c
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 lessCharExpr.ast contents are:
@@ -57,4 +35,3 @@ lessCharExpr.ast contents are:
 30	        - c
 ===========================================================
 -- Finished
-

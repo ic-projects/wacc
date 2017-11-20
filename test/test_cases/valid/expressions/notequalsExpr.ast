@@ -1,28 +1,3 @@
--- Test: notequalsExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating inequality
-
-# Output:
-# true
-# true
-# false
-
-# Program:
-
-begin
-  int x = 2 ;
-  int y = 4 ;
-  int z = 4 ;
-  bool b = x != y ;
-  println b ;
-  println x != y ;
-  println y != z
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 notequalsExpr.ast contents are:
@@ -71,4 +46,3 @@ notequalsExpr.ast contents are:
 41	        - z
 ===========================================================
 -- Finished
-

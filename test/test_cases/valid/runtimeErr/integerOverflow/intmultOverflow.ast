@@ -1,32 +1,3 @@
--- Test: intmultOverflow.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# integer overflow - generates odd assembly error!
-
-# Output:
-# 2147483
-# 2147483000
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-  int x = 2147483 ;
-  println x ;
-  x = x * 1000 ;
-  println x ;
-  x = x * 1000 ;
-  println x ;
-  x = x * 1000 ; #err here?
-  println x 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 intmultOverflow.ast contents are:
@@ -71,4 +42,3 @@ intmultOverflow.ast contents are:
 37	      - x
 ===========================================================
 -- Finished
-

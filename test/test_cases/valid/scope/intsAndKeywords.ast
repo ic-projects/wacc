@@ -1,20 +1,3 @@
--- Test: intsAndKeywords.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# checking handling of ints and keywords 
-
-# Output:
-# #empty#
-
-# Program:
-begin
-  begin
-    int x = 125end
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 intsAndKeywords.ast contents are:
@@ -31,4 +14,3 @@ intsAndKeywords.ast contents are:
 9	          - 125
 ===========================================================
 -- Finished
-

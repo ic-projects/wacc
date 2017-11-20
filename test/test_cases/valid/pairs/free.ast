@@ -1,22 +1,3 @@
--- Test: free.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Create and free a simple pair
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  pair(int, char) a = newpair(10, 'a') ;
-  free a
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 free.ast contents are:
@@ -25,7 +6,7 @@ free.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - a
 7	      - RHS
@@ -38,4 +19,3 @@ free.ast contents are:
 14	      - a
 ===========================================================
 -- Finished
-

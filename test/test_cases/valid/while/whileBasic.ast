@@ -1,22 +1,3 @@
--- Test: whileBasic.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple while loop
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  while false do
-    skip
-  done
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 whileBasic.ast contents are:
@@ -30,4 +11,3 @@ whileBasic.ast contents are:
 6	        - SKIP
 ===========================================================
 -- Finished
-

@@ -1,25 +1,3 @@
--- Test: IOSequence.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# basic input/output sequence
-
-# Output:
-# Please input an integer: #input#
-# You input: #output#
-
-# Program:
-
-begin 
-  int x = 0 ;
-  print "Please input an integer: " ;
-  read x ;
-  print "You input: " ;
-  println x
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 IOSequence.ast contents are:
@@ -43,4 +21,3 @@ IOSequence.ast contents are:
 16	      - x
 ===========================================================
 -- Finished
-

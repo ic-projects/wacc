@@ -1,22 +1,3 @@
--- Test: printRef.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# basic array (reference) printing
-
-# Output:
-# Printing an array variable gives an address, such as #addrs#
-
-# Program:
-
-begin
-  print "Printing an array variable gives an address, such as " ;
-  int[] a = [1,2,3] ;
-  println a
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 printRef.ast contents are:
@@ -39,4 +20,3 @@ printRef.ast contents are:
 15	      - a
 ===========================================================
 -- Finished
-

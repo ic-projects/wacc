@@ -1,27 +1,3 @@
--- Test: modifyString.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create and modify string
-
-# Output:
-# hello world!
-# Hello world!
-# Hi!
-
-# Program:
-
-begin
-  string s = "hello world!" ;
-  println s ;
-  s[0] = 'H' ;
-  println s ;
-  s = "Hi!" ;
-  println s
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 modifyString.ast contents are:
@@ -55,4 +31,3 @@ modifyString.ast contents are:
 26	      - s
 ===========================================================
 -- Finished
-

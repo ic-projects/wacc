@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require "rest-client"
+require "json"
+
+files = Dir.glob(File.join("test_cases", "**", "*.wacc"))
+
+
+files.each do |file_path|
+  if !File.file?(File.dirname(file_path) + "/" +  File.basename(file_path, ".wacc") + ".s")
+    puts "Compiling #{file_path}"
+
+    RestClient.post("https://teaching.doc.ic.ac.uk/wacc_compiler/run.cgi",
+                      :stdin => "",
+                      :options => ["-a"],
+                      :testfile => File.new(file_path)
+                     ) do |response|
+      json = JSON.load(response)
+      File.open(File.dirname(file_path) + "/" +  File.basename(file_path, ".wacc") + ".s" , 'w') { |file|
+          file.puts json['compiler_out']
+      }
+    end
+  end
+end

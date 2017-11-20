@@ -1,21 +1,3 @@
--- Test: boolAssignment.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple boolean variable declaration and assignment
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  bool b = false ;
-  b = true
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 boolAssignment.ast contents are:
@@ -36,4 +18,3 @@ boolAssignment.ast contents are:
 13	        - true
 ===========================================================
 -- Finished
-

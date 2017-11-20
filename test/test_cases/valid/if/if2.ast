@@ -1,26 +1,3 @@
--- Test: if2.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Simple conditional statement with int comparison test
-
-# Output:
-# correct
-
-# Program:
-
-begin
-  int a = 13;	
-  if a != 13 
-  then 
-    println "incorrect"
-  else 
-    println "correct"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 if2.ast contents are:
@@ -47,4 +24,3 @@ if2.ast contents are:
 19	          - "correct"
 ===========================================================
 -- Finished
-

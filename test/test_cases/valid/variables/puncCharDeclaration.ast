@@ -1,20 +1,3 @@
--- Test: puncCharDeclaration.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple punctuation character variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  char c = '!'
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 puncCharDeclaration.ast contents are:
@@ -30,4 +13,3 @@ puncCharDeclaration.ast contents are:
 8	        - '!'
 ===========================================================
 -- Finished
-

@@ -1,28 +1,3 @@
--- Test: printPair.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# print pair program
-
-# Output:
-# #addrs# = (10, a)
-
-# Program:
-
-begin
-  pair(int, char) p = newpair(10, 'a') ;
-  print p ; 
-  print " = (" ;
-  int x = fst p ;
-  print x ;
-  print ", " ;
-  char c = snd p ;
-  print c ;
-  println ')' 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 printPair.ast contents are:
@@ -31,7 +6,7 @@ printPair.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -70,4 +45,3 @@ printPair.ast contents are:
 40	      - ')'
 ===========================================================
 -- Finished
-

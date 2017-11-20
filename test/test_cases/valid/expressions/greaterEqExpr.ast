@@ -1,28 +1,3 @@
--- Test: greaterEqExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating greater-than
-
-# Output:
-# false
-# true
-# true
-
-# Program:
-
-begin
-  int x = 2 ;
-  int y = 6 ;
-  int z = 4 ;
-  int a = 4 ;
-  println x >= y ;
-  println y >= z ;
-  println z >= z
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 greaterEqExpr.ast contents are:
@@ -71,4 +46,3 @@ greaterEqExpr.ast contents are:
 41	        - z
 ===========================================================
 -- Finished
-
