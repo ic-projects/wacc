@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"strconv"
 )
 
 type Assembly struct {
@@ -152,7 +153,7 @@ type CodeGenerator struct {
 	asm *Assembly
 	currentFunction string
 	symbolTable *SymbolTable
-	freeRegisters []Register
+	freeRegisters *RegisterStack
 	returnRegisters *RegisterStack
 }
 
@@ -161,7 +162,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
 		asm: NewAssembly(),
 		symbolTable: symbolTable,
-		freeRegisters: []Register{R3,R4,R5,R6,R7,R8,R9,R10,R11,R12},
+		freeRegisters: NewRegisterStackWith([]Register{R4,R5,R6,R7,R8,R9,R10,R11,R12}),
 		returnRegisters: NewRegisterStack(),
 	}
 }
@@ -184,10 +185,16 @@ func NewRegisterStack() *RegisterStack {
 	}
 }
 
+func NewRegisterStackWith(registers []Register) *RegisterStack {
+	return &RegisterStack{
+		stack: registers,
+	}
+}
+
 func (registerStack *RegisterStack) Pop() Register {
-	register := registerStack.stack[len(registerStack.stack) - 1];
+	register := registerStack.stack[len(registerStack.stack) - 1]
 	registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
-	return register;
+	return register
 }
 
 func (registerStack *RegisterStack) Push(register Register) {
@@ -290,7 +297,9 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case BinaryOperator:
 
 	case IntegerLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		v.addCode("LDR " + register.String() + ", =" + strconv.Itoa(node.val))
+		v.returnRegisters.Push(register)
 	case BooleanLiteralNode:
 
 	case CharacterLiteralNode:
@@ -337,9 +346,43 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case FunctionNode:
     v.symbolTable.MoveUpScope()
 		if (node.ident.ident == "") {
-			v.addCode("LDR r0, =0")
+			v.addCode("LDR r0, =0", "POP {pc}")
 		}
-		v.addCode("POP {pc}", ".ltorg")
+		v.addCode(".ltorg")
 	case ArrayLiteralNode:
+
+	case ExitNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, " + register.String(), "BL exit")
+	case ReturnNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, " + register.String(), "POP {pc}")
+	case BinaryOperatorNode:
+		operand2 := v.returnRegisters.Pop()
+		operand1 := v.returnRegisters.Pop()
+		returnRegister := v.freeRegisters.Pop()
+		switch node.op {
+		case MUL:
+			v.addCode("MUL " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+		case DIV:
+			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idiv", "MOV " + returnRegister.String() + ", r0")
+		case MOD:
+			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idivmod", "MOV " + returnRegister.String() + ", r0")
+		case ADD:
+			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+		case SUB:
+			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+		case GT, GEQ, LT, LEQ:
+
+		case EQ, NEQ:
+
+		case AND, OR:
+
+		}
+		v.freeRegisters.Push(operand1)
+		v.freeRegisters.Push(operand2)
+		v.returnRegisters.Push(returnRegister)
 	}
 }
