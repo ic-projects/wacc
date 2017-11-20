@@ -11,31 +11,34 @@ import (
 type Assembly struct {
 	data []string
 	text []string
-	global []string
+	global map[string]([]string)
 }
 
 func NewAssembly() *Assembly {
 	return &Assembly{
 		data: make([]string, 0),
 		text: make([]string, 0),
-		global: make([]string, 0),
+		global: make(map[string]([]string)),
 	}
 }
 
 // String will return the string format of the Assembly code with line numbers.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(indent(".data", "  "))
+	buf.WriteString(".data\n")
 	for _, s := range asm.data {
 		buf.WriteString(indent(s, "  "))
 	}
-	buf.WriteString(indent(".text", "  "))
+	buf.WriteString(".text\n")
 	for _, s := range asm.text {
 		buf.WriteString(indent(s, "  "))
 	}
-	buf.WriteString(indent(".global main", "  "))
-	for _, s := range asm.global {
-		buf.WriteString(indent(s, "  "))
+	buf.WriteString(".global main\n")
+	for fname, f := range asm.global {
+		buf.WriteString(fname + ":\n")
+		for _, s := range f {
+			buf.WriteString(indent(s, "  "))
+		}
 	}
 	return buf.String()
 }
@@ -98,9 +101,6 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 
 	Walk(codeGen, tree)
 
-	codeGen.addCode("code", "code2")
-	codeGen.addCode("assembly")
-
 	return codeGen.asm
 }
 
@@ -108,6 +108,7 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 // Walk. It stores
 type CodeGenerator struct {
 	asm *Assembly
+	currentFunction string
 	symbolTable *SymbolTable
 	freeRegisters []Register
 	returnRegisters *RegisterStack
@@ -171,8 +172,15 @@ func (v *CodeGenerator) addText(lines ...string) {
 // assembly code
 func (v *CodeGenerator) addCode(lines ...string) {
 	for _, line := range lines {
-		v.asm.global = append(v.asm.global, line + "\n")
+		v.asm.global[v.currentFunction] = append(v.asm.global[v.currentFunction], line + "\n")
 	}
+}
+
+// addCode add lines of assembly to the already code part of the generated
+// assembly code
+func (v *CodeGenerator) addFunction(name string) {
+	v.asm.global[name] = make([]string, 0)
+	v.currentFunction = name
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
@@ -183,6 +191,12 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case FunctionNode:
     v.symbolTable.MoveNextScope()
+		if (node.ident.ident == "") {
+			v.addFunction("main")
+		} else {
+			v.addFunction("f_"+node.ident.ident)
+		}
+		v.addCode("PUSH {lr}")
 	case ParameterNode:
 
 	case SkipNode:
@@ -274,11 +288,16 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 // Leave will be called to leave the current node.
 func (v *CodeGenerator) Leave(programNode ProgramNode) {
-	switch programNode.(type) {
+	switch node := programNode.(type) {
 	case []StatementNode:
     v.symbolTable.MoveUpScope()
+
 	case FunctionNode:
     v.symbolTable.MoveUpScope()
+		if (node.ident.ident == "") {
+			v.addCode("LDR r0, =0")
+		}
+		v.addCode("POP {pc}", ".ltorg")
 	case ArrayLiteralNode:
 	}
 }
