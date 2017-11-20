@@ -154,7 +154,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case Program:
 
 	case FunctionNode:
-
+    v.symbolTable.MoveNextScope()
 	case ParameterNode:
 
 	case SkipNode:
@@ -240,7 +240,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		}
 	case []StatementNode:
-
+    v.symbolTable.moveNextScope()
 	}
 }
 
@@ -248,9 +248,9 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	switch programNode.(type) {
 	case []StatementNode:
-
+    v.symbolTable.MoveUpScope()
 	case FunctionNode:
-
+    v.symbolTable.MoveUpScope()
 	case ArrayLiteralNode:
 	}
 }
