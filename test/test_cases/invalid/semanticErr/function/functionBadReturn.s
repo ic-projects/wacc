@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 13:9 -- Incompatible type at 'c' (expected: INT, actual: CHAR)

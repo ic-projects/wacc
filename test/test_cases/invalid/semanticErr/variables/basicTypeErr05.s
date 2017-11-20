@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 12:11 -- Incompatible type at 't' (expected: BOOL, actual: CHAR)

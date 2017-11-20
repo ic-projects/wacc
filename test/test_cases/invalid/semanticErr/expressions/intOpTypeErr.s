@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 12:17 -- Incompatible type at false (expected: INT, actual: BOOL)

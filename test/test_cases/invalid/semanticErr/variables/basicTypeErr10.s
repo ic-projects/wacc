@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 12:13 -- Incompatible type at 128 (expected: CHAR[], actual: INT)
