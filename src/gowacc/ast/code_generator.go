@@ -369,7 +369,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case DIV:
 			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idiv", "MOV " + returnRegister.String() + ", r0")
 		case MOD:
-			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idivmod", "MOV " + returnRegister.String() + ", r0")
+			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idivmod", "MOV " + returnRegister.String() + ", r1")
 		case ADD:
 			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case SUB:
