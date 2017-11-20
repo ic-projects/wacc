@@ -110,7 +110,7 @@ type CodeGenerator struct {
 	asm *Assembly
 	symbolTable *SymbolTable
 	freeRegisters []Register
-	returnRegisters []Register
+	returnRegisters *RegisterStack
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -119,8 +119,36 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		asm: NewAssembly(),
 		symbolTable: symbolTable,
 		freeRegisters: []Register{R3,R4,R5,R6,R7,R8,R9,R10,R11,R12},
-		returnRegisters: make([]Register, 0),
+		returnRegisters: NewRegisterStack(),
 	}
+}
+
+// RegisterStack is a struct that represents a stack of regsters.
+// It is used to keep track of which register is used for returning a value.
+//
+// When a callee returns with value, it pushes the register used to store the
+// return value to the stack.
+//
+// The caller pops a register off the stack to determine the register where the
+// return value is stored.
+type RegisterStack struct {
+	stack []Register
+}
+
+func NewRegisterStack() *RegisterStack {
+	return &RegisterStack{
+		stack: []Register{},
+	}
+}
+
+func (registerStack *RegisterStack) Pop() Register {
+	register := registerStack.stack[len(registerStack.stack) - 1];
+	registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
+	return register;
+}
+
+func (registerStack *RegisterStack) Push(register Register) {
+	registerStack.stack = append(registerStack.stack, register)
 }
 
 // addData add lines of assembly to the already data part of the generated
