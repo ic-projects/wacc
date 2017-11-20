@@ -343,3 +343,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case ArrayLiteralNode:
 	}
 }
+
+type Location struct {
+	register 		Register
+	address  		int
+	stackOffset int
+}
