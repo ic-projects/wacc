@@ -1,27 +1,3 @@
--- Test: if4.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Simple conditional statement with boolen expression test
-
-# Output:
-# correct
-
-# Program:
-
-begin
-  bool b = true;
-  bool c = false;	
-  if b && c 
-  then 
-    println "incorrect"
-  else 
-    println "correct"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 if4.ast contents are:
@@ -55,4 +31,3 @@ if4.ast contents are:
 26	          - "correct"
 ===========================================================
 -- Finished
-

@@ -1,26 +1,3 @@
--- Test: orExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating or
-
-# Output:
-# true
-# true
-# false
-
-# Program:
-
-begin
-  bool a = true ;
-  bool b = false ;
-  println a || b ;
-  println a || true ;
-  println b || false
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 orExpr.ast contents are:
@@ -55,4 +32,3 @@ orExpr.ast contents are:
 27	        - false
 ===========================================================
 -- Finished
-

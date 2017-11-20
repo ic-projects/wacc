@@ -1,25 +1,3 @@
--- Test: boolExpr1.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating a moderately complex boolean expression
-
-# Output:
-# Correct
-
-# Program:
-
-begin
-  bool b = ! ( ( true && false) || (true && false) );
-  if b == true then
-    println "Correct"
-  else
-    println "Wrong"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 boolExpr1.ast contents are:
@@ -53,4 +31,3 @@ boolExpr1.ast contents are:
 26	          - "Wrong"
 ===========================================================
 -- Finished
-

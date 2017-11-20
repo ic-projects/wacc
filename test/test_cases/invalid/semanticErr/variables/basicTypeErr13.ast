@@ -1,28 +1,3 @@
--- Test: basicTypeErr13.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# attempting to access non-array type as array
-
-# Output:
-# #semantic_error#
-
-# Exit:
-# 200
-
-# Program:
-
-begin
-  int i = 1 ;
-	println i[2] ;
-	int e = 2 ;
-	println e[2][1] ;
-	println e[i]
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 Errors detected during compilation! Exit code 200 returned.
 Semantic Error at 13:9 -- Incompatible type at i (expected: Any[], actual: INT)
-

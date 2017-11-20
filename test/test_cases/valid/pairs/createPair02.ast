@@ -1,20 +1,3 @@
--- Test: createPair02.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create a pair (char, char)
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  pair(char, char) p = newpair('a', 'b')
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 createPair02.ast contents are:
@@ -23,7 +6,7 @@ createPair02.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(char, char)
+4	        - charchar
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -34,4 +17,3 @@ createPair02.ast contents are:
 12	            - 'b'
 ===========================================================
 -- Finished
-

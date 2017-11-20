@@ -1,21 +1,3 @@
--- Test: createRefPair.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# create a pair(int, char) with a second reference to it
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  pair(int, char) p = newpair(10, 'a') ;
-  pair(int, char) q = p
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 createRefPair.ast contents are:
@@ -24,7 +6,7 @@ createRefPair.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, char)
+4	        - intchar
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -35,11 +17,10 @@ createRefPair.ast contents are:
 12	            - 'a'
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(int, char)
+15	        - intchar
 16	      - LHS
 17	        - q
 18	      - RHS
 19	        - p
 ===========================================================
 -- Finished
-

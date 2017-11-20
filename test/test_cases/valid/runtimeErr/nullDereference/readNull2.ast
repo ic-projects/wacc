@@ -1,24 +1,3 @@
--- Test: readNull2.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# attempt dereference of a null pair by reading into an element of it
-
-# Output:
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-	pair(int, int) p = null ;
-	read snd p
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 readNull2.ast contents are:
@@ -27,7 +6,7 @@ readNull2.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, int)
+4	        - intint
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -37,4 +16,3 @@ readNull2.ast contents are:
 11	        - p
 ===========================================================
 -- Finished
-

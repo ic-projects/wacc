@@ -1,20 +1,3 @@
--- Test: multNoWhitespaceExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# multiplication expressions should not be whitespace sensitive
-
-# Output:
-# 2
-
-# Program:
-
-begin
-  println 1*2
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 multNoWhitespaceExpr.ast contents are:
@@ -27,4 +10,3 @@ multNoWhitespaceExpr.ast contents are:
 5	        - 2
 ===========================================================
 -- Finished
-

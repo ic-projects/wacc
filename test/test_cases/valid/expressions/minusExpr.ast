@@ -1,22 +1,3 @@
--- Test: minusExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating subtraction
-
-# Output:
-# 5
-
-# Program:
-
-begin
-  int x = 15 ;
-  int y = 20 ;
-  println y - x
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 minusExpr.ast contents are:
@@ -43,4 +24,3 @@ minusExpr.ast contents are:
 19	        - x
 ===========================================================
 -- Finished
-

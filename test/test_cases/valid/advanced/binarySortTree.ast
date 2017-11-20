@@ -1,102 +1,12 @@
--- Test: binarySortTree.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# The program reads n (number of integers), then n integers. After each input, 
-# it insert the integer into a binary search tree. At the end, it prints out 
-# the content in the binary search tree so that we have a sorted list of 
-# integer.
-# 
-# We represent a node in the binary search tree using two pair elements. The 
-# first element has a type <int, pair>, the int is the integer stored in the 
-# node, the pair is the pointer to the second pair element. The second pair 
-# element has a type <pair, pair> which is the pointer to the two children 
-# nodes in the binary search tree.
-
-begin
-
-  # Create a new node of a binary search tree having the given integer value 
-  # and points to the two given pairs.
-  pair(int, pair) createNewNode(int value, pair(int, pair) left, pair(int, pair) right) is
-    pair(pair, pair) p = newpair(left, right) ;
-    pair(int, pair) q = newpair(value, p) ;
-    return q
-  end
-
-  # Given a root of a binary search tree and an integer to insert, the function 
-  # inserts the integer into the tree and returns the new root of the tree.
-  pair(int, pair) insert(pair(int, pair) root, int n) is
-    if root == null then
-      root = call createNewNode(n, null, null)
-    else
-      pair(pair, pair) p = snd root ;
-      int current = fst root ;
-      pair(int, pair) q = null ;
-      if n < current then
-      	q = fst p ;
-        fst p = call insert(q, n)
-      else 
-      	q = snd p ;
-        snd p = call insert(q, n)
-      fi 
-    fi ;
-    return root
-  end
-
-  # Print the integers in the binary search tree in the increasing order.
-  int printTree(pair(int, pair) root) is
-    if root == null then
-      return 0 
-    else
-      pair(pair, pair) body = snd root ;
-      pair(int, pair) p = fst body ;
-      int temp = call printTree(p) ;
-      temp = fst root ; 
-      print temp ;
-      print ' ' ;
-      p = snd body ;
-      temp = call printTree(p) ;
-      return 0
-    fi
-  end
-
-  # The main function
-  int n = 0 ;
-  print "Please enter the number of integers to insert: " ;
-  read n ;
-  print "There are " ;
-  print n ;
-  println " integers." ;
-  int i = 0 ;
-  pair(int, pair) root = null ;
-  while i < n do
-    int x = 0 ;
-    print "Please enter the number at position " ; 
-    print i + 1 ;
-    print " : " ;
-    read x ;
-    root = call insert(root, x) ;
-    i = i + 1
-  done ;
-  print "Here are the numbers sorted: " ;
-  i = call printTree(root) ;
-  println ""
-end
-
-
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 binarySortTree.ast contents are:
 ===========================================================
 0	Program
-1	  - pair(int, basePair) createNewNode(int value, pair(int, basePair) left, pair(int, basePair) right)
+1	  - int createNewNode(int value, int left, int right)
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(basePair, basePair)
+4	        - 
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -107,7 +17,7 @@ binarySortTree.ast contents are:
 12	            - right
 13	    - DECLARE
 14	      - TYPE
-15	        - pair(int, basePair)
+15	        - int
 16	      - LHS
 17	        - q
 18	      - RHS
@@ -118,7 +28,7 @@ binarySortTree.ast contents are:
 23	            - p
 24	    - RETURN
 25	      - q
-26	  - pair(int, basePair) insert(pair(int, basePair) root, int n)
+26	  - int insert(int root, int n)
 27	    - IF
 28	      - CONDITION
 29	        - ==
@@ -136,7 +46,7 @@ binarySortTree.ast contents are:
 41	      - ELSE
 42	        - DECLARE
 43	          - TYPE
-44	            - pair(basePair, basePair)
+44	            - 
 45	          - LHS
 46	            - p
 47	          - RHS
@@ -152,7 +62,7 @@ binarySortTree.ast contents are:
 57	              - root
 58	        - DECLARE
 59	          - TYPE
-60	            - pair(int, basePair)
+60	            - int
 61	          - LHS
 62	            - q
 63	          - RHS
@@ -194,7 +104,7 @@ binarySortTree.ast contents are:
 99	                - n
 100	    - RETURN
 101	      - root
-102	  - int printTree(pair(int, basePair) root)
+102	  - int printTree(int root)
 103	    - IF
 104	      - CONDITION
 105	        - ==
@@ -206,7 +116,7 @@ binarySortTree.ast contents are:
 111	      - ELSE
 112	        - DECLARE
 113	          - TYPE
-114	            - pair(basePair, basePair)
+114	            - 
 115	          - LHS
 116	            - body
 117	          - RHS
@@ -214,7 +124,7 @@ binarySortTree.ast contents are:
 119	              - root
 120	        - DECLARE
 121	          - TYPE
-122	            - pair(int, basePair)
+122	            - int
 123	          - LHS
 124	            - p
 125	          - RHS
@@ -279,7 +189,7 @@ binarySortTree.ast contents are:
 184	        - 0
 185	    - DECLARE
 186	      - TYPE
-187	        - pair(int, basePair)
+187	        - int
 188	      - LHS
 189	        - root
 190	      - RHS
@@ -333,4 +243,3 @@ binarySortTree.ast contents are:
 238	      - ""
 ===========================================================
 -- Finished
-

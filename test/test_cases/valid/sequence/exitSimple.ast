@@ -1,24 +1,3 @@
--- Test: exitSimple.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# exit with unreachable print
-
-# Output:
-# #empty#
-
-# Exit:
-# 42
-
-# Program:
-
-begin
-  exit 42 ;
-  println "Should not print this."
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 exitSimple.ast contents are:
@@ -31,4 +10,3 @@ exitSimple.ast contents are:
 5	      - "Should not print this."
 ===========================================================
 -- Finished
-

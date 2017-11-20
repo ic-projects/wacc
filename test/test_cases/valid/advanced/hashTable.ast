@@ -1,337 +1,9 @@
--- Test: hashTable.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# This program is interactive. We implement a hash table containing integers and we play with it.
-# 
-# A hash table is represented by an array of node lists. Each node in a node list is represented 
-# by pair(int, pair). The first element of the pair is the integer at that node, the second element 
-# is the pointer to the next node (or null if no more node). 
-# 
-# Integers those mapped to the same index are stored on the list (in any order) in that index.
-
-begin
-
-	######################### Functions for Hash Table Interface ###############################
-	
-	# Given a hash table, initialise it. Return true.
-	bool init(pair(int, pair)[] table) is
-		int length = len table ;
-		int i = 0 ;
-		while i < length do
-			table[i] = null ; 
-			i = i + 1
-		done ;
-		return true
-	end
-
-	# Returns true if and only if the given hash table contains x.
-	bool contain(pair(int, pair)[] table, int x) is
-		int index = call calculateIndex(table, x) ;
-		pair(int, pair) node = call findNode(table[index], x) ;
-		return node != null
-	end
-	
-	# Insert the given x into the hash table if it does not already contain x.
-	# Returns true if and only if the table does not already contain x.
-	bool insertIfNotContain(pair(int, pair)[] table, int x) is
-		int index = call calculateIndex(table, x) ;
-		pair(int, pair) node = call findNode(table[index], x) ;
-		if node != null then
-			# Already contain it. Do nothing.
-			return false
-		else
-			# Insert in the front of the list.
-			pair(int, pair) p = newpair(x, table[index]) ;
-			table[index] = p ;
-			return true 
-		fi
-	end
-	
-	# Remove the given x from the hash table. Returns true if an only if the table contains x. 
-	# Otherwise, do nothing and returns false.
-	bool remove(pair(int, pair)[] table, int x) is
-		int index = call calculateIndex(table, x) ;
-		pair(int, pair) node = call findNode(table[index], x) ;
-		if node == null then
-			# Not found x. Just return false.
-			return false
-		else
-			# Found x, have to remove the node.
-			table[index] = call removeNode(table[index], node) ;
-			return true
-		fi
-	end
-	
-	# Remove all nodes from the table. Returns true.
-	bool removeAll(pair(int, pair)[] table) is
-		int length = len table ;
-		int i = 0 ;
-		while i < length do
-			pair(int, pair) p = table[i] ;
-			while p != null do
-				pair(int, pair) p2 = snd p ;
-				free p ;
-				p = p2
-			done ;
-			table[i] = null ;
-			i = i + 1
-		done ; 
-		return true
-	end
-	
-	# Count the number of integers in the table and return it.
-	int count(pair(int, pair)[] table) is
-		int length = len table ;
-		int sum = 0 ;
-		int i = 0 ;
-		while i < length do
-			int subSum = call countNodes(table[i]) ;
-			sum = sum + subSum ;
-			i = i + 1
-		done ;
-		return sum
-	end
-	
-	# Print all the integers inside the table, separated by a space and ended with a newline. Returns true.
-	bool printAll(pair(int, pair)[] table) is
-		int length = len table ;
-		int i = 0 ;
-		while i < length do
-      bool result = call printAllNodes(table[i]) ;
-			i = i + 1
-		done ;
-		println "" ;
-		return true
-	end
-		
-	# A helper function.
-	# Given a hash table and an integer, calculate the index of the integer in the table.
-	int calculateIndex(pair(int, pair)[] table, int x) is
-		int length = len table ;
-		return x % length
-	end
-	
-	# A helper function.
-	# Given a head of a chain of nodes, returns the first node containing the value x.
-	# Returns null if no such node.
-	pair(int, pair) findNode(pair(int, pair) head, int x) is
-		while head != null do
-			int y = fst head ;
-			if y == x then
-				return head
-			else
-				head = snd head
-			fi 
-		done ;
-		return null
-	end
-
-	# A helper function.
-	# Given a list of nodes and a node to remove, remove that node from the 
-	# list and return the new list.
-	pair(int, pair) removeNode(pair(int, pair) head, pair(int, pair) toRemove) is
-		if head == null then
-			# Should not happen actually.
-			return null
-		else
-			if head == toRemove then
-				# Save the new head.
-				head = snd head ;
-				
-				# Deallocate the memory of the old node.
-				free toRemove ;
-				
-				# Return the new head.
-				return head
-			else
-				# Not this node, recursive.
-				pair(int, pair) tail = snd head ;
-				snd head = call removeNode(tail, toRemove) ;
-				return head
-			fi
-		fi
-	end
-
-	# A helper function.
-	# Given a list of nodes, count how many nodes there are.
-	int countNodes(pair(int, pair) head) is 
-		int sum = 0 ;
-		while head != null do
-			sum = sum + 1 ;
-			head = snd head
-		done ;
-		return sum
-	end
-
-	# A helper function.
-	# Given a list of nodes, print each integer in the node followed by a space. Returns true.
-	bool printAllNodes(pair(int, pair) head) is
-    while head != null do
-			int x = fst head ;
-			print x ;
-			print ' ' ;
-			head = snd head
-		done ;
-		return true
-	end
-
-	######################### Functions for Command Line Interface ###############################
-	
-	# Print the menu and ask to choose. Returns a valid decision.
-	char printMenu() is
-		println "===========================================" ;
-		println "========== Hash Table Program =============" ;
-		println "===========================================" ;
-		println "=                                         =" ;
-		println "= Please choose the following options:    =" ;
-		println "=                                         =" ;
-		println "= a: insert an integer                    =" ;
-		println "= b: find an integer                      =" ;
-		println "= c: count the integers                   =" ;
-		println "= d: print all integers                   =" ;
-		println "= e: remove an integer                    =" ;
-		println "= f: remove all integers                  =" ;
-		println "= g: exit                                 =" ;
-		println "=                                         =" ;
-		println "===========================================" ;
-		
-		int minChoice = ord 'a' ;
-		int maxChoice = ord 'g' ;
-		
-		while true do
-			print   "Your decision: " ;
-			char d = '\0' ;
-			read d ;
-			int dInt = ord d ;
-			if minChoice <= dInt && dInt <= maxChoice then
-				return d
-			else 
-				print "You have entered: " ;
-				print d ;
-				println " which is invalid, please try again."
-			fi
-		done ;
-		# The compiler is not smart enough to know that this never reaches. 
-		# We have to add a return statement here.
-		return '\0'
-	end
-	
-	# Print out the question, and then read an integer. After that print the integer back and return it.
-	int askForInt(char[] message) is
-		print message ;
-		int x = 0 ;
-		read x ;
-		print "You have entered: " ;
-		println x ;
-		return x
-	end
-	
-	# Handle menu insert. Returns true.
-	bool handleMenuInsert(pair(int, pair)[] table) is
-		int x = call askForInt("Please enter an integer to insert: ") ;
-		bool notContain = call insertIfNotContain(table, x) ;
-		if notContain then
-			println "Successfully insert it. The integer is new." 
-		else 
-			println "The integer is already there. No insertion is made."
-		fi ;
-		return true		
-	end
-	
-	# Handle menu find. Returns true.
-	bool handleMenuFind(pair(int, pair)[] table) is
-		int x = call askForInt("Please enter an integer to find: ") ;
-		bool find = call contain(table, x) ;
-		if find then
-			println "Find the integer." 
-		else 
-			println "The integer is not found."
-		fi ;
-		return true		
-	end
-	
-	# Handle menu count. Returns true.
-	bool handleMenuCount(pair(int, pair)[] table) is
-		int size = call count(table) ;
-		if size == 1 then
-			println "There is only 1 integer."
-		else
-			print "There are " ;
-			print size ;
-			println " integers."
-		fi ; 
-		return true
-	end
-	
-	# Handle menu print. Returns true.
-	bool handleMenuPrint(pair(int, pair)[] table) is
-		print "Here are the integers: " ;
-		bool junk = call printAll(table) ;
-		return true
-	end
-	
-	# Handle menu remove. Returns true.
-	bool handleMenuRemove(pair(int, pair)[] table) is
-		int x = call askForInt("Please enter an integer to remove: ") ;
-		bool find = call remove(table, x) ;
-		if find then
-			println "The integer has been removed." 
-		else 
-			println "The integer is not found."
-		fi ;
-		return true		
-	end
-	
-	# Handle menu remove all. Returns true.
-	bool handleMenuRemoveAll(pair(int, pair)[] table) is
-		bool junk = call removeAll(table) ; 
-		println "All integers have been removed." ; 
-		return true
-	end
-	
-	################################# The main function ########################################
-	# Our hash table of size 13.
-	pair(int, pair)[] table = [null, null, null, null, null, null, null, null, null, null, null, null, null] ;
-	bool junk = call init(table) ;
-	
-	bool continue = true ;
-	while continue do
-		char choice = call printMenu() ;
-		if choice == 'a' then
-			bool result = call handleMenuInsert(table)
-		else if choice == 'b' then
-			bool result = call handleMenuFind(table)
-		else if choice == 'c' then
-			bool result = call handleMenuCount(table)
-		else if choice == 'd' then
-			bool result = call handleMenuPrint(table)
-		else if choice == 'e' then
-			bool result = call handleMenuRemove(table)
-		else if choice == 'f' then
-			bool result = call handleMenuRemoveAll(table)
-		else if choice == 'g' then
-			println "Goodbye Human" ;
-			continue = false
-		else
-			# Should not happen.
-			print "Error: unknown choice (" ;
-			print choice ;
-			println ")" ;
-			exit -1
-		fi fi fi fi fi fi fi
-	done
-	
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 hashTable.ast contents are:
 ===========================================================
 0	Program
-1	  - bool init(pair(int, basePair)[] table)
+1	  - bool init(int[] table)
 2	    - DECLARE
 3	      - TYPE
 4	        - int
@@ -369,7 +41,7 @@ hashTable.ast contents are:
 36	              - 1
 37	    - RETURN
 38	      - true
-39	  - bool contain(pair(int, basePair)[] table, int x)
+39	  - bool contain(int[] table, int x)
 40	    - DECLARE
 41	      - TYPE
 42	        - int
@@ -381,7 +53,7 @@ hashTable.ast contents are:
 48	        - x
 49	    - DECLARE
 50	      - TYPE
-51	        - pair(int, basePair)
+51	        - int
 52	      - LHS
 53	        - node
 54	      - RHS
@@ -394,7 +66,7 @@ hashTable.ast contents are:
 61	      - !=
 62	        - node
 63	        - null
-64	  - bool insertIfNotContain(pair(int, basePair)[] table, int x)
+64	  - bool insertIfNotContain(int[] table, int x)
 65	    - DECLARE
 66	      - TYPE
 67	        - int
@@ -406,7 +78,7 @@ hashTable.ast contents are:
 73	        - x
 74	    - DECLARE
 75	      - TYPE
-76	        - pair(int, basePair)
+76	        - int
 77	      - LHS
 78	        - node
 79	      - RHS
@@ -426,7 +98,7 @@ hashTable.ast contents are:
 93	      - ELSE
 94	        - DECLARE
 95	          - TYPE
-96	            - pair(int, basePair)
+96	            - int
 97	          - LHS
 98	            - p
 99	          - RHS
@@ -446,7 +118,7 @@ hashTable.ast contents are:
 113	            - p
 114	        - RETURN
 115	          - true
-116	  - bool remove(pair(int, basePair)[] table, int x)
+116	  - bool remove(int[] table, int x)
 117	    - DECLARE
 118	      - TYPE
 119	        - int
@@ -458,7 +130,7 @@ hashTable.ast contents are:
 125	        - x
 126	    - DECLARE
 127	      - TYPE
-128	        - pair(int, basePair)
+128	        - int
 129	      - LHS
 130	        - node
 131	      - RHS
@@ -489,7 +161,7 @@ hashTable.ast contents are:
 156	            - node
 157	        - RETURN
 158	          - true
-159	  - bool removeAll(pair(int, basePair)[] table)
+159	  - bool removeAll(int[] table)
 160	    - DECLARE
 161	      - TYPE
 162	        - int
@@ -513,7 +185,7 @@ hashTable.ast contents are:
 180	      - DO
 181	        - DECLARE
 182	          - TYPE
-183	            - pair(int, basePair)
+183	            - int
 184	          - LHS
 185	            - p
 186	          - RHS
@@ -528,7 +200,7 @@ hashTable.ast contents are:
 195	          - DO
 196	            - DECLARE
 197	              - TYPE
-198	                - pair(int, basePair)
+198	                - int
 199	              - LHS
 200	                - p2
 201	              - RHS
@@ -557,7 +229,7 @@ hashTable.ast contents are:
 224	              - 1
 225	    - RETURN
 226	      - true
-227	  - int count(pair(int, basePair)[] table)
+227	  - int count(int[] table)
 228	    - DECLARE
 229	      - TYPE
 230	        - int
@@ -612,7 +284,7 @@ hashTable.ast contents are:
 279	              - 1
 280	    - RETURN
 281	      - sum
-282	  - bool printAll(pair(int, basePair)[] table)
+282	  - bool printAll(int[] table)
 283	    - DECLARE
 284	      - TYPE
 285	        - int
@@ -655,7 +327,7 @@ hashTable.ast contents are:
 322	      - ""
 323	    - RETURN
 324	      - true
-325	  - int calculateIndex(pair(int, basePair)[] table, int x)
+325	  - int calculateIndex(int[] table, int x)
 326	    - DECLARE
 327	      - TYPE
 328	        - int
@@ -668,7 +340,7 @@ hashTable.ast contents are:
 335	      - %
 336	        - x
 337	        - length
-338	  - pair(int, basePair) findNode(pair(int, basePair) head, int x)
+338	  - int findNode(int head, int x)
 339	    - LOOP
 340	      - CONDITION
 341	        - !=
@@ -700,7 +372,7 @@ hashTable.ast contents are:
 367	                  - head
 368	    - RETURN
 369	      - null
-370	  - pair(int, basePair) removeNode(pair(int, basePair) head, pair(int, basePair) toRemove)
+370	  - int removeNode(int head, int toRemove)
 371	    - IF
 372	      - CONDITION
 373	        - ==
@@ -729,7 +401,7 @@ hashTable.ast contents are:
 396	          - ELSE
 397	            - DECLARE
 398	              - TYPE
-399	                - pair(int, basePair)
+399	                - int
 400	              - LHS
 401	                - tail
 402	              - RHS
@@ -745,7 +417,7 @@ hashTable.ast contents are:
 412	                - toRemove
 413	            - RETURN
 414	              - head
-415	  - int countNodes(pair(int, basePair) head)
+415	  - int countNodes(int head)
 416	    - DECLARE
 417	      - TYPE
 418	        - int
@@ -774,7 +446,7 @@ hashTable.ast contents are:
 441	              - head
 442	    - RETURN
 443	      - sum
-444	  - bool printAllNodes(pair(int, basePair) head)
+444	  - bool printAllNodes(int head)
 445	    - LOOP
 446	      - CONDITION
 447	        - !=
@@ -910,7 +582,7 @@ hashTable.ast contents are:
 577	      - x
 578	    - RETURN
 579	      - x
-580	  - bool handleMenuInsert(pair(int, basePair)[] table)
+580	  - bool handleMenuInsert(int[] table)
 581	    - DECLARE
 582	      - TYPE
 583	        - int
@@ -939,7 +611,7 @@ hashTable.ast contents are:
 606	          - "The integer is already there. No insertion is made."
 607	    - RETURN
 608	      - true
-609	  - bool handleMenuFind(pair(int, basePair)[] table)
+609	  - bool handleMenuFind(int[] table)
 610	    - DECLARE
 611	      - TYPE
 612	        - int
@@ -968,7 +640,7 @@ hashTable.ast contents are:
 635	          - "The integer is not found."
 636	    - RETURN
 637	      - true
-638	  - bool handleMenuCount(pair(int, basePair)[] table)
+638	  - bool handleMenuCount(int[] table)
 639	    - DECLARE
 640	      - TYPE
 641	        - int
@@ -994,7 +666,7 @@ hashTable.ast contents are:
 661	          - " integers."
 662	    - RETURN
 663	      - true
-664	  - bool handleMenuPrint(pair(int, basePair)[] table)
+664	  - bool handleMenuPrint(int[] table)
 665	    - PRINT
 666	      - "Here are the integers: "
 667	    - DECLARE
@@ -1007,7 +679,7 @@ hashTable.ast contents are:
 674	        - table
 675	    - RETURN
 676	      - true
-677	  - bool handleMenuRemove(pair(int, basePair)[] table)
+677	  - bool handleMenuRemove(int[] table)
 678	    - DECLARE
 679	      - TYPE
 680	        - int
@@ -1036,7 +708,7 @@ hashTable.ast contents are:
 703	          - "The integer is not found."
 704	    - RETURN
 705	      - true
-706	  - bool handleMenuRemoveAll(pair(int, basePair)[] table)
+706	  - bool handleMenuRemoveAll(int[] table)
 707	    - DECLARE
 708	      - TYPE
 709	        - bool
@@ -1052,7 +724,7 @@ hashTable.ast contents are:
 719	  - int main()
 720	    - DECLARE
 721	      - TYPE
-722	        - pair(int, basePair)[]
+722	        - int[]
 723	      - LHS
 724	        - table
 725	      - RHS
@@ -1210,4 +882,3 @@ hashTable.ast contents are:
 877	                                      - -1
 ===========================================================
 -- Finished
-

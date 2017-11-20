@@ -1,20 +1,3 @@
--- Test: printNull.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# print the null reference
-
-# Output:
-# (nil)
-
-# Program:
-
-begin
-  println null
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 printNull.ast contents are:
@@ -25,4 +8,3 @@ printNull.ast contents are:
 3	      - null
 ===========================================================
 -- Finished
-

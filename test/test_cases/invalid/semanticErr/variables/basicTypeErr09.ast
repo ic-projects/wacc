@@ -1,24 +1,3 @@
--- Test: basicTypeErr09.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# type mismatch: char <- string
-
-# Output:
-# #semantic_error#
-
-# Exit:
-# 200
-
-# Program:
-
-begin
-  char c = "a"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 Errors detected during compilation! Exit code 200 returned.
 Semantic Error at 12:11 -- Incompatible type at "a" (expected: CHAR, actual: CHAR[])
-

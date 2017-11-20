@@ -1,24 +1,3 @@
--- Test: stringAssignmentWithPrint.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# string assignment followed by print
-
-# Output:
-# foo
-# bar
-
-# Program:
-
-begin
-  string s = "foo" ;
-  println s ;
-  s = "bar" ;
-  println s
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 stringAssignmentWithPrint.ast contents are:
@@ -43,4 +22,3 @@ stringAssignmentWithPrint.ast contents are:
 17	      - s
 ===========================================================
 -- Finished
-

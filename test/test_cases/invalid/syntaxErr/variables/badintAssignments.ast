@@ -1,27 +1,5 @@
--- Test: badintAssignments.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# bad integer assignments
-
-# Output:
-# #syntax_error#
-
-# Exit:
-# 100
-
-# Program:
-
-begin
-  int x = 22 0 ;
-  int y = 1A4
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 Errors detected during compilation! Exit code 100 returned.
 Syntactic Error at 12:13 -- extraneous input '0' expecting {'-', '*', '/', '%', '+', '<', '<=', '>=', '>', '==', '!=', '&&', '||', 'end', ';'}
 Syntactic Error at 13:11 -- extraneous input 'A4' expecting {'-', '*', '/', '%', '+', '<', '<=', '>=', '>', '==', '!=', '&&', '||', 'end', ';'}
 2 parser error(s) detected, no further compilation attempted.
-

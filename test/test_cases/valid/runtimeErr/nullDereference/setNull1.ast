@@ -1,24 +1,3 @@
--- Test: setNull1.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# attempt dereference of a null pair by setting an element of it
-
-# Output:
-# #runtime_error#
-
-# Exit:
-# 255
-
-# Program:
-
-begin
-	pair(int, int) p = null ;
-	fst p = 1
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 setNull1.ast contents are:
@@ -27,7 +6,7 @@ setNull1.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, int)
+4	        - intint
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -40,4 +19,3 @@ setNull1.ast contents are:
 14	        - 1
 ===========================================================
 -- Finished
-

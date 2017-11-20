@@ -1,24 +1,3 @@
--- Test: scopeBasic.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# very simple scoping test
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  skip;
-  begin
-    skip
-  end
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 scopeBasic.ast contents are:
@@ -30,4 +9,3 @@ scopeBasic.ast contents are:
 4	      - SKIP
 ===========================================================
 -- Finished
-

@@ -1,28 +1,3 @@
--- Test: scopeRedefine.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# more complex variable scoping test that redefines a variable
-
-# Output:
-# true
-# 2
-
-# Program:
-
-begin
-  int x = 1 ;
-  begin
-    x = 2 ;
-    bool x = true ;
-    println x
-  end ;
-  println x 
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 scopeRedefine.ast contents are:
@@ -55,4 +30,3 @@ scopeRedefine.ast contents are:
 25	      - x
 ===========================================================
 -- Finished
-

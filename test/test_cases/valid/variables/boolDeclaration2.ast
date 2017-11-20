@@ -1,20 +1,3 @@
--- Test: boolDeclaration2.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple true boolean variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  bool b = true
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 boolDeclaration2.ast contents are:
@@ -30,4 +13,3 @@ boolDeclaration2.ast contents are:
 8	        - true
 ===========================================================
 -- Finished
-

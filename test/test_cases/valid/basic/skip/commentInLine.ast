@@ -1,20 +1,3 @@
--- Test: commentInLine.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple skip program with in-line comment
-
-# Output:
-# #empty#
-
-# Program:
-
-begin 
-  skip # I can write comments in-line 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 commentInLine.ast contents are:
@@ -24,4 +7,3 @@ commentInLine.ast contents are:
 2	    - SKIP
 ===========================================================
 -- Finished
-

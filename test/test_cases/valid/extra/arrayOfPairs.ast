@@ -1,60 +1,22 @@
--- Test: arrayOfPairs.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# spooky pair array
-
-# Output:
-#
-
-# Program:
-
-begin
-	pair(pair, pair)[] f(pair(pair, pair)[] x) is
-		return x
-	end
-	pair(pair, pair) n = null ;
-	pair(pair, pair) n2 = fst n ;
-	pair(pair, pair) n3 = n ;
-	pair(pair, pair) n4 = newpair(n, n2) ;
-	pair(pair, pair) n5 = newpair(n4, null) ;
-	pair(pair, pair) n6 = newpair(null, null) ;
-	pair(pair, pair) n7 = n6 ;
-	pair(pair, pair) n8 = newpair(null, null) ;
-	pair(pair, pair)[] a = [n, n2, n3] ;
-	pair(pair, pair)[] a2 = call f(a) ;
-	pair(pair, pair)[] a3 = [null, null, n4] ;
-	pair(pair, pair)[][] aa = [a2, a3, a] ;
-	pair(pair, pair)[] a4 = [aa[0][len aa[len a3]], aa[1][2]] ;
-	pair(pair, pair)[][] aa2 = [aa[len a3], a2] ;
-	pair(pair, pair) n9 = newpair(aa2[1][2], null) ;
-	pair(pair, pair) n10 = newpair(null, a4[len aa[len aa[len aa[len aa]]]]) ;
-	pair(int, int) intpair = fst n ;
-	int i = fst intpair ;
-	pair(int, pair(pair, pair)[]) wow = newpair(i, aa2[0])
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 arrayOfPairs.ast contents are:
 ===========================================================
 0	Program
-1	  - pair(basePair, basePair)[] f(pair(basePair, basePair)[] x)
+1	  - [] f([] x)
 2	    - RETURN
 3	      - x
 4	  - int main()
 5	    - DECLARE
 6	      - TYPE
-7	        - pair(basePair, basePair)
+7	        - 
 8	      - LHS
 9	        - n
 10	      - RHS
 11	        - null
 12	    - DECLARE
 13	      - TYPE
-14	        - pair(basePair, basePair)
+14	        - 
 15	      - LHS
 16	        - n2
 17	      - RHS
@@ -62,14 +24,14 @@ arrayOfPairs.ast contents are:
 19	          - n
 20	    - DECLARE
 21	      - TYPE
-22	        - pair(basePair, basePair)
+22	        - 
 23	      - LHS
 24	        - n3
 25	      - RHS
 26	        - n
 27	    - DECLARE
 28	      - TYPE
-29	        - pair(basePair, basePair)
+29	        - 
 30	      - LHS
 31	        - n4
 32	      - RHS
@@ -80,7 +42,7 @@ arrayOfPairs.ast contents are:
 37	            - n2
 38	    - DECLARE
 39	      - TYPE
-40	        - pair(basePair, basePair)
+40	        - 
 41	      - LHS
 42	        - n5
 43	      - RHS
@@ -91,7 +53,7 @@ arrayOfPairs.ast contents are:
 48	            - null
 49	    - DECLARE
 50	      - TYPE
-51	        - pair(basePair, basePair)
+51	        - 
 52	      - LHS
 53	        - n6
 54	      - RHS
@@ -102,14 +64,14 @@ arrayOfPairs.ast contents are:
 59	            - null
 60	    - DECLARE
 61	      - TYPE
-62	        - pair(basePair, basePair)
+62	        - 
 63	      - LHS
 64	        - n7
 65	      - RHS
 66	        - n6
 67	    - DECLARE
 68	      - TYPE
-69	        - pair(basePair, basePair)
+69	        - 
 70	      - LHS
 71	        - n8
 72	      - RHS
@@ -120,7 +82,7 @@ arrayOfPairs.ast contents are:
 77	            - null
 78	    - DECLARE
 79	      - TYPE
-80	        - pair(basePair, basePair)[]
+80	        - []
 81	      - LHS
 82	        - a
 83	      - RHS
@@ -130,7 +92,7 @@ arrayOfPairs.ast contents are:
 87	          - n3
 88	    - DECLARE
 89	      - TYPE
-90	        - pair(basePair, basePair)[]
+90	        - []
 91	      - LHS
 92	        - a2
 93	      - RHS
@@ -138,7 +100,7 @@ arrayOfPairs.ast contents are:
 95	        - a
 96	    - DECLARE
 97	      - TYPE
-98	        - pair(basePair, basePair)[]
+98	        - []
 99	      - LHS
 100	        - a3
 101	      - RHS
@@ -148,7 +110,7 @@ arrayOfPairs.ast contents are:
 105	          - n4
 106	    - DECLARE
 107	      - TYPE
-108	        - pair(basePair, basePair)[][]
+108	        - [][]
 109	      - LHS
 110	        - aa
 111	      - RHS
@@ -158,7 +120,7 @@ arrayOfPairs.ast contents are:
 115	          - a
 116	    - DECLARE
 117	      - TYPE
-118	        - pair(basePair, basePair)[]
+118	        - []
 119	      - LHS
 120	        - a4
 121	      - RHS
@@ -179,7 +141,7 @@ arrayOfPairs.ast contents are:
 136	              - 2
 137	    - DECLARE
 138	      - TYPE
-139	        - pair(basePair, basePair)[][]
+139	        - [][]
 140	      - LHS
 141	        - aa2
 142	      - RHS
@@ -191,7 +153,7 @@ arrayOfPairs.ast contents are:
 148	          - a2
 149	    - DECLARE
 150	      - TYPE
-151	        - pair(basePair, basePair)
+151	        - 
 152	      - LHS
 153	        - n9
 154	      - RHS
@@ -206,7 +168,7 @@ arrayOfPairs.ast contents are:
 163	            - null
 164	    - DECLARE
 165	      - TYPE
-166	        - pair(basePair, basePair)
+166	        - 
 167	      - LHS
 168	        - n10
 169	      - RHS
@@ -229,7 +191,7 @@ arrayOfPairs.ast contents are:
 186	                                    - aa
 187	    - DECLARE
 188	      - TYPE
-189	        - pair(int, int)
+189	        - intint
 190	      - LHS
 191	        - intpair
 192	      - RHS
@@ -245,7 +207,7 @@ arrayOfPairs.ast contents are:
 202	          - intpair
 203	    - DECLARE
 204	      - TYPE
-205	        - pair(int, pair(basePair, basePair)[])
+205	        - int[]
 206	      - LHS
 207	        - wow
 208	      - RHS
@@ -258,4 +220,3 @@ arrayOfPairs.ast contents are:
 215	                - 0
 ===========================================================
 -- Finished
-

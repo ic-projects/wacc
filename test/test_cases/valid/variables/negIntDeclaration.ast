@@ -1,20 +1,3 @@
--- Test: negIntDeclaration.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple negative integer variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  int x = -1
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 negIntDeclaration.ast contents are:
@@ -30,4 +13,3 @@ negIntDeclaration.ast contents are:
 8	        - -1
 ===========================================================
 -- Finished
-

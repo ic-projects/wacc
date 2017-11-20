@@ -1,21 +1,3 @@
--- Test: stringAssignment.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple string variable declaration and assignment
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  string s = "foo" ;
-  s = "bar"
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 stringAssignment.ast contents are:
@@ -36,4 +18,3 @@ stringAssignment.ast contents are:
 13	        - "bar"
 ===========================================================
 -- Finished
-

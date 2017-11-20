@@ -1,21 +1,3 @@
--- Test: arrayBasic.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# basic array declaration and assignment
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  int[] a = [0]
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 arrayBasic.ast contents are:
@@ -32,4 +14,3 @@ arrayBasic.ast contents are:
 9	          - 0
 ===========================================================
 -- Finished
-

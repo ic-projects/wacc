@@ -1,25 +1,3 @@
--- Test: intExpr1.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating a moderately complex integer expression
-
-# Output:
-# Correct
-
-# Program:
-
-begin
-  int a = ( 10 * 1 + 2 * 15 );
-  if a == 40 then
-    println "Correct"
-  else
-    println "Wrong"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 intExpr1.ast contents are:
@@ -52,4 +30,3 @@ intExpr1.ast contents are:
 25	          - "Wrong"
 ===========================================================
 -- Finished
-

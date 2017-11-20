@@ -1,26 +1,3 @@
--- Test: multiTypeErrs.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# multiple type mismatches: int <- bool, bool <- char, char <- int
-
-# Output:
-# #semantic_error#
-
-# Exit:
-# 200
-
-# Program:
-
-begin
-  int i = true ;
-  bool b = 'a' ;
-  char c = 10
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 Errors detected during compilation! Exit code 200 returned.
 Semantic Error at 12:10 -- Incompatible type at true (expected: INT, actual: BOOL)
-

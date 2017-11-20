@@ -1,31 +1,3 @@
--- Test: ifNested1.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# Nested conditional statement
-
-# Output:
-# correct
-
-# Program:
-
-begin
-  int a = 13;	
-  if a == 13 
-  then 
-    if a > 5
-    then
-      println "correct"
-    else
-      println "incorrect"
-    fi
-  else 
-    println "incorrect"
-  fi
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 ifNested1.ast contents are:
@@ -61,4 +33,3 @@ ifNested1.ast contents are:
 28	          - "incorrect"
 ===========================================================
 -- Finished
-

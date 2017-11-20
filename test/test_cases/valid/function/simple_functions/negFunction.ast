@@ -1,32 +1,3 @@
--- Test: negFunction.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# a simple negation function definition and usage
-
-# Output:
-# true
-# false
-# true
-
-# Program:
-
-begin
-  bool neg(bool b) is
-    return !b 
-  end
-  bool b = true ;
-  println b ;
-  b = call neg(b) ;
-  println b ;
-  b = call neg(b) ;
-  b = call neg(b) ;
-  b = call neg(b) ;
-  println b
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 negFunction.ast contents are:
@@ -76,4 +47,3 @@ negFunction.ast contents are:
 42	      - b
 ===========================================================
 -- Finished
-

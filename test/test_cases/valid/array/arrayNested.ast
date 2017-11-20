@@ -1,26 +1,3 @@
--- Test: arrayNested.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# basic array declaration and assignment
-
-# Output:
-# 3
-# 3
-
-# Program:
-
-begin
-  int[] a = [1,2,3];
-  int[] b = [3,4];
-  int[][] c = [a,b] ;
-  println c[0][2] ;
-  println c[1][0]
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 arrayNested.ast contents are:
@@ -69,4 +46,3 @@ arrayNested.ast contents are:
 41	          - 0
 ===========================================================
 -- Finished
-

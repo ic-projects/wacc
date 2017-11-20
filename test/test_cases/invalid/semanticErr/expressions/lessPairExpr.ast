@@ -1,28 +1,3 @@
--- Test: lessPairExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evaluating less-than on references
-
-# Output:
-# #semantic_error#
-
-# Exit:
-# 200
-
-# Program:
-
-begin
-  pair(int,int) x = newpair(1,2) ;
-  println x;
-  pair(int,int) y = newpair(2,3) ;
-  println y;
-  println x < y
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 Errors detected during compilation! Exit code 200 returned.
 Semantic Error at 16:10 -- Incompatible type Pair(INT, INT)
-

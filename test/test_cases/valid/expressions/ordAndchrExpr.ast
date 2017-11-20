@@ -1,32 +1,3 @@
--- Test: ordAndchrExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# evalutaing ord and chr
-
-# Output:
-# a is 97
-# 99 is c
-
-# Program:
-
-begin
-  char a = 'a' ;
-  int i = 99 ;
-
-  print a ;
-  print " is " ;
-  println ord a ;
-
-  print i ;
-  print " is " ;
-  println chr i
-end
-
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 ordAndchrExpr.ast contents are:
@@ -63,4 +34,3 @@ ordAndchrExpr.ast contents are:
 29	        - i
 ===========================================================
 -- Finished
-

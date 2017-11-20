@@ -1,37 +1,12 @@
--- Test: functionReturnPair.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# creates a pair which is returned from a function
-
-# Output:
-# 10
-
-# Program:
-
-begin
-
-  pair(int, int) getPair() is
-    pair(int, int) p = newpair(10,15);
-    return p
-  end
-
-  pair(int, int) p = call getPair();
-  int x = fst p;
-  println x
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 functionReturnPair.ast contents are:
 ===========================================================
 0	Program
-1	  - pair(int, int) getPair()
+1	  - intint getPair()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(int, int)
+4	        - intint
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -45,7 +20,7 @@ functionReturnPair.ast contents are:
 15	  - int main()
 16	    - DECLARE
 17	      - TYPE
-18	        - pair(int, int)
+18	        - intint
 19	      - LHS
 20	        - p
 21	      - RHS
@@ -62,4 +37,3 @@ functionReturnPair.ast contents are:
 32	      - x
 ===========================================================
 -- Finished
-

@@ -1,40 +1,3 @@
--- Test: readPair.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# construct a pair from supplied user input
-
-# Output:
-# Please enter the first element (char): #input#
-# Please enter the second element (int): #input#
-# The first element was #output#
-# The second element was #output#
-
-# Program:
-
-begin
-	pair(char, int) p = newpair('\0', 0) ;
-	print "Please enter the first element (char): " ;
-  	char c = '0';
-	read c ;
-  	fst p = c ;
-	print "Please enter the second element (int): " ;
-	int i = 0 ;
-	read i ;
-	snd p = i ;
-	# Clear the value for c and i
-	c = '\0' ;
-	i = -1 ;
-	print "The first element was " ;
-	c = fst p ;
-	println c ;
-	print "The second element was " ;
-	i = snd p ;
-	println i 
-end 
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 readPair.ast contents are:
@@ -43,7 +6,7 @@ readPair.ast contents are:
 1	  - int main()
 2	    - DECLARE
 3	      - TYPE
-4	        - pair(char, int)
+4	        - charint
 5	      - LHS
 6	        - p
 7	      - RHS
@@ -118,4 +81,3 @@ readPair.ast contents are:
 76	      - i
 ===========================================================
 -- Finished
-

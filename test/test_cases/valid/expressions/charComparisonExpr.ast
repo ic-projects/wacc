@@ -1,33 +1,3 @@
--- Test: charComparisonExpr.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# detailed battery of character comparison tests
-
-# Output:
-# false
-# true
-# true
-# true
-# false
-# false
-
-# Program:
-
-begin
-  char c1 = 'a' ;
-  char c2 = 'z' ;
-  println c1 == c2 ;
-  println c1 != c2 ;
-  println c1 < c2 ;
-  println c1 <= c2 ;
-  println c1 > c2 ;
-  println c1 >= c2
-end
-
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 charComparisonExpr.ast contents are:
@@ -74,4 +44,3 @@ charComparisonExpr.ast contents are:
 39	        - c2
 ===========================================================
 -- Finished
-

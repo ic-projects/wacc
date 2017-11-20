@@ -1,20 +1,3 @@
--- Test: charDeclaration2.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple character variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  char c = 'z'
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 charDeclaration2.ast contents are:
@@ -30,4 +13,3 @@ charDeclaration2.ast contents are:
 8	        - 'z'
 ===========================================================
 -- Finished
-

@@ -1,25 +1,3 @@
--- Test: echoChar.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# echo the user's input char
-
-# Output:
-# enter a character to echo
-# #input#
-# #output#
-
-# Program:
-
-begin
-	char c = '\0' ;
-  println "enter a character to echo";
-	read c ;
-	println c 
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 echoChar.ast contents are:
@@ -41,4 +19,3 @@ echoChar.ast contents are:
 14	      - c
 ===========================================================
 -- Finished
-

@@ -1,20 +1,3 @@
--- Test: capCharDeclaration.wacc
-
--- Uploaded file: 
----------------------------------------------------------------
-# simple capital character variable declaration
-
-# Output:
-# #empty#
-
-# Program:
-
-begin
-  char c = 'M'
-end
----------------------------------------------------------------
-
--- Compiler Output:
 -- Compiling...
 -- Printing AST...
 capCharDeclaration.ast contents are:
@@ -30,4 +13,3 @@ capCharDeclaration.ast contents are:
 8	        - 'M'
 ===========================================================
 -- Finished
-
