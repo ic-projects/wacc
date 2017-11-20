@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -386,4 +387,26 @@ func (location *Location) UpdateStackOffsetPop() {
 	if location.stackOffset != -1 {
 		location.stackOffset--
 	}
+}
+
+func (location *Location) String() string {
+	// Location is a register
+	if location.register == UNDEFINED {
+		return location.register.String()
+	}
+
+	var buf bytes.Buffer
+
+	// Location is an address on the heap
+	if location.address != -1 {
+		buf.WriteString("#")
+		buf.WriteString(strconv.Itoa(location.address))
+		return buf.String()
+	}
+
+	// Location is a stack offset
+	buf.WriteString("[sp, #")
+	buf.WriteString(strconv.Itoa(location.stackOffset))
+	buf.WriteString("]")
+	return buf.String()
 }
