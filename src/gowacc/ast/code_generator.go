@@ -349,3 +349,27 @@ type Location struct {
 	address  		int
 	stackOffset int
 }
+
+func NewRegisterLocation(register Register) *Location {
+	return &Location{
+		register: 	 register,
+		address: 		 -1,
+		stackOffset: -1,
+	}
+}
+
+func NewAddressLocation(address int) *Location {
+	return &Location{
+		register: 	 UNDEFINED,
+		address: 		 address,
+		stackOffset: -1,
+	}
+}
+
+func NewStackOffsetLocation(offset int) *Location {
+	return &Location{
+		register: 	 UNDEFINED,
+		address: 		 -1,
+		stackOffset: offset,
+	}
+}
