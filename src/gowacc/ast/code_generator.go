@@ -69,6 +69,28 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	return nil
 }
 
+type Register int
+
+const (
+	R0    Register = iota
+	R1
+	R2
+	R3
+	R4
+	R5
+	R6
+	R7
+	R8
+	R9
+	R10
+	R11
+	R12
+	SP
+	LR
+	PC
+	APSR
+)
+
 // GenerateCode is a function that will generate and return the finished assembly
 // code for a given AST.
 func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
@@ -87,6 +109,8 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 type CodeGenerator struct {
 	asm *Assembly
 	symbolTable *SymbolTable
+	freeRegisters []Register
+	returnRegisters []Register
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -94,6 +118,8 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
 		asm: NewAssembly(),
 		symbolTable: symbolTable,
+		freeRegisters: []Register{R3,R4,R5,R6,R7,R8,R9,R10,R11,R12},
+		returnRegisters: make([]Register, 0),
 	}
 }
 
