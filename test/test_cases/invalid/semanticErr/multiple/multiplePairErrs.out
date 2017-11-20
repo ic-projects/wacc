@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 14:6 -- accessing element of a null pair

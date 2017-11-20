@@ -1,0 +1,9 @@
+-- Compiling...
+-- Assembling and Linking...
+-- Executing...
+===========================================================
+Change c
+Should print "Change c" once before.
+===========================================================
+The exit code is 0.
+-- Finished

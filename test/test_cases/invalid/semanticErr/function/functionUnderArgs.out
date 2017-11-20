@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 15:9 -- Incorrect number of parameters for f (expected: 2, actual: 1)

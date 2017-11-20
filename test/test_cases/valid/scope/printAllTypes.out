@@ -1,0 +1,18 @@
+-- Compiling...
+-- Assembling and Linking...
+-- Executing...
+===========================================================
+( [1, 2, 3] , [a, b, c] )
+[ 0x23088 = (a, true), 0x230b8 = (b, false) ]
+1, 2
+array, of, strings
+true, false, true
+xyz
+1, 2, 3
+this is a string
+true
+x
+5
+===========================================================
+The exit code is 0.
+-- Finished

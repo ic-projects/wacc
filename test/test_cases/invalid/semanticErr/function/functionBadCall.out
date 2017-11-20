@@ -1,0 +1,3 @@
+-- Compiling...
+Errors detected during compilation! Exit code 200 returned.
+Semantic Error at 15:10 -- Incompatible type at callf() (expected: BOOL, actual: INT)
