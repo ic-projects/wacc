@@ -1,13 +1,16 @@
 package ast
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 )
 
 type Assembly []string
 
+// String will return the string format of the Assembly code with line numbers.
 func (asm Assembly) String() string {
 	var tempbuf bytes.Buffer
 	for _, s := range asm {
@@ -20,6 +23,26 @@ func (asm Assembly) String() string {
 		}
 	}
 	return buf.String()
+}
+
+// SaveToFile is a function that will save the assembly to the given savepath
+// overwriting any file already there.
+func (asm Assembly) SaveToFile(savepath string) error {
+	file, err := os.Create(savepath)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+
+	w := bufio.NewWriter(file)
+	defer w.Flush()
+	for _, line := range asm {
+		_, err := w.WriteString(line)
+		if err != nil {
+				return err
+		}
+	}
+	return nil
 }
 
 // GenerateCode is a function that will generate and return the finished assembly
@@ -48,8 +71,9 @@ func NewCodeGenerator() *CodeGenerator {
 	}
 }
 
+// add adds a single line of assembly to the already generated assembly code
 func (v *CodeGenerator) add(line string) {
-	v.asm = append(v.asm, line)
+	v.asm = append(v.asm, line + "\n")
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with

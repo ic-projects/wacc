@@ -61,13 +61,19 @@ func main() {
 			asm := ast.GenerateCode(tree)
 
 			// Save assembly code to files
-
+			savepath := strings.TrimSuffix(path.Base(filepath), ".wacc") + ".s"
+			err := asm.SaveToFile(savepath)
+			if err != nil {
+				fmt.Println("Error creating output file.")
+				fmt.Println(err)
+				os.Exit(200)
+			}
 
 			// Print assembly code
 			if *printAssembly {
 				fmt.Println("-- Printing Assembly...")
-				fmt.Print(strings.TrimSuffix(path.Base(filepath), ".wacc"))
-				fmt.Println(".s contents are:")
+				fmt.Print(savepath)
+				fmt.Println(" contents are:")
 				fmt.Println("===========================================================")
 				fmt.Print(asm)
 				fmt.Println("===========================================================")
