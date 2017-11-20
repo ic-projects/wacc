@@ -14,7 +14,7 @@ class TestSuite
     @test_cases_path       = File.absolute_path(test_cases_path)
     @wacc_compile_script   = File.absolute_path(wacc_compile_script)
 
-    @compile    = File.absolute_path(File.join(wacc_compile_script,"compile"))
+    @compile    = File.absolute_path(File.join(wacc_compile_script,"testCompile"))
     @refCompile = File.absolute_path(File.join(wacc_compile_script,"refCompile"))
 
     sources

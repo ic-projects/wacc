@@ -89,9 +89,18 @@ exitstatus = 0
 
 # now process each target file
 files.each do |file_path|
+  puts "-- Test: #{File.basename file_path}"
+  puts ""
+  puts "-- Uploaded file: "
+  puts "---------------------------------------------------------------"
+  puts IO.read(file_path)
+  puts "---------------------------------------------------------------"
+  puts ""
+  puts "-- Compiler Output:"
   output = %x(./gowacc #{$opts.join(" ")} #{file_path})
   exitstatus = $?.exitstatus
   puts output
+  puts ""
 end
 
 exit exitstatus
