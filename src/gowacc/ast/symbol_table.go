@@ -8,10 +8,10 @@ import (
 // SymbolTable is a struct that stores the symboltable and the currentScope that
 // the program is in.
 type SymbolTable struct {
-	head         *SymbolTableNode
-	currentScope *SymbolTableNode
-	functions    map[string]FunctionNode
-  functionsOrder []string
+	head           *SymbolTableNode
+	currentScope   *SymbolTableNode
+	functions      map[string]FunctionNode
+	functionsOrder []string
 }
 
 // NewSymbolTable returns an initialised SymbolTable, with an empty scope. The
@@ -19,10 +19,10 @@ type SymbolTable struct {
 func NewSymbolTable() *SymbolTable {
 	head := NewSymbolTableNode(nil)
 	return &SymbolTable{
-		head:         head,
-		currentScope: head,
-		functions:    make(map[string]FunctionNode),
-    functionsOrder: make([]string, 0),
+		head:           head,
+		currentScope:   head,
+		functions:      make(map[string]FunctionNode),
+		functionsOrder: make([]string, 0),
 	}
 }
 
@@ -32,7 +32,7 @@ type SymbolTableNode struct {
 	scope       map[string]IdentifierDeclaration
 	childScopes []*SymbolTableNode
 	parentScope *SymbolTableNode
-  lastScope int
+	lastScope   int
 }
 
 func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
@@ -40,16 +40,16 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 		scope:       make(map[string]IdentifierDeclaration),
 		childScopes: make([]*SymbolTableNode, 0, 10),
 		parentScope: parentScope,
-    lastScope: -1,
+		lastScope:   -1,
 	}
 }
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
-	pos   Position
-	t     TypeNode
-	ident IdentifierNode
-  position interface{}
+	pos      Position
+	t        TypeNode
+	ident    IdentifierNode
+	position interface{}
 }
 
 func NewIdentifierDeclaration(programNode ProgramNode) IdentifierDeclaration {
@@ -72,7 +72,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) IdentifierDeclaration {
 }
 
 func (dec IdentifierDeclaration) AddPosition(position interface{}) {
-  dec.position = position
+	dec.position = position
 }
 
 // MoveDownScope creates a new scope such that it is a chile of the currentscope,
@@ -84,8 +84,8 @@ func (table *SymbolTable) MoveDownScope() {
 }
 
 func (table *SymbolTable) MoveNextScope() {
-  table.currentScope.lastScope++
-  table.currentScope = table.currentScope.childScopes[table.currentScope.lastScope]
+	table.currentScope.lastScope++
+	table.currentScope = table.currentScope.childScopes[table.currentScope.lastScope]
 }
 
 // MoveUpScope will move the scope one level up if it exists.

@@ -190,14 +190,14 @@ func (p Position) String() string {
 	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)
 }
 
-func Type(e ExpressionNode, s *SymbolTable) TypeNode{
+func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
 	case BinaryOperatorNode:
 		switch node.op {
 		case MUL, DIV, MOD, ADD, SUB:
 			return NewBaseTypeNode(INT)
 		case GT, GEQ, LT, LEQ, EQ, NEQ, AND, OR:
-			return  NewBaseTypeNode(BOOL)
+			return NewBaseTypeNode(BOOL)
 		}
 	case UnaryOperatorNode:
 		switch node.op {
@@ -221,7 +221,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode{
 	case ArrayElementNode:
 		a, _ := s.SearchForIdent(node.ident.ident)
 		arr := a.t.(ArrayTypeNode)
-		if dimLeft := arr.dim - len(node.exprs); dimLeft == 0{
+		if dimLeft := arr.dim - len(node.exprs); dimLeft == 0 {
 			return arr.t
 		} else {
 			return NewArrayTypeNode(arr.t, dimLeft)
