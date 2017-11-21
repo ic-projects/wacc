@@ -341,18 +341,18 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case IfNode:
 		// Cond
-		v.Visit(node.expr)
+		Walk(v, node.expr)
 		r := v.returnRegisters.Pop()
-		v.freeRegisters.Push(r)
 		v.addCode(fmt.Sprintf("CMP %s, #0", r))
+		v.freeRegisters.Push(r)
 		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount))
 		// If
-		v.Visit(node.ifStats)
+		Walk(v, node.ifStats)
 		v.addCode(fmt.Sprintf("B L%d", v.labelCount))
 		// Else
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
-		v.Visit(node.elseStats)
+		Walk(v, node.elseStats)
 		// Fi
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
@@ -398,7 +398,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.addCode("MOV " + register.String() + ", #0") // False
 		}
-		v.returnRegisters.Push(register)
 	case CharacterLiteralNode:
 		register := v.freeRegisters.Pop()
 		v.addCode("LDR " + register.String() + ", #" + string(node.val))

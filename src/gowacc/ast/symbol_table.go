@@ -86,7 +86,11 @@ func (table *SymbolTable) MoveDownScope() {
 
 func (table *SymbolTable) MoveNextScope() {
 	table.currentScope.lastScope++
-	table.currentScope = table.currentScope.childScopes[table.currentScope.lastScope]
+	if len(table.currentScope.childScopes) > table.currentScope.lastScope {
+		table.currentScope = table.currentScope.childScopes[table.currentScope.lastScope]
+	} else {
+		fmt.Println("Internal Error: no next scope, currentScope has ", len(table.currentScope.childScopes), " childscopes")
+	}
 }
 
 // MoveUpScope will move the scope one level up if it exists.
