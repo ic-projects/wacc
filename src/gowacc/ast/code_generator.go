@@ -232,10 +232,10 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 	case BaseTypeNode:
 		switch node.t {
 		case BOOL:
-			v.addCode("BL p_print_bool")
+			v.addCode("BL " + PRINT_BOOL.String())
 			v.usesFunction(PRINT_BOOL)
 		case INT:
-			v.addCode("BL p_print_int")
+			v.addCode("BL " + PRINT_INT.String())
 			v.usesFunction(PRINT_INT)
 		case CHAR:
 			v.addCode("BL putchar")
@@ -421,7 +421,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.freeRegisters.Push(register)
 		v.addCode("MOV r0, "+register.String())
 		v.addPrint(Type(node.expr, v.symbolTable))
-		v.addCode("BL p_print_ln")
+		v.addCode("BL " + PRINT_LN.String())
 		v.usesFunction(PRINT_LN)
 	case ExitNode:
 		register := v.returnRegisters.Pop()
@@ -460,8 +460,10 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
+				"BL " + CHECK_DIVIDE.String(),
 				"BL __aeabi_idiv",
 				"MOV "+returnRegister.String()+", r0")
+			v.usesFunction(CHECK_DIVIDE)
 		case MOD:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
