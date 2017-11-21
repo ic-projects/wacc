@@ -90,5 +90,4 @@ func main() {
 		fmt.Print(tree)
 		fmt.Println("===========================================================")
 	}
-	fmt.Println("-- Finished")
 }
