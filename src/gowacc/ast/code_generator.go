@@ -173,6 +173,7 @@ type CodeGenerator struct {
 	freeRegisters   *RegisterStack
 	returnRegisters *RegisterStack
 	library					*Library
+	currentStackPos int
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -183,6 +184,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
 		returnRegisters: NewRegisterStack(),
 		library:				 GetLibrary(),
+		currentStackPos: 0,
 	}
 }
 
@@ -505,46 +507,32 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 }
 
 type Location struct {
-	register    Register
-	address     int
-	stackOffset int
+	register Register
+	address  int
+
+	// Stores information needed to determine stack offset
+	currentPos    int
+	codeGenerator *CodeGenerator
 }
 
 func NewRegisterLocation(register Register) *Location {
 	return &Location{
-		register:    register,
-		address:     0,
-		stackOffset: -1,
+		register: register,
 	}
 }
 
 func NewAddressLocation(address int) *Location {
 	return &Location{
-		register:    UNDEFINED,
-		address:     address,
-		stackOffset: -1,
+		register: UNDEFINED,
+		address:  address,
 	}
 }
 
-func NewStackOffsetLocation(offset int) *Location {
+func NewStackOffsetLocation(currentPos int, v *CodeGenerator) *Location {
 	return &Location{
-		register:    UNDEFINED,
-		address:     0,
-		stackOffset: offset,
-	}
-}
-
-func (location *Location) UpdateStackOffsetPush() {
-	// Only updating if the location is a StackOffsetLocation
-	if location.stackOffset != -1 {
-		location.stackOffset++
-	}
-}
-
-func (location *Location) UpdateStackOffsetPop() {
-	// Only updating if the location is a StackOffsetLocation
-	if location.stackOffset != -1 {
-		location.stackOffset--
+		register:      UNDEFINED,
+		currentPos:    currentPos,
+		codeGenerator: v,
 	}
 }
 
@@ -560,5 +548,5 @@ func (location *Location) String() string {
 	}
 
 	// Location is a stack offset
-	return "[sp, #" + strconv.Itoa(location.stackOffset) + "]"
+	return "[sp, #" + strconv.Itoa(location.codeGenerator.currentStackPos-location.currentPos) + "]"
 }
