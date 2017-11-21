@@ -192,9 +192,14 @@ func NewRegisterStackWith(registers []Register) *RegisterStack {
 }
 
 func (registerStack *RegisterStack) Pop() Register {
-	register := registerStack.stack[len(registerStack.stack)-1]
-	registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
-	return register
+	  if len(registerStack.stack) != 0 {
+      register := registerStack.stack[len(registerStack.stack) - 1];
+      registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
+      return register;
+    } else {
+      fmt.Println("Internal compiler error")
+      return UNDEFINED
+    }
 }
 
 func (registerStack *RegisterStack) Push(register Register) {
