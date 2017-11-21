@@ -1,0 +1,11 @@
+# spooky strings
+
+# Output:
+#
+
+# Program:
+
+begin
+	int c = c ;
+	println c
+end

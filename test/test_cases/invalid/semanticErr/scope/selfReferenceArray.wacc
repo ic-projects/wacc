@@ -1,0 +1,13 @@
+# spooky strings
+
+# Output:
+#
+
+# Program:
+
+begin
+	int[][] c = [c[0]] ;
+	println c ;
+	println c[0] ;
+	println c[0][0]
+end
