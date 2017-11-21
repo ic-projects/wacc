@@ -406,8 +406,22 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case SUB:
 			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
-		case GT, GEQ, LT, LEQ:
-
+		case GT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGT "+returnRegister.String()+", #1",
+				"MOVLE "+returnRegister.String()+", #0")
+		case GEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGE "+returnRegister.String()+", #1",
+				"MOVLT "+returnRegister.String()+", #0")
+		case LT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLT "+returnRegister.String()+", #1",
+				"MOVGE "+returnRegister.String()+", #0")
+		case LEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLE "+returnRegister.String()+", #1",
+				"MOVGT "+returnRegister.String()+", #0")
 		case EQ:
 			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
 				"MOVEQ "+returnRegister.String()+", #1",
