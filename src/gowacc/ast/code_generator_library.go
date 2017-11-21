@@ -70,6 +70,7 @@ const (
 	PRINT_STRING
 
 	CHECK_DIVIDE
+	CHECK_OVERFLOW
 	THROW_RUNTIME_ERROR
 
   MSG_TRUE
@@ -78,6 +79,7 @@ const (
   MSG_NEWLINE
 	MSG_STRING
 	MSG_DIVIDE_BY_ZERO
+	MSG_OVERFLOW
 )
 
 type Library struct {
@@ -172,7 +174,15 @@ func GetLibrary() *Library {
 			"BLEQ " + THROW_RUNTIME_ERROR.String(),
 			"POP {pc}",
 		})
-
+	library.NewPreFunction(CHECK_OVERFLOW,
+		[]LibraryFunction{
+			THROW_RUNTIME_ERROR,
+			MSG_OVERFLOW,
+		},
+		[]string{
+			"LDR r0, =" + MSG_OVERFLOW.String(),
+			"BL " + THROW_RUNTIME_ERROR.String(),
+		})
 	library.NewPreFunction(THROW_RUNTIME_ERROR,
 		[]LibraryFunction{
 				PRINT_STRING,
@@ -190,6 +200,7 @@ func GetLibrary() *Library {
   library.NewPreData(MSG_INT, "%d\\0", 3)
 	library.NewPreData(MSG_STRING, "%.*s\\0", 5)
 	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0", 45)
+	library.NewPreData(MSG_OVERFLOW, "OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n", 82)
 
   return library
 }
