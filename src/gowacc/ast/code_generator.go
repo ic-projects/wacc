@@ -352,7 +352,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case FunctionNode:
 		v.symbolTable.MoveUpScope()
 		if node.ident.ident == "" {
-			v.addCode("LDR r0, =0", "POP {pc}")
+			v.addCode("LDR r0, =0",
+				"POP {pc}")
 		}
 		v.addCode(".ltorg")
 	case ArrayLiteralNode:
@@ -360,11 +361,30 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case ExitNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String(), "BL exit")
+		v.addCode("MOV r0, "+register.String(),
+			"BL exit")
 	case ReturnNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String(), "POP {pc}")
+		v.addCode("MOV r0, "+register.String(),
+			"POP {pc}")
+	case UnaryOperatorNode:
+		operand := v.returnRegisters.Pop()
+		returnRegister := v.freeRegisters.Pop()
+		switch node.op {
+		case NOT:
+			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
+		case NEG:
+
+		case LEN:
+
+		case ORD:
+
+		case CHR:
+
+		}
+		v.freeRegisters.Push(operand)
+		v.returnRegisters.Push(returnRegister)
 	case BinaryOperatorNode:
 		operand2 := v.returnRegisters.Pop()
 		operand1 := v.returnRegisters.Pop()
@@ -373,9 +393,15 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case MUL:
 			v.addCode("MUL " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case DIV:
-			v.addCode("MOV r0, "+operand1.String(), "MOV r1, "+operand2.String(), "BL __aeabi_idiv", "MOV "+returnRegister.String()+", r0")
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL __aeabi_idiv",
+				"MOV "+returnRegister.String()+", r0")
 		case MOD:
-			v.addCode("MOV r0, "+operand1.String(), "MOV r1, "+operand2.String(), "BL __aeabi_idivmod", "MOV "+returnRegister.String()+", r1")
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL __aeabi_idivmod",
+				"MOV "+returnRegister.String()+", r1")
 		case ADD:
 			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case SUB:
@@ -383,9 +409,13 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case GT, GEQ, LT, LEQ:
 
 		case EQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(), "MOVEQ "+returnRegister.String()+", #1", "MOVNE "+returnRegister.String()+", #0")
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVEQ "+returnRegister.String()+", #1",
+				"MOVNE "+returnRegister.String()+", #0")
 		case NEQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(), "MOVNE "+returnRegister.String()+", #1", "MOVEQ "+returnRegister.String()+", #0")
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVNE "+returnRegister.String()+", #1",
+				"MOVEQ "+returnRegister.String()+", #0")
 		case AND:
 			v.addCode("AND " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case OR:
