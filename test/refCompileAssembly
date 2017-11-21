@@ -7,7 +7,7 @@ files = Dir.glob(File.join("test_cases", "**", "*.wacc"))
 
 
 files.each do |file_path|
-  if !File.file?(File.dirname(file_path) + "/" +  File.basename(file_path, ".wacc") + ".s")
+  if !File.file?(File.dirname(file_path) + "/" +  File.basename(file_path, ".wacc") + ".s") && File.dirname(file_path)=~/\/valid/
     puts "Compiling #{file_path}"
 
     RestClient.post("https://teaching.doc.ic.ac.uk/wacc_compiler/run.cgi",
