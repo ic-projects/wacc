@@ -220,6 +220,22 @@ func (registerStack *RegisterStack) Push(register Register) {
 	registerStack.stack = append(registerStack.stack, register)
 }
 
+func (v *CodeGenerator) addPrint(t TypeNode) {
+	switch node := t.(type) {
+	case BaseTypeNode:
+		switch node.t {
+		case BOOL:
+			v.addCode("BL p_print_bool")
+			v.usesFunction(PRINT_BOOL)
+		case INT:
+			v.addCode("BL p_print_int")
+			v.usesFunction(PRINT_INT)
+		case CHAR:
+			v.addCode("BL putchar")
+		}
+	}
+}
+
 // addDataWithLabel adds a ascii word to the data section generating a unique label
 func (v *CodeGenerator) addData(text string) string {
 	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
@@ -389,6 +405,18 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.addCode(".ltorg")
 	case ArrayLiteralNode:
 
+	case PrintNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, "+register.String())
+		v.addPrint(Type(node.expr, v.symbolTable))
+	case PrintlnNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, "+register.String())
+		v.addPrint(Type(node.expr, v.symbolTable))
+		v.addCode("BL p_print_ln")
+		v.usesFunction(PRINT_LN)
 	case ExitNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
