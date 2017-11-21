@@ -17,24 +17,23 @@ type AsciiWord struct {
 func NewAsciiWord(length int, text string) AsciiWord {
 	return AsciiWord{
 		length: length,
-		text: text,
+		text:   text,
 	}
 }
 
-
 type Assembly struct {
-	data   			map[string](AsciiWord)
+	data        map[string](AsciiWord)
 	dataCounter int
-	text   			[]string
-	global 			map[string]([]string)
+	text        []string
+	global      map[string]([]string)
 }
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:   make(map[string]AsciiWord),
+		data:        make(map[string]AsciiWord),
 		dataCounter: 0,
-		text:   make([]string, 0),
-		global: make(map[string]([]string)),
+		text:        make([]string, 0),
+		global:      make(map[string]([]string)),
 	}
 }
 
@@ -168,11 +167,12 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 // Walk. It stores
 type CodeGenerator struct {
 	asm             *Assembly
+	labelCount      int
 	currentFunction string
 	symbolTable     *SymbolTable
 	freeRegisters   *RegisterStack
 	returnRegisters *RegisterStack
-	library					*Library
+	library         *Library
 	currentStackPos int
 }
 
@@ -180,10 +180,11 @@ type CodeGenerator struct {
 func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
 		asm:             NewAssembly(),
+		labelCount:      0,
 		symbolTable:     symbolTable,
 		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
 		returnRegisters: NewRegisterStack(),
-		library:				 GetLibrary(),
+		library:         GetLibrary(),
 		currentStackPos: 0,
 	}
 }
@@ -213,14 +214,14 @@ func NewRegisterStackWith(registers []Register) *RegisterStack {
 }
 
 func (registerStack *RegisterStack) Pop() Register {
-	  if len(registerStack.stack) != 0 {
-      register := registerStack.stack[len(registerStack.stack) - 1];
-      registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
-      return register;
-    } else {
-      fmt.Println("Internal compiler error")
-      return UNDEFINED
-    }
+	if len(registerStack.stack) != 0 {
+		register := registerStack.stack[len(registerStack.stack)-1]
+		registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
+		return register
+	} else {
+		fmt.Println("Internal compiler error")
+		return UNDEFINED
+	}
 }
 
 func (registerStack *RegisterStack) Push(register Register) {
@@ -285,6 +286,17 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 	v.library.add(v, f)
 }
 
+// NoRecurse defines the nodes of the AST which should not be automatically
+// walked. This means we can visit the children in any way we choose.
+func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
+	switch programNode.(type) {
+	case IfNode:
+		return true
+	default:
+		return false
+	}
+}
+
 // Visit will apply the correct rule for the programNode given, to be used with
 // Walk.
 func (v *CodeGenerator) Visit(programNode ProgramNode) {
@@ -320,7 +332,22 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case PrintlnNode:
 
 	case IfNode:
-
+		// Cond
+		v.Visit(node.expr)
+		r := v.returnRegisters.Pop()
+		v.freeRegisters.Push(r)
+		v.addCode(fmt.Sprintf("CMP %s, #0", r))
+		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount))
+		// If
+		v.Visit(node.ifStats)
+		v.addCode(fmt.Sprintf("B L%d", v.labelCount))
+		// Else
+		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		v.labelCount++
+		v.Visit(node.elseStats)
+		// Fi
+		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		v.labelCount++
 	case LoopNode:
 
 	case ScopeNode:
@@ -414,12 +441,12 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case PrintNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String())
+		v.addCode("MOV r0, " + register.String())
 		v.addPrint(Type(node.expr, v.symbolTable))
 	case PrintlnNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String())
+		v.addCode("MOV r0, " + register.String())
 		v.addPrint(Type(node.expr, v.symbolTable))
 		v.addCode("BL " + PRINT_LN.String())
 		v.usesFunction(PRINT_LN)
@@ -460,7 +487,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
-				"BL " + CHECK_DIVIDE.String(),
+				"BL "+CHECK_DIVIDE.String(),
 				"BL __aeabi_idiv",
 				"MOV "+returnRegister.String()+", r0")
 			v.usesFunction(CHECK_DIVIDE)

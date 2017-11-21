@@ -1,0 +1,15 @@
+# Simple conditional statement with different exit codes
+
+# Output:
+# correct
+
+# Program:
+
+begin
+  if 2 + 2 == 3
+  then 
+    exit 0
+  else 
+    exit 1
+  fi
+end
