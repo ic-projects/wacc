@@ -400,7 +400,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 	case CharacterLiteralNode:
 		register := v.freeRegisters.Pop()
-		v.addCode("LDR " + register.String() + ", #" + string(node.val))
+		v.addCode("MOV " + register.String() + ", #'" + string(node.val) + "'")
 		v.returnRegisters.Push(register)
 	case StringLiteralNode:
 
