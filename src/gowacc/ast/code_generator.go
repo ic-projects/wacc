@@ -483,7 +483,10 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		returnRegister := v.freeRegisters.Pop()
 		switch node.op {
 		case MUL:
-			v.addCode("MUL " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+			v.addCode("SMULL " + returnRegister.String() + ", " + operand2.String() + ", " + operand1.String() + ", " + operand2.String(),
+				"CMP "+ operand2.String() + ", " + returnRegister.String() + ", ASR #31",
+				"BLNE " + CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
@@ -494,12 +497,18 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case MOD:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
+				"BL "+CHECK_DIVIDE.String(),
 				"BL __aeabi_idivmod",
 				"MOV "+returnRegister.String()+", r1")
+			v.usesFunction(CHECK_DIVIDE)
 		case ADD:
-			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+			v.addCode("ADDS " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
+				"BLVS " + CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
 		case SUB:
-			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
+				"BLVS " + CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
 		case GT:
 			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
 				"MOVGT "+returnRegister.String()+", #1",
