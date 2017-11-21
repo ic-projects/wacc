@@ -458,8 +458,10 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
+				"BL " + CHECK_DIVIDE.String(),
 				"BL __aeabi_idiv",
 				"MOV "+returnRegister.String()+", r0")
+			v.usesFunction(CHECK_DIVIDE)
 		case MOD:
 			v.addCode("MOV r0, "+operand1.String(),
 				"MOV r1, "+operand2.String(),
