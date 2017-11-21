@@ -384,8 +384,10 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 
 		case EQ, NEQ:
 
-		case AND, OR:
-
+		case AND:
+			v.addCode("AND " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+		case OR:
+			v.addCode("ORR " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		}
 		v.freeRegisters.Push(operand1)
 		v.freeRegisters.Push(operand2)
