@@ -9,15 +9,30 @@ import (
 	"strings"
 )
 
+type AsciiWord struct {
+	length int
+	text string
+}
+
+func NewAsciiWord(length int, text string) AsciiWord {
+	return AsciiWord{
+		length: length,
+		text: text,
+	}
+}
+
+
 type Assembly struct {
-	data   []string
-	text   []string
-	global map[string]([]string)
+	data   			map[string](AsciiWord)
+	dataCounter int
+	text   			[]string
+	global 			map[string]([]string)
 }
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:   make([]string, 0),
+		data:   make(map[string]([]string)),
+		dataCounter: 0,
 		text:   make([]string, 0),
 		global: make(map[string]([]string)),
 	}
@@ -27,8 +42,11 @@ func NewAssembly() *Assembly {
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(".data\n")
-	for _, s := range asm.data {
-		buf.WriteString(indent(s, "  "))
+	for dname, d := range asm.data {
+		buf.WriteString(dname + ":\n")
+		for _, s := range d {
+			buf.WriteString(indent(s, "  "))
+		}
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
@@ -201,12 +219,18 @@ func (registerStack *RegisterStack) Push(register Register) {
 	registerStack.stack = append(registerStack.stack, register)
 }
 
-// addData add lines of assembly to the already data part of the generated
-// assembly code
-func (v *CodeGenerator) addData(lines ...string) {
-	for _, line := range lines {
-		v.asm.data = append(v.asm.data, line+"\n")
-	}
+// addDataWithLabel adds a ascii word to the data section generating a unique label
+func (v *CodeGenerator) addData(text string) string {
+	string label = "msg_" + strconv.Itoa(v.asm.dataCounter)
+	v.asm.dataCounter++
+	v.addDataWithLabel(label, text)
+	return label
+}
+
+// addDataWithLabel adds a ascii word to the data section using a given label
+func (v *CodeGenerator) addDataWithLabel(label string, text string) {
+	length := 1 // Get length of text
+	v.asm.data[label] = NewAsciiWord(length, text)
 }
 
 // addText add lines of assembly to the already text part of the generated
@@ -230,6 +254,14 @@ func (v *CodeGenerator) addCode(lines ...string) {
 func (v *CodeGenerator) addFunction(name string) {
 	v.asm.global[name] = make([]string, 0)
 	v.currentFunction = name
+}
+
+// usesFunction adds the corresponding predefined function to the assembly if
+// it is not already added
+func (v *CodeGenerator) usesFunction(f PreFunction) {
+	if _, already := v.asm.global[f.name]; !already {
+		f.add(v.asm)
+		}
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
