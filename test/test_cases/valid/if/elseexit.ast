@@ -1,0 +1,21 @@
+-- Compiling...
+-- Printing AST...
+elseexit.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - IF
+3	      - CONDITION
+4	        - ==
+5	          - +
+6	            - 2
+7	            - 2
+8	          - 3
+9	      - THEN
+10	        - EXIT
+11	          - 0
+12	      - ELSE
+13	        - EXIT
+14	          - 1
+===========================================================
+-- Finished
