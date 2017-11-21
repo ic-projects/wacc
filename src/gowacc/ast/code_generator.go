@@ -182,7 +182,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		asm:             NewAssembly(),
 		labelCount:      0,
 		symbolTable:     symbolTable,
-		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
+		freeRegisters:   NewRegisterStackWith([]Register{R11, R10, R9, R8, R7, R6, R5, R4}),
 		returnRegisters: NewRegisterStack(),
 		library:         GetLibrary(),
 		currentStackPos: 0,
