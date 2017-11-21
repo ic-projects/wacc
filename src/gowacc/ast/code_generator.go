@@ -9,15 +9,30 @@ import (
 	"strings"
 )
 
+type AsciiWord struct {
+	length int
+	text string
+}
+
+func NewAsciiWord(length int, text string) AsciiWord {
+	return AsciiWord{
+		length: length,
+		text: text,
+	}
+}
+
+
 type Assembly struct {
-	data   []string
-	text   []string
-	global map[string]([]string)
+	data   			map[string](AsciiWord)
+	dataCounter int
+	text   			[]string
+	global 			map[string]([]string)
 }
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:   make([]string, 0),
+		data:   make(map[string]AsciiWord),
+		dataCounter: 0,
 		text:   make([]string, 0),
 		global: make(map[string]([]string)),
 	}
@@ -27,8 +42,10 @@ func NewAssembly() *Assembly {
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(".data\n")
-	for _, s := range asm.data {
-		buf.WriteString(indent(s, "  "))
+	for dname, d := range asm.data {
+		buf.WriteString(dname + ":\n")
+		buf.WriteString(fmt.Sprintf("   .word %d\n", d.length))
+		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"\n", d.text))
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
@@ -155,6 +172,7 @@ type CodeGenerator struct {
 	symbolTable     *SymbolTable
 	freeRegisters   *RegisterStack
 	returnRegisters *RegisterStack
+	library					*Library
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -164,6 +182,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		symbolTable:     symbolTable,
 		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
 		returnRegisters: NewRegisterStack(),
+		library:				 GetLibrary(),
 	}
 }
 
@@ -206,12 +225,33 @@ func (registerStack *RegisterStack) Push(register Register) {
 	registerStack.stack = append(registerStack.stack, register)
 }
 
-// addData add lines of assembly to the already data part of the generated
-// assembly code
-func (v *CodeGenerator) addData(lines ...string) {
-	for _, line := range lines {
-		v.asm.data = append(v.asm.data, line+"\n")
+func (v *CodeGenerator) addPrint(t TypeNode) {
+	switch node := t.(type) {
+	case BaseTypeNode:
+		switch node.t {
+		case BOOL:
+			v.addCode("BL p_print_bool")
+			v.usesFunction(PRINT_BOOL)
+		case INT:
+			v.addCode("BL p_print_int")
+			v.usesFunction(PRINT_INT)
+		case CHAR:
+			v.addCode("BL putchar")
+		}
 	}
+}
+
+// addDataWithLabel adds a ascii word to the data section generating a unique label
+func (v *CodeGenerator) addData(text string) string {
+	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
+	v.asm.dataCounter++
+	v.addDataWithLabel(label, text, len(text))
+	return label
+}
+
+// addDataWithLabel adds a ascii word to the data section using a given label
+func (v *CodeGenerator) addDataWithLabel(label string, text string, length int) {
+	v.asm.data[label] = NewAsciiWord(length, text)
 }
 
 // addText add lines of assembly to the already text part of the generated
@@ -235,6 +275,12 @@ func (v *CodeGenerator) addCode(lines ...string) {
 func (v *CodeGenerator) addFunction(name string) {
 	v.asm.global[name] = make([]string, 0)
 	v.currentFunction = name
+}
+
+// usesFunction adds the corresponding predefined function to the assembly if
+// it is not already added
+func (v *CodeGenerator) usesFunction(f LibraryFunction) {
+	v.library.add(v, f)
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
@@ -363,6 +409,18 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.addCode(".ltorg")
 	case ArrayLiteralNode:
 
+	case PrintNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, "+register.String())
+		v.addPrint(Type(node.expr, v.symbolTable))
+	case PrintlnNode:
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		v.addCode("MOV r0, "+register.String())
+		v.addPrint(Type(node.expr, v.symbolTable))
+		v.addCode("BL p_print_ln")
+		v.usesFunction(PRINT_LN)
 	case ExitNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
