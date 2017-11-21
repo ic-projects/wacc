@@ -496,8 +496,6 @@ func (location *Location) String() string {
 		return location.register.String()
 	}
 
-	var buf bytes.Buffer
-
 	// Location is an address on the heap
 	if location.address != 0 {
 		return "#" + strconv.Itoa(location.address)
