@@ -500,14 +500,9 @@ func (location *Location) String() string {
 
 	// Location is an address on the heap
 	if location.address != 0 {
-		buf.WriteString("#")
-		buf.WriteString(strconv.Itoa(location.address))
-		return buf.String()
+		return "#" + strconv.Itoa(location.address)
 	}
 
 	// Location is a stack offset
-	buf.WriteString("[sp, #")
-	buf.WriteString(strconv.Itoa(location.stackOffset))
-	buf.WriteString("]")
-	return buf.String()
+	return "[sp, #" + strconv.Itoa(location.stackOffset) + "]"
 }
