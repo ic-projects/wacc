@@ -242,7 +242,7 @@ func (v *CodeGenerator) addFunction(name string) {
 // NoRecurse defines the nodes of the AST which should not be automatically
 // walked. This means we can visit the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
-	switch node := programNode.(type) {
+	switch programNode.(type) {
 	case IfNode:
 		return true
 	default:
@@ -285,20 +285,19 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case PrintlnNode:
 
 	case IfNode:
-		thisNode := programNode.(IfNode)
 		// Cond
-		v.Visit(thisNode.expr)
+		v.Visit(node.expr)
 		r := v.returnRegisters.Pop()
 		v.freeRegisters.Push(r)
 		v.addCode(fmt.Sprintf("CMP %s, #0", r))
 		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount))
 		// If
-		v.Visit(thisNode.ifStats)
+		v.Visit(node.ifStats)
 		v.addCode(fmt.Sprintf("B L%d", v.labelCount))
 		// Else
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
-		v.Visit(thisNode.elseStats)
+		v.Visit(node.elseStats)
 		// Fi
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
