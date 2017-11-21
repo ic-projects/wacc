@@ -44,8 +44,8 @@ func (asm *Assembly) String() string {
 	buf.WriteString(".data\n")
 	for dname, d := range asm.data {
 		buf.WriteString(dname + ":\n")
-		buf.WriteString(fmt.Sprintf("   .word %d", d.length))
-		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"", d.text))
+		buf.WriteString(fmt.Sprintf("   .word %d\n", d.length))
+		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"\n", d.text))
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
@@ -240,13 +240,12 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 func (v *CodeGenerator) addData(text string) string {
 	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
 	v.asm.dataCounter++
-	v.addDataWithLabel(label, text)
+	v.addDataWithLabel(label, text, len(text))
 	return label
 }
 
 // addDataWithLabel adds a ascii word to the data section using a given label
-func (v *CodeGenerator) addDataWithLabel(label string, text string) {
-	length := 1 // Get length of text
+func (v *CodeGenerator) addDataWithLabel(label string, text string, length int) {
 	v.asm.data[label] = NewAsciiWord(length, text)
 }
 

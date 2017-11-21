@@ -33,18 +33,20 @@ func (f PreFunction) add(v *CodeGenerator, lib *Library) {
 type PreData struct {
   name string
   text string
+  length int
   dependancies []LibraryFunction
 }
 
-func NewPreData(name string, text string) Predefined {
+func NewPreData(name string, text string, length int) Predefined {
 	return PreData{
 		name: name,
     text: text,
+    length: length,
 	}
 }
 
 func (d PreData) add(v *CodeGenerator, lib *Library) {
-  v.addDataWithLabel(d.name, d.text)
+  v.addDataWithLabel(d.name, d.text, d.length)
 
   // Add any dependancies
   for _, dep := range d.dependancies {
@@ -102,7 +104,7 @@ func GetLibrary() *Library {
       "BL printf",
       "MOV r0, #0",
       "BL fflush",
-      "POP {pc})",
+      "POP {pc}",
     })
   library[PRINT_INT] = NewPreFunction("p_print_int",
     []LibraryFunction{
@@ -121,10 +123,10 @@ func GetLibrary() *Library {
   //PRINT_STRING
 
   // Predefined strings
-  library[MSG_TRUE] = NewPreData("msg_p_true", "true\\0")
-  library[MSG_FALSE] = NewPreData("msg_p_false", "false\\0")
-  library[MSG_NEWLINE] = NewPreData("msg_p_newline", "\\0")
-  library[MSG_INT] = NewPreData("msg_p_int", "%d\\0")
+  library[MSG_TRUE] = NewPreData("msg_p_true", "true\\0", 5)
+  library[MSG_FALSE] = NewPreData("msg_p_false", "false\\0", 6)
+  library[MSG_NEWLINE] = NewPreData("msg_p_newline", "\\0", 1)
+  library[MSG_INT] = NewPreData("msg_p_int", "%d\\0", 3)
 
 
   return &Library {
