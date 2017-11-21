@@ -450,7 +450,7 @@ type Location struct {
 func NewRegisterLocation(register Register) *Location {
 	return &Location{
 		register:    register,
-		address:     -1,
+		address:     0,
 		stackOffset: -1,
 	}
 }
@@ -466,7 +466,7 @@ func NewAddressLocation(address int) *Location {
 func NewStackOffsetLocation(offset int) *Location {
 	return &Location{
 		register:    UNDEFINED,
-		address:     -1,
+		address:     0,
 		stackOffset: offset,
 	}
 }
@@ -487,14 +487,14 @@ func (location *Location) UpdateStackOffsetPop() {
 
 func (location *Location) String() string {
 	// Location is a register
-	if location.register == UNDEFINED {
+	if location.register != UNDEFINED {
 		return location.register.String()
 	}
 
 	var buf bytes.Buffer
 
 	// Location is an address on the heap
-	if location.address != -1 {
+	if location.address != 0 {
 		buf.WriteString("#")
 		buf.WriteString(strconv.Itoa(location.address))
 		return buf.String()
