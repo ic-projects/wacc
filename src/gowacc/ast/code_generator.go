@@ -11,7 +11,7 @@ import (
 
 type AsciiWord struct {
 	length int
-	text string
+	text   string
 }
 
 func NewAsciiWord(length int, text string) AsciiWord {
@@ -214,23 +214,22 @@ func NewRegisterStackWith(registers []Register) *RegisterStack {
 }
 
 func (registerStack *RegisterStack) Pop() Register {
-	  if len(registerStack.stack) != 0 {
-      register := registerStack.stack[len(registerStack.stack) - 1];
-      registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
-      return register;
-    } else {
-      fmt.Println("Internal compiler error")
-      return UNDEFINED
-    }
+	if len(registerStack.stack) != 0 {
+		register := registerStack.stack[len(registerStack.stack)-1]
+		registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
+		return register
+	}
+	fmt.Println("Internal compiler error")
+	return UNDEFINED
+}
 
 func (registerStack *RegisterStack) Peek() Register {
 	if len(registerStack.stack) != 0 {
 		register := registerStack.stack[len(registerStack.stack)-1]
 		return register
-	} else {
-		fmt.Println("Internal compiler error")
-		return UNDEFINED
 	}
+	fmt.Println("Internal compiler error")
+	return UNDEFINED
 }
 
 func (registerStack *RegisterStack) Push(register Register) {
