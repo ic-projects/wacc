@@ -29,15 +29,16 @@ func NewSymbolTable() *SymbolTable {
 // SymbolTableNode is a struct that stores its scope, the scopes below it and a
 // pointer to the scope above itself.
 type SymbolTableNode struct {
-	scope       map[string]IdentifierDeclaration
+	scope       map[string]*IdentifierDeclaration
 	childScopes []*SymbolTableNode
 	parentScope *SymbolTableNode
 	lastScope   int
+	scopeSize   int
 }
 
 func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	return &SymbolTableNode{
-		scope:       make(map[string]IdentifierDeclaration),
+		scope:       make(map[string]*IdentifierDeclaration),
 		childScopes: make([]*SymbolTableNode, 0, 10),
 		parentScope: parentScope,
 		lastScope:   -1,
@@ -49,30 +50,30 @@ type IdentifierDeclaration struct {
 	pos      Position
 	t        TypeNode
 	ident    IdentifierNode
-	position interface{}
+	location *Location
 }
 
-func NewIdentifierDeclaration(programNode ProgramNode) IdentifierDeclaration {
+func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	switch node := programNode.(type) {
 	case ParameterNode:
-		return IdentifierDeclaration{
+		return &IdentifierDeclaration{
 			pos:   node.pos,
 			t:     node.t,
 			ident: node.ident,
 		}
 	case DeclareNode:
-		return IdentifierDeclaration{
+		return &IdentifierDeclaration{
 			pos:   node.pos,
 			t:     node.t,
 			ident: node.ident,
 		}
 	default:
-		return IdentifierDeclaration{}
+		return &IdentifierDeclaration{}
 	}
 }
 
-func (dec IdentifierDeclaration) AddPosition(position interface{}) {
-	dec.position = position
+func (dec *IdentifierDeclaration) AddLocation(location *Location) {
+	dec.location = location
 }
 
 // MoveDownScope creates a new scope such that it is a chile of the currentscope,
@@ -98,20 +99,20 @@ func (table *SymbolTable) MoveUpScope() {
 // SearchForIdent will search for an identifier, first checking the currentScope
 // and then will iterate through to the head scope. It will return false as its second return
 // if the identifier is not in the currentScope or any parentScopes.
-func (table *SymbolTable) SearchForIdent(identifier string) (IdentifierDeclaration, bool) {
+func (table *SymbolTable) SearchForIdent(identifier string) (*IdentifierDeclaration, bool) {
 	for node := table.currentScope; node != nil; node = node.parentScope {
 		node, ok := node.scope[identifier]
 		if ok {
 			return node, ok
 		}
 	}
-	return IdentifierDeclaration{}, false
+	return &IdentifierDeclaration{}, false
 }
 
 // SearchForIdentInCurrentScope will search for an identifier, only in the
 // currentScope. It will return false as its second return false
 // if the identifier is not in the currentScope.
-func (table *SymbolTable) SearchForIdentInCurrentScope(identifier string) (IdentifierDeclaration, bool) {
+func (table *SymbolTable) SearchForIdentInCurrentScope(identifier string) (*IdentifierDeclaration, bool) {
 	node, ok := table.currentScope.scope[identifier]
 	return node, ok
 }

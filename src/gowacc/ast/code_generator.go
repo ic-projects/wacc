@@ -214,9 +214,18 @@ func NewRegisterStackWith(registers []Register) *RegisterStack {
 }
 
 func (registerStack *RegisterStack) Pop() Register {
+	  if len(registerStack.stack) != 0 {
+      register := registerStack.stack[len(registerStack.stack) - 1];
+      registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
+      return register;
+    } else {
+      fmt.Println("Internal compiler error")
+      return UNDEFINED
+    }
+
+func (registerStack *RegisterStack) Peek() Register {
 	if len(registerStack.stack) != 0 {
 		register := registerStack.stack[len(registerStack.stack)-1]
-		registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
 		return register
 	} else {
 		fmt.Println("Internal compiler error")
@@ -353,7 +362,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case ScopeNode:
 
 	case IdentifierNode:
-
+		register := v.freeRegisters.Pop()
+		dec, _ := v.symbolTable.SearchForIdent(node.ident)
+		v.addCode("LDR " + register.String() + ", " + dec.location.String())
+		v.returnRegisters.Push(register)
 	case PairFirstElementNode:
 
 	case PairSecondElementNode:
@@ -422,6 +434,23 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 	case []StatementNode:
 		v.symbolTable.MoveNextScope()
+		i := 0
+		for _, dec := range v.symbolTable.currentScope.scope {
+			switch typeNode := dec.t.(type) {
+			case BaseTypeNode:
+				switch typeNode.t {
+				case STRING:
+				case PAIR:
+				default:
+					dec.AddLocation(NewStackOffsetLocation(i, v))
+					i += sizeOf(dec.t)
+				}
+			}
+		}
+		if i != 0 {
+			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
+		}
+		v.symbolTable.currentScope.scopeSize = i
 	}
 }
 
@@ -429,8 +458,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case []StatementNode:
+		if v.symbolTable.currentScope.scopeSize != 0 {
+			v.addCode("ADD sp, sp, #" + strconv.Itoa(v.symbolTable.currentScope.scopeSize))
+		}
 		v.symbolTable.MoveUpScope()
-
 	case FunctionNode:
 		v.symbolTable.MoveUpScope()
 		if node.ident.ident == "" {
@@ -440,6 +471,17 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.addCode(".ltorg")
 	case ArrayLiteralNode:
 
+	case DeclareNode:
+		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
+		register := v.returnRegisters.Pop()
+		v.freeRegisters.Push(register)
+		if dec.location != nil {
+			if sizeOf(dec.t) == 1 {
+				v.addCode("STRB " + register.String() + ", " + dec.location.String())
+			} else {
+				v.addCode("STR " + register.String() + ", " + dec.location.String())
+			}
+		}
 	case PrintNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
@@ -469,7 +511,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case NOT:
 			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
 		case NEG:
-
+			register := v.returnRegisters.Peek()
+			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
 		case LEN:
 
 		case ORD:
