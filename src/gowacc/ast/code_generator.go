@@ -10,15 +10,15 @@ import (
 )
 
 type Assembly struct {
-	data []string
-	text []string
+	data   []string
+	text   []string
 	global map[string]([]string)
 }
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data: make([]string, 0),
-		text: make([]string, 0),
+		data:   make([]string, 0),
+		text:   make([]string, 0),
 		global: make(map[string]([]string)),
 	}
 }
@@ -67,7 +67,7 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	defer w.Flush()
 	_, err = w.WriteString(asm.String())
 	if err != nil {
-			return err
+		return err
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 type Register int
 
 const (
-	R0    Register = iota
+	R0 Register = iota
 	R1
 	R2
 	R3
@@ -150,19 +150,19 @@ func GenerateCode(tree ProgramNode, symbolTable *SymbolTable) *Assembly {
 // CodeGenerator is a struct that implements EntryExitVisitor to be called with
 // Walk. It stores
 type CodeGenerator struct {
-	asm *Assembly
+	asm             *Assembly
 	currentFunction string
-	symbolTable *SymbolTable
-	freeRegisters *RegisterStack
+	symbolTable     *SymbolTable
+	freeRegisters   *RegisterStack
 	returnRegisters *RegisterStack
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
 func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
-		asm: NewAssembly(),
-		symbolTable: symbolTable,
-		freeRegisters: NewRegisterStackWith([]Register{R4,R5,R6,R7,R8,R9,R10,R11,R12}),
+		asm:             NewAssembly(),
+		symbolTable:     symbolTable,
+		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
 		returnRegisters: NewRegisterStack(),
 	}
 }
@@ -192,8 +192,8 @@ func NewRegisterStackWith(registers []Register) *RegisterStack {
 }
 
 func (registerStack *RegisterStack) Pop() Register {
-	register := registerStack.stack[len(registerStack.stack) - 1]
-	registerStack.stack = registerStack.stack[:len(registerStack.stack) - 1]
+	register := registerStack.stack[len(registerStack.stack)-1]
+	registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
 	return register
 }
 
@@ -205,7 +205,7 @@ func (registerStack *RegisterStack) Push(register Register) {
 // assembly code
 func (v *CodeGenerator) addData(lines ...string) {
 	for _, line := range lines {
-		v.asm.data = append(v.asm.data, line + "\n")
+		v.asm.data = append(v.asm.data, line+"\n")
 	}
 }
 
@@ -213,7 +213,7 @@ func (v *CodeGenerator) addData(lines ...string) {
 // assembly code
 func (v *CodeGenerator) addText(lines ...string) {
 	for _, line := range lines {
-		v.asm.text = append(v.asm.text, line + "\n")
+		v.asm.text = append(v.asm.text, line+"\n")
 	}
 }
 
@@ -221,7 +221,7 @@ func (v *CodeGenerator) addText(lines ...string) {
 // assembly code
 func (v *CodeGenerator) addCode(lines ...string) {
 	for _, line := range lines {
-		v.asm.global[v.currentFunction] = append(v.asm.global[v.currentFunction], line + "\n")
+		v.asm.global[v.currentFunction] = append(v.asm.global[v.currentFunction], line+"\n")
 	}
 }
 
@@ -239,11 +239,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case Program:
 
 	case FunctionNode:
-    v.symbolTable.MoveNextScope()
-		if (node.ident.ident == "") {
+		v.symbolTable.MoveNextScope()
+		if node.ident.ident == "" {
 			v.addFunction("main")
 		} else {
-			v.addFunction("f_"+node.ident.ident)
+			v.addFunction("f_" + node.ident.ident)
 		}
 		v.addCode("PUSH {lr}")
 	case ParameterNode:
@@ -301,7 +301,13 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("LDR " + register.String() + ", =" + strconv.Itoa(node.val))
 		v.returnRegisters.Push(register)
 	case BooleanLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		if node.val {
+			v.addCode("MOV " + register.String() + ", #1") // True
+		} else {
+			v.addCode("MOV " + register.String() + ", #0") // False
+		}
+		v.returnRegisters.Push(register)
 	case CharacterLiteralNode:
 
 	case StringLiteralNode:
@@ -333,7 +339,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		}
 	case []StatementNode:
-    v.symbolTable.MoveNextScope()
+		v.symbolTable.MoveNextScope()
 	}
 }
 
@@ -341,12 +347,13 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case []StatementNode:
-    v.symbolTable.MoveUpScope()
+		v.symbolTable.MoveUpScope()
 
 	case FunctionNode:
-    v.symbolTable.MoveUpScope()
-		if (node.ident.ident == "") {
-			v.addCode("LDR r0, =0", "POP {pc}")
+		v.symbolTable.MoveUpScope()
+		if node.ident.ident == "" {
+			v.addCode("LDR r0, =0",
+				"POP {pc}")
 		}
 		v.addCode(".ltorg")
 	case ArrayLiteralNode:
@@ -354,11 +361,30 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case ExitNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, " + register.String(), "BL exit")
+		v.addCode("MOV r0, "+register.String(),
+			"BL exit")
 	case ReturnNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, " + register.String(), "POP {pc}")
+		v.addCode("MOV r0, "+register.String(),
+			"POP {pc}")
+	case UnaryOperatorNode:
+		operand := v.returnRegisters.Pop()
+		returnRegister := v.freeRegisters.Pop()
+		switch node.op {
+		case NOT:
+			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
+		case NEG:
+
+		case LEN:
+
+		case ORD:
+
+		case CHR:
+
+		}
+		v.freeRegisters.Push(operand)
+		v.returnRegisters.Push(returnRegister)
 	case BinaryOperatorNode:
 		operand2 := v.returnRegisters.Pop()
 		operand1 := v.returnRegisters.Pop()
@@ -367,19 +393,47 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case MUL:
 			v.addCode("MUL " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case DIV:
-			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idiv", "MOV " + returnRegister.String() + ", r0")
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL __aeabi_idiv",
+				"MOV "+returnRegister.String()+", r0")
 		case MOD:
-			v.addCode("MOV r0, " + operand1.String(), "MOV r1, "  + operand2.String(), "BL __aeabi_idivmod", "MOV " + returnRegister.String() + ", r1")
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL __aeabi_idivmod",
+				"MOV "+returnRegister.String()+", r1")
 		case ADD:
 			v.addCode("ADD " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		case SUB:
 			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
-		case GT, GEQ, LT, LEQ:
-
-		case EQ, NEQ:
-
-		case AND, OR:
-
+		case GT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGT "+returnRegister.String()+", #1",
+				"MOVLE "+returnRegister.String()+", #0")
+		case GEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGE "+returnRegister.String()+", #1",
+				"MOVLT "+returnRegister.String()+", #0")
+		case LT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLT "+returnRegister.String()+", #1",
+				"MOVGE "+returnRegister.String()+", #0")
+		case LEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLE "+returnRegister.String()+", #1",
+				"MOVGT "+returnRegister.String()+", #0")
+		case EQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVEQ "+returnRegister.String()+", #1",
+				"MOVNE "+returnRegister.String()+", #0")
+		case NEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVNE "+returnRegister.String()+", #1",
+				"MOVEQ "+returnRegister.String()+", #0")
+		case AND:
+			v.addCode("AND " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
+		case OR:
+			v.addCode("ORR " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String())
 		}
 		v.freeRegisters.Push(operand1)
 		v.freeRegisters.Push(operand2)
@@ -388,31 +442,31 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 }
 
 type Location struct {
-	register 		Register
-	address  		int
+	register    Register
+	address     int
 	stackOffset int
 }
 
 func NewRegisterLocation(register Register) *Location {
 	return &Location{
-		register: 	 register,
-		address: 		 -1,
+		register:    register,
+		address:     -1,
 		stackOffset: -1,
 	}
 }
 
 func NewAddressLocation(address int) *Location {
 	return &Location{
-		register: 	 UNDEFINED,
-		address: 		 address,
+		register:    UNDEFINED,
+		address:     address,
 		stackOffset: -1,
 	}
 }
 
 func NewStackOffsetLocation(offset int) *Location {
 	return &Location{
-		register: 	 UNDEFINED,
-		address: 		 -1,
+		register:    UNDEFINED,
+		address:     -1,
 		stackOffset: offset,
 	}
 }
