@@ -31,7 +31,7 @@ type Assembly struct {
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:   make(map[string]([]string)),
+		data:   make(map[string]AsciiWord),
 		dataCounter: 0,
 		text:   make([]string, 0),
 		global: make(map[string]([]string)),
@@ -44,9 +44,8 @@ func (asm *Assembly) String() string {
 	buf.WriteString(".data\n")
 	for dname, d := range asm.data {
 		buf.WriteString(dname + ":\n")
-		for _, s := range d {
-			buf.WriteString(indent(s, "  "))
-		}
+		buf.WriteString(fmt.Sprintf("   .word %d", d.length))
+		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"", d.text))
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
@@ -173,6 +172,7 @@ type CodeGenerator struct {
 	symbolTable     *SymbolTable
 	freeRegisters   *RegisterStack
 	returnRegisters *RegisterStack
+	library					*Library
 }
 
 // NewCodeGenerator returns an initialised CodeGenerator
@@ -182,6 +182,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		symbolTable:     symbolTable,
 		freeRegisters:   NewRegisterStackWith([]Register{R4, R5, R6, R7, R8, R9, R10, R11, R12}),
 		returnRegisters: NewRegisterStack(),
+		library:				 GetLibrary(),
 	}
 }
 
@@ -221,7 +222,7 @@ func (registerStack *RegisterStack) Push(register Register) {
 
 // addDataWithLabel adds a ascii word to the data section generating a unique label
 func (v *CodeGenerator) addData(text string) string {
-	string label = "msg_" + strconv.Itoa(v.asm.dataCounter)
+	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
 	v.asm.dataCounter++
 	v.addDataWithLabel(label, text)
 	return label
@@ -258,10 +259,8 @@ func (v *CodeGenerator) addFunction(name string) {
 
 // usesFunction adds the corresponding predefined function to the assembly if
 // it is not already added
-func (v *CodeGenerator) usesFunction(f PreFunction) {
-	if _, already := v.asm.global[f.name]; !already {
-		f.add(v.asm)
-		}
+func (v *CodeGenerator) usesFunction(f LibraryFunction) {
+	v.library.add(v, f)
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
