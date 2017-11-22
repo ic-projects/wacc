@@ -85,16 +85,18 @@ func (node PairSecondElementNode) String() string {
 // E.g.
 //  i[4][3+2]
 type ArrayElementNode struct {
-	pos   Position
-	ident IdentifierNode
-	exprs []ExpressionNode
+	pos    Position
+	ident  IdentifierNode
+	exprs  []ExpressionNode
+	assign bool
 }
 
 func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
-		pos:   pos,
-		ident: ident,
-		exprs: exprs,
+		pos:    pos,
+		ident:  ident,
+		exprs:  exprs,
+		assign: false,
 	}
 }
 
