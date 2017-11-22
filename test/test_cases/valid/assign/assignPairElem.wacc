@@ -6,7 +6,8 @@
 # Program:
 
 begin
-  pair x = newpair;
-  x.fst = 1;
-  exit x.fst
+  pair(int, int) x = newpair(0, 0);
+  fst x = 1;
+  int y = fst x;
+  exit y
 end

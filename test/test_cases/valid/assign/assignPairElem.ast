@@ -1,6 +1,35 @@
 -- Compiling...
-Errors detected during compilation! Exit code 100 returned.
-Syntactic Error at 9:7 -- no viable alternative at input 'pairx'
-Syntactic Error at 10:3 -- token recognition error at: '.'
-Syntactic Error at 11:8 -- token recognition error at: '.'
-1 parser error(s) detected, no further compilation attempted.
+-- Printing AST...
+assignPairElem.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - intint
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - NEW_PAIR
+9	          - FST
+10	            - 0
+11	          - SND
+12	            - 0
+13	    - ASSIGNMENT
+14	      - LHS
+15	        - FST
+16	          - x
+17	      - RHS
+18	        - 1
+19	    - DECLARE
+20	      - TYPE
+21	        - int
+22	      - LHS
+23	        - y
+24	      - RHS
+25	        - FST
+26	          - x
+27	    - EXIT
+28	      - y
+===========================================================
+-- Finished
