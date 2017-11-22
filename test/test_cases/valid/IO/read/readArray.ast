@@ -1,0 +1,32 @@
+-- Compiling...
+-- Printing AST...
+readArray.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 0
+10	          - 1
+11	          - 2
+12	    - PRINTLN
+13	      - x
+14	        - []
+15	          - 0
+16	    - PRINTLN
+17	      - "input an integer to continue..."
+18	    - READ
+19	      - x
+20	        - []
+21	          - 0
+22	    - PRINTLN
+23	      - x
+24	        - []
+25	          - 0
+===========================================================
+-- Finished
