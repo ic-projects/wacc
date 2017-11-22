@@ -266,12 +266,19 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 func (v *CodeGenerator) addData(text string) string {
 	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
 	v.asm.dataCounter++
-	v.addDataWithLabel(label, text, len(text))
+	v.addDataWithLabel(label, text)
 	return label
 }
 
 // addDataWithLabel adds a ascii word to the data section using a given label
-func (v *CodeGenerator) addDataWithLabel(label string, text string, length int) {
+func (v *CodeGenerator) addDataWithLabel(label string, text string) {
+	length := 0
+	for i := 0; i < len(text); i++ {
+		length++
+		if text[i] == '\\' {
+			i++
+		}
+	}
 	v.asm.data[label] = NewAsciiWord(length, text)
 }
 
@@ -556,9 +563,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		returnRegister := v.freeRegisters.Pop()
 		switch node.op {
 		case MUL:
-			v.addCode("SMULL " + returnRegister.String() + ", " + operand2.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"CMP "+ operand2.String() + ", " + returnRegister.String() + ", ASR #31",
-				"BLNE " + CHECK_OVERFLOW.String())
+			v.addCode("SMULL "+returnRegister.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
+				"CMP "+operand2.String()+", "+returnRegister.String()+", ASR #31",
+				"BLNE "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
@@ -575,12 +582,12 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 				"MOV "+returnRegister.String()+", r1")
 			v.usesFunction(CHECK_DIVIDE)
 		case ADD:
-			v.addCode("ADDS " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"BLVS " + CHECK_OVERFLOW.String())
+			v.addCode("ADDS "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case SUB:
-			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"BLVS " + CHECK_OVERFLOW.String())
+			v.addCode("SUB "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case GT:
 			v.addCode("CMP "+operand1.String()+", "+operand2.String(),

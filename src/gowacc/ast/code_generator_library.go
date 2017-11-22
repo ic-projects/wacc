@@ -37,20 +37,18 @@ func (f PreFunction) add(v *CodeGenerator, lib *Library) {
 type PreData struct {
 	name         string
 	text         string
-	length       int
 	dependancies []LibraryFunction
 }
 
-func NewPreData(name string, text string, length int) Predefined {
+func NewPreData(name string, text string) Predefined {
 	return PreData{
-		name:   name,
-		text:   text,
-		length: length,
+		name: name,
+		text: text,
 	}
 }
 
 func (d PreData) add(v *CodeGenerator, lib *Library) {
-	v.addDataWithLabel(d.name, d.text, d.length)
+	v.addDataWithLabel(d.name, d.text)
 
 	// Add any dependancies
 	for _, dep := range d.dependancies {
@@ -96,8 +94,8 @@ func (l *Library) add(v *CodeGenerator, function LibraryFunction) {
 	l.lib[function].add(v, l)
 }
 
-func (l *Library) NewPreData(f LibraryFunction, text string, length int) {
-	l.lib[f] = NewPreData(f.String(), text, length)
+func (l *Library) NewPreData(f LibraryFunction, text string) {
+	l.lib[f] = NewPreData(f.String(), text)
 }
 
 func (l *Library) NewPreFunction(f LibraryFunction, dependancies []LibraryFunction, body []string) {
@@ -230,16 +228,16 @@ func GetLibrary() *Library {
 		})
 
 	// Predefined strings
-	library.NewPreData(MSG_TRUE, "true\\0", 5)
-	library.NewPreData(MSG_FALSE, "false\\0", 6)
-	library.NewPreData(MSG_NEWLINE, "\\0", 1)
-	library.NewPreData(MSG_INT, "%d\\0", 3)
-	library.NewPreData(MSG_STRING, "%.*s\\0", 5)
-	library.NewPreData(MSG_REFERENCE, "%p\\0", 3)
-	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0", 45)
-	library.NewPreData(MSG_OVERFLOW, "OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n", 82)
-	library.NewPreData(MSG_ARRAY_NEGATIVE_INDEX, "ArrayIndexOutOfBoundsError: negative index\\n\\0", 44)
-	library.NewPreData(MSG_ARRAY_OUT_BOUNDS_INDEX, "ArrayIndexOutOfBoundsError: index too large\\n\\0", 45)
+	library.NewPreData(MSG_TRUE, "true\\0")
+	library.NewPreData(MSG_FALSE, "false\\0")
+	library.NewPreData(MSG_NEWLINE, "\\0")
+	library.NewPreData(MSG_INT, "%d\\0")
+	library.NewPreData(MSG_STRING, "%.*s\\0")
+	library.NewPreData(MSG_REFERENCE, "%p\\0")
+	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0")
+	library.NewPreData(MSG_OVERFLOW, "OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n")
+	library.NewPreData(MSG_ARRAY_NEGATIVE_INDEX, "ArrayIndexOutOfBoundsError: negative index\\n\\0")
+	library.NewPreData(MSG_ARRAY_OUT_BOUNDS_INDEX, "ArrayIndexOutOfBoundsError: index too large\\n\\0")
 
 	return library
 }
