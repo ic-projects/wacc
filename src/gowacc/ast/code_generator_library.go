@@ -72,6 +72,8 @@ func (l LibraryFunction) String() string {
 		return "p_check_overflow"
 	case CHECK_ARRAY_INDEX:
 		return "p_check_array_index"
+	case CHECK_NULL_POINTER:
+		return "p_check_null_pointer"
 	case THROW_RUNTIME_ERROR:
 		return "p_throw_runtime_error"
 	case MSG_TRUE:
@@ -94,6 +96,8 @@ func (l LibraryFunction) String() string {
 		return "msg_array_negative_index"
 	case MSG_ARRAY_OUT_BOUNDS_INDEX:
 		return "msg_array_out_bounds_index"
+	case MSG_NULL_POINTER_REFERENCE:
+		return "msg_null_pointer_reference"
 	default:
 		return "unknown"
 	}
