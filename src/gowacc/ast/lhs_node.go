@@ -36,16 +36,16 @@ func (node IdentifierNode) String() string {
 //
 //  fst i
 type PairFirstElementNode struct {
-	pos    Position
-	expr   ExpressionNode
-	assign bool
+	pos     Position
+	expr    ExpressionNode
+	pointer bool
 }
 
 func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElementNode {
 	return PairFirstElementNode{
-		pos:    pos,
-		expr:   expr,
-		assign: false,
+		pos:     pos,
+		expr:    expr,
+		pointer: false,
 	}
 }
 
@@ -63,16 +63,16 @@ func (node PairFirstElementNode) String() string {
 //
 //  snd i
 type PairSecondElementNode struct {
-	pos    Position
-	expr   ExpressionNode
-	assign bool
+	pos     Position
+	expr    ExpressionNode
+	pointer bool
 }
 
 func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondElementNode {
 	return PairSecondElementNode{
-		pos:    pos,
-		expr:   expr,
-		assign: false,
+		pos:     pos,
+		expr:    expr,
+		pointer: false,
 	}
 }
 
@@ -89,18 +89,18 @@ func (node PairSecondElementNode) String() string {
 // E.g.
 //  i[4][3+2]
 type ArrayElementNode struct {
-	pos    Position
-	ident  IdentifierNode
-	exprs  []ExpressionNode
-	assign bool
+	pos     Position
+	ident   IdentifierNode
+	exprs   []ExpressionNode
+	pointer bool
 }
 
 func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
-		pos:    pos,
-		ident:  ident,
-		exprs:  exprs,
-		assign: false,
+		pos:     pos,
+		ident:   ident,
+		exprs:   exprs,
+		pointer: false,
 	}
 }
 

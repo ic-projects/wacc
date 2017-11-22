@@ -63,13 +63,13 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case AssignNode:
 		if arr, ok := node.lhs.(ArrayElementNode); ok {
-			arr.assign = true
+			arr.pointer = true
 		}
 		if fst, ok := node.lhs.(PairFirstElementNode); ok {
-			fst.assign = true
+			fst.pointer = true
 		}
 		if snd, ok := node.lhs.(PairSecondElementNode); ok {
-			snd.assign = true
+			snd.pointer = true
 		}
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 	case ReadNode:

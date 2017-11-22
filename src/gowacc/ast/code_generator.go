@@ -460,7 +460,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			}
 
 			// If it is an assignment leave the pointer to the element in the register
-			if !(node.assign && i == length-1) {
+			if !(node.pointer && i == length-1) {
 				v.addCode(fmt.Sprintf("LDR %s, [%s]", identRegister, identRegister))
 			}
 		}
@@ -665,7 +665,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+"]")
 
-		if !node.assign {
+		// If we don't want a pointer then don't retrieve the value
+		if !node.pointer {
 			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
 				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
 			} else {
@@ -679,7 +680,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+", #4]")
 
-		if !node.assign {
+		// If we don't want a pointer then don't retrieve the value
+		if !node.pointer {
 			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
 				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
 			} else {
