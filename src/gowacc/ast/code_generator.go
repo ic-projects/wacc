@@ -420,7 +420,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.freeRegisters.Push(exprRegister)
 			//lengthReg := v.freeRegisters.Pop()
 			v.addCode(
-				//"LDR "+identRegister.String()+", ["+identRegister.String()+"]",
 				"MOV r0, "+exprRegister.String(),
 				"MOV r1, "+identRegister.String(),
 				"BL "+CHECK_ARRAY_INDEX.String(),
@@ -432,11 +431,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			} else {
 				v.addCode(fmt.Sprintf("ADD %s, %s, %s, LSL #2", identRegister, identRegister, exprRegister))
 			}
-		}
 
-		// If it is an assignment leave the pointer to the element in the register
-		if !node.assign {
-			v.addCode(fmt.Sprintf("LDR %s, [%s]", identRegister, identRegister))
+			// If it is an assignment leave the pointer to the element in the register
+			if !(node.assign && i == length-1) {
+				v.addCode(fmt.Sprintf("LDR %s, [%s]", identRegister, identRegister))
+			}
 		}
 		v.usesFunction(CHECK_ARRAY_INDEX)
 
