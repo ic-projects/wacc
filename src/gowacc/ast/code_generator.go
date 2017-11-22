@@ -546,7 +546,9 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("LDR " + register.String() + ", =" + label)
 		v.returnRegisters.Push(register)
 	case PairLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		v.returnRegisters.Push(register)
+		v.addCode("LDR " + register.String() + ", =0")
 	case UnaryOperatorNode:
 		switch node.op {
 		case NOT:
