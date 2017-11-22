@@ -72,6 +72,7 @@ const (
 	CHECK_DIVIDE
 	CHECK_OVERFLOW
 	CHECK_ARRAY_INDEX
+	CHECK_NULL_POINTER
 	THROW_RUNTIME_ERROR
 
 	MSG_TRUE
@@ -84,6 +85,7 @@ const (
 	MSG_OVERFLOW
 	MSG_ARRAY_NEGATIVE_INDEX
 	MSG_ARRAY_OUT_BOUNDS_INDEX
+	MSG_NULL_POINTER_REFERENCE
 )
 
 type Library struct {
@@ -226,6 +228,18 @@ func GetLibrary() *Library {
 			"MOV r0, #-1",
 			"BL exit",
 		})
+	library.NewPreFunction(CHECK_NULL_POINTER,
+		[]LibraryFunction{
+			MSG_NULL_POINTER_REFERENCE,
+			THROW_RUNTIME_ERROR,
+		},
+		[]string{
+			"PUSH {lr}",
+			"CMP r0, #0",
+			"LDREQ r0, =" + MSG_NULL_POINTER_REFERENCE.String(),
+			"BLEQ " + THROW_RUNTIME_ERROR.String(),
+			"POP {pc}",
+		})
 
 	// Predefined strings
 	library.NewPreData(MSG_TRUE, "true\\0")
@@ -238,6 +252,7 @@ func GetLibrary() *Library {
 	library.NewPreData(MSG_OVERFLOW, "OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n")
 	library.NewPreData(MSG_ARRAY_NEGATIVE_INDEX, "ArrayIndexOutOfBoundsError: negative index\\n\\0")
 	library.NewPreData(MSG_ARRAY_OUT_BOUNDS_INDEX, "ArrayIndexOutOfBoundsError: index too large\\n\\0")
+	library.NewPreData(MSG_NULL_POINTER_REFERENCE, "NullReferenceError: dereference a null reference\\n\\0")
 
 	return library
 }
