@@ -312,7 +312,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 }
 
 // NoRecurse defines the nodes of the AST which should not be automatically
-// walked. This means we can visit the children in any way we choose.
+// walked. This means we can Walk the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
 	case IfNode, ArrayLiteralNode:
