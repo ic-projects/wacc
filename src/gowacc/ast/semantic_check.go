@@ -65,6 +65,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.expect(node.t)
 		}
 	case AssignNode:
+		if arr, ok := node.lhs.(ArrayElementNode); ok {
+			arr.assign = true
+		}
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 	case ReadNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
