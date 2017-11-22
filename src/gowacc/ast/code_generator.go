@@ -315,7 +315,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can visit the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, ArrayLiteralNode:
+	case IfNode, ArrayLiteralNode, ArrayElementNode:
 		return true
 	default:
 		return false
@@ -387,7 +387,37 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case PairSecondElementNode:
 
 	case ArrayElementNode:
+		register := v.freeRegisters.Pop()
+		Walk(v, node.ident)
+		identRegister := v.returnRegisters.Pop()
 
+		length := len(node.exprs)
+		symbol, _ := v.symbolTable.SearchForIdent(node.ident.ident)
+		charOrInt := sizeOf(symbol.t) == 1
+
+		for i := 0; i < length; i++ {
+			expr := node.exprs[i]
+			Walk(v, expr)
+			exprRegister := v.returnRegisters.Pop()
+
+			v.addCode("MOV r0, "+exprRegister.String(),
+				"MOV r1, "+identRegister.String(),
+				"BL "+CHECK_ARRAY_INDEX.String(),
+				"ADD "+identRegister.String()+", "+identRegister.String()+" #4")
+			if i == length-1 && charOrInt {
+				v.addCode(fmt.Sprintf("ADD %s, %s, %s", identRegister, identRegister, exprRegister))
+			} else {
+				v.addCode(fmt.Sprintf("ADD %s, %s, %s, LSL #2", identRegister, identRegister, exprRegister))
+			}
+		}
+
+		// If it is an assignment leave the pointer to the element in the register
+		if !node.assign {
+			v.addCode(fmt.Sprintf("LDR %s, [%s]", identRegister, identRegister))
+		}
+		v.usesFunction(CHECK_ARRAY_INDEX)
+
+		v.returnRegisters.Push(register)
 	case ArrayLiteralNode:
 		register := v.freeRegisters.Pop()
 		length := len(node.exprs)
