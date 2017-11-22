@@ -236,6 +236,16 @@ func (registerStack *RegisterStack) Push(register Register) {
 	registerStack.stack = append(registerStack.stack, register)
 }
 
+func (registerStack *RegisterStack) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("[ ")
+	for _, r := range registerStack.stack {
+		buf.WriteString(r.String() + " ")
+	}
+	buf.WriteString("]")
+	return buf.String()
+}
+
 func (v *CodeGenerator) addPrint(t TypeNode) {
 	switch node := t.(type) {
 	case BaseTypeNode:
