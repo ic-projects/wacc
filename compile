@@ -94,9 +94,10 @@ files.each do |file_path|
   if $options[:execute] && exitstatus == 0 then
     emulatedexitstatus = 0
     puts "-- Assembling and Linking..."
-    %x(arm-linux-gnueabi-gcc -o FILENAME1 -mcpu=arm1176jzf-s -mtune=arm1176jzf-s ./#{(File.basename file_path)[0..-6]}.s)
+    %x(arm-linux-gnueabi-gcc -o bin -mcpu=arm1176jzf-s -mtune=arm1176jzf-s ./#{(File.basename file_path)[0..-6]}.s)
     puts "-- Executing..."
-    emulated = %x(qemu-arm -L /usr/arm-linux-gnueabi/ FILENAME1)
+    emulated = %x(qemu-arm -L /usr/arm-linux-gnueabi/ bin)
+    File.delete("bin")
     emulatedexitstatus = $?.exitstatus
     puts "==========================================================="
     if emulated != "" then
