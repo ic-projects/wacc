@@ -1,0 +1,13 @@
+-- Compiling...
+-- Assembling and Linking...
+-- Executing...
+===========================================================
+0x22098
+0x23100
+0x230d0
+0x22008
+3
+ArrayIndexOutOfBoundsError: index too large
+===========================================================
+The exit code is 255.
+-- Finished
