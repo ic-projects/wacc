@@ -317,6 +317,8 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
 	case IfNode, ArrayLiteralNode:
 		return true
+	case LoopNode:
+		return true
 	default:
 		return false
 	}
@@ -374,7 +376,19 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
 	case LoopNode:
-
+		v.addCode(fmt.Sprintf("B L%d", v.labelCount+1))
+		// Do
+		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		v.labelCount++
+		Walk(v, node.stats)
+		// Cond
+		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		v.labelCount++
+		Walk(v, node.expr)
+		r := v.returnRegisters.Pop()
+		v.addCode(fmt.Sprintf("CMP %s, #1", r))
+		v.freeRegisters.Push(r)
+		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount-2))
 	case ScopeNode:
 
 	case IdentifierNode:
