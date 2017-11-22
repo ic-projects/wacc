@@ -336,6 +336,8 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 		NewPairNode,
 		ReadNode:
 		return true
+	case FunctionCallNode:
+		return true
 	default:
 		return false
 	}
@@ -355,6 +357,35 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.addFunction("f_" + node.ident.ident)
 		}
 		v.addCode("PUSH {lr}")
+	case []ParameterNode:
+		registers := []Register{R0, R1, R2, R3}
+		i := 0
+		j := 0
+		for n, e := range node {
+			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
+			if n < len(registers) {
+				dec.AddLocation(NewStackOffsetLocation(i, v))
+				i += sizeOf(e.t)
+			} else {
+				dec.AddLocation(NewStackOffsetLocation(j, v))
+				j += sizeOf(e.t)
+			}
+		}
+
+		if i > 0 {
+			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
+		}
+		v.symbolTable.currentScope.scopeSize = i
+		for n, e := range node {
+			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
+			if n < len(registers) {
+				if sizeOf(e.t) == 1 {
+					v.addCode("STRB " + registers[n].String() + ", " + dec.location.String())
+				} else {
+					v.addCode("STR " + registers[n].String() + ", " + dec.location.String())
+				}
+			}
+		}
 	case ParameterNode:
 
 	case SkipNode:
@@ -368,7 +399,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		// Lhs
 		switch lhsNode := node.lhs.(type) {
 		case IdentifierNode:
-			ident, _ := v.symbolTable.SearchForIdentInCurrentScope(lhsNode.ident)
+			ident, _ := v.symbolTable.SearchForIdent(lhsNode.ident)
 			if ident.location != nil {
 				if sizeOf(ident.t) == 1 {
 					v.addCode("STRB " + rhsRegister.String() + ", " + ident.location.String())
@@ -547,7 +578,21 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(snd)
 		v.returnRegisters.Push(register)
 	case FunctionCallNode:
+		registers := []Register{R0, R1, R2, R3}
+		for i, e := range node.exprs {
+			Walk(v, e)
+			register := v.returnRegisters.Pop()
+			if i < len(node.exprs) {
+				v.addCode("MOV " + registers[i].String() + ", " + register.String())
+			} else {
+				v.addCode("PUSH {" + register.String() + "}")
+			}
+		}
+		v.addCode("BL f_" + node.ident.ident)
 
+		register := v.freeRegisters.Pop()
+		v.returnRegisters.Push(register)
+		v.addCode("MOV " + register.String() + ", " + R0.String())
 	case BaseTypeNode:
 
 	case ArrayTypeNode:
@@ -611,8 +656,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveNextScope()
 		size := 0
 		for _, dec := range v.symbolTable.currentScope.scope {
-			dec.AddLocation(NewStackOffsetLocation(size, v))
 			size += sizeOf(dec.t)
+			dec.AddLocation(NewStackOffsetLocation(v.currentStackPos+size, v))
 		}
 		if size != 0 {
 			i := size
@@ -622,6 +667,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
 		}
 		v.symbolTable.currentScope.scopeSize = size
+		v.currentStackPos += size
 	}
 }
 
@@ -631,6 +677,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case []StatementNode:
 		if v.symbolTable.currentScope.scopeSize != 0 {
 			i := v.symbolTable.currentScope.scopeSize
+			v.currentStackPos -= i
 			for ; i > 1024; i -= 1024 {
 				v.addCode("ADD sp, sp, #1024")
 			}
@@ -638,6 +685,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		}
 		v.symbolTable.MoveUpScope()
 	case FunctionNode:
+		if v.symbolTable.currentScope.scopeSize > 0 {
+			v.addCode("ADD sp, sp, #" + strconv.Itoa(v.symbolTable.currentScope.scopeSize))
+		}
 		v.symbolTable.MoveUpScope()
 		if node.ident.ident == "" {
 			v.addCode("LDR r0, =0",
@@ -681,8 +731,16 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case ReturnNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
+		i := 0
+		for t := v.symbolTable.currentScope; t != v.symbolTable.head; t = t.parentScope {
+			i += t.scopeSize
+		}
+		if i > 0 {
+			v.addCode("ADD sp, sp, #" + strconv.Itoa(i))
+		}
 		v.addCode("MOV r0, "+register.String(),
 			"POP {pc}")
+
 	case PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, "+register.String(),
@@ -839,7 +897,7 @@ func (location *Location) String() string {
 	}
 
 	// Location is a stack offset
-	return "[sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos) + "]"
+	return "[sp, #" + strconv.Itoa(location.codeGenerator.currentStackPos-location.currentPos) + "]"
 }
 
 func (location *Location) PointerTo() string {
