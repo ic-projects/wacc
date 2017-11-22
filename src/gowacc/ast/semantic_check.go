@@ -52,8 +52,6 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case ParameterNode:
 		if declareNode, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
 			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
-		} else {
-			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
 	case SkipNode:
 	case DeclareNode:
@@ -61,7 +59,6 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
 			v.typeChecker.freeze(node)
 		} else {
-			v.symbolTable.AddToScope(node.ident.ident, node)
 			v.typeChecker.expect(node.t)
 		}
 	case AssignNode:
@@ -221,7 +218,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 
 // Leave will be called to leave the current node.
 func (v *SemanticCheck) Leave(programNode ProgramNode) {
-	switch programNode.(type) {
+	switch node := programNode.(type) {
 	case []StatementNode:
 		v.symbolTable.MoveUpScope()
 	case FunctionNode:
@@ -229,6 +226,14 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 		v.typeChecker.forcePop()
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
+	case DeclareNode:
+		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); !ok {
+			v.symbolTable.AddToScope(node.ident.ident, node)
+		}
+	case ParameterNode:
+		if _, ok := v.symbolTable.SearchForIdent(node.ident.ident); !ok {
+			v.symbolTable.AddToScope(node.ident.ident, node)
+		}
 	}
 	v.typeChecker.unfreeze(programNode)
 }
