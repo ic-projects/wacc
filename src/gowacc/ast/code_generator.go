@@ -336,6 +336,8 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 		NewPairNode,
 		ReadNode:
 		return true
+	case FunctionCallNode:
+		return true
 	default:
 		return false
 	}
@@ -355,6 +357,35 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.addFunction("f_" + node.ident.ident)
 		}
 		v.addCode("PUSH {lr}")
+	case []ParameterNode:
+		registers := []Register{R0, R1, R2, R3}
+		i := 0
+		j := 0
+		for n, e := range node {
+			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
+			if n < len(registers) {
+				dec.AddLocation(NewStackOffsetLocation(i, v))
+				i += sizeOf(e.t)
+			} else {
+				dec.AddLocation(NewStackOffsetLocation(j, v))
+				j += sizeOf(e.t)
+			}
+		}
+
+		if i > 0 {
+			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
+		}
+		v.symbolTable.currentScope.scopeSize = i
+		for n, e := range node {
+			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
+			if n < len(registers) {
+				if sizeOf(e.t) == 1 {
+					v.addCode("STRB " + registers[n].String() + ", " + dec.location.String())
+				} else {
+					v.addCode("STR " + registers[n].String() + ", " + dec.location.String())
+				}
+			}
+		}
 	case ParameterNode:
 
 	case SkipNode:
@@ -547,7 +578,21 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(snd)
 		v.returnRegisters.Push(register)
 	case FunctionCallNode:
+		registers := []Register{R0, R1, R2, R3}
+		for i, e := range node.exprs {
+			Walk(v, e)
+			register := v.returnRegisters.Pop()
+			if i < len(node.exprs) {
+				v.addCode("MOV " + registers[i].String() + ", " + register.String())
+			} else {
+				v.addCode("PUSH {" + register.String() + "}")
+			}
+		}
+		v.addCode("BL f_" + node.ident.ident)
 
+		register := v.freeRegisters.Pop()
+		v.returnRegisters.Push(register)
+		v.addCode("MOV " + register.String() + ", " + R0.String())
 	case BaseTypeNode:
 
 	case ArrayTypeNode:
