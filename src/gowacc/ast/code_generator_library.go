@@ -1,9 +1,5 @@
 package ast
 
-import (
-	"strconv"
-)
-
 type Predefined interface {
 	add(*CodeGenerator, *Library)
 }
@@ -59,7 +55,48 @@ func (d PreData) add(v *CodeGenerator, lib *Library) {
 type LibraryFunction int
 
 func (l LibraryFunction) String() string {
-	return "lib_" + strconv.Itoa(int(l))
+	switch l {
+	case PRINT_LN:
+		return "p_print_ln"
+	case PRINT_BOOL:
+		return "p_print_bool"
+	case PRINT_INT:
+		return "p_print_int"
+	case PRINT_STRING:
+		return "p_print_string"
+	case PRINT_REFERENCE:
+		return "p_print_reference"
+	case CHECK_DIVIDE:
+		return "p_check_divide"
+	case CHECK_OVERFLOW:
+		return "p_check_overflow"
+	case CHECK_ARRAY_INDEX:
+		return "p_check_array_index"
+	case THROW_RUNTIME_ERROR:
+		return "p_throw_runtime_error"
+	case MSG_TRUE:
+		return "msg_true"
+	case MSG_FALSE:
+		return "msg_false"
+	case MSG_INT:
+		return "msg_int"
+	case MSG_NEWLINE:
+		return "msg_newline"
+	case MSG_STRING:
+		return "msg_string"
+	case MSG_REFERENCE:
+		return "msg_reference"
+	case MSG_DIVIDE_BY_ZERO:
+		return "msg_divide_by_zero"
+	case MSG_OVERFLOW:
+		return "msg_overflow"
+	case MSG_ARRAY_NEGATIVE_INDEX:
+		return "msg_array_negative_index"
+	case MSG_ARRAY_OUT_BOUNDS_INDEX:
+		return "msg_array_out_bounds_index"
+	default:
+		return "unknown"
+	}
 }
 
 const (
