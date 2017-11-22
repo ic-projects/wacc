@@ -454,13 +454,13 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("LDR r0, =8",
 			"BL malloc",
 			"MOV "+register.String()+", r0")
-		v.Visit(node.fst)
+		Walk(v, node.fst)
 		fst := v.returnRegisters.Pop()
 		v.addCode("LDR r0, ="+strconv.Itoa(sizeOf(Type(node.fst, v.symbolTable))),
 			"BL malloc",
 			"STR "+fst.String()+", [r0]",
 			"STR r0, ["+register.String()+"]")
-		v.Visit(node.snd)
+		Walk(v, node.snd)
 		snd := v.returnRegisters.Pop()
 		v.addCode("LDR r0, ="+strconv.Itoa(sizeOf(Type(node.snd, v.symbolTable))),
 			"BL malloc",
