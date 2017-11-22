@@ -350,6 +350,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case Program:
 
 	case FunctionNode:
+		v.currentStackPos = 0
 		v.symbolTable.MoveNextScope()
 		if node.ident.ident == "" {
 			v.addFunction("main")
@@ -364,11 +365,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
 			if n < len(registers) {
-				dec.AddLocation(NewStackOffsetLocation(i, v))
 				i += sizeOf(e.t)
+				dec.AddLocation(NewStackOffsetLocation(i, v))
 			} else {
-				dec.AddLocation(NewStackOffsetLocation(j, v))
-				j += sizeOf(e.t)
+				j -= sizeOf(e.t)
+				dec.AddLocation(NewStackOffsetLocation(j-4, v))
 			}
 		}
 
@@ -376,6 +377,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
 		}
 		v.symbolTable.currentScope.scopeSize = i
+		v.currentStackPos += i
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
 			if n < len(registers) {
@@ -579,16 +581,22 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.returnRegisters.Push(register)
 	case FunctionCallNode:
 		registers := []Register{R0, R1, R2, R3}
+		size := 0
 		for i, e := range node.exprs {
 			Walk(v, e)
 			register := v.returnRegisters.Pop()
-			if i < len(node.exprs) {
+			if i < len(registers) {
 				v.addCode("MOV " + registers[i].String() + ", " + register.String())
 			} else {
 				v.addCode("PUSH {" + register.String() + "}")
+				f, _ := v.symbolTable.SearchForFunction(node.ident.ident)
+				size += sizeOf(f.params[i].t)
 			}
 		}
 		v.addCode("BL f_" + node.ident.ident)
+		if size > 0 {
+			v.addCode("ADD sp, sp, #" + strconv.Itoa(size))
+		}
 
 		register := v.freeRegisters.Pop()
 		v.returnRegisters.Push(register)
