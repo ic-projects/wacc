@@ -368,8 +368,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 				i += sizeOf(e.t)
 				dec.AddLocation(NewStackOffsetLocation(i, v))
 			} else {
-				j -= sizeOf(e.t)
 				dec.AddLocation(NewStackOffsetLocation(j-4, v))
+				j -= sizeOf(e.t)
 			}
 		}
 
@@ -582,20 +582,29 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case FunctionCallNode:
 		registers := []Register{R0, R1, R2, R3}
 		size := 0
-		for i, e := range node.exprs {
-			Walk(v, e)
+		for i := len(node.exprs) - 1; i >= 0; i-- {
+			Walk(v, node.exprs[i])
 			register := v.returnRegisters.Pop()
+			v.freeRegisters.Push(register)
 			if i < len(registers) {
 				v.addCode("MOV " + registers[i].String() + ", " + register.String())
 			} else {
-				v.addCode("PUSH {" + register.String() + "}")
 				f, _ := v.symbolTable.SearchForFunction(node.ident.ident)
+				v.addCode("SUB sp, sp, #" + strconv.Itoa(sizeOf(f.params[i].t)))
+				if sizeOf(f.params[i].t) == 1 {
+					v.addCode("STRB " + register.String() + ", [sp]")
+				} else {
+					v.addCode("STR " + register.String() + ", [sp]")
+				}
+				//		v.addCode("PUSH {" + register.String() + "}")
 				size += sizeOf(f.params[i].t)
+				v.currentStackPos += sizeOf(f.params[i].t)
 			}
 		}
 		v.addCode("BL f_" + node.ident.ident)
 		if size > 0 {
 			v.addCode("ADD sp, sp, #" + strconv.Itoa(size))
+			v.currentStackPos -= size
 		}
 
 		register := v.freeRegisters.Pop()
