@@ -315,9 +315,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can Walk the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, ArrayLiteralNode:
-		return true
-	case LoopNode:
+	case IfNode, LoopNode, AssignNode, ArrayLiteralNode:
 		return true
 	default:
 		return false
