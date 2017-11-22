@@ -76,6 +76,8 @@ func (l LibraryFunction) String() string {
 		return "p_check_null_pointer"
 	case THROW_RUNTIME_ERROR:
 		return "p_throw_runtime_error"
+	case FREE:
+		return "p_free"
 	case MSG_TRUE:
 		return "msg_true"
 	case MSG_FALSE:
@@ -116,6 +118,8 @@ const (
 	CHECK_NULL_POINTER
 	THROW_RUNTIME_ERROR
 
+	FREE
+
 	MSG_TRUE
 	MSG_FALSE
 	MSG_INT
@@ -127,6 +131,7 @@ const (
 	MSG_ARRAY_NEGATIVE_INDEX
 	MSG_ARRAY_OUT_BOUNDS_INDEX
 	MSG_NULL_POINTER_REFERENCE
+	MSG_FREE
 )
 
 type Library struct {
@@ -279,6 +284,27 @@ func GetLibrary() *Library {
 			"CMP r0, #0",
 			"LDREQ r0, =" + MSG_NULL_POINTER_REFERENCE.String(),
 			"BLEQ " + THROW_RUNTIME_ERROR.String(),
+			"POP {pc}",
+		})
+
+	library.NewPreFunction(FREE,
+		[]LibraryFunction{
+			MSG_NULL_POINTER_REFERENCE,
+			THROW_RUNTIME_ERROR,
+		},
+		[]string{
+			"PUSH {lr}",
+			"CMP r0, #0",
+			"LDREQ r0, =" + MSG_NULL_POINTER_REFERENCE.String(),
+			"BEQ " + THROW_RUNTIME_ERROR.String(),
+			"PUSH {r0}",
+			"LDR r0, [r0]",
+			"BL free",
+			"LDR r0, [sp]",
+			"LDR r0, [r0, #4]",
+			"BL free",
+			"POP {r0}",
+			"BL free",
 			"POP {pc}",
 		})
 
