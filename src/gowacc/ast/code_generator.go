@@ -259,6 +259,9 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		}
 		v.addCode("BL " + PRINT_REFERENCE.String())
 		v.usesFunction(PRINT_REFERENCE)
+	case PairTypeNode:
+		v.addCode("BL " + PRINT_REFERENCE.String())
+		v.usesFunction(PRINT_REFERENCE)
 	}
 }
 
@@ -395,9 +398,35 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("LDR " + register.String() + ", " + dec.location.String())
 		v.returnRegisters.Push(register)
 	case PairFirstElementNode:
+		Walk(v, node.expr)
+		register := v.returnRegisters.Peek()
+		v.addCode("MOV r0, "+register.String(),
+			"BL "+CHECK_NULL_POINTER.String(),
+			"LDR "+register.String()+", ["+register.String()+"]")
 
+		if !node.assign {
+			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
+				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
+			} else {
+				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
+			}
+		}
+		v.usesFunction(CHECK_NULL_POINTER)
 	case PairSecondElementNode:
+		Walk(v, node.expr)
+		register := v.returnRegisters.Peek()
+		v.addCode("MOV r0, "+register.String(),
+			"BL "+CHECK_NULL_POINTER.String(),
+			"LDR "+register.String()+", ["+register.String()+", #4]")
 
+		if !node.assign {
+			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
+				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
+			} else {
+				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
+			}
+		}
+		v.usesFunction(CHECK_NULL_POINTER)
 	case ArrayElementNode:
 		register := v.freeRegisters.Pop()
 		Walk(v, node.ident)
@@ -451,21 +480,37 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.returnRegisters.Push(register)
 	case NewPairNode:
 		register := v.freeRegisters.Pop()
+
+		// Make space for 2 new pointers on heap
 		v.addCode("LDR r0, =8",
 			"BL malloc",
 			"MOV "+register.String()+", r0")
+
+		// Store first element
 		Walk(v, node.fst)
 		fst := v.returnRegisters.Pop()
-		v.addCode("LDR r0, ="+strconv.Itoa(sizeOf(Type(node.fst, v.symbolTable))),
+		fstSize := sizeOf(Type(node.fst, v.symbolTable))
+		v.addCode("LDR r0, ="+strconv.Itoa(fstSize),
 			"BL malloc",
-			"STR "+fst.String()+", [r0]",
 			"STR r0, ["+register.String()+"]")
+		if fstSize == 1 {
+			v.addCode("STRB " + fst.String() + ", [r0]")
+		} else {
+			v.addCode("STR " + fst.String() + ", [r0]")
+		}
+
+		// Store second element
 		Walk(v, node.snd)
 		snd := v.returnRegisters.Pop()
-		v.addCode("LDR r0, ="+strconv.Itoa(sizeOf(Type(node.snd, v.symbolTable))),
+		sndSize := sizeOf(Type(node.snd, v.symbolTable))
+		v.addCode("LDR r0, ="+strconv.Itoa(sndSize),
 			"BL malloc",
-			"STR "+snd.String()+", [r0]",
 			"STR r0, ["+register.String()+", #4]")
+		if sndSize == 1 {
+			v.addCode("STRB " + snd.String() + ", [r0]")
+		} else {
+			v.addCode("STR " + snd.String() + ", [r0]")
+		}
 		v.returnRegisters.Push(register)
 	case FunctionCallNode:
 
