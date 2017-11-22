@@ -249,6 +249,16 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		case CHAR:
 			v.addCode("BL putchar")
 		}
+	case ArrayTypeNode:
+		if arr, ok := node.t.(BaseTypeNode); ok {
+			if arr.t == CHAR && node.dim == 1 {
+				v.addCode("BL " + PRINT_STRING.String())
+				v.usesFunction(PRINT_STRING)
+				return
+			}
+		}
+		v.addCode("BL " + PRINT_REFERENCE.String())
+		v.usesFunction(PRINT_REFERENCE)
 	}
 }
 
