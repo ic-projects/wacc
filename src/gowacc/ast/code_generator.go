@@ -328,7 +328,13 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can Walk the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, AssignNode, ArrayLiteralNode, ArrayElementNode, LoopNode, NewPairNode:
+	case IfNode,
+		AssignNode,
+		ArrayLiteralNode,
+		ArrayElementNode,
+		LoopNode,
+		NewPairNode,
+		ReadNode:
 		return true
 	default:
 		return false
@@ -378,6 +384,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
 
+		if ident, ok := node.lhs.(IdentifierNode); ok {
+			register := v.freeRegisters.Pop()
+			dec, _ := v.symbolTable.SearchForIdent(ident.ident)
+			v.addCode("ADD " + register.String() + ", " + dec.location.PointerTo())
+			v.returnRegisters.Push(register)
+		} else {
+			Walk(v, node.lhs)
+		}
+		register := v.returnRegisters.Pop()
+		v.addCode("MOV r0, " + register.String())
+		if sizeOf(Type(node.lhs, v.symbolTable)) == 1 {
+			v.addCode("BL " + READ_CHAR.String())
+			v.usesFunction(READ_CHAR)
+		} else {
+			v.addCode("BL " + READ_INT.String())
+			v.usesFunction(READ_INT)
+		}
+		v.freeRegisters.Push(register)
 	case FreeNode:
 
 	case ReturnNode:
@@ -460,7 +484,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			}
 
 			// If it is an assignment leave the pointer to the element in the register
-			if !(node.assign && i == length-1) {
+			if !(node.pointer && i == length-1) {
 				v.addCode(fmt.Sprintf("LDR %s, [%s]", identRegister, identRegister))
 			}
 		}
@@ -665,7 +689,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+"]")
 
-		if !node.assign {
+		// If we don't want a pointer then don't retrieve the value
+		if !node.pointer {
 			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
 				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
 			} else {
@@ -679,7 +704,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+", #4]")
 
-		if !node.assign {
+		// If we don't want a pointer then don't retrieve the value
+		if !node.pointer {
 			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
 				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
 			} else {
@@ -814,4 +840,8 @@ func (location *Location) String() string {
 
 	// Location is a stack offset
 	return "[sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos) + "]"
+}
+
+func (location *Location) PointerTo() string {
+	return "sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos)
 }

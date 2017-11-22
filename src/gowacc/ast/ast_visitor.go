@@ -48,7 +48,7 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 			Walk(visitor, node.lhs)
 			Walk(visitor, node.rhs)
 		case ReadNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.lhs)
 		case FreeNode:
 			Walk(visitor, node.expr)
 		case ReturnNode:

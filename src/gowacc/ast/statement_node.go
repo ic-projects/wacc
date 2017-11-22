@@ -93,21 +93,21 @@ func (node AssignNode) String() string {
 // E.g.
 //  read i
 type ReadNode struct {
-	pos  Position
-	expr ExpressionNode
+	pos Position
+	lhs LHSNode
 }
 
-func NewReadNode(pos Position, expr ExpressionNode) ReadNode {
+func NewReadNode(pos Position, lhs LHSNode) ReadNode {
 	return ReadNode{
-		pos:  pos,
-		expr: expr,
+		pos: pos,
+		lhs: lhs,
 	}
 }
 
 func (node ReadNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- READ"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.lhs), "  "))
 	return buf.String()
 }
 

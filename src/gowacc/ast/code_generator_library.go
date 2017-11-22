@@ -66,6 +66,10 @@ func (l LibraryFunction) String() string {
 		return "p_print_string"
 	case PRINT_REFERENCE:
 		return "p_print_reference"
+	case READ_INT:
+		return "p_read_int"
+	case READ_CHAR:
+		return "p_read_char"
 	case CHECK_DIVIDE:
 		return "p_check_divide"
 	case CHECK_OVERFLOW:
@@ -84,6 +88,8 @@ func (l LibraryFunction) String() string {
 		return "msg_false"
 	case MSG_INT:
 		return "msg_int"
+	case MSG_CHAR:
+		return "msg_char"
 	case MSG_NEWLINE:
 		return "msg_newline"
 	case MSG_STRING:
@@ -112,6 +118,9 @@ const (
 	PRINT_STRING
 	PRINT_REFERENCE
 
+	READ_INT
+	READ_CHAR
+
 	CHECK_DIVIDE
 	CHECK_OVERFLOW
 	CHECK_ARRAY_INDEX
@@ -123,6 +132,7 @@ const (
 	MSG_TRUE
 	MSG_FALSE
 	MSG_INT
+	MSG_CHAR
 	MSG_NEWLINE
 	MSG_STRING
 	MSG_REFERENCE
@@ -286,6 +296,30 @@ func GetLibrary() *Library {
 			"BLEQ " + THROW_RUNTIME_ERROR.String(),
 			"POP {pc}",
 		})
+	library.NewPreFunction(READ_INT,
+		[]LibraryFunction{
+			MSG_INT,
+		},
+		[]string{
+			"PUSH {lr}",
+			"MOV r1, r0",
+			"LDR r0, =" + MSG_INT.String(),
+			"ADD r0, r0, #4",
+			"BL scanf",
+			"POP {pc}",
+		})
+	library.NewPreFunction(READ_CHAR,
+		[]LibraryFunction{
+			MSG_CHAR,
+		},
+		[]string{
+			"PUSH {lr}",
+			"MOV r1, r0",
+			"LDR r0, =" + MSG_CHAR.String(),
+			"ADD r0, r0, #4",
+			"BL scanf",
+			"POP {pc}",
+		})
 
 	library.NewPreFunction(FREE,
 		[]LibraryFunction{
@@ -313,6 +347,7 @@ func GetLibrary() *Library {
 	library.NewPreData(MSG_FALSE, "false\\0")
 	library.NewPreData(MSG_NEWLINE, "\\0")
 	library.NewPreData(MSG_INT, "%d\\0")
+	library.NewPreData(MSG_CHAR, "%c\\0")
 	library.NewPreData(MSG_STRING, "%.*s\\0")
 	library.NewPreData(MSG_REFERENCE, "%p\\0")
 	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0")
