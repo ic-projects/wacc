@@ -540,10 +540,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case NOT:
 			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
 		case NEG:
-			register := v.returnRegisters.Peek()
-			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
+			v.addCode("RSBS " + returnRegister.String() + ", " + operand.String() + ", #0")
 		case LEN:
-
+			v.addCode("LDR " + returnRegister.String() + ", [" + operand.String() + "]")
 		case ORD:
 
 		case CHR:
