@@ -175,7 +175,7 @@ func NewStringLiteralNode(pos Position, val string) StringLiteralNode {
 }
 
 func (node StringLiteralNode) String() string {
-	return fmt.Sprintf("- %s", node.val)
+	return fmt.Sprintf("- \"%s\"", node.val)
 }
 
 // PairLiteralNode is a struct which stores the position of a pair literal.
