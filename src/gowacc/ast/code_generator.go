@@ -349,7 +349,14 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		// Lhs
 		switch lhsNode := node.lhs.(type) {
 		case IdentifierNode:
-			// TODO
+			ident, _ := v.symbolTable.SearchForIdentInCurrentScope(lhsNode.ident)
+			if ident.location != nil {
+				if sizeOf(ident.t) == 1 {
+					v.addCode("STRB " + rhsRegister.String() + ", " + ident.location.String())
+				} else {
+					v.addCode("STR " + rhsRegister.String() + ", " + ident.location.String())
+				}
+			}
 		case ArrayElementNode, PairFirstElementNode, PairSecondElementNode:
 			Walk(v, lhsNode)
 			lhsRegister := v.returnRegisters.Pop()
