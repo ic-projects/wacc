@@ -237,13 +237,9 @@ func sizeOf(t TypeNode) int {
 	switch node := t.(type) {
 	case BaseTypeNode:
 		switch node.t {
-		case INT:
-			return 4
 		case CHAR, BOOL:
 			return 1
 		}
-	default:
-		return 0
 	}
-	return 0
+	return 4
 }
