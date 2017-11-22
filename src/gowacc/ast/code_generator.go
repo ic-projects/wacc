@@ -484,7 +484,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 	case []StatementNode:
 		v.symbolTable.MoveNextScope()
-		i := 0
+		size := 0
 		for _, dec := range v.symbolTable.currentScope.scope {
 			switch typeNode := dec.t.(type) {
 			case BaseTypeNode:
@@ -492,15 +492,19 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 				case STRING:
 				case PAIR:
 				default:
-					dec.AddLocation(NewStackOffsetLocation(i, v))
-					i += sizeOf(dec.t)
+					dec.AddLocation(NewStackOffsetLocation(size, v))
+					size += sizeOf(dec.t)
 				}
 			}
 		}
-		if i != 0 {
+		if size != 0 {
+			i := size
+			for ; i > 1024; i -= 1024 {
+				v.addCode("SUB sp, sp, #1024")
+			}
 			v.addCode("SUB sp, sp, #" + strconv.Itoa(i))
 		}
-		v.symbolTable.currentScope.scopeSize = i
+		v.symbolTable.currentScope.scopeSize = size
 	}
 }
 
@@ -509,7 +513,11 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case []StatementNode:
 		if v.symbolTable.currentScope.scopeSize != 0 {
-			v.addCode("ADD sp, sp, #" + strconv.Itoa(v.symbolTable.currentScope.scopeSize))
+			i := v.symbolTable.currentScope.scopeSize
+			for ; i > 1024; i -= 1024 {
+				v.addCode("ADD sp, sp, #1024")
+			}
+			v.addCode("ADD sp, sp, #" + strconv.Itoa(i))
 		}
 		v.symbolTable.MoveUpScope()
 	case FunctionNode:
@@ -680,5 +688,5 @@ func (location *Location) String() string {
 	}
 
 	// Location is a stack offset
-	return "[sp, #" + strconv.Itoa(location.codeGenerator.currentStackPos-location.currentPos) + "]"
+	return "[sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos) + "]"
 }
