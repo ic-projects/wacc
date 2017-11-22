@@ -1,0 +1,27 @@
+-- Compiling...
+-- Printing AST...
+assignArrayElem.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - int[]
+5	      - LHS
+6	        - x
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 0
+10	    - ASSIGNMENT
+11	      - LHS
+12	        - x
+13	          - []
+14	            - 0
+15	      - RHS
+16	        - 1
+17	    - EXIT
+18	      - x
+19	        - []
+20	          - 0
+===========================================================
+-- Finished

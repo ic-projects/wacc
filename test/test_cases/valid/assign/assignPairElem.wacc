@@ -1,0 +1,12 @@
+# simple assignment to pair element
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  pair x = newpair;
+  x.fst = 1;
+  exit x.fst
+end

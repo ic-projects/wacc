@@ -1,0 +1,12 @@
+# simple assignment to identifier
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int x = 0;
+  x = 1;
+  exit x
+end
