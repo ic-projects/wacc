@@ -1,6 +1,6 @@
 -- Compiling...
 -- Printing Assembly...
-ifexit.s contents are:
+ifExit.s contents are:
 ===========================================================
 0	.data
 1	

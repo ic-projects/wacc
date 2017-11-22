@@ -1,6 +1,6 @@
 -- Compiling...
 -- Printing AST...
-elseexit.ast contents are:
+elseExit.ast contents are:
 ===========================================================
 0	Program
 1	  - int main()

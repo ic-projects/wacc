@@ -1,6 +1,6 @@
 -- Compiling...
 -- Printing Assembly...
-elseexit.s contents are:
+elseExit.s contents are:
 ===========================================================
 0	.data
 1	
