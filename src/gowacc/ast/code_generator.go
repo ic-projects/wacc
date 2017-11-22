@@ -486,16 +486,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.symbolTable.MoveNextScope()
 		size := 0
 		for _, dec := range v.symbolTable.currentScope.scope {
-			switch typeNode := dec.t.(type) {
-			case BaseTypeNode:
-				switch typeNode.t {
-				case STRING:
-				case PAIR:
-				default:
-					dec.AddLocation(NewStackOffsetLocation(size, v))
-					size += sizeOf(dec.t)
-				}
-			}
+			dec.AddLocation(NewStackOffsetLocation(size, v))
+			size += sizeOf(dec.t)
 		}
 		if size != 0 {
 			i := size
