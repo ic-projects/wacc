@@ -421,7 +421,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount))
 		// If
 		Walk(v, node.ifStats)
-		v.addCode(fmt.Sprintf("B L%d", v.labelCount))
+		v.addCode(fmt.Sprintf("B L%d", v.labelCount+1))
 		// Else
 		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
 		v.labelCount++
