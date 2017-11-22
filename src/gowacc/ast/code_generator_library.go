@@ -69,6 +69,7 @@ const (
 	PRINT_BOOL
 	PRINT_INT
 	PRINT_STRING
+	PRINT_REFERENCE
 
 	CHECK_DIVIDE
 	CHECK_OVERFLOW
@@ -80,6 +81,7 @@ const (
 	MSG_INT
 	MSG_NEWLINE
 	MSG_STRING
+	MSG_REFERENCE
 	MSG_DIVIDE_BY_ZERO
 	MSG_OVERFLOW
 	MSG_ARRAY_NEGATIVE_INDEX
@@ -165,7 +167,20 @@ func GetLibrary() *Library {
 			"BL fflush",
 			"POP {pc}",
 		})
-
+	library.NewPreFunction(PRINT_REFERENCE,
+		[]LibraryFunction{
+			MSG_REFERENCE,
+		},
+		[]string{
+			"PUSH {lr}",
+			"MOV r1, r0",
+			"LDR r0, =" + MSG_REFERENCE.String(),
+			"ADD r0, r0, #4",
+			"BL printf",
+			"MOV r0, #0",
+			"BL fflush",
+			"POP {pc}",
+		})
 	library.NewPreFunction(CHECK_DIVIDE,
 		[]LibraryFunction{
 			THROW_RUNTIME_ERROR,
@@ -220,6 +235,7 @@ func GetLibrary() *Library {
 	library.NewPreData(MSG_NEWLINE, "\\0", 1)
 	library.NewPreData(MSG_INT, "%d\\0", 3)
 	library.NewPreData(MSG_STRING, "%.*s\\0", 5)
+	library.NewPreData(MSG_REFERENCE, "%p\\0", 3)
 	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0", 45)
 	library.NewPreData(MSG_OVERFLOW, "OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n", 82)
 	library.NewPreData(MSG_ARRAY_NEGATIVE_INDEX, "ArrayIndexOutOfBoundsError: negative index\\n\\0", 44)
