@@ -343,7 +343,19 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case DeclareNode:
 
 	case AssignNode:
-
+		// Rhs
+		Walk(v, node.rhs)
+		rhsRegister := v.returnRegisters.Pop()
+		// Lhs
+		switch lhsNode := node.lhs.(type) {
+		case IdentifierNode:
+			// TODO
+		case ArrayElementNode, PairFirstElementNode, PairSecondElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.returnRegisters.Pop()
+			v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+		}
+		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
 
 	case FreeNode:
