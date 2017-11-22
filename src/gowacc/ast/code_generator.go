@@ -308,7 +308,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can visit the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode:
+	case IfNode, ArrayLiteralNode:
 		return true
 	default:
 		return false
@@ -382,7 +382,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case ArrayElementNode:
 
 	case ArrayLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		length := len(node.exprs)
+		v.addCode(
+			"LDR r0, ="+strconv.Itoa(length*4+4),
+			"BL malloc",
+			"MOV "+register.String()+", r0")
+		for i := 0; i < length; i++ {
+			Walk(v, node.exprs[i])
+			exprRegister := v.returnRegisters.Pop()
+			v.freeRegisters.Push(exprRegister)
+			v.addCode("STR " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*4) + "]")
+		}
+		lengthRegister := v.freeRegisters.Pop()
+		v.addCode(
+			"LDR "+lengthRegister.String()+", ="+strconv.Itoa(length),
+			"STR "+lengthRegister.String()+", ["+register.String()+"]")
+		v.returnRegisters.Push(lengthRegister)
+		v.returnRegisters.Push(register)
 	case NewPairNode:
 
 	case FunctionCallNode:
