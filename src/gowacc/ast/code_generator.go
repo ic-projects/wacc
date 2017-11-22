@@ -325,10 +325,10 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 }
 
 // NoRecurse defines the nodes of the AST which should not be automatically
-// walked. This means we can visit the children in any way we choose.
+// walked. This means we can Walk the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, ArrayLiteralNode, ArrayElementNode, LoopNode, NewPairNode:
+	case IfNode, AssignNode, ArrayLiteralNode, ArrayElementNode, LoopNode, NewPairNode:
 		return true
 	default:
 		return false
@@ -356,7 +356,26 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case DeclareNode:
 
 	case AssignNode:
-
+		// Rhs
+		Walk(v, node.rhs)
+		rhsRegister := v.returnRegisters.Pop()
+		// Lhs
+		switch lhsNode := node.lhs.(type) {
+		case IdentifierNode:
+			ident, _ := v.symbolTable.SearchForIdentInCurrentScope(lhsNode.ident)
+			if ident.location != nil {
+				if sizeOf(ident.t) == 1 {
+					v.addCode("STRB " + rhsRegister.String() + ", " + ident.location.String())
+				} else {
+					v.addCode("STR " + rhsRegister.String() + ", " + ident.location.String())
+				}
+			}
+		case ArrayElementNode, PairFirstElementNode, PairSecondElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.returnRegisters.Pop()
+			v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+		}
+		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
 
 	case FreeNode:

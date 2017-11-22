@@ -1,0 +1,13 @@
+# simple assignment to pair element
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  pair(int, int) x = newpair(0, 0);
+  fst x = 1;
+  int y = fst x;
+  exit y
+end

@@ -1,0 +1,12 @@
+# simple assignment to array element
+
+# Output:
+# #empty#
+
+# Program:
+
+begin
+  int[] x = [0];
+  x[0] = 1;
+  exit x[0]
+end
