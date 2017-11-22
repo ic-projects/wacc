@@ -328,7 +328,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can visit the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, ArrayLiteralNode, ArrayElementNode, LoopNode, PairTypeNode:
+	case IfNode, ArrayLiteralNode, ArrayElementNode, LoopNode, NewPairNode:
 		return true
 	default:
 		return false
@@ -406,43 +406,16 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		register := v.freeRegisters.Pop()
 		dec, _ := v.symbolTable.SearchForIdent(node.ident)
 		if sizeOf(dec.t) == 1 {
-			v.addCode("LDRB " + register.String() + ", " + dec.location.String())
+			v.addCode("LDRSB " + register.String() + ", " + dec.location.String())
 		} else {
 			v.addCode("LDR " + register.String() + ", " + dec.location.String())
 		}
 		v.returnRegisters.Push(register)
 	case PairFirstElementNode:
-		Walk(v, node.expr)
-		register := v.returnRegisters.Peek()
-		v.addCode("MOV r0, "+register.String(),
-			"BL "+CHECK_NULL_POINTER.String(),
-			"LDR "+register.String()+", ["+register.String()+"]")
 
-		if !node.assign {
-			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
-				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
-			} else {
-				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
-			}
-		}
-		v.usesFunction(CHECK_NULL_POINTER)
 	case PairSecondElementNode:
-		Walk(v, node.expr)
-		register := v.returnRegisters.Peek()
-		v.addCode("MOV r0, "+register.String(),
-			"BL "+CHECK_NULL_POINTER.String(),
-			"LDR "+register.String()+", ["+register.String()+", #4]")
 
-		if !node.assign {
-			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
-				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
-			} else {
-				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
-			}
-		}
-		v.usesFunction(CHECK_NULL_POINTER)
 	case ArrayElementNode:
-		//register := v.freeRegisters.Pop()
 		Walk(v, node.ident)
 		identRegister := v.returnRegisters.Pop()
 
@@ -455,13 +428,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			Walk(v, expr)
 			exprRegister := v.returnRegisters.Pop()
 			v.freeRegisters.Push(exprRegister)
-			//lengthReg := v.freeRegisters.Pop()
 			v.addCode(
 				"MOV r0, "+exprRegister.String(),
 				"MOV r1, "+identRegister.String(),
 				"BL "+CHECK_ARRAY_INDEX.String(),
 				"ADD "+identRegister.String()+", "+identRegister.String()+", #4")
-			//v.freeRegisters.Push(lengthReg)
 
 			if i == length-1 && charOrInt {
 				v.addCode(fmt.Sprintf("ADD %s, %s, %s", identRegister, identRegister, exprRegister))
@@ -516,6 +487,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.addCode("STR " + fst.String() + ", [r0]")
 		}
+		v.freeRegisters.Push(fst)
 
 		// Store second element
 		Walk(v, node.snd)
@@ -529,6 +501,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.addCode("STR " + snd.String() + ", [r0]")
 		}
+		v.freeRegisters.Push(snd)
 		v.returnRegisters.Push(register)
 	case FunctionCallNode:
 
@@ -663,6 +636,34 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.freeRegisters.Push(register)
 		v.addCode("MOV r0, "+register.String(),
 			"POP {pc}")
+	case PairFirstElementNode:
+		register := v.returnRegisters.Peek()
+		v.addCode("MOV r0, "+register.String(),
+			"BL "+CHECK_NULL_POINTER.String(),
+			"LDR "+register.String()+", ["+register.String()+"]")
+
+		if !node.assign {
+			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
+				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
+			} else {
+				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
+			}
+		}
+		v.usesFunction(CHECK_NULL_POINTER)
+	case PairSecondElementNode:
+		register := v.returnRegisters.Peek()
+		v.addCode("MOV r0, "+register.String(),
+			"BL "+CHECK_NULL_POINTER.String(),
+			"LDR "+register.String()+", ["+register.String()+", #4]")
+
+		if !node.assign {
+			if sizeOf(Type(node.expr, v.symbolTable)) == 1 {
+				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
+			} else {
+				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
+			}
+		}
+		v.usesFunction(CHECK_NULL_POINTER)
 	case UnaryOperatorNode:
 		operand := v.returnRegisters.Pop()
 		returnRegister := v.freeRegisters.Pop()
