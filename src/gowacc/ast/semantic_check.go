@@ -62,26 +62,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.expect(node.t)
 		}
 	case AssignNode:
-		if arr, ok := node.lhs.(ArrayElementNode); ok {
-			arr.pointer = true
-		}
-		if fst, ok := node.lhs.(PairFirstElementNode); ok {
-			fst.pointer = true
-		}
-		if snd, ok := node.lhs.(PairSecondElementNode); ok {
-			snd.pointer = true
-		}
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 	case ReadNode:
-		if arr, ok := node.lhs.(ArrayElementNode); ok {
-			arr.pointer = true
-		}
-		if fst, ok := node.lhs.(PairFirstElementNode); ok {
-			fst.pointer = true
-		}
-		if snd, ok := node.lhs.(PairSecondElementNode); ok {
-			snd.pointer = true
-		}
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
 	case FreeNode:
 		v.typeChecker.expectSet([]TypeNode{PairTypeNode{}, ArrayTypeNode{}})

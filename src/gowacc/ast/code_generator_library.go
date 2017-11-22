@@ -66,6 +66,10 @@ func (l LibraryFunction) String() string {
 		return "p_print_string"
 	case PRINT_REFERENCE:
 		return "p_print_reference"
+	case READ_INT:
+		return "p_read_int"
+	case READ_CHAR:
+		return "p_read_char"
 	case CHECK_DIVIDE:
 		return "p_check_divide"
 	case CHECK_OVERFLOW:
@@ -84,6 +88,8 @@ func (l LibraryFunction) String() string {
 		return "msg_false"
 	case MSG_INT:
 		return "msg_int"
+	case MSG_CHAR:
+		return "msg_char"
 	case MSG_NEWLINE:
 		return "msg_newline"
 	case MSG_STRING:

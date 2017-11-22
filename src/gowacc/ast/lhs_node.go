@@ -41,6 +41,10 @@ type PairFirstElementNode struct {
 	pointer bool
 }
 
+func (fst *PairFirstElementNode) SetPointer(p bool) {
+	fst.pointer = p
+}
+
 func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElementNode {
 	return PairFirstElementNode{
 		pos:     pos,
@@ -68,6 +72,10 @@ type PairSecondElementNode struct {
 	pointer bool
 }
 
+func (snd *PairSecondElementNode) SetPointer(p bool) {
+	snd.pointer = p
+}
+
 func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondElementNode {
 	return PairSecondElementNode{
 		pos:     pos,
@@ -93,6 +101,10 @@ type ArrayElementNode struct {
 	ident   IdentifierNode
 	exprs   []ExpressionNode
 	pointer bool
+}
+
+func (arr *ArrayElementNode) SetPointer(p bool) {
+	arr.pointer = p
 }
 
 func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {

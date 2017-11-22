@@ -61,6 +61,31 @@ NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 // AssignNode
 ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 
+	if arr, ok := lhs.(ast.ArrayElementNode); ok {
+		arr.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			arr,
+			rhs.(ast.LHSNode),
+		))
+	}
+	if fst, ok := lhs.(ast.PairFirstElementNode); ok {
+		fst.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			fst,
+			rhs.(ast.LHSNode),
+		))
+	}
+	if snd, ok := lhs.(ast.PairSecondElementNode); ok {
+		snd.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			snd,
+			rhs.(ast.LHSNode),
+		))
+	}
+
 	return ret(ast.NewAssignNode(
 		c.getPosition(),
 		lhs.(ast.LHSNode),
@@ -71,6 +96,28 @@ ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 
 // ReadNode
 READ ← "read" __ lhs:ASSIGNLHS {
+
+	if arr, ok := lhs.(ast.ArrayElementNode); ok {
+		arr.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			arr,
+		))
+	}
+	if fst, ok := lhs.(ast.PairFirstElementNode); ok {
+		fst.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			fst,
+		))
+	}
+	if snd, ok := lhs.(ast.PairSecondElementNode); ok {
+		snd.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			snd,
+		))
+	}
 
 	return ret(ast.NewReadNode(
 		c.getPosition(),

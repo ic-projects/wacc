@@ -328,7 +328,13 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can Walk the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode, AssignNode, ArrayLiteralNode, ArrayElementNode, LoopNode, NewPairNode:
+	case IfNode,
+		AssignNode,
+		ArrayLiteralNode,
+		ArrayElementNode,
+		LoopNode,
+		NewPairNode,
+		ReadNode:
 		return true
 	default:
 		return false
@@ -378,6 +384,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
 
+		if ident, ok := node.lhs.(IdentifierNode); ok {
+			register := v.freeRegisters.Pop()
+			dec, _ := v.symbolTable.SearchForIdent(ident.ident)
+			v.addCode("ADD " + register.String() + ", " + dec.location.PointerTo())
+			v.returnRegisters.Push(register)
+		} else {
+			Walk(v, node.lhs)
+		}
+		register := v.returnRegisters.Pop()
+		v.addCode("MOV r0, " + register.String())
+		if sizeOf(Type(node.lhs, v.symbolTable)) == 1 {
+			v.addCode("BL " + READ_CHAR.String())
+			v.usesFunction(READ_CHAR)
+		} else {
+			v.addCode("BL " + READ_INT.String())
+			v.usesFunction(READ_INT)
+		}
+		v.freeRegisters.Push(register)
 	case FreeNode:
 
 	case ReturnNode:
@@ -816,4 +840,8 @@ func (location *Location) String() string {
 
 	// Location is a stack offset
 	return "[sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos) + "]"
+}
+
+func (location *Location) PointerTo() string {
+	return "sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos)
 }
