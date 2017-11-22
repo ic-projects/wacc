@@ -394,7 +394,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case IdentifierNode:
 		register := v.freeRegisters.Pop()
 		dec, _ := v.symbolTable.SearchForIdent(node.ident)
-		v.addCode("LDR " + register.String() + ", " + dec.location.String())
+		if sizeOf(dec.t) == 1 {
+			v.addCode("LDRB " + register.String() + ", " + dec.location.String())
+		} else {
+			v.addCode("LDR " + register.String() + ", " + dec.location.String())
+		}
 		v.returnRegisters.Push(register)
 	case PairFirstElementNode:
 
