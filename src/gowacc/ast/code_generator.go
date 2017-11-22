@@ -408,12 +408,16 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.addCode("MOV " + register.String() + ", #0") // False
 		}
+		v.returnRegisters.Push(register)
 	case CharacterLiteralNode:
 		register := v.freeRegisters.Pop()
 		v.addCode("MOV " + register.String() + ", #'" + string(node.val) + "'")
 		v.returnRegisters.Push(register)
 	case StringLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		label := v.addData(node.val)
+		v.addCode("LDR " + register.String() + ", =" + label)
+		v.returnRegisters.Push(register)
 	case PairLiteralNode:
 
 	case UnaryOperatorNode:
