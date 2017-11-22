@@ -405,7 +405,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case PairSecondElementNode:
 
 	case ArrayElementNode:
-		register := v.freeRegisters.Pop()
+		//register := v.freeRegisters.Pop()
 		Walk(v, node.ident)
 		identRegister := v.returnRegisters.Pop()
 
@@ -417,11 +417,16 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			expr := node.exprs[i]
 			Walk(v, expr)
 			exprRegister := v.returnRegisters.Pop()
-
-			v.addCode("MOV r0, "+exprRegister.String(),
+			v.freeRegisters.Push(exprRegister)
+			//lengthReg := v.freeRegisters.Pop()
+			v.addCode(
+				//"LDR "+identRegister.String()+", ["+identRegister.String()+"]",
+				"MOV r0, "+exprRegister.String(),
 				"MOV r1, "+identRegister.String(),
 				"BL "+CHECK_ARRAY_INDEX.String(),
-				"ADD "+identRegister.String()+", "+identRegister.String()+" #4")
+				"ADD "+identRegister.String()+", "+identRegister.String()+", #4")
+			//v.freeRegisters.Push(lengthReg)
+
 			if i == length-1 && charOrInt {
 				v.addCode(fmt.Sprintf("ADD %s, %s, %s", identRegister, identRegister, exprRegister))
 			} else {
@@ -435,7 +440,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 		v.usesFunction(CHECK_ARRAY_INDEX)
 
-		v.returnRegisters.Push(register)
+		v.returnRegisters.Push(identRegister)
 	case ArrayLiteralNode:
 		register := v.freeRegisters.Pop()
 		length := len(node.exprs)
@@ -453,7 +458,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode(
 			"LDR "+lengthRegister.String()+", ="+strconv.Itoa(length),
 			"STR "+lengthRegister.String()+", ["+register.String()+"]")
-		v.returnRegisters.Push(lengthRegister)
+		v.freeRegisters.Push(lengthRegister)
 		v.returnRegisters.Push(register)
 	case NewPairNode:
 
