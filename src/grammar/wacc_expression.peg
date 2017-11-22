@@ -268,13 +268,18 @@ CHARACTER ← char:[^""''\\] {
 ESCAPEDCHAR ← [0btnfr""''\\]
 
 // StringLiteralNode
-STRLITER ← '"' CHARACTER* '"' {
+STRLITER ← '"' (str:STR) '"' {
 
 	return ret(ast.NewStringLiteralNode(
 		c.getPosition(),
-		string(c.text),
+		str.(string),
 	))
 
+}
+
+// String
+STR ← CHARACTER* {
+	return ret(string(c.text))
 }
 
 // PairLiteralNode

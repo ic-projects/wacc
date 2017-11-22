@@ -249,6 +249,16 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		case CHAR:
 			v.addCode("BL putchar")
 		}
+	case ArrayTypeNode:
+		if arr, ok := node.t.(BaseTypeNode); ok {
+			if arr.t == CHAR && node.dim == 1 {
+				v.addCode("BL " + PRINT_STRING.String())
+				v.usesFunction(PRINT_STRING)
+				return
+			}
+		}
+		v.addCode("BL " + PRINT_REFERENCE.String())
+		v.usesFunction(PRINT_REFERENCE)
 	}
 }
 
@@ -256,12 +266,19 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 func (v *CodeGenerator) addData(text string) string {
 	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
 	v.asm.dataCounter++
-	v.addDataWithLabel(label, text, len(text))
+	v.addDataWithLabel(label, text)
 	return label
 }
 
 // addDataWithLabel adds a ascii word to the data section using a given label
-func (v *CodeGenerator) addDataWithLabel(label string, text string, length int) {
+func (v *CodeGenerator) addDataWithLabel(label string, text string) {
+	length := 0
+	for i := 0; i < len(text); i++ {
+		length++
+		if text[i] == '\\' {
+			i++
+		}
+	}
 	v.asm.data[label] = NewAsciiWord(length, text)
 }
 
@@ -298,7 +315,7 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 // walked. This means we can visit the children in any way we choose.
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
-	case IfNode:
+	case IfNode, ArrayLiteralNode:
 		return true
 	default:
 		return false
@@ -372,7 +389,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case ArrayElementNode:
 
 	case ArrayLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		length := len(node.exprs)
+		v.addCode(
+			"LDR r0, ="+strconv.Itoa(length*4+4),
+			"BL malloc",
+			"MOV "+register.String()+", r0")
+		for i := 0; i < length; i++ {
+			Walk(v, node.exprs[i])
+			exprRegister := v.returnRegisters.Pop()
+			v.freeRegisters.Push(exprRegister)
+			v.addCode("STR " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*4) + "]")
+		}
+		lengthRegister := v.freeRegisters.Pop()
+		v.addCode(
+			"LDR "+lengthRegister.String()+", ="+strconv.Itoa(length),
+			"STR "+lengthRegister.String()+", ["+register.String()+"]")
+		v.returnRegisters.Push(lengthRegister)
+		v.returnRegisters.Push(register)
 	case NewPairNode:
 
 	case FunctionCallNode:
@@ -398,12 +432,16 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.addCode("MOV " + register.String() + ", #0") // False
 		}
+		v.returnRegisters.Push(register)
 	case CharacterLiteralNode:
 		register := v.freeRegisters.Pop()
 		v.addCode("MOV " + register.String() + ", #'" + string(node.val) + "'")
 		v.returnRegisters.Push(register)
 	case StringLiteralNode:
-
+		register := v.freeRegisters.Pop()
+		label := v.addData(node.val)
+		v.addCode("LDR " + register.String() + ", =" + label)
+		v.returnRegisters.Push(register)
 	case PairLiteralNode:
 
 	case UnaryOperatorNode:
@@ -509,10 +547,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case NOT:
 			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
 		case NEG:
-			register := v.returnRegisters.Peek()
-			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
+			v.addCode("RSBS " + returnRegister.String() + ", " + operand.String() + ", #0")
 		case LEN:
-
+			v.addCode("LDR " + returnRegister.String() + ", [" + operand.String() + "]")
 		case ORD:
 
 		case CHR:
@@ -526,9 +563,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		returnRegister := v.freeRegisters.Pop()
 		switch node.op {
 		case MUL:
-			v.addCode("SMULL " + returnRegister.String() + ", " + operand2.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"CMP "+ operand2.String() + ", " + returnRegister.String() + ", ASR #31",
-				"BLNE " + CHECK_OVERFLOW.String())
+			v.addCode("SMULL "+returnRegister.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
+				"CMP "+operand2.String()+", "+returnRegister.String()+", ASR #31",
+				"BLNE "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case DIV:
 			v.addCode("MOV r0, "+operand1.String(),
@@ -545,12 +582,12 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 				"MOV "+returnRegister.String()+", r1")
 			v.usesFunction(CHECK_DIVIDE)
 		case ADD:
-			v.addCode("ADDS " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"BLVS " + CHECK_OVERFLOW.String())
+			v.addCode("ADDS "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case SUB:
-			v.addCode("SUB " + returnRegister.String() + ", " + operand1.String() + ", " + operand2.String(),
-				"BLVS " + CHECK_OVERFLOW.String())
+			v.addCode("SUB "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case GT:
 			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
