@@ -7,14 +7,14 @@ type Predefined interface {
 type PreFunction struct {
 	name         string
 	body         []string
-	dependancies []LibraryFunction
+	dependencies []LibraryFunction
 }
 
-func NewPreFunction(name string, dependancies []LibraryFunction, body []string) Predefined {
+func NewPreFunction(name string, dependencies []LibraryFunction, body []string) Predefined {
 	return PreFunction{
 		name:         name,
 		body:         body,
-		dependancies: dependancies,
+		dependencies: dependencies,
 	}
 }
 
@@ -23,8 +23,8 @@ func (f PreFunction) add(v *CodeGenerator, lib *Library) {
 		// Add function to the code
 		v.asm.global[f.name] = f.body
 
-		// Add any dependancies
-		for _, dep := range f.dependancies {
+		// Add any dependencies
+		for _, dep := range f.dependencies {
 			lib.add(v, dep)
 		}
 	}
@@ -146,12 +146,12 @@ func (l *Library) add(v *CodeGenerator, function LibraryFunction) {
 	l.lib[function].add(v, l)
 }
 
-func (l *Library) NewPreData(f LibraryFunction, text string) {
-	l.lib[f] = NewPreData(f.String(), text)
+func (l *Library) NewPreData(function LibraryFunction, text string) {
+	l.lib[function] = NewPreData(function.String(), text)
 }
 
-func (l *Library) NewPreFunction(f LibraryFunction, dependancies []LibraryFunction, body []string) {
-	l.lib[f] = NewPreFunction(f.String(), dependancies, body)
+func (l *Library) NewPreFunction(function LibraryFunction, dependencies []LibraryFunction, body []string) {
+	l.lib[function] = NewPreFunction(function.String(), dependencies, body)
 }
 
 func GetLibrary() *Library {
