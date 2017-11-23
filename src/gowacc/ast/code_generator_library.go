@@ -347,7 +347,7 @@ func GetLibrary() *Library {
 	library.NewPreData(MSG_FALSE, "false\\0")
 	library.NewPreData(MSG_NEWLINE, "\\0")
 	library.NewPreData(MSG_INT, "%d\\0")
-	library.NewPreData(MSG_CHAR, "%c\\0")
+	library.NewPreData(MSG_CHAR, " %c\\0")
 	library.NewPreData(MSG_STRING, "%.*s\\0")
 	library.NewPreData(MSG_REFERENCE, "%p\\0")
 	library.NewPreData(MSG_DIVIDE_BY_ZERO, "DivideByZeroError: divide or modulo by zero\\n\\0")
