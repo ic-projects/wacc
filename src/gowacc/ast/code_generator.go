@@ -928,5 +928,5 @@ func (location *Location) String() string {
 }
 
 func (location *Location) PointerTo() string {
-	return "sp, #" + strconv.Itoa(-location.codeGenerator.currentStackPos+location.currentPos)
+	return "sp, #" + strconv.Itoa(+location.codeGenerator.currentStackPos-location.currentPos)
 }
