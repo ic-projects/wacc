@@ -354,6 +354,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case FunctionNode:
 		v.currentStackPos = 0
+		v.freeRegisters.stack = []Register{R11, R10, R9, R8, R7, R6, R5, R4}
 		v.symbolTable.MoveNextScope()
 		if node.ident.ident == "" {
 			v.addFunction("main")
@@ -367,6 +368,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		j := 0
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.ident.ident)
+			dec.isDeclared = true
 			if n < len(registers) {
 				i += sizeOf(e.t)
 				dec.AddLocation(NewStackOffsetLocation(i, v))
@@ -406,7 +408,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		case ArrayElementNode:
 			Walk(v, lhsNode)
 			lhsRegister := v.returnRegisters.Pop()
-			dec, _ := v.symbolTable.SearchForIdent(lhsNode.ident.ident)
+			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.ident.ident)
 			arr := dec.t.(ArrayTypeNode)
 			if sizeOf(arr.t) == 1 && len(lhsNode.exprs) == arr.dim {
 				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
@@ -430,7 +432,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
 			}
 		case IdentifierNode:
-			ident, _ := v.symbolTable.SearchForIdent(lhsNode.ident)
+			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.ident)
 			if ident.location != nil {
 				if sizeOf(ident.t) == 1 {
 					v.addCode("STRB " + rhsRegister.String() + ", " + ident.location.String())
@@ -444,7 +446,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		if ident, ok := node.lhs.(IdentifierNode); ok {
 			register := v.freeRegisters.Pop()
-			dec, _ := v.symbolTable.SearchForIdent(ident.ident)
+			dec := v.symbolTable.SearchForDeclaredIdent(ident.ident)
 			v.addCode("ADD " + register.String() + ", " + dec.location.PointerTo())
 			v.returnRegisters.Push(register)
 		} else {
@@ -511,7 +513,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case IdentifierNode:
 		register := v.freeRegisters.Pop()
-		dec, _ := v.symbolTable.SearchForIdent(node.ident)
+		dec := v.symbolTable.SearchForDeclaredIdent(node.ident)
 		if sizeOf(dec.t) == 1 {
 			v.addCode("LDRSB " + register.String() + ", " + dec.location.String())
 		} else {
@@ -527,7 +529,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		identRegister := v.returnRegisters.Pop()
 
 		length := len(node.exprs)
-		symbol, _ := v.symbolTable.SearchForIdent(node.ident.ident)
+		symbol := v.symbolTable.SearchForDeclaredIdent(node.ident.ident)
 		lastIsCharOrBool := sizeOf(symbol.t.(ArrayTypeNode).t) == 1 && symbol.t.(ArrayTypeNode).dim == length
 
 		for i := 0; i < length; i++ {
@@ -768,6 +770,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.usesFunction(FREE)
 	case DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
+		dec.isDeclared = true
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
 		if dec.location != nil {
