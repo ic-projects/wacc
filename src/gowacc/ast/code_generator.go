@@ -798,7 +798,9 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case NOT:
 			v.addCode("EOR " + register.String() + ", " + register.String() + ", #1")
 		case NEG:
-			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
+			v.addCode("RSBS "+register.String()+", "+register.String()+", #0",
+				"BLVS "+CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
 		case LEN:
 			v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 		case ORD:
@@ -835,7 +837,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case SUB:
-			v.addCode("SUB "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
+			v.addCode("SUBS "+returnRegister.String()+", "+operand1.String()+", "+operand2.String(),
 				"BLVS "+CHECK_OVERFLOW.String())
 			v.usesFunction(CHECK_OVERFLOW)
 		case GT:
