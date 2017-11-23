@@ -1,0 +1,56 @@
+-- Compiling...
+-- Printing AST...
+stringArrays2.ast contents are:
+===========================================================
+0	Program
+1	  - int main()
+2	    - DECLARE
+3	      - TYPE
+4	        - char[]
+5	      - LHS
+6	        - a
+7	      - RHS
+8	        - ARRAY LITERAL
+9	          - 'f'
+10	          - 's'
+11	          - 't'
+12	    - DECLARE
+13	      - TYPE
+14	        - string
+15	      - LHS
+16	        - b
+17	      - RHS
+18	        - "snd"
+19	    - DECLARE
+20	      - TYPE
+21	        - string[]
+22	      - LHS
+23	        - c
+24	      - RHS
+25	        - ARRAY LITERAL
+26	          - a
+27	          - b
+28	    - PRINTLN
+29	      - ==
+30	        - c
+31	          - []
+32	            - 0
+33	        - a
+34	    - PRINTLN
+35	      - ==
+36	        - c
+37	          - []
+38	            - 0
+39	          - []
+40	            - 1
+41	        - 'f'
+42	    - PRINTLN
+43	      - ==
+44	        - c
+45	          - []
+46	            - 1
+47	          - []
+48	            - 2
+49	        - 'd'
+===========================================================
+-- Finished
