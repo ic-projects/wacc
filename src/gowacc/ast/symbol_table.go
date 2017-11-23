@@ -47,25 +47,28 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
-	pos      Position
-	t        TypeNode
-	ident    IdentifierNode
-	location *Location
+	pos        Position
+	t          TypeNode
+	ident      IdentifierNode
+	location   *Location
+	isDeclared bool
 }
 
 func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	switch node := programNode.(type) {
 	case ParameterNode:
 		return &IdentifierDeclaration{
-			pos:   node.pos,
-			t:     node.t,
-			ident: node.ident,
+			pos:        node.pos,
+			t:          node.t,
+			ident:      node.ident,
+			isDeclared: false,
 		}
 	case DeclareNode:
 		return &IdentifierDeclaration{
-			pos:   node.pos,
-			t:     node.t,
-			ident: node.ident,
+			pos:        node.pos,
+			t:          node.t,
+			ident:      node.ident,
+			isDeclared: false,
 		}
 	default:
 		return &IdentifierDeclaration{}
@@ -111,6 +114,18 @@ func (table *SymbolTable) SearchForIdent(identifier string) (*IdentifierDeclarat
 		}
 	}
 	return &IdentifierDeclaration{}, false
+}
+
+func (table *SymbolTable) SearchForDeclaredIdent(identifier string) *IdentifierDeclaration {
+	for node := table.currentScope; node != nil; node = node.parentScope {
+		node, ok := node.scope[identifier]
+		if ok {
+			if node.isDeclared {
+				return node
+			}
+		}
+	}
+	return &IdentifierDeclaration{}
 }
 
 // SearchForIdentInCurrentScope will search for an identifier, only in the
