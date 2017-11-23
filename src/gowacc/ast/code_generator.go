@@ -715,7 +715,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case FreeNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, " + register.String())
+		v.addCode("MOV r0, "+register.String(),
+			"BL "+FREE.String())
 		v.usesFunction(FREE)
 	case DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident)
