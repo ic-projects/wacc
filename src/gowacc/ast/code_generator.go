@@ -460,7 +460,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(r)
 		v.addCode(fmt.Sprintf("BEQ ELSE%d", elseLabel))
 		// If
-		v.addCode(fmt.Sprintf(";IF:"))
 		Walk(v, node.ifStats)
 		v.addCode(fmt.Sprintf("B ENDIF%d", endifLabel))
 		// Else
