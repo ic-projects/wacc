@@ -26,7 +26,7 @@ printCharArrays.ast contents are:
 21	          - 'c'
 22	    - DECLARE
 23	      - TYPE
-24	        - int[]char[]
+24	        - pair(int[], char[])
 25	      - LHS
 26	        - x
 27	      - RHS
