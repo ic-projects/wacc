@@ -258,6 +258,9 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 			v.usesFunction(PRINT_INT)
 		case CHAR:
 			v.addCode("BL putchar")
+		case PAIR:
+			v.addCode("BL " + PRINT_REFERENCE.String())
+			v.usesFunction(PRINT_REFERENCE)
 		}
 	case ArrayTypeNode:
 		if arr, ok := node.t.(BaseTypeNode); ok {
