@@ -31,9 +31,8 @@ func (f PreFunction) add(v *CodeGenerator, lib *Library) {
 }
 
 type PreData struct {
-	name         string
-	text         string
-	dependancies []LibraryFunction
+	name string
+	text string
 }
 
 func NewPreData(name string, text string) Predefined {
@@ -45,11 +44,6 @@ func NewPreData(name string, text string) Predefined {
 
 func (d PreData) add(v *CodeGenerator, lib *Library) {
 	v.addDataWithLabel(d.name, d.text)
-
-	// Add any dependancies
-	for _, dep := range d.dependancies {
-		lib.add(v, dep)
-	}
 }
 
 type LibraryFunction int
