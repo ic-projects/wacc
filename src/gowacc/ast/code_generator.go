@@ -403,6 +403,32 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		rhsRegister := v.returnRegisters.Pop()
 		// Lhs
 		switch lhsNode := node.lhs.(type) {
+		case ArrayElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.returnRegisters.Pop()
+			dec, _ := v.symbolTable.SearchForIdent(lhsNode.ident.ident)
+			arr := dec.t.(ArrayTypeNode)
+			if sizeOf(arr.t) == 1 && len(lhsNode.exprs) == arr.dim {
+				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
+			} else {
+				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+			}
+		case PairFirstElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.returnRegisters.Pop()
+			if sizeOf(Type(lhsNode.expr, v.symbolTable)) == 1 {
+				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
+			} else {
+				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+			}
+		case PairSecondElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.returnRegisters.Pop()
+			if sizeOf(Type(lhsNode.expr, v.symbolTable)) == 1 {
+				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
+			} else {
+				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+			}
 		case IdentifierNode:
 			ident, _ := v.symbolTable.SearchForIdent(lhsNode.ident)
 			if ident.location != nil {
@@ -412,10 +438,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 					v.addCode("STR " + rhsRegister.String() + ", " + ident.location.String())
 				}
 			}
-		case ArrayElementNode, PairFirstElementNode, PairSecondElementNode:
-			Walk(v, lhsNode)
-			lhsRegister := v.returnRegisters.Pop()
-			v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
