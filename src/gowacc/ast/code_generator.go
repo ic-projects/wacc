@@ -546,15 +546,23 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case ArrayLiteralNode:
 		register := v.freeRegisters.Pop()
 		length := len(node.exprs)
+		size := 0
+		if length > 0 {
+			size = sizeOf(Type(node.exprs[0], v.symbolTable))
+		}
 		v.addCode(
-			"LDR r0, ="+strconv.Itoa(length*4+4),
+			"LDR r0, ="+strconv.Itoa(length*size+4),
 			"BL malloc",
 			"MOV "+register.String()+", r0")
 		for i := 0; i < length; i++ {
 			Walk(v, node.exprs[i])
 			exprRegister := v.returnRegisters.Pop()
 			v.freeRegisters.Push(exprRegister)
-			v.addCode("STR " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*4) + "]")
+			if size == 1 {
+				v.addCode("STRB " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*size) + "]")
+			} else {
+				v.addCode("STR " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*size) + "]")
+			}
 		}
 		lengthRegister := v.freeRegisters.Pop()
 		v.addCode(
