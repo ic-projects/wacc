@@ -449,36 +449,43 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case PrintlnNode:
 
 	case IfNode:
+		// Labels
+		elseLabel := v.labelCount + 1
+		endifLabel := v.labelCount + 1
+		v.labelCount += 2
 		// Cond
 		Walk(v, node.expr)
 		r := v.returnRegisters.Pop()
 		v.addCode(fmt.Sprintf("CMP %s, #0", r))
 		v.freeRegisters.Push(r)
-		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount))
+		v.addCode(fmt.Sprintf("BEQ ELSE%d", elseLabel))
 		// If
+		v.addCode(fmt.Sprintf(";IF:"))
 		Walk(v, node.ifStats)
-		v.addCode(fmt.Sprintf("B L%d", v.labelCount+1))
+		v.addCode(fmt.Sprintf("B ENDIF%d", endifLabel))
 		// Else
-		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
-		v.labelCount++
+		v.addCode(fmt.Sprintf("ELSE%d:", elseLabel))
 		Walk(v, node.elseStats)
 		// Fi
-		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
-		v.labelCount++
+		v.addCode(fmt.Sprintf("ENDIF%d:", endifLabel))
 	case LoopNode:
-		v.addCode(fmt.Sprintf("B L%d", v.labelCount+1))
+		// Labels
+		doLabel := v.labelCount + 1
+		whileLabel := v.labelCount + 1
+		v.labelCount += 2
+		v.addCode(fmt.Sprintf("B WHILE%d", whileLabel))
 		// Do
-		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		v.addCode(fmt.Sprintf("DO%d:", doLabel))
 		v.labelCount++
 		Walk(v, node.stats)
-		// Cond
-		v.addCode(fmt.Sprintf("L%d:", v.labelCount))
+		// While
+		v.addCode(fmt.Sprintf("WHILE%d:", whileLabel))
 		v.labelCount++
 		Walk(v, node.expr)
 		r := v.returnRegisters.Pop()
 		v.addCode(fmt.Sprintf("CMP %s, #1", r))
 		v.freeRegisters.Push(r)
-		v.addCode(fmt.Sprintf("BEQ L%d", v.labelCount-2))
+		v.addCode(fmt.Sprintf("BEQ DO%d", doLabel))
 	case ScopeNode:
 
 	case IdentifierNode:
