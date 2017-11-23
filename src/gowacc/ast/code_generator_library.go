@@ -138,22 +138,37 @@ const (
 	MSG_FREE
 )
 
+// Library is struct containing a map from LibraryFunction to Predefined. This
+// allows a LibraryFunction to be retrived from the name and then the add method
+// can be called on Predefined to add the required function
 type Library struct {
 	lib map[LibraryFunction]Predefined
 }
 
+// add adds the given LibraryFunction function to the assembly code being generated
+// by the CodeGenerator v. It adds the predefined function or data in the correct location
+// and also adds any required dependencies for that LibraryFunction.
 func (l *Library) add(v *CodeGenerator, function LibraryFunction) {
 	l.lib[function].add(v, l)
 }
 
+// NewPreData adds predefined data to the Library, it requires the name
+// of the data being added and the text of the data. The name of the data in
+// the generated assembly is derived from the LibraryFunction String method.
 func (l *Library) NewPreData(function LibraryFunction, text string) {
 	l.lib[function] = NewPreData(function.String(), text)
 }
 
+// NewPreFunction add a predefined function to the Library, it requires the name
+// of the function being added, a list of dependencies required for the given function
+// to work and the body of the function. The name of the function in the generated
+// assembly is derived from the LibraryFunction String method.
 func (l *Library) NewPreFunction(function LibraryFunction, dependencies []LibraryFunction, body []string) {
 	l.lib[function] = NewPreFunction(function.String(), dependencies, body)
 }
 
+// GetLibrary returns a pointer to a complete Library of predefined functions
+// and strings to be included in the assembly code if necessary.
 func GetLibrary() *Library {
 	library := &Library{
 		lib: make(map[LibraryFunction]Predefined),
