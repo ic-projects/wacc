@@ -793,22 +793,19 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		}
 		v.usesFunction(CHECK_NULL_POINTER)
 	case UnaryOperatorNode:
-		operand := v.returnRegisters.Pop()
-		returnRegister := v.freeRegisters.Pop()
+		register := v.returnRegisters.Peek()
 		switch node.op {
 		case NOT:
-			v.addCode("EOR " + returnRegister.String() + ", " + operand.String() + ", #1")
+			v.addCode("EOR " + register.String() + ", " + register.String() + ", #1")
 		case NEG:
-			v.addCode("RSBS " + returnRegister.String() + ", " + operand.String() + ", #0")
+			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
 		case LEN:
-			v.addCode("LDR " + returnRegister.String() + ", [" + operand.String() + "]")
+			v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 		case ORD:
 
 		case CHR:
 
 		}
-		v.freeRegisters.Push(operand)
-		v.returnRegisters.Push(returnRegister)
 	case BinaryOperatorNode:
 		operand2 := v.returnRegisters.Pop()
 		operand1 := v.returnRegisters.Pop()
