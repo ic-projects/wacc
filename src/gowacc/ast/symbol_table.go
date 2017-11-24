@@ -3,112 +3,113 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"gowacc/location"
 )
 
-// SymbolTable is a struct that stores the symboltable and the currentScope that
+// SymbolTable is a struct that stores the symboltable and the CurrentScope that
 // the program is in.
 type SymbolTable struct {
-	head           *SymbolTableNode
-	currentScope   *SymbolTableNode
+	Head           *SymbolTableNode
+	CurrentScope   *SymbolTableNode
 	functions      map[string]FunctionNode
 	functionsOrder []string
 }
 
-// NewSymbolTable returns an initialised SymbolTable, with an empty scope. The
-// current scope is initialised to the top level scope.
+// NewSymbolTable returns an initialised SymbolTable, with an empty Scope. The
+// current Scope is initialised to the top level Scope.
 func NewSymbolTable() *SymbolTable {
 	head := NewSymbolTableNode(nil)
 	return &SymbolTable{
-		head:           head,
-		currentScope:   head,
+		Head:           head,
+		CurrentScope:   head,
 		functions:      make(map[string]FunctionNode),
 		functionsOrder: make([]string, 0),
 	}
 }
 
-// SymbolTableNode is a struct that stores its scope, the scopes below it and a
-// Pointer to the scope above itself.
+// SymbolTableNode is a struct that stores its Scope, the scopes below it and a
+// Pointer to the Scope above itself.
 type SymbolTableNode struct {
-	scope       map[string]*IdentifierDeclaration
+	Scope       map[string]*IdentifierDeclaration
 	childScopes []*SymbolTableNode
-	parentScope *SymbolTableNode
+	ParentScope *SymbolTableNode
 	lastScope   int
-	scopeSize   int
+	ScopeSize   int
 }
 
 func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	return &SymbolTableNode{
-		scope:       make(map[string]*IdentifierDeclaration),
+		Scope:       make(map[string]*IdentifierDeclaration),
 		childScopes: make([]*SymbolTableNode, 0, 10),
-		parentScope: parentScope,
+		ParentScope: parentScope,
 		lastScope:   -1,
 	}
 }
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
-	pos        Position
-	t          TypeNode
+	Pos        Position
+	T          TypeNode
 	ident      IdentifierNode
-	location   *Location
-	isDeclared bool
+	Location   *location.Location
+	IsDeclared bool
 }
 
 func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	switch node := programNode.(type) {
 	case ParameterNode:
 		return &IdentifierDeclaration{
-			pos:        node.Pos,
-			t:          node.T,
+			Pos:        node.Pos,
+			T:          node.T,
 			ident:      node.Ident,
-			isDeclared: false,
+			IsDeclared: false,
 		}
 	case DeclareNode:
 		return &IdentifierDeclaration{
-			pos:        node.Pos,
-			t:          node.T,
+			Pos:        node.Pos,
+			T:          node.T,
 			ident:      node.Ident,
-			isDeclared: false,
+			IsDeclared: false,
 		}
 	default:
 		return &IdentifierDeclaration{}
 	}
 }
 
-func (dec *IdentifierDeclaration) AddLocation(location *Location) {
-	dec.location = location
+func (dec *IdentifierDeclaration) AddLocation(location *location.Location) {
+	dec.Location = location
 }
 
-// MoveDownScope creates a new scope such that it is a chile of the currentscope,
-// and then sets the currentScope to be the new scope.
+// MoveDownScope creates a new Scope such that it is a chile of the currentscope,
+// and then sets the CurrentScope to be the new Scope.
 func (table *SymbolTable) MoveDownScope() {
-	newNode := NewSymbolTableNode(table.currentScope)
-	table.currentScope.childScopes = append(table.currentScope.childScopes, newNode)
-	table.currentScope = newNode
+	newNode := NewSymbolTableNode(table.CurrentScope)
+	table.CurrentScope.childScopes = append(table.CurrentScope.childScopes, newNode)
+	table.CurrentScope = newNode
 }
 
 func (table *SymbolTable) MoveNextScope() {
-	table.currentScope.lastScope++
-	if len(table.currentScope.childScopes) > table.currentScope.lastScope {
-		table.currentScope = table.currentScope.childScopes[table.currentScope.lastScope]
+	table.CurrentScope.lastScope++
+	if len(table.CurrentScope.childScopes) > table.CurrentScope.lastScope {
+		table.CurrentScope = table.CurrentScope.childScopes[table.CurrentScope.lastScope]
 	} else {
-		fmt.Println("Internal Error: no next scope, currentScope has ", len(table.currentScope.childScopes), " childscopes")
+		fmt.Println("Internal Error: no next Scope, CurrentScope has ", len(table.CurrentScope.childScopes), " childscopes")
 	}
 }
 
-// MoveUpScope will move the scope one level up if it exists.
+// MoveUpScope will move the Scope one level up if it exists.
 func (table *SymbolTable) MoveUpScope() {
-	if table.currentScope.parentScope != nil {
-		table.currentScope = table.currentScope.parentScope
+	if table.CurrentScope.ParentScope != nil {
+		table.CurrentScope = table.CurrentScope.ParentScope
 	}
 }
 
-// SearchForIdent will search for an identifier, first checking the currentScope
-// and then will iterate through to the head scope. It will return false as its second return
-// if the identifier is not in the currentScope or any parentScopes.
+// SearchForIdent will search for an identifier, first checking the CurrentScope
+// and then will iterate through to the Head Scope. It will return false as its second return
+// if the identifier is not in the CurrentScope or any parentScopes.
 func (table *SymbolTable) SearchForIdent(identifier string) (*IdentifierDeclaration, bool) {
-	for node := table.currentScope; node != nil; node = node.parentScope {
-		node, ok := node.scope[identifier]
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		node, ok := node.Scope[identifier]
 		if ok {
 			return node, ok
 		}
@@ -117,10 +118,10 @@ func (table *SymbolTable) SearchForIdent(identifier string) (*IdentifierDeclarat
 }
 
 func (table *SymbolTable) SearchForDeclaredIdent(identifier string) *IdentifierDeclaration {
-	for node := table.currentScope; node != nil; node = node.parentScope {
-		node, ok := node.scope[identifier]
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		node, ok := node.Scope[identifier]
 		if ok {
-			if node.isDeclared {
+			if node.IsDeclared {
 				return node
 			}
 		}
@@ -129,10 +130,10 @@ func (table *SymbolTable) SearchForDeclaredIdent(identifier string) *IdentifierD
 }
 
 // SearchForIdentInCurrentScope will search for an identifier, only in the
-// currentScope. It will return false as its second return false
-// if the identifier is not in the currentScope.
+// CurrentScope. It will return false as its second return false
+// if the identifier is not in the CurrentScope.
 func (table *SymbolTable) SearchForIdentInCurrentScope(identifier string) (*IdentifierDeclaration, bool) {
-	node, ok := table.currentScope.scope[identifier]
+	node, ok := table.CurrentScope.Scope[identifier]
 	return node, ok
 }
 
@@ -143,9 +144,9 @@ func (table *SymbolTable) SearchForFunction(identifier string) (FunctionNode, bo
 	return node, ok
 }
 
-// AddToScope will add an identifier to the currentScope.
+// AddToScope will add an identifier to the CurrentScope.
 func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode) {
-	table.currentScope.scope[identifier] = NewIdentifierDeclaration(programNode)
+	table.CurrentScope.Scope[identifier] = NewIdentifierDeclaration(programNode)
 }
 
 // AddFunction will add a function to the symbolTable
@@ -155,17 +156,17 @@ func (table *SymbolTable) AddFunction(identifier string, node FunctionNode) {
 
 // Print will print a Node, and all of its parents
 func (node SymbolTableNode) Print() {
-	for _, ident := range node.scope {
-		fmt.Printf("%s of type %s\n", ident.ident, ident.t)
+	for _, ident := range node.Scope {
+		fmt.Printf("%s of type %s\n", ident.ident, ident.T)
 	}
 	fmt.Println("Parent Scope ---------------------")
-	if node.parentScope != nil {
-		node.parentScope.Print()
+	if node.ParentScope != nil {
+		node.ParentScope.Print()
 	}
 }
 
-// Print will print a symbolTable, relating from the currentScope. I.e. it will
-// print the currentScope and all parentScopes, along with the Functions.
+// Print will print a symbolTable, relating from the CurrentScope. I.e. it will
+// print the CurrentScope and all parentScopes, along with the Functions.
 func (table *SymbolTable) Print() {
 	fmt.Println("------- Begin Symbol table -------")
 	fmt.Println("Functions ------------------------")
@@ -173,12 +174,12 @@ func (table *SymbolTable) Print() {
 		fmt.Printf("%s of type %s\n", f.Ident, f.T)
 	}
 	fmt.Println("Scopes ---------------------------")
-	table.currentScope.Print()
+	table.CurrentScope.Print()
 	fmt.Println("-------- End Symbol table --------")
 }
 
 // String will return a string representation of the SymbolTable, from the
-// top level scope down.
+// top level Scope down.
 func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Functions:\n")
@@ -194,7 +195,7 @@ func (table *SymbolTable) String() string {
 		buf.WriteString(fmt.Sprintln(")"))
 	}
 	buf.WriteString("- Scopes:\n")
-	for _, s := range table.head.childScopes {
+	for _, s := range table.Head.childScopes {
 		buf.WriteString(indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
@@ -205,8 +206,8 @@ func (table *SymbolTable) String() string {
 func (node *SymbolTableNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Scope:\n")
-	for _, s := range node.scope {
-		buf.WriteString(fmt.Sprintf("  - Ident: %s, with type: %s\n", s.ident.Ident, s.t))
+	for _, s := range node.Scope {
+		buf.WriteString(fmt.Sprintf("  - Ident: %s, with type: %s\n", s.ident.Ident, s.T))
 	}
 	if len(node.childScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")

@@ -1,13 +1,14 @@
-package ast
+package semantic_checker
 
 import (
 	"fmt"
+	"gowacc/ast"
 )
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with
 // Walk. It stores a SymbolTable, a TypeChecker, and a list of GenericErrors.
 type SemanticCheck struct {
-	symbolTable *SymbolTable
+	symbolTable *ast.SymbolTable
 	typeChecker *TypeChecker
 	Errors      []GenericError
 }
@@ -15,7 +16,7 @@ type SemanticCheck struct {
 // NewSemanticCheck returns an initialised SemanticCheck
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
-		symbolTable: NewSymbolTable(),
+		symbolTable: ast.NewSymbolTable(),
 		typeChecker: NewTypeChecker(),
 		Errors:      make([]GenericError, 0),
 	}
@@ -25,17 +26,17 @@ func (v *SemanticCheck) PrintSymbolTable() {
 	fmt.Println(v.symbolTable.String())
 }
 
-func (v *SemanticCheck) SymbolTable() *SymbolTable {
+func (v *SemanticCheck) SymbolTable() *ast.SymbolTable {
 	return v.symbolTable
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
 // Walk.
-func (v *SemanticCheck) Visit(programNode ProgramNode) {
+func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 	var foundError GenericError
 	foundError = nil
 	switch node := programNode.(type) {
-	case Program:
+	case ast.Program:
 		// Add the Functions when hitting program instead of each function so that
 		// Functions can be declared in any order.
 		for _, f := range node.Functions {
@@ -45,54 +46,54 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 				v.symbolTable.AddFunction(f.Ident.Ident, f)
 			}
 		}
-	case FunctionNode:
-		// Move down scope so that the parameters are on a new scope.
+	case ast.FunctionNode:
+		// Move down Scope so that the parameters are on a new Scope.
 		v.symbolTable.MoveDownScope()
 		v.typeChecker.expectRepeatUntilForce(node.T)
-	case ParameterNode:
+	case ast.ParameterNode:
 		if declareNode, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.pos)
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.Pos)
 		}
-	case SkipNode:
-	case DeclareNode:
+	case ast.SkipNode:
+	case ast.DeclareNode:
 		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.pos)
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.Pos)
 			v.typeChecker.freeze(node)
 		} else {
 			v.typeChecker.expect(node.T)
 		}
-	case AssignNode:
+	case ast.AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
-	case ReadNode:
-		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
-	case FreeNode:
-		v.typeChecker.expectSet([]TypeNode{PairTypeNode{}, ArrayTypeNode{}})
-	case ReturnNode:
-	case ExitNode:
-		v.typeChecker.expect(NewBaseTypeNode(INT))
-	case PrintNode:
+	case ast.ReadNode:
+		v.typeChecker.expectSet([]ast.TypeNode{ast.NewBaseTypeNode(ast.INT), ast.NewBaseTypeNode(ast.CHAR)})
+	case ast.FreeNode:
+		v.typeChecker.expectSet([]ast.TypeNode{ast.PairTypeNode{}, ast.ArrayTypeNode{}})
+	case ast.ReturnNode:
+	case ast.ExitNode:
+		v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
+	case ast.PrintNode:
 		v.typeChecker.expectAny()
-	case PrintlnNode:
+	case ast.PrintlnNode:
 		v.typeChecker.expectAny()
-	case IfNode:
-		v.typeChecker.expect(NewBaseTypeNode(BOOL))
-	case LoopNode:
-		v.typeChecker.expect(NewBaseTypeNode(BOOL))
-	case ScopeNode:
-	case IdentifierNode:
+	case ast.IfNode:
+		v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
+	case ast.LoopNode:
+		v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
+	case ast.ScopeNode:
+	case ast.IdentifierNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident); !ok {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.t).addPos(node.Pos)
+			foundError = v.typeChecker.seen(identDec.T).addPos(node.Pos)
 			if foundError != nil {
-				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.pos)
+				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
 			}
 		}
-	case PairFirstElementNode:
+	case ast.PairFirstElementNode:
 		//  Look up type for pair call seen
-		if identNode, ok := node.Expr.(IdentifierNode); !ok {
+		if identNode, ok := node.Expr.(ast.IdentifierNode); !ok {
 			foundError = NewCustomError(node.Pos, "Cannot access first element of null")
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -101,11 +102,11 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.t.(PairTypeNode).T1).addPos(node.Pos)
-			v.typeChecker.expect(identDec.t)
+			foundError = v.typeChecker.seen(identDec.T.(ast.PairTypeNode).T1).addPos(node.Pos)
+			v.typeChecker.expect(identDec.T)
 		}
-	case PairSecondElementNode:
-		if identNode, ok := node.Expr.(IdentifierNode); !ok {
+	case ast.PairSecondElementNode:
+		if identNode, ok := node.Expr.(ast.IdentifierNode); !ok {
 			foundError = NewCustomError(node.Pos, "Cannot access second element of null")
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -114,15 +115,15 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.t.(PairTypeNode).T2)
-			v.typeChecker.expect(identDec.t)
+			v.typeChecker.seen(identDec.T.(ast.PairTypeNode).T2)
+			v.typeChecker.expect(identDec.T)
 		}
-	case ArrayElementNode:
+	case ast.ArrayElementNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if arrayNode, ok := identDec.t.(ArrayTypeNode); !ok {
+		} else if arrayNode, ok := identDec.T.(ast.ArrayTypeNode); !ok {
 			foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.Ident.Ident))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -131,17 +132,17 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
 				foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
 			} else {
-				foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
+				foundError = v.typeChecker.seen(ast.NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
 			}
 		}
 		for i := 0; i < len(node.Exprs); i++ {
-			v.typeChecker.expect(NewBaseTypeNode(INT))
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
 		}
-	case ArrayLiteralNode:
-		foundError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.Pos)
-	case NewPairNode:
-		foundError = v.typeChecker.seen(PairTypeNode{}).addPos(node.Pos)
-	case FunctionCallNode:
+	case ast.ArrayLiteralNode:
+		foundError = v.typeChecker.seen(ast.ArrayTypeNode{}).addPos(node.Pos)
+	case ast.NewPairNode:
+		foundError = v.typeChecker.seen(ast.PairTypeNode{}).addPos(node.Pos)
+	case ast.FunctionCallNode:
 		if f, ok := v.symbolTable.SearchForFunction(node.Ident.Ident); !ok {
 			foundError = NewDeclarationError(node.Pos, true, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
@@ -156,57 +157,57 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 				v.typeChecker.expect(f.Params[i].T)
 			}
 		}
-	case BaseTypeNode:
-	case ArrayTypeNode:
-	case PairTypeNode:
-	case UnaryOperator:
-	case BinaryOperator:
-	case IntegerLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-	case BooleanLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
-	case CharacterLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
-	case StringLiteralNode:
-		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.Pos)
-	case PairLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.Pos)
-	case UnaryOperatorNode:
+	case ast.BaseTypeNode:
+	case ast.ArrayTypeNode:
+	case ast.PairTypeNode:
+	case ast.UnaryOperator:
+	case ast.BinaryOperator:
+	case ast.IntegerLiteralNode:
+		foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
+	case ast.BooleanLiteralNode:
+		foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.BOOL)).addPos(node.Pos)
+	case ast.CharacterLiteralNode:
+		foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.CHAR)).addPos(node.Pos)
+	case ast.StringLiteralNode:
+		foundError = v.typeChecker.seen(ast.NewStringArrayTypeNode()).addPos(node.Pos)
+	case ast.PairLiteralNode:
+		foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.PAIR)).addPos(node.Pos)
+	case ast.UnaryOperatorNode:
 		switch node.Op {
-		case NOT:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(BOOL))
-		case NEG:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(INT))
-		case LEN:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(ArrayTypeNode{})
-		case ORD:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(CHAR))
-		case CHR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(INT))
+		case ast.NOT:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.BOOL)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
+		case ast.NEG:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
+		case ast.LEN:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
+			v.typeChecker.expect(ast.ArrayTypeNode{})
+		case ast.ORD:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.CHAR))
+		case ast.CHR:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.CHAR)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
 		}
-	case BinaryOperatorNode:
+	case ast.BinaryOperatorNode:
 		switch node.Op {
-		case MUL, DIV, MOD, ADD, SUB:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(INT))
-			v.typeChecker.expect(NewBaseTypeNode(INT))
-		case GT, GEQ, LT, LEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
-			v.typeChecker.expectTwiceSame(NewSetExpectance([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)}))
-		case EQ, NEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
+		case ast.MUL, ast.DIV, ast.MOD, ast.ADD, ast.SUB:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
+		case ast.GT, ast.GEQ, ast.LT, ast.LEQ:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.BOOL)).addPos(node.Pos)
+			v.typeChecker.expectTwiceSame(NewSetExpectance([]ast.TypeNode{ast.NewBaseTypeNode(ast.INT), ast.NewBaseTypeNode(ast.CHAR)}))
+		case ast.EQ, ast.NEQ:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.BOOL)).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewAnyExpectance())
-		case AND, OR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
-			v.typeChecker.expect(NewBaseTypeNode(BOOL))
-			v.typeChecker.expect(NewBaseTypeNode(BOOL))
+		case ast.AND, ast.OR:
+			foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.BOOL)).addPos(node.Pos)
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
+			v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
 		}
-	case []StatementNode:
+	case []ast.StatementNode:
 		v.symbolTable.MoveDownScope()
 	}
 
@@ -217,20 +218,20 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 }
 
 // Leave will be called to leave the current node.
-func (v *SemanticCheck) Leave(programNode ProgramNode) {
+func (v *SemanticCheck) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
-	case []StatementNode:
+	case []ast.StatementNode:
 		v.symbolTable.MoveUpScope()
-	case FunctionNode:
+	case ast.FunctionNode:
 		v.symbolTable.MoveUpScope()
 		v.typeChecker.forcePop()
-	case ArrayLiteralNode:
+	case ast.ArrayLiteralNode:
 		v.typeChecker.forcePop()
-	case DeclareNode:
+	case ast.DeclareNode:
 		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); !ok {
 			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}
-	case ParameterNode:
+	case ast.ParameterNode:
 		if _, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
 			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"gowacc/ast"
+	"gowacc/semantic_checker"
+	"gowacc/code_generator"
 	"os"
 	"path"
 	"strings"
@@ -40,7 +42,7 @@ func main() {
 	if !*parseOnly {
 
 		// Perform semantic error checking
-		checker := ast.NewSemanticCheck()
+		checker := semantic_checker.NewSemanticCheck()
 		ast.Walk(checker, tree)
 
 		// Print out all semantic errors that occur
@@ -58,7 +60,7 @@ func main() {
 		if !*semanticOnly {
 
 			// Generate assembly Code
-			asm := ast.GenerateCode(tree, checker.SymbolTable())
+			asm := code_generator.GenerateCode(tree, checker.SymbolTable())
 
 			// Save assembly code to files
 			savepath := strings.TrimSuffix(path.Base(filepath), ".wacc") + ".s"

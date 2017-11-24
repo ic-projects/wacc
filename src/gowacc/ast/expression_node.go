@@ -36,7 +36,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		return NewStringArrayTypeNode()
 	case ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
-		arr := a.t.(ArrayTypeNode)
+		arr := a.T.(ArrayTypeNode)
 		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
 			return arr.T
 		} else {
@@ -44,7 +44,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		}
 	case IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
-		return v.t
+		return v.T
 	}
 	return nil
 }

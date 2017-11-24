@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var DEBUG_MODE bool
+
 // FinalStatIsValid given the last statement from a statement list, this function
 // traverses to the last statement checks that statement is a valid end statement,
 // such as a return or exit.
@@ -30,9 +32,6 @@ func FinalStatIsValid(s StatementNode) bool {
 	}
 }
 
-type ProgramNode interface {
-}
-
 // indent is a function to indent when printing the AST, given the string s, it indents
 // it with all previous indents plus the new indent (sep)
 func indent(s string, sep string) string {
@@ -43,6 +42,9 @@ func indent(s string, sep string) string {
 		}
 	}
 	return buf.String()
+}
+
+type ProgramNode interface {
 }
 
 // Program the struct that encapsulates the entire program and will be the root of

@@ -1,4 +1,4 @@
-package ast
+package code_generator
 
 // Predefined is an interface that defines a function or data that can be added
 // to the CodeGenerators assembly.
