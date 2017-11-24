@@ -194,7 +194,9 @@ func GetLibrary() *Library {
 	library := &Library{
 		lib: make(map[LibraryFunction]Predefined),
 	}
+
 	// Predefined Functions
+	// Printing Functions
 	library.NewPreFunction(PRINT_LN,
 		[]LibraryFunction{
 			MSG_NEWLINE,
@@ -267,6 +269,34 @@ func GetLibrary() *Library {
 			"BL fflush",
 			"POP {pc}",
 		})
+
+	// Reading functions
+	library.NewPreFunction(READ_INT,
+		[]LibraryFunction{
+			MSG_INT,
+		},
+		[]string{
+			"PUSH {lr}",
+			"MOV r1, r0",
+			"LDR r0, =" + MSG_INT.String(),
+			"ADD r0, r0, #4",
+			"BL scanf",
+			"POP {pc}",
+		})
+	library.NewPreFunction(READ_CHAR,
+		[]LibraryFunction{
+			MSG_CHAR,
+		},
+		[]string{
+			"PUSH {lr}",
+			"MOV r1, r0",
+			"LDR r0, =" + MSG_CHAR.String(),
+			"ADD r0, r0, #4",
+			"BL scanf",
+			"POP {pc}",
+		})
+
+	// Runtime Error Functions
 	library.NewPreFunction(CHECK_DIVIDE,
 		[]LibraryFunction{
 			THROW_RUNTIME_ERROR,
@@ -305,15 +335,6 @@ func GetLibrary() *Library {
 			"BLCS " + THROW_RUNTIME_ERROR.String(),
 			"POP {pc}",
 		})
-	library.NewPreFunction(THROW_RUNTIME_ERROR,
-		[]LibraryFunction{
-			PRINT_STRING,
-		},
-		[]string{
-			"BL " + PRINT_STRING.String(),
-			"MOV r0, #-1",
-			"BL exit",
-		})
 	library.NewPreFunction(CHECK_NULL_POINTER,
 		[]LibraryFunction{
 			MSG_NULL_POINTER_REFERENCE,
@@ -326,31 +347,17 @@ func GetLibrary() *Library {
 			"BLEQ " + THROW_RUNTIME_ERROR.String(),
 			"POP {pc}",
 		})
-	library.NewPreFunction(READ_INT,
+	library.NewPreFunction(THROW_RUNTIME_ERROR,
 		[]LibraryFunction{
-			MSG_INT,
+			PRINT_STRING,
 		},
 		[]string{
-			"PUSH {lr}",
-			"MOV r1, r0",
-			"LDR r0, =" + MSG_INT.String(),
-			"ADD r0, r0, #4",
-			"BL scanf",
-			"POP {pc}",
-		})
-	library.NewPreFunction(READ_CHAR,
-		[]LibraryFunction{
-			MSG_CHAR,
-		},
-		[]string{
-			"PUSH {lr}",
-			"MOV r1, r0",
-			"LDR r0, =" + MSG_CHAR.String(),
-			"ADD r0, r0, #4",
-			"BL scanf",
-			"POP {pc}",
+			"BL " + PRINT_STRING.String(),
+			"MOV r0, #-1",
+			"BL exit",
 		})
 
+	// Free functions
 	library.NewPreFunction(FREE,
 		[]LibraryFunction{
 			MSG_NULL_POINTER_REFERENCE,
