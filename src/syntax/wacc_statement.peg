@@ -1,0 +1,210 @@
+// StatementNode
+STATS ← stat:STAT stats:(_ ';' _ STAT)* {
+
+	statements := []ast.StatementNode{stat}
+	for _, s := range toSlice(stats) {
+		statements = append(statements, getItem(s, 3).(ast.StatementNode))
+	}
+
+	return ret(statements)
+
+}
+
+STAT ←
+	SKIP /
+	NEWASSIGN /
+	READ /
+	FREE /
+	RETURN /
+	EXIT /
+	PRINT /
+	PRINTLN /
+	IF /
+	WHILE /
+	SCOPE /
+	ASSIGN
+
+// SkipNode
+SKIP ← "skip" {
+
+	return ret(ast.NewSkipNode(
+		c.getPosition(),
+	))
+
+}
+
+// DeclareNode
+NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
+
+	return ret(ast.NewDeclareNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		ident.(ast.IdentifierNode),
+		rhs.(ast.RHSNode),
+	))
+
+} / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
+
+	name := string(getItem(ident, 0).([]byte))
+	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
+	err := errors.New(errmsg)
+
+	return ast.NewDeclareNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		ast.NewIdentifierNode(c.getPosition(), name),
+		rhs.(ast.RHSNode),
+	), err
+
+}
+
+// AssignNode
+ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
+
+	if arr, ok := lhs.(ast.ArrayElementNode); ok {
+		arr.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			arr,
+			rhs.(ast.LHSNode),
+		))
+	}
+	if fst, ok := lhs.(ast.PairFirstElementNode); ok {
+		fst.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			fst,
+			rhs.(ast.LHSNode),
+		))
+	}
+	if snd, ok := lhs.(ast.PairSecondElementNode); ok {
+		snd.SetPointer(true)
+		return ret(ast.NewAssignNode(
+			c.getPosition(),
+			snd,
+			rhs.(ast.LHSNode),
+		))
+	}
+
+	return ret(ast.NewAssignNode(
+		c.getPosition(),
+		lhs.(ast.LHSNode),
+		rhs.(ast.LHSNode),
+	))
+
+}
+
+// ReadNode
+READ ← "read" __ lhs:ASSIGNLHS {
+
+	if arr, ok := lhs.(ast.ArrayElementNode); ok {
+		arr.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			arr,
+		))
+	}
+	if fst, ok := lhs.(ast.PairFirstElementNode); ok {
+		fst.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			fst,
+		))
+	}
+	if snd, ok := lhs.(ast.PairSecondElementNode); ok {
+		snd.SetPointer(true)
+		return ret(ast.NewReadNode(
+			c.getPosition(),
+			snd,
+		))
+	}
+
+	return ret(ast.NewReadNode(
+		c.getPosition(),
+		lhs.(ast.LHSNode),
+	))
+
+}
+
+// FreeNode
+FREE ← "free" __ expr:EXPR {
+
+	return ret(ast.NewFreeNode(
+		c.getPosition(),
+		expr.(ast.ExpressionNode),
+	))
+
+}
+
+// ReturnNode
+RETURN ← "return" __ expr:EXPR {
+
+	return ret(ast.NewReturnNode(
+		c.getPosition(), 
+		expr.(ast.ExpressionNode),
+	))
+
+}
+
+// ExitNode
+EXIT ← "exit" __ expr:EXPR {
+
+	return ret(ast.NewExitNode(
+		c.getPosition(),
+		expr.(ast.ExpressionNode),
+	))
+
+}
+
+// PrintNode
+PRINT ← "print" __ expr:EXPR {
+
+	return ret(ast.NewPrintNode(
+		c.getPosition(),
+		expr.(ast.ExpressionNode),
+	))
+
+}
+
+// PrintlnNode
+PRINTLN ← "println" __ expr:EXPR {
+
+	return ret(ast.NewPrintlnNode(
+		c.getPosition(),
+		expr.(ast.ExpressionNode),
+	))
+
+}
+
+// IfNode
+IF ← "if" __ cond:EXPR _ "then" __ ifStats:STATS _ "else" __ elseStats:STATS _ "fi" {
+
+	return ret(ast.NewIfNode(
+		c.getPosition(),
+		cond.(ast.ExpressionNode),
+		ifStats.([]ast.StatementNode),
+		elseStats.([]ast.StatementNode),
+	))
+
+}
+
+// LoopNode
+WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
+
+	return ret(ast.NewLoopNode(
+		c.getPosition(),
+		cond.(ast.ExpressionNode),
+		stats.([]ast.StatementNode),
+	))
+
+}
+
+// ScopeNode
+SCOPE ← "begin" __ stats:STATS _ "end" {
+
+	return ret(ast.NewScopeNode(
+		c.getPosition(),
+		stats.([]ast.StatementNode),
+	))
+
+}

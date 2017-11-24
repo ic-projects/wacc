@@ -1,0 +1,114 @@
+// ProgramNode
+START ←_ p:PROGRAM {
+    return ret(p)
+}
+
+PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
+
+	main := ast.NewFunctionNode(
+		c.getPosition(),
+		ast.NewBaseTypeNode(ast.VOID),
+		ast.NewIdentifierNode(c.getPosition(), ""),
+		[]ast.ParameterNode{},
+		stat.([]ast.StatementNode),
+	)
+
+	functions := []ast.FunctionNode{}
+	for _, f := range toSlice(fs) {
+		functions = append(functions, getItem(f, 1).(ast.FunctionNode))
+	}
+	functions = append(functions, main)
+
+	return ret(ast.NewProgram(functions))
+
+} / "begin" fs:(__ FUNC)* _ "end" _ !. {
+
+	functions := []ast.FunctionNode{}
+	for _, f := range toSlice(fs) {
+		functions = append(functions, getItem(f, 1).(ast.FunctionNode))
+	}
+
+	err := errors.New("Program body empty")
+
+	return ast.NewProgram(functions), err
+
+}
+
+// FunctionNode
+FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
+       _ "end" {
+
+	stats := s.([]ast.StatementNode)
+	finalStat := stats[len(stats)-1]
+
+	var err error
+	if (!ast.FinalStatIsValid(finalStat)) {
+		name := strings.TrimPrefix(i.(ast.IdentifierNode).String(), "- ")
+		errmsg := fmt.Sprintf(
+			"Function \"%s\" is not ended with a return or an exit statement", 
+			name,
+		)
+		err = errors.New(errmsg)
+	}
+
+	if (params != nil) {
+		return ast.NewFunctionNode(
+			c.getPosition(), 
+			t.(ast.TypeNode), 
+			i.(ast.IdentifierNode), 
+			params.([]ast.ParameterNode), 
+			stats,
+		), err
+	}
+
+	return ast.NewFunctionNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		i.(ast.IdentifierNode),
+		[]ast.ParameterNode{},
+		stats,
+	), err
+
+} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS 
+    _ "end" {
+
+	name := string(getItem(ident, 0).([]byte))
+	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
+	err := errors.New(errmsg)
+
+	return ast.NewFunctionNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		ast.NewIdentifierNode(c.getPosition(), name),
+		[]ast.ParameterNode{},
+		[]ast.StatementNode{},
+	), err
+
+}
+
+PARAMLIST ← param:PARAM params:(_ ',' _ PARAM)* {
+
+	paramList := []ast.ParameterNode{param.(ast.ParameterNode)}
+	for _, p := range toSlice(params) {
+		paramList = append(paramList, getItem(p, 3).(ast.ParameterNode))
+	}
+
+	return ret(paramList)
+
+}
+
+// Parameter Node
+PARAM ← t:TYPE __ i:IDENT {
+
+	return ret(ast.NewParameterNode(
+		c.getPosition(),
+		t.(ast.TypeNode),
+		i.(ast.IdentifierNode),
+	))
+
+}
+
+// Spacing and Comments
+_ "Optional Space" ← ([ \n\t\r] / COMMENT)*
+__ "Obligatory Space" ← ([ \n\t\r] / COMMENT)+
+COMMENT ← '#' ([^\n])* '\n'

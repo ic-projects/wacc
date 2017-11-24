@@ -1,0 +1,106 @@
+// LHSNode
+ASSIGNLHS ←
+	PAIRELEM /
+	ARRAYELEM /
+	IDENT
+
+// IdentifierNode
+IDENT ← !RESERVED ((
+	'_' /
+	[a-z] /
+	[A-Z]
+) (
+	'_' /
+	[a-z] /
+	[A-Z] /
+	[0-9])*
+) {
+
+	return ret(ast.NewIdentifierNode(
+		c.getPosition(), 
+		string(c.text),
+	))
+
+}
+
+RESERVED ← (
+	"int" /
+	"bool" /
+	"char" /
+	"string" /
+	"pair" /
+	"false" /
+	"true" /
+	"newpair" /
+	"null" /
+	"begin" /
+	"end" /
+	"is" /
+	"len" /
+	"ord" /
+	"chr" /
+	"fst" /
+	"snd" /
+	"skip" /
+	"read" /
+	"free" /
+	"return" /
+	"exit" /
+	"print" /
+	"println" /
+	"if" /
+	"then" /
+	"else" /
+	"while" /
+	"do" /
+	"done" /
+	"call"
+) !(
+	'_' / 
+	[a-z] /
+	[A-Z] /
+	[0-9]
+)
+
+PAIRELEM ←
+	FST /
+	SND
+
+// PairFirstElementNode
+FST ← "fst" __ e:EXPR {
+
+	return ret(ast.NewPairFirstElementNode(
+		c.getPosition(),
+		e.(ast.ExpressionNode),
+	))
+
+}
+
+// PairSecondElementNode
+SND ← "snd" __ e:EXPR {
+
+	return ret(ast.NewPairSecondElementNode(
+		c.getPosition(),
+		e.(ast.ExpressionNode),
+	))
+
+}
+
+// ArrayElementNode
+ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
+
+	var expressionNodes  []ast.ExpressionNode
+	for _, e := range toSlice(exprs) {
+			expressionNodes = append(
+				expressionNodes, 
+				getItem(e, 3).(ast.ExpressionNode),
+			)
+	}
+
+	return ret(ast.NewArrayElementNode(
+		c.getPosition(),
+		ident.(ast.IdentifierNode), 
+		expressionNodes,
+	))
+
+}

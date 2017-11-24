@@ -1,0 +1,307 @@
+// ExpressionNode
+EXPR ← e1:PREC2 e2:(_ OR _ PREC2)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC2 ← e1:PREC3 e2:(_ AND _ PREC3)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC3 ← e1:PREC4 e2:(_ EQUOP _ PREC4)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC4 ← e1:PREC5 e2:(_ COMPOP _ PREC5)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC5 ← e1:PREC6 e2:(_ ADDOP _ PREC6)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC6 ← e1:PREC7 e2:(_ MULOP _ PREC7)* {
+	return parseBinOps(e1, e2, c.getPosition())
+}
+
+PREC7 ← bre:BREXPR _ ')' {
+
+	return ret(bre)
+
+} / e:(
+	INTLITER /
+	BOOLLITER /
+	CHARLITER /
+	STRLITER /
+	PAIRLITER /
+	UNARYEXPR /
+	ARRAYELEM /
+	IDENT
+) {
+
+	return ret(e)
+
+} / p:PAIRELEM {
+
+	name := string(c.text)
+	errmsg := fmt.Sprintf("Invalid expression, \"%s\" (pair element)", name)
+	err := errors.New(errmsg)
+
+	return p, err
+
+}
+
+BREXPR ← '(' _ expr:EXPR {
+
+	return ret(expr)
+
+}
+
+// UnaryOperator
+UNARYOPER ← 
+	NOT /
+	NEG /
+	LEN /
+	ORD /
+	CHR
+
+NOT ← '!' {
+	return ret(ast.NOT)
+}
+
+NEG ← '-' {
+	return ret(ast.NEG)
+}
+
+LEN ← "len" __ {
+	return ret(ast.LEN)
+}
+
+ORD ← "ord" __ {
+	return ret(ast.ORD)
+}
+
+CHR ← "chr" __ {
+	return ret(ast.CHR)
+}
+
+// BinaryOperator
+MULOP ← 
+	MULT /
+	DIV /
+	MOD
+
+ADDOP ←
+	SUB /
+	PLUS
+
+COMPOP ← 
+	GEQ /
+	GT / 
+	LEQ /
+	LT
+
+EQUOP ← 
+	EQ  /
+	NEQ
+
+OR ← "||" {
+	return ret(ast.OR)
+}
+
+AND ← "&&" {
+	return ret(ast.AND)
+}
+
+MULT ← '*' {
+	return ret(ast.MUL)
+}
+
+DIV ← '/' {
+	return ret(ast.DIV)
+}
+
+MOD ← '%' {
+	return ret(ast.MOD)
+}
+
+SUB ← '-' {
+	return ret(ast.SUB)
+}
+
+PLUS ← '+' {
+	return ret(ast.ADD)
+}
+
+GEQ ← ">=" {
+	return ret(ast.GEQ)
+}
+
+GT ← '>' {
+	return ret(ast.GT)
+}
+
+LEQ ← "<=" {
+	return ret(ast.LEQ)
+}
+
+LT ← '<' {
+	return ret(ast.LT)
+}
+
+EQ ← "==" {
+	return ret(ast.EQ)
+}
+
+NEQ ← "!=" {
+	return ret(ast.NEQ)
+}
+
+// IntegerLiteralNode
+INTLITER ← INTSIGN? _ DIGIT+ {
+
+	clean := strings.Replace(string(c.text), " ", "", -1)
+	i, err := strconv.ParseInt(clean, 10, 32)
+
+	if err != nil {
+		val := string(c.text)
+		errmsg := fmt.Sprintf(
+			"Integer value \"%s\" is badly formatted " +
+			"(either it has a badly defined sign " +
+			"or it is too large for a 32-bit signed integer)", 
+			val,
+		)
+		err = errors.New(errmsg)
+	}
+
+	return ast.NewIntegerLiteralNode(
+		c.getPosition(),
+		int(i),
+	), err
+
+}
+
+INTSIGN ← 
+	'+' /
+	'-'
+
+DIGIT ← [0-9]
+
+// BooleanLiteralNode
+BOOLLITER ← 
+	TRUE /
+	FALSE
+
+TRUE ← "true" {
+
+	return ret(ast.NewBooleanLiteralNode(
+		c.getPosition(),
+		true,
+	))
+
+}
+
+FALSE ← "false" {
+
+	return ret(ast.NewBooleanLiteralNode(
+		c.getPosition(),
+		false,
+	))
+
+}
+
+// CharacterLiteralNode
+CHARLITER ← "'" char:CHARACTER "'" {
+
+	r, _ := utf8.DecodeRune(char.([]byte))
+
+	return ret(ast.NewCharacterLiteralNode(
+		c.getPosition(),
+		r,
+	))
+
+} / "'" char:[""''\\] "'" {
+
+	r, _ := utf8.DecodeRune(char.([]byte))
+
+	errmsg := fmt.Sprintf("Invalid character, %s (must be escaped)", c.text)
+	err := errors.New(errmsg)
+
+	return ast.NewCharacterLiteralNode(
+		c.getPosition(),
+		r,
+	), err
+
+}
+
+CHARACTER ← char:[^""''\\] {
+
+	return ret(char)
+
+} / '\\' char:ESCAPEDCHAR {
+
+	switch char.([]byte)[0] {
+	case '0':
+		return ret([]byte{'\000'})
+	case 'b':
+		return ret('\b')
+	case 't':
+		return ret('\t')
+	case 'n':
+		return ret('\n')
+	case 'f':
+		return ret('\f')
+	case 'r':
+		return ret('\r')
+	default:
+		return ret(char)
+	}
+
+} / '\\' char:. {
+
+	errmsg := fmt.Sprintf("Invalid escaped character, \"%s\"", c.text)
+	err := errors.New(errmsg)
+
+	return char, err
+
+}
+
+ESCAPEDCHAR ← [0btnfr""''\\]
+
+// StringLiteralNode
+STRLITER ← '"' (str:STR) '"' {
+
+	return ret(ast.NewStringLiteralNode(
+		c.getPosition(),
+		str.(string),
+	))
+
+}
+
+// String
+STR ← CHARACTER* {
+	return ret(string(c.text))
+}
+
+// PairLiteralNode
+PAIRLITER ← "null" {
+
+	return ret(ast.NewPairLiteralNode(
+		c.getPosition(),
+	))
+
+}
+
+// IdentifierNode - defined in wacc_lhs.peg
+
+// ArrayElementNode - defined in wacc_lhs.peg
+
+// UnaryOperatorNode
+UNARYEXPR ← op:UNARYOPER _ expr:EXPR {
+
+	return ret(ast.NewUnaryOperatorNode(
+		c.getPosition(),
+		op.(ast.UnaryOperator),
+		expr.(ast.ExpressionNode),
+	))
+
+}
