@@ -12,6 +12,7 @@ import (
 	"utils"
 )
 
+// AsciiWord is a struct that stores the length and string of an ascii string.
 type AsciiWord struct {
 	length int
 	text   string
@@ -24,6 +25,8 @@ func NewAsciiWord(length int, text string) AsciiWord {
 	}
 }
 
+// Assembly is a struct that stores the different parts of the assembly. It stores
+// the .data, .text and global.
 type Assembly struct {
 	data        map[string](AsciiWord)
 	dataCounter int
@@ -40,7 +43,7 @@ func NewAssembly() *Assembly {
 	}
 }
 
-// String will return the string format of the Assembly code with line numbers.
+// String will return the string format of the Assembly code.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(".data\n")
@@ -63,6 +66,7 @@ func (asm *Assembly) String() string {
 	return buf.String()
 }
 
+// NumberedCode will return the string format of the Assembly code with line numbers.
 func (asm *Assembly) NumberedCode() string {
 	var buf bytes.Buffer
 	for i, line := range strings.Split(asm.String(), "\n") {
@@ -92,6 +96,7 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	return nil
 }
 
+// LocationOf will return the location of a
 func (codeGenerator *CodeGenerator) LocationOf(loc *location.Location) string {
 	// Location is a register
 	if loc.Register != location.UNDEFINED {
@@ -122,7 +127,10 @@ func GenerateCode(tree ast.ProgramNode, symbolTable *ast.SymbolTable) *Assembly 
 }
 
 // CodeGenerator is a struct that implements EntryExitVisitor to be called with
-// Walk. It stores
+// Walk. It stores the assembly, a label count (used for ensuring distinct labels)
+// the currentFunction (so when we add code we add to the currentFunction), a symbolTable,
+// a stack of freeRegisters and returnRegisters, a predefined function Library,
+// and the current position of the stack.
 type CodeGenerator struct {
 	asm             *Assembly
 	labelCount      int
@@ -134,7 +142,7 @@ type CodeGenerator struct {
 	currentStackPos int
 }
 
-// NewCodeGenerator returns an initialised CodeGenerator
+// NewCodeGenerator returns an initialised CodeGenerator.
 func NewCodeGenerator(symbolTable *ast.SymbolTable) *CodeGenerator {
 	return &CodeGenerator{
 		asm:             NewAssembly(),
@@ -147,6 +155,7 @@ func NewCodeGenerator(symbolTable *ast.SymbolTable) *CodeGenerator {
 	}
 }
 
+// addPrint will add the correct type of print function for the type given.
 func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 	switch node := t.(type) {
 	case ast.BaseTypeNode:
@@ -208,7 +217,7 @@ func (v *CodeGenerator) addCode(lineFormat string, inputs ...interface{}) {
 }
 
 // addCode add lines of assembly to the already code part of the generated
-// assembly code
+// assembly code.
 func (v *CodeGenerator) addFunction(name string) {
 	v.asm.global[name] = make([]string, 0)
 	v.currentFunction = name
@@ -691,18 +700,23 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	}
 }
 
+// getFreeRegister pops a register from freeRegisters, and returns it
+// after pushing it onto the returnRegisters.
 func (v *CodeGenerator) getFreeRegister() location.Register {
 	register := v.freeRegisters.Pop()
 	v.returnRegisters.Push(register)
 	return register
 }
 
+// getFreeRegister pops a register from returnRegister, and returns it
+// after pushing it onto the freeRegisters.
 func (v *CodeGenerator) getReturnRegister() location.Register {
 	register := v.returnRegisters.Pop()
 	v.freeRegisters.Push(register)
 	return register
 }
 
+// store will return "STRB" if the passed paramater is one, "STR" otherwise.
 func store(size int) string {
 	if size == 1 {
 		return "STRB"
@@ -710,6 +724,7 @@ func store(size int) string {
 	return "STR"
 }
 
+// load will return "LDRB" if the passed paramater is one, "LDR" otherwise.
 func load(size int) string {
 	if size == 1 {
 		return "LDRSB"
