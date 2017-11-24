@@ -9,30 +9,6 @@ import (
 
 var DEBUG_MODE bool
 
-// FinalStatIsValid given the last statement from a statement list, this function
-// traverses to the last statement checks that statement is a valid end statement,
-// such as a return or exit.
-func FinalStatIsValid(s StatementNode) bool {
-	switch s.(type) {
-	case ReturnNode:
-		return true
-	case ExitNode:
-		return true
-	case ScopeNode:
-		stats := s.(ScopeNode).Stats
-		finalStat := stats[len(stats)-1]
-		return FinalStatIsValid(finalStat)
-	case IfNode:
-		ifStats := s.(IfNode).IfStats
-		ifFinalStat := ifStats[len(ifStats)-1]
-		elseStats := s.(IfNode).ElseStats
-		elseFinalStat := elseStats[len(elseStats)-1]
-		return FinalStatIsValid(ifFinalStat) && FinalStatIsValid(elseFinalStat)
-	default:
-		return false
-	}
-}
-
 type ProgramNode interface {
 }
 
