@@ -11,7 +11,7 @@ import (
 type ExpressionNode interface {
 }
 
-/******************** EXPRESSION HELPER FUNCTIONS ****************/
+/******************** EXPRESSION HELPER FUNCTIONS ********************/
 
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
@@ -97,7 +97,7 @@ func BuildBinOpTree(
 	)
 }
 
-/******************** UNARY OPERATOR ****************/
+/******************** UNARY OPERATOR ********************/
 
 // UnaryOperator is an enum which defines the different unary operators.
 type UnaryOperator int
@@ -126,7 +126,7 @@ func (unOp UnaryOperator) String() string {
 	return "ERROR"
 }
 
-/******************** BINARY OPERATOR ****************/
+/******************** BINARY OPERATOR ********************/
 
 // BinaryOperator is an enum which defines the different binary operators.
 type BinaryOperator int
@@ -179,7 +179,7 @@ func (binOp BinaryOperator) String() string {
 	return "ERROR"
 }
 
-/******************** INTEGER LITERAL NODE ****************/
+/******************** INTEGER LITERAL NODE ********************/
 
 // IntegerLiteralNode is a struct which stores the position and value of an
 // integer literal.
@@ -202,7 +202,7 @@ func (node IntegerLiteralNode) String() string {
 	return fmt.Sprintf("- %d", node.Val)
 }
 
-/******************** BOOLEAN LITERAL NODE ****************/
+/******************** BOOLEAN LITERAL NODE ********************/
 
 // BooleanLiteralNode is a struct which stores the position and value of a
 // boolean literal.
@@ -225,7 +225,7 @@ func (node BooleanLiteralNode) String() string {
 	return fmt.Sprintf("- %s", strconv.FormatBool(node.Val))
 }
 
-/******************** CHARACTER LITERAL NODE ****************/
+/******************** CHARACTER LITERAL NODE ********************/
 
 // CharacterLiteralNode is a struct which stores the position and value of a
 // character literal.
@@ -254,7 +254,7 @@ func (node CharacterLiteralNode) String() string {
 	return fmt.Sprintf("- %q", node.Val)
 }
 
-/******************** STRING LITERAL NODE ****************/
+/******************** STRING LITERAL NODE ********************/
 
 // StringLiteralNode is a struct which stores the position and value of a string
 // literal.
@@ -277,7 +277,7 @@ func (node StringLiteralNode) String() string {
 	return fmt.Sprintf("- \"%s\"", node.Val)
 }
 
-/******************** PAIR LITERAL NODE ****************/
+/******************** PAIR LITERAL NODE ********************/
 
 // PairLiteralNode is a struct which stores the position of a pair literal.
 // This does not store the value of the pair literal since the value of a pair
@@ -296,15 +296,15 @@ func (node PairLiteralNode) String() string {
 	return "- null\n"
 }
 
-/******************** IDENTIFIER NODE ****************/
+/******************** IDENTIFIER NODE ********************/
 
 // IdentifierNode - defined in lhs_node.go
 
-/******************** ARRAY ELEMENT NODE ****************/
+/******************** ARRAY ELEMENT NODE ********************/
 
 // ArrayElementNode - defined in lhs_node.go
 
-/******************** UNARY OPERATOR NODE ****************/
+/******************** UNARY OPERATOR NODE ********************/
 
 // UnaryOperatorNode is a struct which stores the position, (unary) operator and
 // expression of a unary operator operation on an expression.
@@ -339,7 +339,7 @@ func (node UnaryOperatorNode) String() string {
 	return buf.String()
 }
 
-/******************** BINARY OPERATOR NODE ****************/
+/******************** BINARY OPERATOR NODE ********************/
 
 // BinaryOperatorNode is a struct which stores the position, (binary) operator
 // and the two expressions of a binary operation on two expressions.
