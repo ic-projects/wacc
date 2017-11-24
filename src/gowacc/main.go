@@ -1,13 +1,13 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"ast"
 	"codegen"
-	"semantics"
+	"flag"
+	"fmt"
 	"os"
 	"path"
+	"semantics"
 	"strings"
 )
 

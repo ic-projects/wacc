@@ -1,8 +1,8 @@
 package semantics
 
 import (
-	"fmt"
 	"ast"
+	"fmt"
 )
 
 // Expectance is an interface used to store what type is expected.

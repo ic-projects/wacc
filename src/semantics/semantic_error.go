@@ -1,10 +1,10 @@
 package semantics
 
 import (
+	"ast"
 	"bufio"
 	"bytes"
 	"fmt"
-	"ast"
 	"os"
 	"strings"
 )

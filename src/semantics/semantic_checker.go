@@ -1,8 +1,8 @@
 package semantics
 
 import (
-	"fmt"
 	"ast"
+	"fmt"
 )
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with
