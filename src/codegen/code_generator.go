@@ -830,3 +830,29 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		}
 	}
 }
+
+func (v *CodeGenerator) getFreeRegister() location.Register {
+	register := v.freeRegisters.Pop()
+	v.returnRegisters.Push(register)
+	return register
+}
+
+func (v *CodeGenerator) getReturnRegister() location.Register {
+	register := v.returnRegisters.Pop()
+	v.freeRegisters.Push(register)
+	return register
+}
+
+func store(size int, from string, dest string) string {
+	if size == 1 {
+		return fmt.Sprintf("STRB %s, %s", from, dest)
+	}
+	return fmt.Sprintf("STR %s, %s", from, dest)
+}
+
+func load(size int, from string, dest string) string {
+	if size == 1 {
+		return fmt.Sprintf("LDRSB %s, %s", from, dest)
+	}
+	return fmt.Sprintf("LDR %s, %s", from, dest)
+}
