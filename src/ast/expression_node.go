@@ -328,3 +328,17 @@ func (node BinaryOperatorNode) String() string {
 
 	return buf.String()
 }
+
+// Weight returns the number of registers used to evaluate the given
+// ExpressionNode.
+func Weight(n ExpressionNode) int {
+	switch node := n.(type) {
+	case UnaryOperatorNode:
+		return Weight(node.Expr)
+	case BinaryOperatorNode:
+		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
+		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
+		return utils.Min(lhsWeight, rhsWeight)
+	}
+	return 1
+}
