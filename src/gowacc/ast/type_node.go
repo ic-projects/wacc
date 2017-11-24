@@ -5,6 +5,17 @@ import (
 	"fmt"
 )
 
+func SizeOf(t TypeNode) int {
+	switch node := t.(type) {
+	case BaseTypeNode:
+		switch node.t {
+		case CHAR, BOOL:
+			return 1
+		}
+	}
+	return 4
+}
+
 // TypeNode is an empty interface for all types to implement.
 type TypeNode interface {
 }

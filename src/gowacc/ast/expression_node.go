@@ -6,6 +6,49 @@ import (
 	"strconv"
 )
 
+func Type(e ExpressionNode, s *SymbolTable) TypeNode {
+	switch node := e.(type) {
+	case BinaryOperatorNode:
+		switch node.op {
+		case MUL, DIV, MOD, ADD, SUB:
+			return NewBaseTypeNode(INT)
+		case GT, GEQ, LT, LEQ, EQ, NEQ, AND, OR:
+			return NewBaseTypeNode(BOOL)
+		}
+	case UnaryOperatorNode:
+		switch node.op {
+		case NOT:
+			return NewBaseTypeNode(BOOL)
+		case NEG, LEN, ORD:
+			return NewBaseTypeNode(INT)
+		case CHR:
+			return NewBaseTypeNode(CHAR)
+		}
+	case PairLiteralNode, PairTypeNode:
+		return NewBaseTypeNode(PAIR)
+	case IntegerLiteralNode:
+		return NewBaseTypeNode(INT)
+	case BooleanLiteralNode:
+		return NewBaseTypeNode(BOOL)
+	case CharacterLiteralNode:
+		return NewBaseTypeNode(CHAR)
+	case StringLiteralNode:
+		return NewStringArrayTypeNode()
+	case ArrayElementNode:
+		a, _ := s.SearchForIdent(node.ident.ident)
+		arr := a.t.(ArrayTypeNode)
+		if dimLeft := arr.dim - len(node.exprs); dimLeft == 0 {
+			return arr.t
+		} else {
+			return NewArrayTypeNode(arr.t, dimLeft)
+		}
+	case IdentifierNode:
+		v, _ := s.SearchForIdent(node.ident)
+		return v.t
+	}
+	return nil
+}
+
 // ExpressionNode is an empty interface for expression nodes to implement.
 type ExpressionNode interface {
 }
