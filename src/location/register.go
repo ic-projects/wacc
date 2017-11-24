@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// Register is an enum which defines the registers according to the ARM11
+// specification.
 type Register int
 
 const (
