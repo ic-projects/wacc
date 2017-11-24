@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 // RHSNode is an empty interface for Lhs nodes to implement.
@@ -32,7 +33,7 @@ func (node ArrayLiteralNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
 	for _, e := range node.Exprs {
-		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "  "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "  "))
 	}
 	return buf.String()
 }
@@ -58,10 +59,10 @@ func NewNewPairNode(pos Position, fst ExpressionNode, snd ExpressionNode) NewPai
 func (node NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
-	buf.WriteString(indent(fmt.Sprintln("- FST"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Fst), "    "))
-	buf.WriteString(indent(fmt.Sprintln("- SND"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Snd), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- FST"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Fst), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- SND"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"utils"
 )
 
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
@@ -291,7 +292,7 @@ func (node UnaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 
 	return buf.String()
 }
@@ -322,8 +323,8 @@ func (node BinaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
 
 	return buf.String()
 }

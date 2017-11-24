@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 // StatementNode is an empty interface for statement nodes to implement.
@@ -50,11 +51,11 @@ func (node DeclareNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- DECLARE"))
 	buf.WriteString(fmt.Sprintln("  - TYPE"))
-	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.T), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("- %s\n", node.T), "    "))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Ident), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Ident), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Rhs), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Rhs), "    "))
 	return buf.String()
 }
 
@@ -81,9 +82,9 @@ func (node AssignNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ASSIGNMENT"))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Lhs), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Lhs), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Rhs), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Rhs), "    "))
 	return buf.String()
 }
 
@@ -107,7 +108,7 @@ func NewReadNode(pos Position, lhs LHSNode) ReadNode {
 func (node ReadNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- READ"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Lhs), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Lhs), "  "))
 	return buf.String()
 }
 
@@ -131,7 +132,7 @@ func NewFreeNode(pos Position, expr ExpressionNode) FreeNode {
 func (node FreeNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FREE"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -155,7 +156,7 @@ func NewReturnNode(pos Position, expr ExpressionNode) ReturnNode {
 func (node ReturnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- RETURN"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -179,7 +180,7 @@ func NewExitNode(pos Position, expr ExpressionNode) ExitNode {
 func (node ExitNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- EXIT"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -203,7 +204,7 @@ func NewPrintNode(pos Position, expr ExpressionNode) PrintNode {
 func (node PrintNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINT"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -227,7 +228,7 @@ func NewPrintlnNode(pos Position, expr ExpressionNode) PrintlnNode {
 func (node PrintlnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINTLN"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -256,15 +257,15 @@ func NewIfNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseS
 func (node IfNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- IF"))
-	buf.WriteString(indent(fmt.Sprintln("- CONDITION"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "    "))
-	buf.WriteString(indent(fmt.Sprintln("- THEN"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- CONDITION"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- THEN"), "  "))
 	for _, s := range node.IfStats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "    "))
 	}
-	buf.WriteString(indent(fmt.Sprintln("- ELSE"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- ELSE"), "  "))
 	for _, s := range node.ElseStats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
 }
@@ -293,10 +294,10 @@ func (node LoopNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- LOOP"))
 	buf.WriteString(fmt.Sprintln("  - CONDITION"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "    "))
 	buf.WriteString(fmt.Sprintln("  - DO"))
 	for _, s := range node.Stats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
 }
@@ -322,7 +323,7 @@ func (node ScopeNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SCOPE"))
 	for _, s := range node.Stats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "  "))
 	}
 	return buf.String()
 }

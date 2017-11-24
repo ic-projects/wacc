@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"utils"
 )
 
 var DEBUG_MODE bool
@@ -32,18 +33,6 @@ func FinalStatIsValid(s StatementNode) bool {
 	}
 }
 
-// indent is a function to indent when printing the AST, given the string s, it indents
-// it with all previous indents plus the new indent (sep)
-func indent(s string, sep string) string {
-	var buf bytes.Buffer
-	for _, line := range strings.Split(s, "\n") {
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%s%s\n", sep, line))
-		}
-	}
-	return buf.String()
-}
-
 type ProgramNode interface {
 }
 
@@ -65,7 +54,7 @@ func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.Functions {
-		tempbuf.WriteString(indent(fmt.Sprintf("%s", f), "  "))
+		tempbuf.WriteString(utils.Indent(fmt.Sprintf("%s", f), "  "))
 	}
 	var buf bytes.Buffer
 	for i, line := range strings.Split(tempbuf.String(), "\n") {
@@ -116,7 +105,7 @@ func (node FunctionNode) String() string {
 	}
 	buf.WriteString(fmt.Sprintln(")"))
 	for _, s := range node.Stats {
-		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "  "))
 	}
 	return buf.String()
 }

@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"utils"
 )
 
 type AsciiWord struct {
@@ -39,18 +40,6 @@ func NewAssembly() *Assembly {
 	}
 }
 
-// indent is a function to indent when printing the AST, given the string s, it indents
-// it with all previous indents plus the new indent (sep)
-func indent(s string, sep string) string {
-	var buf bytes.Buffer
-	for _, line := range strings.Split(s, "\n") {
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%s%s\n", sep, line))
-		}
-	}
-	return buf.String()
-}
-
 // String will return the string format of the Assembly code with line numbers.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
@@ -62,13 +51,13 @@ func (asm *Assembly) String() string {
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
-		buf.WriteString(indent(s, "  "))
+		buf.WriteString(utils.Indent(s, "  "))
 	}
 	buf.WriteString(".global main\n")
 	for fname, f := range asm.global {
 		buf.WriteString(fname + ":\n")
 		for _, s := range f {
-			buf.WriteString(indent(s, "  "))
+			buf.WriteString(utils.Indent(s, "  "))
 		}
 	}
 	return buf.String()

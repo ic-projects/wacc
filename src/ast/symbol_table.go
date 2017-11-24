@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"location"
+	"utils"
 )
 
 // SymbolTable is a struct that stores the symboltable and the CurrentScope that
@@ -196,7 +197,7 @@ func (table *SymbolTable) String() string {
 	}
 	buf.WriteString("- Scopes:\n")
 	for _, s := range table.Head.childScopes {
-		buf.WriteString(indent(fmt.Sprintf("%s\n", s), "  "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
 }
@@ -212,7 +213,7 @@ func (node *SymbolTableNode) String() string {
 	if len(node.childScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")
 		for _, s := range node.childScopes {
-			buf.WriteString(indent(fmt.Sprintf("%s\n", s), "  "))
+			buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 		}
 	}
 	return buf.String()
