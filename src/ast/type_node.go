@@ -5,6 +5,12 @@ import (
 	"fmt"
 )
 
+// TypeNode is an empty interface for all types to implement.
+type TypeNode interface {
+}
+
+/******************** TYPE NODE HELPER FUNCTIONS ****************/
+
 func SizeOf(t TypeNode) int {
 	switch node := t.(type) {
 	case BaseTypeNode:
@@ -16,9 +22,7 @@ func SizeOf(t TypeNode) int {
 	return 4
 }
 
-// TypeNode is an empty interface for all types to implement.
-type TypeNode interface {
-}
+/******************** BASE TYPE ****************/
 
 type BaseType int
 
@@ -51,6 +55,8 @@ func (t BaseType) String() string {
 	return ""
 }
 
+/******************** BASE TYPE NODE ****************/
+
 // BaseTypeNode is a struct that stores a BaseType.
 type BaseTypeNode struct {
 	T BaseType
@@ -65,6 +71,8 @@ func NewBaseTypeNode(t BaseType) BaseTypeNode {
 func (node BaseTypeNode) String() string {
 	return fmt.Sprintf("%s", node.T)
 }
+
+/******************** ARRAY TYPE NODE ****************/
 
 // ArrayTypeNode stores the type, and dimension of the array. It stores if it is
 // a string additionally to distinguish between a char array and a string.
@@ -116,6 +124,8 @@ func (node ArrayTypeNode) String() string {
 	}
 	return buf.String()
 }
+
+/******************** PAIR TYPE NODE ****************/
 
 // PairTypeNode is a struct that stores the types of the first and second
 // elements of the pair.

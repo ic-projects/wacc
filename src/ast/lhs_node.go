@@ -10,7 +10,10 @@ import (
 type LHSNode interface {
 }
 
-// IdentifierNode is a struct that stores the position and string of an identifier.
+/******************** IDENTIFIER NODE ********************/
+
+// IdentifierNode is a struct that stores the position and string of an
+// identifier.
 type IdentifierNode struct {
 	Pos   Position
 	Ident string
@@ -30,6 +33,8 @@ func (node IdentifierNode) String() string {
 	return fmt.Sprintf("- %s", node.Ident)
 }
 
+/******************** PAIR FIRST ELEMENT NODE ********************/
+
 // PairFirstElementNode is a struct that stores the position and expression of
 // an access to a pair's first element.
 //
@@ -46,7 +51,10 @@ func (fst *PairFirstElementNode) SetPointer(p bool) {
 	fst.Pointer = p
 }
 
-func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElementNode {
+func NewPairFirstElementNode(
+	pos Position,
+	expr ExpressionNode,
+) PairFirstElementNode {
 	return PairFirstElementNode{
 		Pos:     pos,
 		Expr:    expr,
@@ -60,6 +68,8 @@ func (node PairFirstElementNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 	return buf.String()
 }
+
+/******************** PAIR SECOND ELEMENT NODE ********************/
 
 // PairSecondElementNode is a struct that stores the position and expression of
 // an access to a pair's second element.
@@ -77,7 +87,10 @@ func (snd *PairSecondElementNode) SetPointer(p bool) {
 	snd.Pointer = p
 }
 
-func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondElementNode {
+func NewPairSecondElementNode(
+	pos Position,
+	expr ExpressionNode,
+) PairSecondElementNode {
 	return PairSecondElementNode{
 		Pos:     pos,
 		Expr:    expr,
@@ -92,8 +105,10 @@ func (node PairSecondElementNode) String() string {
 	return buf.String()
 }
 
-// ArrayElementNode is a struct that stores the position, identifier and expressions of
-// an access to an array.
+/******************** ARRAY ELEMENT NODE ********************/
+
+// ArrayElementNode is a struct that stores the position, identifier and
+// expressions of an access to an array.
 //
 // E.g.
 //  i[4][3+2]
@@ -108,7 +123,11 @@ func (arr *ArrayElementNode) SetPointer(p bool) {
 	arr.Pointer = p
 }
 
-func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {
+func NewArrayElementNode(
+	pos Position,
+	ident IdentifierNode,
+	exprs []ExpressionNode,
+) ArrayElementNode {
 	return ArrayElementNode{
 		Pos:     pos,
 		Ident:   ident,

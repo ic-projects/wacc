@@ -7,6 +7,12 @@ import (
 	"utils"
 )
 
+// ExpressionNode is an empty interface for expression nodes to implement.
+type ExpressionNode interface {
+}
+
+/******************** EXPRESSION HELPER FUNCTIONS ****************/
+
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
 	case BinaryOperatorNode:
@@ -52,12 +58,17 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 
 // BuildBinOpTree is a function that builds the correct tree of binary operation
 // when given the first expression, a list of the remaining binary operators and
-// expressions and the position inside the source file (used for error messages).
+// expressions and the position inside the source file (used for error
+// messages).
 //
 // The list of remaining binary operators and expressions is given in the form
 // [[space, BinaryOperator, space, Expression], ...]
 // where space is ignored.
-func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position) ExpressionNode {
+func BuildBinOpTree(
+	first ExpressionNode,
+	list []interface{},
+	position Position,
+) ExpressionNode {
 	if len(list) > 1 {
 		// Generate the LHS expression node
 		var toParse []interface{}
@@ -67,17 +78,26 @@ func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position)
 		lhs := BuildBinOpTree(first, toParse, position)
 
 		// Get the RHS node
-		// Note that last is in the form [space, BinaryOperator, space, Expression],
-		// So we use last[1] to get the BinaryOperator and last[3] to get the Expression
+		// Note that last is in the form [space, BinaryOperator, space,
+		// Expression],So we use last[1] to get the BinaryOperator and last[3]
+		// to get the Expression
 		last := list[len(list)-1].([]interface{})
-		return NewBinaryOperatorNode(position, last[1].(BinaryOperator), lhs, last[3])
+		return NewBinaryOperatorNode(
+			position,
+			last[1].(BinaryOperator),
+			lhs,
+			last[3],
+		)
 	}
-	return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
+	return NewBinaryOperatorNode(
+		position,
+		list[0].([]interface{})[1].(BinaryOperator),
+		first,
+		list[0].([]interface{})[3],
+	)
 }
 
-// ExpressionNode is an empty interface for expression nodes to implement.
-type ExpressionNode interface {
-}
+/******************** UNARY OPERATOR ****************/
 
 // UnaryOperator is an enum which defines the different unary operators.
 type UnaryOperator int
@@ -105,6 +125,8 @@ func (unOp UnaryOperator) String() string {
 	}
 	return "ERROR"
 }
+
+/******************** BINARY OPERATOR ****************/
 
 // BinaryOperator is an enum which defines the different binary operators.
 type BinaryOperator int
@@ -157,6 +179,8 @@ func (binOp BinaryOperator) String() string {
 	return "ERROR"
 }
 
+/******************** INTEGER LITERAL NODE ****************/
+
 // IntegerLiteralNode is a struct which stores the position and value of an
 // integer literal.
 //
@@ -178,6 +202,8 @@ func (node IntegerLiteralNode) String() string {
 	return fmt.Sprintf("- %d", node.Val)
 }
 
+/******************** BOOLEAN LITERAL NODE ****************/
+
 // BooleanLiteralNode is a struct which stores the position and value of a
 // boolean literal.
 //
@@ -198,6 +224,8 @@ func NewBooleanLiteralNode(pos Position, val bool) BooleanLiteralNode {
 func (node BooleanLiteralNode) String() string {
 	return fmt.Sprintf("- %s", strconv.FormatBool(node.Val))
 }
+
+/******************** CHARACTER LITERAL NODE ****************/
 
 // CharacterLiteralNode is a struct which stores the position and value of a
 // character literal.
@@ -226,6 +254,8 @@ func (node CharacterLiteralNode) String() string {
 	return fmt.Sprintf("- %q", node.Val)
 }
 
+/******************** STRING LITERAL NODE ****************/
+
 // StringLiteralNode is a struct which stores the position and value of a string
 // literal.
 //
@@ -247,6 +277,8 @@ func (node StringLiteralNode) String() string {
 	return fmt.Sprintf("- \"%s\"", node.Val)
 }
 
+/******************** PAIR LITERAL NODE ****************/
+
 // PairLiteralNode is a struct which stores the position of a pair literal.
 // This does not store the value of the pair literal since the value of a pair
 // literal is always null.
@@ -264,9 +296,15 @@ func (node PairLiteralNode) String() string {
 	return "- null\n"
 }
 
+/******************** IDENTIFIER NODE ****************/
+
 // IdentifierNode - defined in lhs_node.go
 
+/******************** ARRAY ELEMENT NODE ****************/
+
 // ArrayElementNode - defined in lhs_node.go
+
+/******************** UNARY OPERATOR NODE ****************/
 
 // UnaryOperatorNode is a struct which stores the position, (unary) operator and
 // expression of a unary operator operation on an expression.
@@ -280,7 +318,11 @@ type UnaryOperatorNode struct {
 	Expr ExpressionNode
 }
 
-func NewUnaryOperatorNode(pos Position, op UnaryOperator, expr ExpressionNode) UnaryOperatorNode {
+func NewUnaryOperatorNode(
+	pos Position,
+	op UnaryOperator,
+	expr ExpressionNode,
+) UnaryOperatorNode {
 	return UnaryOperatorNode{
 		Pos:  pos,
 		Op:   op,
@@ -297,6 +339,8 @@ func (node UnaryOperatorNode) String() string {
 	return buf.String()
 }
 
+/******************** BINARY OPERATOR NODE ****************/
+
 // BinaryOperatorNode is a struct which stores the position, (binary) operator
 // and the two expressions of a binary operation on two expressions.
 //
@@ -310,7 +354,12 @@ type BinaryOperatorNode struct {
 	Expr2 ExpressionNode
 }
 
-func NewBinaryOperatorNode(pos Position, op BinaryOperator, expr1 ExpressionNode, expr2 ExpressionNode) BinaryOperatorNode {
+func NewBinaryOperatorNode(
+	pos Position,
+	op BinaryOperator,
+	expr1 ExpressionNode,
+	expr2 ExpressionNode,
+) BinaryOperatorNode {
 	return BinaryOperatorNode{
 		Pos:   pos,
 		Op:    op,

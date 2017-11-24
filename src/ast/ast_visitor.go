@@ -13,6 +13,8 @@ type EntryExitVisitor interface {
 	Leave(ProgramNode)
 }
 
+// EntryExitVisitorOptional is an extension of the EntryExitVisitor interface to
+// allow manual walking through the AST
 type EntryExitVisitorOptional interface {
 	Visit(ProgramNode)
 	Leave(ProgramNode)
@@ -23,7 +25,8 @@ type EntryExitVisitorOptional interface {
 // visit on the programNodes below the programNode and the current programNode.
 func Walk(visitor Visitor, programNode ProgramNode) {
 	visitor.Visit(programNode)
-	if v, ok := visitor.(EntryExitVisitorOptional); !ok || !v.NoRecurse(programNode) {
+	if v, ok := visitor.(EntryExitVisitorOptional); !ok ||
+		!v.NoRecurse(programNode) {
 		switch node := programNode.(type) {
 		case []StatementNode:
 			for _, s := range node {
@@ -40,10 +43,6 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 			for _, p := range node {
 				Walk(visitor, p)
 			}
-		case ParameterNode:
-
-		case SkipNode:
-
 		case DeclareNode:
 			Walk(visitor, node.Rhs)
 		case AssignNode:
@@ -70,8 +69,6 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 			Walk(visitor, node.Stats)
 		case ScopeNode:
 			Walk(visitor, node.Stats)
-		case IdentifierNode:
-
 		case PairFirstElementNode:
 			Walk(visitor, node.Expr)
 		case PairSecondElementNode:
@@ -91,35 +88,11 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
-		case BaseType:
-
-		case BaseTypeNode:
-
-		case ArrayTypeNode:
-
-		case PairTypeNode:
-
-		case UnaryOperator:
-
-		case BinaryOperator:
-
-		case IntegerLiteralNode:
-
-		case BooleanLiteralNode:
-
-		case CharacterLiteralNode:
-
-		case StringLiteralNode:
-
-		case PairLiteralNode:
-
 		case UnaryOperatorNode:
 			Walk(visitor, node.Expr)
 		case BinaryOperatorNode:
 			Walk(visitor, node.Expr1)
 			Walk(visitor, node.Expr2)
-		default:
-
 		}
 	}
 	// If we have a EntryExitVisitor, use it to call leave.

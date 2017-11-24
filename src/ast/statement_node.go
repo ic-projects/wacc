@@ -6,6 +6,12 @@ import (
 	"utils"
 )
 
+// StatementNode is an empty interface for statement nodes to implement.
+type StatementNode interface {
+}
+
+/******************** STATEMENT HELPER FUNCTIONS ****************/
+
 // FinalStatIsValid given the last statement from a statement list, this function
 // traverses to the last statement checks that statement is a valid end statement,
 // such as a return or exit.
@@ -30,9 +36,7 @@ func FinalStatIsValid(s StatementNode) bool {
 	}
 }
 
-// StatementNode is an empty interface for statement nodes to implement.
-type StatementNode interface {
-}
+/******************** SKIP NODE ****************/
 
 // SkipNode is a struct that stores the position of a skip statement.
 type SkipNode struct {
@@ -48,6 +52,8 @@ func NewSkipNode(pos Position) SkipNode {
 func (node SkipNode) String() string {
 	return "- SKIP\n"
 }
+
+/******************** DECLARE NODE ****************/
 
 // DeclareNode is a struct that stores the position, type, identifier and
 // assignment of a declaration.
@@ -83,6 +89,8 @@ func (node DeclareNode) String() string {
 	return buf.String()
 }
 
+/******************** ASSIGN NODE ****************/
+
 // AssignNode stores the position, left hand side and right hand side of an
 // assignment statement.
 //
@@ -112,6 +120,8 @@ func (node AssignNode) String() string {
 	return buf.String()
 }
 
+/******************** READ NODE ****************/
+
 // ReadNode is a struct that stores the position and expression of a read
 // statement.
 //
@@ -135,6 +145,8 @@ func (node ReadNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Lhs), "  "))
 	return buf.String()
 }
+
+/******************** FREE NODE ****************/
 
 // FreeNode stores the position and expression of a free statement.
 //
@@ -160,6 +172,8 @@ func (node FreeNode) String() string {
 	return buf.String()
 }
 
+/******************** RETURN NODE ****************/
+
 // ReturnNode stores the position and expression of a return statement.
 //
 // E.g.
@@ -183,6 +197,8 @@ func (node ReturnNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
+
+/******************** EXIT NODE ****************/
 
 // ExitNode stores the position and expression of an exit statement.
 //
@@ -208,6 +224,8 @@ func (node ExitNode) String() string {
 	return buf.String()
 }
 
+/******************** PRINT NODE ****************/
+
 // PrintNode stores the position and expression of an print statement.
 //
 // E.g.
@@ -232,6 +250,8 @@ func (node PrintNode) String() string {
 	return buf.String()
 }
 
+/******************** PRINTLN NODE ****************/
+
 // PrintlnNode stores the position and expression of an println statement.
 //
 // E.g.
@@ -255,6 +275,8 @@ func (node PrintlnNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
+
+/******************** IF NODE ****************/
 
 // IfNode stores the position, condition and the two branches of an if else
 // statement.
@@ -294,6 +316,8 @@ func (node IfNode) String() string {
 	return buf.String()
 }
 
+/******************** LOOP NODE ****************/
+
 // LoopNode stores the position, condition and loop statements for a loop
 // while loop statement.
 //
@@ -325,6 +349,8 @@ func (node LoopNode) String() string {
 	}
 	return buf.String()
 }
+
+/******************** SCOPE NODE ****************/
 
 // ScopeNode stores the position and statement of a new scope.
 //

@@ -9,14 +9,17 @@ import (
 
 var DEBUG_MODE bool
 
+// ProgramNode is an empty interface for AST nodes to implement.
 type ProgramNode interface {
 }
 
-// Program the struct that encapsulates the entire program and will be the root of
-// the AST.
+/******************** PROGRAM ****************/
+
+// Program the struct that encapsulates the entire program and will be the root
+// of the AST.
 type Program struct {
-	// Functions the list of all the Functions in the program in the order they are
-	// declared, the last function will be the "main" function.
+	// Functions the list of all the Functions in the program in the order they
+	// are declared, the last function will be the "main" function.
 	Functions []FunctionNode
 }
 
@@ -41,8 +44,10 @@ func (program Program) String() string {
 	return buf.String()
 }
 
-// FunctionNode is the struct that holds information about a function, the return type,
-// parameters and internal body.
+/**************** FUNCTION NODE ****************/
+
+// FunctionNode is the struct that holds information about a function, the
+// return type, parameters and internal body.
 type FunctionNode struct {
 	Pos Position
 
@@ -59,7 +64,12 @@ type FunctionNode struct {
 	Stats []StatementNode
 }
 
-func NewFunctionNode(pos Position, t TypeNode, ident IdentifierNode, params []ParameterNode, stats []StatementNode) FunctionNode {
+func NewFunctionNode(
+	pos Position, t TypeNode,
+	ident IdentifierNode,
+	params []ParameterNode,
+	stats []StatementNode,
+) FunctionNode {
 	return FunctionNode{
 		Pos:    pos,
 		T:      t,
@@ -86,8 +96,10 @@ func (node FunctionNode) String() string {
 	return buf.String()
 }
 
-// ParameterNode is the struct that holds information about a parameter for a function,
-// the type and identifier of the single parameter.
+/******************** PARAMETER NODE ****************/
+
+// ParameterNode is the struct that holds information about a parameter for a
+// function, the type and identifier of the single parameter.
 type ParameterNode struct {
 	Pos Position
 
@@ -98,7 +110,11 @@ type ParameterNode struct {
 	Ident IdentifierNode
 }
 
-func NewParameterNode(pos Position, t TypeNode, ident IdentifierNode) ParameterNode {
+func NewParameterNode(
+	pos Position,
+	t TypeNode,
+	ident IdentifierNode,
+) ParameterNode {
 	return ParameterNode{
 		Pos:   pos,
 		T:     t,

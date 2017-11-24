@@ -10,7 +10,11 @@ import (
 type RHSNode interface {
 }
 
+/******************** EXPRESSION NODE ****************/
+
 // ExpressionNode - defined in expression_node.go
+
+/******************** ARRAY LITERAL NODE ****************/
 
 // ArrayLiteralNode stores the position and elements of an array literal.
 //
@@ -22,7 +26,10 @@ type ArrayLiteralNode struct {
 	Exprs []ExpressionNode
 }
 
-func NewArrayLiteralNode(pos Position, exprs []ExpressionNode) ArrayLiteralNode {
+func NewArrayLiteralNode(
+	pos Position,
+	exprs []ExpressionNode,
+) ArrayLiteralNode {
 	return ArrayLiteralNode{
 		Pos:   pos,
 		Exprs: exprs,
@@ -38,6 +45,8 @@ func (node ArrayLiteralNode) String() string {
 	return buf.String()
 }
 
+/******************** NEW PAIR NODE ****************/
+
 // NewPairNode stores the position and elements of a newpair call.
 //
 // E.g.
@@ -48,7 +57,11 @@ type NewPairNode struct {
 	Snd ExpressionNode
 }
 
-func NewNewPairNode(pos Position, fst ExpressionNode, snd ExpressionNode) NewPairNode {
+func NewNewPairNode(
+	pos Position,
+	fst ExpressionNode,
+	snd ExpressionNode,
+) NewPairNode {
 	return NewPairNode{
 		Pos: pos,
 		Fst: fst,
@@ -66,9 +79,15 @@ func (node NewPairNode) String() string {
 	return buf.String()
 }
 
+/******************** PAIR FIRST ELEMENT NODE ****************/
+
 // PairFirstElementNode - defined in lhs_node.go
 
+/******************** PAIR SECOND ELEMENT NODE ****************/
+
 // PairSecondElementNode - defined in lhs_node.go
+
+/******************** FUNCTION CALL NODE ****************/
 
 // FunctionCallNode stores the position, identifier and passed in parameters for
 // a function call.
@@ -81,7 +100,11 @@ type FunctionCallNode struct {
 	Exprs []ExpressionNode
 }
 
-func NewFunctionCallNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) FunctionCallNode {
+func NewFunctionCallNode(
+	pos Position,
+	ident IdentifierNode,
+	exprs []ExpressionNode,
+) FunctionCallNode {
 	return FunctionCallNode{
 		Pos:   pos,
 		Ident: ident,
