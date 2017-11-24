@@ -101,7 +101,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.t.(PairTypeNode).t1).addPos(node.Pos)
+			foundError = v.typeChecker.seen(identDec.t.(PairTypeNode).T1).addPos(node.Pos)
 			v.typeChecker.expect(identDec.t)
 		}
 	case PairSecondElementNode:
@@ -114,7 +114,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.t.(PairTypeNode).t2)
+			v.typeChecker.seen(identDec.t.(PairTypeNode).T2)
 			v.typeChecker.expect(identDec.t)
 		}
 	case ArrayElementNode:
@@ -128,10 +128,10 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.freeze(node)
 		} else {
 			// If we have an array or a single element (for use in newsted arrays).
-			if dimLeft := arrayNode.dim - len(node.Exprs); dimLeft == 0 {
-				foundError = v.typeChecker.seen(arrayNode.t).addPos(node.Pos)
+			if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
+				foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
 			} else {
-				foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.t, dimLeft)).addPos(node.Pos)
+				foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
 			}
 		}
 		for i := 0; i < len(node.Exprs); i++ {

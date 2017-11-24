@@ -249,7 +249,7 @@ func (registerStack *RegisterStack) String() string {
 func (v *CodeGenerator) addPrint(t TypeNode) {
 	switch node := t.(type) {
 	case BaseTypeNode:
-		switch node.t {
+		switch node.T {
 		case BOOL:
 			v.addCode("BL " + PRINT_BOOL.String())
 			v.usesFunction(PRINT_BOOL)
@@ -263,8 +263,8 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 			v.usesFunction(PRINT_REFERENCE)
 		}
 	case ArrayTypeNode:
-		if arr, ok := node.t.(BaseTypeNode); ok {
-			if arr.t == CHAR && node.dim == 1 {
+		if arr, ok := node.T.(BaseTypeNode); ok {
+			if arr.T == CHAR && node.Dim == 1 {
 				v.addCode("BL " + PRINT_STRING.String())
 				v.usesFunction(PRINT_STRING)
 				return
@@ -410,7 +410,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			lhsRegister := v.returnRegisters.Pop()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
 			arr := dec.t.(ArrayTypeNode)
-			if SizeOf(arr.t) == 1 && len(lhsNode.Exprs) == arr.dim {
+			if SizeOf(arr.T) == 1 && len(lhsNode.Exprs) == arr.Dim {
 				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
 			} else {
 				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
@@ -530,7 +530,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-		lastIsCharOrBool := SizeOf(symbol.t.(ArrayTypeNode).t) == 1 && symbol.t.(ArrayTypeNode).dim == length
+		lastIsCharOrBool := SizeOf(symbol.t.(ArrayTypeNode).T) == 1 && symbol.t.(ArrayTypeNode).Dim == length
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]

@@ -44,10 +44,10 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 
 	// ArrayLiteral case, so expect an unknown amount of expressions
 	if matchOnAnyArray {
-		if found.dim == 1 {
-			check.expectRepeatUntilForce(found.t)
+		if found.Dim == 1 {
+			check.expectRepeatUntilForce(found.T)
 		} else {
-			check.expectRepeatUntilForce(NewArrayTypeNode(found.t, found.dim-1))
+			check.expectRepeatUntilForce(NewArrayTypeNode(found.T, found.Dim-1))
 		}
 		return true
 	}
@@ -77,8 +77,8 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 
 		// newpair case, expect first and second types of pair
 		if !basePairMatch {
-			check.expect(nilMatch.t2)
-			check.expect(nilMatch.t1)
+			check.expect(nilMatch.T2)
+			check.expect(nilMatch.T1)
 		}
 		return true
 	}
@@ -102,7 +102,7 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 			return NewTypeError(t, validTypes)
 		}
 	case BaseTypeNode:
-		if t.t == PAIR {
+		if t.T == PAIR {
 			_, found := validTypes[t]
 			if !found {
 				found = pairCase(check, validTypes, true, PairTypeNode{})

@@ -8,7 +8,7 @@ import (
 func SizeOf(t TypeNode) int {
 	switch node := t.(type) {
 	case BaseTypeNode:
-		switch node.t {
+		switch node.T {
 		case CHAR, BOOL:
 			return 1
 		}
@@ -53,25 +53,25 @@ func (t BaseType) String() string {
 
 // BaseTypeNode is a struct that stores a BaseType.
 type BaseTypeNode struct {
-	t BaseType
+	T BaseType
 }
 
 func NewBaseTypeNode(t BaseType) BaseTypeNode {
 	return BaseTypeNode{
-		t: t,
+		T: t,
 	}
 }
 
 func (node BaseTypeNode) String() string {
-	return fmt.Sprintf("%s", node.t)
+	return fmt.Sprintf("%s", node.T)
 }
 
 // ArrayTypeNode stores the type, and dimension of the array. It stores if it is
 // a string additionally to distinguish between a char array and a string.
 type ArrayTypeNode struct {
-	t        TypeNode
-	dim      int
-	isString bool
+	T        TypeNode
+	Dim      int
+	IsString bool
 }
 
 // NewArrayTypeNode returns an initialised ArrayTypeNode. If the type provided
@@ -79,22 +79,22 @@ type ArrayTypeNode struct {
 // it.
 func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 	if array, ok := t.(ArrayTypeNode); ok {
-		array.dim += dim
+		array.Dim += dim
 		return array
 	}
 	return ArrayTypeNode{
-		t:        t,
-		dim:      dim,
-		isString: false,
+		T:        t,
+		Dim:      dim,
+		IsString: false,
 	}
 }
 
 // NewStringArrayTypeNode returns an initialised ArrayTypeNode for a string.
 func NewStringArrayTypeNode() ArrayTypeNode {
 	return ArrayTypeNode{
-		t:        NewBaseTypeNode(CHAR),
-		dim:      1,
-		isString: true,
+		T:        NewBaseTypeNode(CHAR),
+		Dim:      1,
+		IsString: true,
 	}
 }
 
@@ -103,14 +103,14 @@ func (node ArrayTypeNode) String() string {
 		return fmt.Sprintf("array")
 	}
 	var buf bytes.Buffer
-	if node.isString {
+	if node.IsString {
 		buf.WriteString(fmt.Sprintf("string"))
-		for i := 0; i < node.dim-1; i++ {
+		for i := 0; i < node.Dim-1; i++ {
 			buf.WriteString("[]")
 		}
 	} else {
-		buf.WriteString(fmt.Sprintf("%s", node.t))
-		for i := 0; i < node.dim; i++ {
+		buf.WriteString(fmt.Sprintf("%s", node.T))
+		for i := 0; i < node.Dim; i++ {
 			buf.WriteString("[]")
 		}
 	}
@@ -124,14 +124,14 @@ func (node ArrayTypeNode) String() string {
 //
 //  pair(int, int)
 type PairTypeNode struct {
-	t1 TypeNode
-	t2 TypeNode
+	T1 TypeNode
+	T2 TypeNode
 }
 
 func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
 	return PairTypeNode{
-		t1: t1,
-		t2: t2,
+		T1: t1,
+		T2: t2,
 	}
 }
 
@@ -139,5 +139,5 @@ func (node PairTypeNode) String() string {
 	if node == (PairTypeNode{}) {
 		return fmt.Sprintf("pair")
 	}
-	return fmt.Sprintf("pair(%s, %s)", node.t1, node.t2)
+	return fmt.Sprintf("pair(%s, %s)", node.T1, node.T2)
 }
