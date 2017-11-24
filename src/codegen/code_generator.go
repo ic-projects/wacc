@@ -12,6 +12,8 @@ import (
 	"utils"
 )
 
+/**************** CODE GENERATOR STRUCTS ****************/
+
 // AsciiWord is a struct that stores the length and string of an ascii string.
 type AsciiWord struct {
 	length int
@@ -242,6 +244,8 @@ func (v *CodeGenerator) callLibraryFunction(
 	v.addCode("%s %s", call, function)
 	v.library.add(v, function)
 }
+
+/**************** WALKER FUNCTIONS ****************/
 
 // NoRecurse defines the nodes of the AST which should not be automatically
 // walked. This means we can Walk the children in any way we choose.
@@ -758,6 +762,8 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		}
 	}
 }
+
+/**************** HELPER FUNCTIONS ****************/
 
 // addToStackPointer increments the stack pointer by the size parameter.
 // If size is greater than 1024 then it will increment in multiple iterations.
