@@ -143,53 +143,6 @@ func (node ParameterNode) String() string {
 	return fmt.Sprintf("%s %s", node.t, node.ident.String()[2:])
 }
 
-// Position stores the position of a node within the original code. The linenumber,
-// column number and offset from the beginning of the file.
-type Position struct {
-	lineNumber int
-	colNumber  int
-	offset     int
-}
-
-// LineNumber returns the line number of a Position.
-func (p Position) LineNumber() int {
-	return p.lineNumber
-}
-
-// ColNumber returns the column number of a Position.
-func (p Position) ColNumber() int {
-	colNum := p.colNumber
-	if colNum != 0 {
-		colNum--
-	}
-	return colNum
-}
-
-func NewPosition(lineNumber int, colNumber int, offset int) Position {
-	return Position{
-		lineNumber: lineNumber,
-		colNumber:  colNumber,
-		offset:     offset,
-	}
-}
-
-func (p Position) String() string {
-	colNum := p.colNumber
-	if colNum != 0 {
-		colNum--
-	}
-
-	if DEBUG_MODE {
-		offsetNum := p.offset
-		if offsetNum != 0 {
-			offsetNum--
-		}
-		return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, colNum, offsetNum)
-	}
-
-	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)
-}
-
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
 	case BinaryOperatorNode:
