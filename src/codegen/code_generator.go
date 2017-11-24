@@ -109,16 +109,24 @@ func (codeGenerator *CodeGenerator) LocationOf(loc *location.Location) string {
 	}
 
 	// Location is a stack offset
-	return "[sp, #" + strconv.Itoa(codeGenerator.currentStackPos-loc.CurrentPos) + "]"
+	return "[sp, #" +
+		strconv.Itoa(codeGenerator.currentStackPos-loc.CurrentPos) +
+		"]"
 }
 
-func (codeGenerator *CodeGenerator) PointerTo(location *location.Location) string {
-	return "sp, #" + strconv.Itoa(codeGenerator.currentStackPos-location.CurrentPos)
+func (codeGenerator *CodeGenerator) PointerTo(
+	location *location.Location,
+) string {
+	return "sp, #" +
+		strconv.Itoa(codeGenerator.currentStackPos-location.CurrentPos)
 }
 
 // GenerateCode is a function that will generate and return the finished assembly
 // code for a given AST.
-func GenerateCode(tree ast.ProgramNode, symbolTable *ast.SymbolTable) *Assembly {
+func GenerateCode(
+	tree ast.ProgramNode,
+	symbolTable *ast.SymbolTable,
+) *Assembly {
 	codeGen := NewCodeGenerator(symbolTable)
 
 	ast.Walk(codeGen, tree)
@@ -213,7 +221,8 @@ func (v *CodeGenerator) addText(lines ...string) {
 // addCode formats and adds one line of assembly to the correct location in then
 // generated assembly code.
 func (v *CodeGenerator) addCode(lineFormat string, inputs ...interface{}) {
-	v.asm.global[v.currentFunction] = append(v.asm.global[v.currentFunction], fmt.Sprintf(lineFormat+"\n", inputs...))
+	v.asm.global[v.currentFunction] = append(v.asm.global[v.currentFunction],
+		fmt.Sprintf(lineFormat+"\n", inputs...))
 }
 
 // addCode add lines of assembly to the already code part of the generated
@@ -226,7 +235,10 @@ func (v *CodeGenerator) addFunction(name string) {
 // callLibraryFunction adds the corresponding predefined function to the assembly if
 // it is not already added. It also adds the call to the function to the assembly, using
 // call as the instruction before the label.
-func (v *CodeGenerator) callLibraryFunction(call string, function LibraryFunction) {
+func (v *CodeGenerator) callLibraryFunction(
+	call string,
+	function LibraryFunction,
+) {
 	v.addCode("%s %s", call, function)
 	v.library.add(v, function)
 }
@@ -278,7 +290,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				dec.AddLocation(location.NewStackOffsetLocation(parametersFromRegsSize))
 			} else {
 				// Then go through parameters stored on stack
-				dec.AddLocation(location.NewStackOffsetLocation(parametersFromStackSize - ast.SizeOf(ast.NewBaseTypeNode(ast.INT))))
+				dec.AddLocation(
+					location.NewStackOffsetLocation(parametersFromStackSize -
+						ast.SizeOf(ast.NewBaseTypeNode(ast.INT))))
 				parametersFromStackSize -= ast.SizeOf(e.T)
 			}
 		}
@@ -291,7 +305,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
-				v.addCode("%s %s, %s", store(ast.SizeOf(e.T)), registers[n], v.LocationOf(dec.Location))
+				v.addCode("%s %s, %s",
+					store(ast.SizeOf(e.T)),
+					registers[n],
+					v.LocationOf(dec.Location))
 			}
 		}
 	case ast.ParameterNode:
@@ -316,15 +333,24 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		case ast.PairFirstElementNode:
 			ast.Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s]", store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))), rhsRegister, lhsRegister)
+			v.addCode("%s %s, [%s]",
+				store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))),
+				rhsRegister,
+				lhsRegister)
 		case ast.PairSecondElementNode:
 			ast.Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s]", store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))), rhsRegister, lhsRegister)
+			v.addCode("%s %s, [%s]",
+				store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))),
+				rhsRegister,
+				lhsRegister)
 		case ast.IdentifierNode:
 			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident)
 			if ident.Location != nil {
-				v.addCode("%s %s, %s", store(ast.SizeOf(ident.T)), rhsRegister, v.LocationOf(ident.Location))
+				v.addCode("%s %s, %s",
+					store(ast.SizeOf(ident.T)),
+					rhsRegister,
+					v.LocationOf(ident.Location))
 			}
 		}
 		v.freeRegisters.Push(rhsRegister)
@@ -382,7 +408,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case ast.ScopeNode:
 	case ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
-		v.addCode("%s %s, %s", load(ast.SizeOf(dec.T)), v.getFreeRegister(), v.LocationOf(dec.Location))
+		v.addCode("%s %s, %s",
+			load(ast.SizeOf(dec.T)),
+			v.getFreeRegister(),
+			v.LocationOf(dec.Location))
 	case ast.PairFirstElementNode:
 	case ast.PairSecondElementNode:
 	case ast.ArrayElementNode:
@@ -391,7 +420,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-		lastIsCharOrBool := ast.SizeOf(symbol.T.(ast.ArrayTypeNode).T) == 1 && symbol.T.(ast.ArrayTypeNode).Dim == length
+		lastIsCharOrBool := ast.SizeOf(symbol.T.(ast.ArrayTypeNode).T) == 1 &&
+			symbol.T.(ast.ArrayTypeNode).Dim == length
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]
@@ -405,7 +435,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			if i == length-1 && lastIsCharOrBool {
 				v.addCode("ADD %s, %s, %s", identRegister, identRegister, exprRegister)
 			} else {
-				v.addCode("ADD %s, %s, %s, LSL #2", identRegister, identRegister, exprRegister)
+				v.addCode("ADD %s, %s, %s, LSL #2",
+					identRegister,
+					identRegister,
+					exprRegister)
 			}
 
 			// If it is an assignment leave the Pointer to the element in the register
@@ -433,7 +466,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for i := 0; i < length; i++ {
 			ast.Walk(v, node.Exprs[i])
 			exprRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s, #%d]", store(size), exprRegister, register, 4+i*size)
+			v.addCode("%s %s, [%s, #%d]",
+				store(size),
+				exprRegister,
+				register,
+				4+i*size)
 		}
 		lengthRegister := v.freeRegisters.Peek()
 		v.addCode("LDR %s, =%d", lengthRegister, length)
@@ -646,7 +683,10 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
 		if dec.Location != nil {
-			v.addCode("%s %s, %s", store(ast.SizeOf(dec.T)), v.getReturnRegister(), v.LocationOf(dec.Location))
+			v.addCode("%s %s, %s",
+				store(ast.SizeOf(dec.T)),
+				v.getReturnRegister(),
+				v.LocationOf(dec.Location))
 		}
 	case ast.PrintNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
@@ -685,7 +725,10 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.addCode("LDR %s, [%s]", register, register)
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			v.addCode("%s %s, [%s]", load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))), register, register)
+			v.addCode("%s %s, [%s]",
+				load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))),
+				register,
+				register)
 		}
 	case ast.PairSecondElementNode:
 		register := v.returnRegisters.Peek()
@@ -695,7 +738,10 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			v.addCode("%s %s, [%s]", load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))), register, register)
+			v.addCode("%s %s, [%s]",
+				load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))),
+				register,
+				register)
 		}
 	case ast.UnaryOperatorNode:
 		register := v.returnRegisters.Peek()
