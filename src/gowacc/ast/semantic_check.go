@@ -36,30 +36,30 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	foundError = nil
 	switch node := programNode.(type) {
 	case Program:
-		// Add the functions when hitting program instead of each function so that
-		// functions can be declared in any order.
-		for _, f := range node.functions {
-			if functionNode, ok := v.symbolTable.SearchForFunction(f.ident.ident); ok {
-				foundError = NewPreviouslyDeclared(NewDeclarationError(f.pos, true, true, f.ident.ident), functionNode.pos)
+		// Add the Functions when hitting program instead of each function so that
+		// Functions can be declared in any order.
+		for _, f := range node.Functions {
+			if functionNode, ok := v.symbolTable.SearchForFunction(f.Ident.Ident); ok {
+				foundError = NewPreviouslyDeclared(NewDeclarationError(f.Pos, true, true, f.Ident.Ident), functionNode.Pos)
 			} else {
-				v.symbolTable.AddFunction(f.ident.ident, f)
+				v.symbolTable.AddFunction(f.Ident.Ident, f)
 			}
 		}
 	case FunctionNode:
 		// Move down scope so that the parameters are on a new scope.
 		v.symbolTable.MoveDownScope()
-		v.typeChecker.expectRepeatUntilForce(node.t)
+		v.typeChecker.expectRepeatUntilForce(node.T)
 	case ParameterNode:
-		if declareNode, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
+		if declareNode, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.pos)
 		}
 	case SkipNode:
 	case DeclareNode:
-		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
+		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.pos)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.expect(node.t)
+			v.typeChecker.expect(node.T)
 		}
 	case AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
@@ -80,80 +80,80 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case ScopeNode:
 	case IdentifierNode:
-		if identDec, ok := v.symbolTable.SearchForIdent(node.ident); !ok {
-			foundError = NewDeclarationError(node.pos, false, false, node.ident)
+		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident); !ok {
+			foundError = NewDeclarationError(node.Pos, false, false, node.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.t).addPos(node.pos)
+			foundError = v.typeChecker.seen(identDec.t).addPos(node.Pos)
 			if foundError != nil {
 				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.pos)
 			}
 		}
 	case PairFirstElementNode:
 		//  Look up type for pair call seen
-		if identNode, ok := node.expr.(IdentifierNode); !ok {
-			foundError = NewCustomError(node.pos, "Cannot access first element of null")
+		if identNode, ok := node.Expr.(IdentifierNode); !ok {
+			foundError = NewCustomError(node.Pos, "Cannot access first element of null")
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			foundError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
+		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.Ident); !ok {
+			foundError = NewDeclarationError(identNode.Pos, false, false, identNode.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.t.(PairTypeNode).t1).addPos(node.pos)
+			foundError = v.typeChecker.seen(identDec.t.(PairTypeNode).T1).addPos(node.Pos)
 			v.typeChecker.expect(identDec.t)
 		}
 	case PairSecondElementNode:
-		if identNode, ok := node.expr.(IdentifierNode); !ok {
-			foundError = NewCustomError(node.pos, "Cannot access second element of null")
+		if identNode, ok := node.Expr.(IdentifierNode); !ok {
+			foundError = NewCustomError(node.Pos, "Cannot access second element of null")
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.ident); !ok {
-			foundError = NewDeclarationError(identNode.pos, false, false, identNode.ident)
+		} else if identDec, ok := v.symbolTable.SearchForIdent(identNode.Ident); !ok {
+			foundError = NewDeclarationError(identNode.Pos, false, false, identNode.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.t.(PairTypeNode).t2)
+			v.typeChecker.seen(identDec.t.(PairTypeNode).T2)
 			v.typeChecker.expect(identDec.t)
 		}
 	case ArrayElementNode:
-		if identDec, ok := v.symbolTable.SearchForIdent(node.ident.ident); !ok {
-			foundError = NewDeclarationError(node.pos, false, false, node.ident.ident)
+		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
+			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else if arrayNode, ok := identDec.t.(ArrayTypeNode); !ok {
-			foundError = NewCustomError(node.pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.ident.ident))
+			foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.Ident.Ident))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
 			// If we have an array or a single element (for use in newsted arrays).
-			if dimLeft := arrayNode.dim - len(node.exprs); dimLeft == 0 {
-				foundError = v.typeChecker.seen(arrayNode.t).addPos(node.pos)
+			if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
+				foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
 			} else {
-				foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.t, dimLeft)).addPos(node.pos)
+				foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
 			}
 		}
-		for i := 0; i < len(node.exprs); i++ {
+		for i := 0; i < len(node.Exprs); i++ {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}
 	case ArrayLiteralNode:
-		foundError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.pos)
+		foundError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.Pos)
 	case NewPairNode:
-		foundError = v.typeChecker.seen(PairTypeNode{}).addPos(node.pos)
+		foundError = v.typeChecker.seen(PairTypeNode{}).addPos(node.Pos)
 	case FunctionCallNode:
-		if f, ok := v.symbolTable.SearchForFunction(node.ident.ident); !ok {
-			foundError = NewDeclarationError(node.pos, true, false, node.ident.ident)
+		if f, ok := v.symbolTable.SearchForFunction(node.Ident.Ident); !ok {
+			foundError = NewDeclarationError(node.Pos, true, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if len(f.params) != len(node.exprs) {
-			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\" (Expected: %d, Given: %d)", node.ident.ident, len(f.params), len(node.exprs)))
+		} else if len(f.Params) != len(node.Exprs) {
+			foundError = NewCustomError(node.Pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\" (Expected: %d, Given: %d)", node.Ident.Ident, len(f.Params), len(node.Exprs)))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(f.t).addPos(node.pos)
-			for i := len(f.params) - 1; i >= 0; i-- {
-				v.typeChecker.expect(f.params[i].t)
+			foundError = v.typeChecker.seen(f.T).addPos(node.Pos)
+			for i := len(f.Params) - 1; i >= 0; i-- {
+				v.typeChecker.expect(f.Params[i].T)
 			}
 		}
 	case BaseTypeNode:
@@ -162,47 +162,47 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case UnaryOperator:
 	case BinaryOperator:
 	case IntegerLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 	case BooleanLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 	case CharacterLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
 	case StringLiteralNode:
-		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.Pos)
 	case PairLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.Pos)
 	case UnaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case NOT:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		case NEG:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(ArrayTypeNode{})
 		case ORD:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(CHAR))
 		case CHR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}
 	case BinaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case MUL, DIV, MOD, ADD, SUB:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case GT, GEQ, LT, LEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewSetExpectance([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)}))
 		case EQ, NEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewAnyExpectance())
 		case AND, OR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		}
@@ -227,12 +227,12 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	case DeclareNode:
-		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.ident); !ok {
-			v.symbolTable.AddToScope(node.ident.ident, node)
+		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); !ok {
+			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}
 	case ParameterNode:
-		if _, ok := v.symbolTable.SearchForIdent(node.ident.ident); !ok {
-			v.symbolTable.AddToScope(node.ident.ident, node)
+		if _, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
+			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}
 	}
 	v.typeChecker.unfreeze(programNode)

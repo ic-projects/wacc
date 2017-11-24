@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// RHSNode is an empty interface for lhs nodes to implement.
+// RHSNode is an empty interface for Lhs nodes to implement.
 type RHSNode interface {
 }
 
@@ -17,21 +17,21 @@ type RHSNode interface {
 //
 //  [2, 4]
 type ArrayLiteralNode struct {
-	pos   Position
-	exprs []ExpressionNode
+	Pos   Position
+	Exprs []ExpressionNode
 }
 
 func NewArrayLiteralNode(pos Position, exprs []ExpressionNode) ArrayLiteralNode {
 	return ArrayLiteralNode{
-		pos:   pos,
-		exprs: exprs,
+		Pos:   pos,
+		Exprs: exprs,
 	}
 }
 
 func (node ArrayLiteralNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
-	for _, e := range node.exprs {
+	for _, e := range node.Exprs {
 		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "  "))
 	}
 	return buf.String()
@@ -42,16 +42,16 @@ func (node ArrayLiteralNode) String() string {
 // E.g.
 //  newpair(4, 2)
 type NewPairNode struct {
-	pos Position
-	fst ExpressionNode
-	snd ExpressionNode
+	Pos Position
+	Fst ExpressionNode
+	Snd ExpressionNode
 }
 
 func NewNewPairNode(pos Position, fst ExpressionNode, snd ExpressionNode) NewPairNode {
 	return NewPairNode{
-		pos: pos,
-		fst: fst,
-		snd: snd,
+		Pos: pos,
+		Fst: fst,
+		Snd: snd,
 	}
 }
 
@@ -59,9 +59,9 @@ func (node NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
 	buf.WriteString(indent(fmt.Sprintln("- FST"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.fst), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Fst), "    "))
 	buf.WriteString(indent(fmt.Sprintln("- SND"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.snd), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
 }
 
@@ -75,23 +75,23 @@ func (node NewPairNode) String() string {
 // E.g.
 //  call f(true, false)
 type FunctionCallNode struct {
-	pos   Position
-	ident IdentifierNode
-	exprs []ExpressionNode
+	Pos   Position
+	Ident IdentifierNode
+	Exprs []ExpressionNode
 }
 
 func NewFunctionCallNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) FunctionCallNode {
 	return FunctionCallNode{
-		pos:   pos,
-		ident: ident,
-		exprs: exprs,
+		Pos:   pos,
+		Ident: ident,
+		Exprs: exprs,
 	}
 }
 
 func (node FunctionCallNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s\n", node.ident))
-	for _, e := range node.exprs {
+	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
+	for _, e := range node.Exprs {
 		buf.WriteString(fmt.Sprintf("%s\n", e))
 	}
 	return buf.String()
