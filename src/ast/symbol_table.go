@@ -3,7 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
-	"gowacc/location"
+	"location"
 )
 
 // SymbolTable is a struct that stores the symboltable and the CurrentScope that

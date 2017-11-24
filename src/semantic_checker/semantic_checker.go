@@ -2,7 +2,7 @@ package semantic_checker
 
 import (
 	"fmt"
-	"gowacc/ast"
+	"ast"
 )
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with

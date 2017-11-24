@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"gowacc/ast"
-	"gowacc/code_generator"
-	"gowacc/semantic_checker"
+	"ast"
+	"code_generator"
+	"semantic_checker"
 	"os"
 	"path"
 	"strings"

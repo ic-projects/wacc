@@ -2,7 +2,7 @@ package semantic_checker
 
 import (
 	"fmt"
-	"gowacc/ast"
+	"ast"
 )
 
 // Expectance is an interface used to store what type is expected.

@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"gowacc/ast"
+	"ast"
 	"os"
 	"strings"
 )
