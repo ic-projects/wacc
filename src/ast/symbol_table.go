@@ -77,6 +77,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	}
 }
 
+// AddLocation will add a location to a declaration.
 func (dec *IdentifierDeclaration) AddLocation(location *location.Location) {
 	dec.Location = location
 }
@@ -118,6 +119,8 @@ func (table *SymbolTable) SearchForIdent(identifier string) (*IdentifierDeclarat
 	return &IdentifierDeclaration{}, false
 }
 
+// SearchForDeclaredIdent will search for an identifier that has the IsDeclared flag
+// to be true. It will search the currentScope first, before checking parentScopes.
 func (table *SymbolTable) SearchForDeclaredIdent(identifier string) *IdentifierDeclaration {
 	for node := table.CurrentScope; node != nil; node = node.ParentScope {
 		node, ok := node.Scope[identifier]
