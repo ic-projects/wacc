@@ -48,21 +48,21 @@ func indent(s string, sep string) string {
 // Program the struct that encapsulates the entire program and will be the root of
 // the AST.
 type Program struct {
-	// functions the list of all the functions in the program in the order they are
+	// Functions the list of all the Functions in the program in the order they are
 	// declared, the last function will be the "main" function.
-	functions []FunctionNode
+	Functions []FunctionNode
 }
 
 func NewProgram(functions []FunctionNode) Program {
 	return Program{
-		functions: functions,
+		Functions: functions,
 	}
 }
 
 func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
-	for _, f := range program.functions {
+	for _, f := range program.Functions {
 		tempbuf.WriteString(indent(fmt.Sprintf("%s", f), "  "))
 	}
 	var buf bytes.Buffer
@@ -77,35 +77,35 @@ func (program Program) String() string {
 // FunctionNode is the struct that holds information about a function, the return type,
 // parameters and internal body.
 type FunctionNode struct {
-	pos Position
+	Pos Position
 
-	// t is the return type of the function.
-	t TypeNode
+	// T is the return type of the function.
+	T TypeNode
 
-	// ident is the identifier used to reference the function.
-	ident IdentifierNode
+	// Ident is the identifier used to reference the function.
+	Ident IdentifierNode
 
-	// params is the list of parameters required to call the function.
-	params []ParameterNode
+	// Params is the list of parameters required to call the function.
+	Params []ParameterNode
 
-	// stats is the list of statements contained within the function body.
-	stats []StatementNode
+	// Stats is the list of statements contained within the function body.
+	Stats []StatementNode
 }
 
 func NewFunctionNode(pos Position, t TypeNode, ident IdentifierNode, params []ParameterNode, stats []StatementNode) FunctionNode {
 	return FunctionNode{
-		pos:    pos,
-		t:      t,
-		ident:  ident,
-		params: params,
-		stats:  stats,
+		Pos:    pos,
+		T:      t,
+		Ident:  ident,
+		Params: params,
+		Stats:  stats,
 	}
 }
 
 func (node FunctionNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s %s(", node.t, node.ident.String()[2:]))
-	for i, p := range node.params {
+	buf.WriteString(fmt.Sprintf("- %s %s(", node.T, node.Ident.String()[2:]))
+	for i, p := range node.Params {
 		if i == 0 {
 			buf.WriteString(fmt.Sprintf("%s", p))
 		} else {
@@ -113,7 +113,7 @@ func (node FunctionNode) String() string {
 		}
 	}
 	buf.WriteString(fmt.Sprintln(")"))
-	for _, s := range node.stats {
+	for _, s := range node.Stats {
 		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
 	}
 	return buf.String()
@@ -122,20 +122,20 @@ func (node FunctionNode) String() string {
 // ParameterNode is the struct that holds information about a parameter for a function,
 // the type and identifier of the single parameter.
 type ParameterNode struct {
-	pos Position
+	Pos Position
 
-	// t is the type of the parameter.
-	t TypeNode
+	// T is the type of the parameter.
+	T TypeNode
 
-	// ident is the identifier used for the parameter.
-	ident IdentifierNode
+	// Ident is the identifier used for the parameter.
+	Ident IdentifierNode
 }
 
 func NewParameterNode(pos Position, t TypeNode, ident IdentifierNode) ParameterNode {
 	return ParameterNode{
-		pos:   pos,
-		t:     t,
-		ident: ident,
+		Pos:   pos,
+		T:     t,
+		Ident: ident,
 	}
 }
 

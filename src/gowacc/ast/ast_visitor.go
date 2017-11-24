@@ -30,12 +30,12 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 				Walk(visitor, s)
 			}
 		case Program:
-			for _, f := range node.functions {
+			for _, f := range node.Functions {
 				Walk(visitor, f)
 			}
 		case FunctionNode:
-			Walk(visitor, node.params)
-			Walk(visitor, node.stats)
+			Walk(visitor, node.Params)
+			Walk(visitor, node.Stats)
 		case []ParameterNode:
 			for _, p := range node {
 				Walk(visitor, p)

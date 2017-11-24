@@ -36,22 +36,22 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	foundError = nil
 	switch node := programNode.(type) {
 	case Program:
-		// Add the functions when hitting program instead of each function so that
-		// functions can be declared in any order.
-		for _, f := range node.functions {
-			if functionNode, ok := v.symbolTable.SearchForFunction(f.ident.ident); ok {
-				foundError = NewPreviouslyDeclared(NewDeclarationError(f.pos, true, true, f.ident.ident), functionNode.pos)
+		// Add the Functions when hitting program instead of each function so that
+		// Functions can be declared in any order.
+		for _, f := range node.Functions {
+			if functionNode, ok := v.symbolTable.SearchForFunction(f.Ident.ident); ok {
+				foundError = NewPreviouslyDeclared(NewDeclarationError(f.Pos, true, true, f.Ident.ident), functionNode.Pos)
 			} else {
-				v.symbolTable.AddFunction(f.ident.ident, f)
+				v.symbolTable.AddFunction(f.Ident.ident, f)
 			}
 		}
 	case FunctionNode:
 		// Move down scope so that the parameters are on a new scope.
 		v.symbolTable.MoveDownScope()
-		v.typeChecker.expectRepeatUntilForce(node.t)
+		v.typeChecker.expectRepeatUntilForce(node.T)
 	case ParameterNode:
-		if declareNode, ok := v.symbolTable.SearchForIdent(node.ident.ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.ident), declareNode.pos)
+		if declareNode, ok := v.symbolTable.SearchForIdent(node.Ident.ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.ident), declareNode.pos)
 		}
 	case SkipNode:
 	case DeclareNode:
@@ -146,14 +146,14 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.pos, true, false, node.ident.ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if len(f.params) != len(node.exprs) {
-			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\" (Expected: %d, Given: %d)", node.ident.ident, len(f.params), len(node.exprs)))
+		} else if len(f.Params) != len(node.exprs) {
+			foundError = NewCustomError(node.pos, fmt.Sprintf("Incorrect number of parameters for function \"%s\" (Expected: %d, Given: %d)", node.ident.ident, len(f.Params), len(node.exprs)))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(f.t).addPos(node.pos)
-			for i := len(f.params) - 1; i >= 0; i-- {
-				v.typeChecker.expect(f.params[i].t)
+			foundError = v.typeChecker.seen(f.T).addPos(node.pos)
+			for i := len(f.Params) - 1; i >= 0; i-- {
+				v.typeChecker.expect(f.Params[i].T)
 			}
 		}
 	case BaseTypeNode:
@@ -231,8 +231,8 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 			v.symbolTable.AddToScope(node.ident.ident, node)
 		}
 	case ParameterNode:
-		if _, ok := v.symbolTable.SearchForIdent(node.ident.ident); !ok {
-			v.symbolTable.AddToScope(node.ident.ident, node)
+		if _, ok := v.symbolTable.SearchForIdent(node.Ident.ident); !ok {
+			v.symbolTable.AddToScope(node.Ident.ident, node)
 		}
 	}
 	v.typeChecker.unfreeze(programNode)

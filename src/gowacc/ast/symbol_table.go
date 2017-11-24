@@ -58,9 +58,9 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	switch node := programNode.(type) {
 	case ParameterNode:
 		return &IdentifierDeclaration{
-			pos:        node.pos,
-			t:          node.t,
-			ident:      node.ident,
+			pos:        node.Pos,
+			t:          node.T,
+			ident:      node.Ident,
 			isDeclared: false,
 		}
 	case DeclareNode:
@@ -165,12 +165,12 @@ func (node SymbolTableNode) Print() {
 }
 
 // Print will print a symbolTable, relating from the currentScope. I.e. it will
-// print the currentScope and all parentScopes, along with the functions.
+// print the currentScope and all parentScopes, along with the Functions.
 func (table *SymbolTable) Print() {
 	fmt.Println("------- Begin Symbol table -------")
 	fmt.Println("Functions ------------------------")
 	for _, f := range table.functions {
-		fmt.Printf("%s of type %s\n", f.ident, f.t)
+		fmt.Printf("%s of type %s\n", f.Ident, f.T)
 	}
 	fmt.Println("Scopes ---------------------------")
 	table.currentScope.Print()
@@ -183,8 +183,8 @@ func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Functions:\n")
 	for _, f := range table.functions {
-		buf.WriteString(fmt.Sprintf("  - %s %s(", f.t, f.ident.String()[2:]))
-		for i, p := range f.params {
+		buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))
+		for i, p := range f.Params {
 			if i == 0 {
 				buf.WriteString(fmt.Sprintf("%s", p))
 			} else {
