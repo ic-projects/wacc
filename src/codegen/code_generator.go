@@ -1,10 +1,10 @@
 package codegen
 
 import (
+	"ast"
 	"bufio"
 	"bytes"
 	"fmt"
-	"ast"
 	"location"
 	"os"
 	"strconv"
@@ -209,30 +209,24 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 	case ast.BaseTypeNode:
 		switch node.T {
 		case ast.BOOL:
-			v.addCode("BL " + PRINT_BOOL.String())
-			v.usesFunction(PRINT_BOOL)
+			v.callLibraryFunction("BL", PRINT_BOOL)
 		case ast.INT:
-			v.addCode("BL " + PRINT_INT.String())
-			v.usesFunction(PRINT_INT)
+			v.callLibraryFunction("BL", PRINT_INT)
 		case ast.CHAR:
 			v.addCode("BL putchar")
 		case ast.PAIR:
-			v.addCode("BL " + PRINT_REFERENCE.String())
-			v.usesFunction(PRINT_REFERENCE)
+			v.callLibraryFunction("BL", PRINT_REFERENCE)
 		}
 	case ast.ArrayTypeNode:
 		if arr, ok := node.T.(ast.BaseTypeNode); ok {
 			if arr.T == ast.CHAR && node.Dim == 1 {
-				v.addCode("BL " + PRINT_STRING.String())
-				v.usesFunction(PRINT_STRING)
+				v.callLibraryFunction("BL", PRINT_STRING)
 				return
 			}
 		}
-		v.addCode("BL " + PRINT_REFERENCE.String())
-		v.usesFunction(PRINT_REFERENCE)
+		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	case ast.PairTypeNode:
-		v.addCode("BL " + PRINT_REFERENCE.String())
-		v.usesFunction(PRINT_REFERENCE)
+		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
 
@@ -279,10 +273,12 @@ func (v *CodeGenerator) addFunction(name string) {
 	v.currentFunction = name
 }
 
-// usesFunction adds the corresponding predefined function to the assembly if
-// it is not already added
-func (v *CodeGenerator) usesFunction(f LibraryFunction) {
-	v.library.add(v, f)
+// callLibraryFunction adds the corresponding predefined function to the assembly if
+// it is not already added. It also adds the call to the function to the assembly, using
+// call as the instruction before the label.
+func (v *CodeGenerator) callLibraryFunction(call string, function LibraryFunction) {
+	v.addCode(fmt.Sprintf("%s %s", call, function))
+	v.library.add(v, function)
 }
 
 // NoRecurse defines the nodes of the AST which should not be automatically
@@ -414,11 +410,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		register := v.returnRegisters.Pop()
 		v.addCode("MOV r0, " + register.String())
 		if ast.SizeOf(ast.Type(node.Lhs, v.symbolTable)) == 1 {
-			v.addCode("BL " + READ_CHAR.String())
-			v.usesFunction(READ_CHAR)
+			v.callLibraryFunction("BL", READ_CHAR)
 		} else {
-			v.addCode("BL " + READ_INT.String())
-			v.usesFunction(READ_INT)
+			v.callLibraryFunction("BL", READ_INT)
 		}
 		v.freeRegisters.Push(register)
 	case ast.FreeNode:
@@ -501,9 +495,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			}
 			v.addCode(
 				"MOV r0, "+exprRegister.String(),
-				"MOV r1, "+identRegister.String(),
-				"BL "+CHECK_ARRAY_INDEX.String(),
-				"ADD "+identRegister.String()+", "+identRegister.String()+", #4")
+				"MOV r1, "+identRegister.String())
+			v.callLibraryFunction("BL", CHECK_ARRAY_INDEX)
+			v.addCode("ADD " + identRegister.String() + ", " + identRegister.String() + ", #4")
 
 			if i == length-1 && lastIsCharOrBool {
 				v.addCode(fmt.Sprintf("ADD %s, %s, %s", identRegister, identRegister, exprRegister))
@@ -521,8 +515,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				}
 			}
 		}
-
-		v.usesFunction(CHECK_ARRAY_INDEX)
 
 		v.returnRegisters.Push(identRegister)
 	case ast.ArrayLiteralNode:
@@ -692,31 +684,26 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		switch node.Op {
 		case ast.MUL:
 			v.addCode("SMULL "+operand1.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
-				"CMP "+operand2.String()+", "+operand1.String()+", ASR #31",
-				"BLNE "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
+				"CMP "+operand2.String()+", "+operand1.String()+", ASR #31")
+			v.callLibraryFunction("BLNE", CHECK_OVERFLOW)
 		case ast.DIV:
 			v.addCode("MOV r0, "+operand1.String(),
-				"MOV r1, "+operand2.String(),
-				"BL "+CHECK_DIVIDE.String(),
-				"BL __aeabi_idiv",
+				"MOV r1, "+operand2.String())
+			v.callLibraryFunction("BL", CHECK_OVERFLOW)
+			v.addCode("BL __aeabi_idiv",
 				"MOV "+operand1.String()+", r0")
-			v.usesFunction(CHECK_DIVIDE)
 		case ast.MOD:
 			v.addCode("MOV r0, "+operand1.String(),
-				"MOV r1, "+operand2.String(),
-				"BL "+CHECK_DIVIDE.String(),
-				"BL __aeabi_idivmod",
+				"MOV r1, "+operand2.String())
+			v.callLibraryFunction("BL", CHECK_OVERFLOW)
+			v.addCode("BL __aeabi_idivmod",
 				"MOV "+operand1.String()+", r1")
-			v.usesFunction(CHECK_DIVIDE)
 		case ast.ADD:
-			v.addCode("ADDS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
-				"BLVS "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
+			v.addCode("ADDS " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
+			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
 		case ast.SUB:
-			v.addCode("SUBS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
-				"BLVS "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
+			v.addCode("SUBS " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
+			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
 		case ast.GT:
 			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
 				"MOVGT "+operand1.String()+", #1",
@@ -794,9 +781,8 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case ast.FreeNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String(),
-			"BL "+FREE.String())
-		v.usesFunction(FREE)
+		v.addCode("MOV r0, " + register.String())
+		v.callLibraryFunction("BL", FREE)
 	case ast.DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
@@ -819,8 +805,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.freeRegisters.Push(register)
 		v.addCode("MOV r0, " + register.String())
 		v.addPrint(ast.Type(node.Expr, v.symbolTable))
-		v.addCode("BL " + PRINT_LN.String())
-		v.usesFunction(PRINT_LN)
+		v.callLibraryFunction("BL", PRINT_LN)
 	case ast.ExitNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
@@ -841,9 +826,9 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 
 	case ast.PairFirstElementNode:
 		register := v.returnRegisters.Peek()
-		v.addCode("MOV r0, "+register.String(),
-			"BL "+CHECK_NULL_POINTER.String(),
-			"LDR "+register.String()+", ["+register.String()+"]")
+		v.addCode("MOV r0, " + register.String())
+		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 
 		// If we don'T want a Pointer then don'T retrieve the value
 		if !node.Pointer {
@@ -853,12 +838,11 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 			}
 		}
-		v.usesFunction(CHECK_NULL_POINTER)
 	case ast.PairSecondElementNode:
 		register := v.returnRegisters.Peek()
-		v.addCode("MOV r0, "+register.String(),
-			"BL "+CHECK_NULL_POINTER.String(),
-			"LDR "+register.String()+", ["+register.String()+", #4]")
+		v.addCode("MOV r0, " + register.String())
+		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.addCode("LDR " + register.String() + ", [" + register.String() + ", #4]")
 
 		// If we don'T want a Pointer then don'T retrieve the value
 		if !node.Pointer {
@@ -868,16 +852,14 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 			}
 		}
-		v.usesFunction(CHECK_NULL_POINTER)
 	case ast.UnaryOperatorNode:
 		register := v.returnRegisters.Peek()
 		switch node.Op {
 		case ast.NOT:
 			v.addCode("EOR " + register.String() + ", " + register.String() + ", #1")
 		case ast.NEG:
-			v.addCode("RSBS "+register.String()+", "+register.String()+", #0",
-				"BLVS "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
+			v.addCode("RSBS " + register.String() + ", " + register.String() + ", #0")
+			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
 		case ast.LEN:
 			v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
 		case ast.ORD:
