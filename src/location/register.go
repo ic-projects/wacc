@@ -30,17 +30,19 @@ const (
 	UNDEFINED
 )
 
-// FreeRegisters returns an array of the registers that functions are allowed to use.
+// FreeRegisters returns an array of the registers that functions are allowed to
+// use.
 func FreeRegisters() []Register {
 	return []Register{R11, R10, R9, R8, R7, R6, R5, R4}
 }
 
-// ReturnRegisters returns an array of the registers used for passing and returning
-// parameters from functions.
+// ReturnRegisters returns an array of the registers used for passing and
+// returning parameters from functions.
 func ReturnRegisters() []Register {
 	return []Register{R0, R1, R2, R3}
 }
 
+// String returns the string representation of this Register.
 func (r Register) String() string {
 	switch r {
 	case R0:
@@ -94,22 +96,27 @@ type RegisterStack struct {
 	stack []Register
 }
 
+// NewRegisterStack creates and returns an empty RegisterStack.
 func NewRegisterStack() *RegisterStack {
 	return &RegisterStack{
 		stack: []Register{},
 	}
 }
 
+// NewRegisterStackWith creates and returns a RegisterStack with the stack set
+// to the list of registers provided in the registers parameter.
 func NewRegisterStackWith(registers []Register) *RegisterStack {
 	return &RegisterStack{
 		stack: registers,
 	}
 }
 
+// Length returns the number of registers in this RegisterStack.
 func (registerStack *RegisterStack) Length() int {
 	return len(registerStack.stack)
 }
 
+// Pop removes and returns the Register at the top of this RegisterStack.
 func (registerStack *RegisterStack) Pop() Register {
 	if len(registerStack.stack) != 0 {
 		register := registerStack.stack[len(registerStack.stack)-1]
@@ -120,6 +127,7 @@ func (registerStack *RegisterStack) Pop() Register {
 	return UNDEFINED
 }
 
+// Peek returns the Register at the top of this RegisterStack.
 func (registerStack *RegisterStack) Peek() Register {
 	if len(registerStack.stack) != 0 {
 		register := registerStack.stack[len(registerStack.stack)-1]
@@ -129,10 +137,13 @@ func (registerStack *RegisterStack) Peek() Register {
 	return UNDEFINED
 }
 
+// Push adds the specified register to the top of this RegisterStack.
 func (registerStack *RegisterStack) Push(register Register) {
 	registerStack.stack = append(registerStack.stack, register)
 }
 
+// String returns the string representation of this RegisterStack in the form:
+// "[ R0 R1 ... ]"
 func (registerStack *RegisterStack) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("[ ")
