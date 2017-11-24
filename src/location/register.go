@@ -23,6 +23,17 @@ const (
 	UNDEFINED
 )
 
+// FreeRegisters returns an array of the registers that functions are allowed to use.
+func FreeRegisters() []Register {
+	return []Register{R11, R10, R9, R8, R7, R6, R5, R4}
+}
+
+// ReturnRegisters returns an array of the registers used for passing and returning
+// parameters from functions.
+func ReturnRegisters() []Register {
+	return []Register{R0, R1, R2, R3}
+}
+
 func (r Register) String() string {
 	switch r {
 	case R0:
