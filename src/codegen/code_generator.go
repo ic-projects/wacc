@@ -530,10 +530,18 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			v.addCode("POP {%s}", operand2)
 			v.currentStackPos -= ast.SizeOf(ast.Type(node.Expr1, v.symbolTable))
 		} else {
-			ast.Walk(v, node.Expr2)
-			operand2 = v.returnRegisters.Pop()
-			ast.Walk(v, node.Expr1)
-			operand1 = v.returnRegisters.Pop()
+			// Evaluate the expression with the largest weight first
+			if ast.Weight(node.Expr1) > ast.Weight(node.Expr2) {
+				ast.Walk(v, node.Expr1)
+				operand1 = v.returnRegisters.Pop()
+				ast.Walk(v, node.Expr2)
+				operand2 = v.returnRegisters.Pop()
+			} else {
+				ast.Walk(v, node.Expr2)
+				operand2 = v.returnRegisters.Pop()
+				ast.Walk(v, node.Expr1)
+				operand1 = v.returnRegisters.Pop()
+			}
 		}
 		switch node.Op {
 		case ast.MUL:
