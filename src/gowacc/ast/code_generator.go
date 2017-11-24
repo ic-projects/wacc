@@ -337,7 +337,8 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 		ArrayElementNode,
 		LoopNode,
 		NewPairNode,
-		ReadNode:
+		ReadNode,
+		BinaryOperatorNode:
 		return true
 	case FunctionCallNode:
 		return true
@@ -709,16 +710,86 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		}
 	case BinaryOperatorNode:
-		switch node.op {
-		case MUL, DIV, MOD, ADD, SUB:
+		operand2 := UNDEFINED
+		operand1 := UNDEFINED
 
-		case GT, GEQ, LT, LEQ:
+		if len(v.freeRegisters.stack) == 2 {
+			Walk(v, node.expr2)
+			operand2 = v.returnRegisters.Pop()
+			v.addCode("PUSH {" + operand2.String() + "}")
+			v.currentStackPos += sizeOf(Type(node.expr1, v.symbolTable))
+			v.freeRegisters.Push(operand2)
 
-		case EQ, NEQ:
-
-		case AND, OR:
-
+			Walk(v, node.expr1)
+			operand1 = v.returnRegisters.Pop()
+			operand2 = v.freeRegisters.Pop()
+			v.addCode("POP {" + operand2.String() + "}")
+			v.currentStackPos -= sizeOf(Type(node.expr1, v.symbolTable))
+		} else {
+			Walk(v, node.expr2)
+			operand2 = v.returnRegisters.Pop()
+			Walk(v, node.expr1)
+			operand1 = v.returnRegisters.Pop()
 		}
+		switch node.op {
+		case MUL:
+			v.addCode("SMULL "+operand1.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
+				"CMP "+operand2.String()+", "+operand1.String()+", ASR #31",
+				"BLNE "+CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
+		case DIV:
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL "+CHECK_DIVIDE.String(),
+				"BL __aeabi_idiv",
+				"MOV "+operand1.String()+", r0")
+			v.usesFunction(CHECK_DIVIDE)
+		case MOD:
+			v.addCode("MOV r0, "+operand1.String(),
+				"MOV r1, "+operand2.String(),
+				"BL "+CHECK_DIVIDE.String(),
+				"BL __aeabi_idivmod",
+				"MOV "+operand1.String()+", r1")
+			v.usesFunction(CHECK_DIVIDE)
+		case ADD:
+			v.addCode("ADDS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
+		case SUB:
+			v.addCode("SUBS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
+				"BLVS "+CHECK_OVERFLOW.String())
+			v.usesFunction(CHECK_OVERFLOW)
+		case GT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGT "+operand1.String()+", #1",
+				"MOVLE "+operand1.String()+", #0")
+		case GEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVGE "+operand1.String()+", #1",
+				"MOVLT "+operand1.String()+", #0")
+		case LT:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLT "+operand1.String()+", #1",
+				"MOVGE "+operand1.String()+", #0")
+		case LEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVLE "+operand1.String()+", #1",
+				"MOVGT "+operand1.String()+", #0")
+		case EQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVEQ "+operand1.String()+", #1",
+				"MOVNE "+operand1.String()+", #0")
+		case NEQ:
+			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
+				"MOVNE "+operand1.String()+", #1",
+				"MOVEQ "+operand1.String()+", #0")
+		case AND:
+			v.addCode("AND " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
+		case OR:
+			v.addCode("ORR " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
+		}
+		v.freeRegisters.Push(operand2)
+		v.returnRegisters.Push(operand1)
 	case []StatementNode:
 		v.symbolTable.MoveNextScope()
 		size := 0
@@ -856,68 +927,6 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		case CHR:
 
 		}
-	case BinaryOperatorNode:
-		operand2 := v.returnRegisters.Pop()
-		operand1 := v.returnRegisters.Pop()
-		switch node.op {
-		case MUL:
-			v.addCode("SMULL "+operand1.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
-				"CMP "+operand2.String()+", "+operand1.String()+", ASR #31",
-				"BLNE "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
-		case DIV:
-			v.addCode("MOV r0, "+operand1.String(),
-				"MOV r1, "+operand2.String(),
-				"BL "+CHECK_DIVIDE.String(),
-				"BL __aeabi_idiv",
-				"MOV "+operand1.String()+", r0")
-			v.usesFunction(CHECK_DIVIDE)
-		case MOD:
-			v.addCode("MOV r0, "+operand1.String(),
-				"MOV r1, "+operand2.String(),
-				"BL "+CHECK_DIVIDE.String(),
-				"BL __aeabi_idivmod",
-				"MOV "+operand1.String()+", r1")
-			v.usesFunction(CHECK_DIVIDE)
-		case ADD:
-			v.addCode("ADDS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
-				"BLVS "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
-		case SUB:
-			v.addCode("SUBS "+operand1.String()+", "+operand1.String()+", "+operand2.String(),
-				"BLVS "+CHECK_OVERFLOW.String())
-			v.usesFunction(CHECK_OVERFLOW)
-		case GT:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVGT "+operand1.String()+", #1",
-				"MOVLE "+operand1.String()+", #0")
-		case GEQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVGE "+operand1.String()+", #1",
-				"MOVLT "+operand1.String()+", #0")
-		case LT:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVLT "+operand1.String()+", #1",
-				"MOVGE "+operand1.String()+", #0")
-		case LEQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVLE "+operand1.String()+", #1",
-				"MOVGT "+operand1.String()+", #0")
-		case EQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVEQ "+operand1.String()+", #1",
-				"MOVNE "+operand1.String()+", #0")
-		case NEQ:
-			v.addCode("CMP "+operand1.String()+", "+operand2.String(),
-				"MOVNE "+operand1.String()+", #1",
-				"MOVEQ "+operand1.String()+", #0")
-		case AND:
-			v.addCode("AND " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
-		case OR:
-			v.addCode("ORR " + operand1.String() + ", " + operand1.String() + ", " + operand2.String())
-		}
-		v.freeRegisters.Push(operand2)
-		v.returnRegisters.Push(operand1)
 	}
 }
 
