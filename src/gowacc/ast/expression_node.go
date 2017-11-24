@@ -74,7 +74,6 @@ func BuildBinOpTree(first ExpressionNode, list []interface{}, position Position)
 	return NewBinaryOperatorNode(position, list[0].([]interface{})[1].(BinaryOperator), first, list[0].([]interface{})[3])
 }
 
-
 // ExpressionNode is an empty interface for expression nodes to implement.
 type ExpressionNode interface {
 }

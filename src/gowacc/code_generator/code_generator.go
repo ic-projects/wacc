@@ -1,14 +1,14 @@
 package code_generator
 
 import (
-	"gowacc/ast"
 	"bufio"
 	"bytes"
 	"fmt"
+	"gowacc/ast"
+	"gowacc/location"
 	"os"
 	"strconv"
 	"strings"
-	"gowacc/location"
 )
 
 type AsciiWord struct {
@@ -301,13 +301,13 @@ func (v *CodeGenerator) usesFunction(f LibraryFunction) {
 func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 	switch programNode.(type) {
 	case ast.IfNode,
-	ast.AssignNode,
-	ast.ArrayLiteralNode,
-	ast.ArrayElementNode,
-	ast.LoopNode,
-	ast.NewPairNode,
-	ast.ReadNode,
-	ast.BinaryOperatorNode:
+		ast.AssignNode,
+		ast.ArrayLiteralNode,
+		ast.ArrayElementNode,
+		ast.LoopNode,
+		ast.NewPairNode,
+		ast.ReadNode,
+		ast.BinaryOperatorNode:
 		return true
 	case ast.FunctionCallNode:
 		return true
@@ -343,7 +343,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				i += ast.SizeOf(e.T)
 				dec.AddLocation(location.NewStackOffsetLocation(i))
 			} else {
-				dec.AddLocation(location.NewStackOffsetLocation(j-4))
+				dec.AddLocation(location.NewStackOffsetLocation(j - 4))
 				j -= ast.SizeOf(e.T)
 			}
 		}
@@ -764,7 +764,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		size := 0
 		for _, dec := range v.symbolTable.CurrentScope.Scope {
 			size += ast.SizeOf(dec.T)
-			dec.AddLocation(location.NewStackOffsetLocation(v.currentStackPos+size))
+			dec.AddLocation(location.NewStackOffsetLocation(v.currentStackPos + size))
 		}
 		if size != 0 {
 			i := size
