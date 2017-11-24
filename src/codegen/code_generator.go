@@ -128,8 +128,8 @@ type CodeGenerator struct {
 	labelCount      int
 	currentFunction string
 	symbolTable     *ast.SymbolTable
-	freeRegisters   *RegisterStack
-	returnRegisters *RegisterStack
+	freeRegisters   *location.RegisterStack
+	returnRegisters *location.RegisterStack
 	library         *Library
 	currentStackPos int
 }
@@ -140,68 +140,11 @@ func NewCodeGenerator(symbolTable *ast.SymbolTable) *CodeGenerator {
 		asm:             NewAssembly(),
 		labelCount:      0,
 		symbolTable:     symbolTable,
-		freeRegisters:   NewRegisterStackWith([]location.Register{location.R11, location.R10, location.R9, location.R8, location.R7, location.R6, location.R5, location.R4}),
-		returnRegisters: NewRegisterStack(),
+		freeRegisters:   location.NewRegisterStackWith(location.FreeRegisters()),
+		returnRegisters: location.NewRegisterStack(),
 		library:         GetLibrary(),
 		currentStackPos: 0,
 	}
-}
-
-// RegisterStack is a struct that represents a stack of regsters.
-// It is used to keep track of which register is used for returning a value.
-//
-// When a callee returns with value, it pushes the register used to store the
-// return value to the stack.
-//
-// The caller pops a register off the stack to determine the register where the
-// return value is stored.
-type RegisterStack struct {
-	stack []location.Register
-}
-
-func NewRegisterStack() *RegisterStack {
-	return &RegisterStack{
-		stack: []location.Register{},
-	}
-}
-
-func NewRegisterStackWith(registers []location.Register) *RegisterStack {
-	return &RegisterStack{
-		stack: registers,
-	}
-}
-
-func (registerStack *RegisterStack) Pop() location.Register {
-	if len(registerStack.stack) != 0 {
-		register := registerStack.stack[len(registerStack.stack)-1]
-		registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
-		return register
-	}
-	fmt.Println("Internal compiler error")
-	return location.UNDEFINED
-}
-
-func (registerStack *RegisterStack) Peek() location.Register {
-	if len(registerStack.stack) != 0 {
-		register := registerStack.stack[len(registerStack.stack)-1]
-		return register
-	}
-	fmt.Println("Internal compiler error")
-	return location.UNDEFINED
-}
-
-func (registerStack *RegisterStack) Push(register location.Register) {
-	registerStack.stack = append(registerStack.stack, register)
-}
-
-func (registerStack *RegisterStack) String() string {
-	var buf bytes.Buffer
-	buf.WriteString("[ ")
-	for _, r := range registerStack.stack {
-		buf.WriteString(r.String() + " ")
-	}
-	buf.WriteString("]")
-	return buf.String()
 }
 
 func (v *CodeGenerator) addPrint(t ast.TypeNode) {
@@ -313,7 +256,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 	case ast.FunctionNode:
 		v.currentStackPos = 0
-		v.freeRegisters.stack = []location.Register{location.R11, location.R10, location.R9, location.R8, location.R7, location.R6, location.R5, location.R4}
+		v.freeRegisters = location.NewRegisterStackWith(location.FreeRegisters())
 		v.symbolTable.MoveNextScope()
 		if node.Ident.Ident == "" {
 			v.addFunction("main")
@@ -322,7 +265,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.addCode("PUSH {lr}")
 	case []ast.ParameterNode:
-		registers := []location.Register{location.R0, location.R1, location.R2, location.R3}
+		registers := location.ReturnRegisters()
 		i := 0
 		j := 0
 		for n, e := range node {

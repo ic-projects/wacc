@@ -1,5 +1,10 @@
 package location
 
+import (
+	"bytes"
+	"fmt"
+)
+
 type Register int
 
 const (
@@ -73,4 +78,65 @@ func (r Register) String() string {
 	default:
 		return "UNDEFINED"
 	}
+}
+
+// RegisterStack is a struct that represents a stack of regsters.
+// It is used to keep track of which register is used for returning a value.
+//
+// When a callee returns with value, it pushes the register used to store the
+// return value to the stack.
+//
+// The caller pops a register off the stack to determine the register where the
+// return value is stored.
+type RegisterStack struct {
+	stack []Register
+}
+
+func NewRegisterStack() *RegisterStack {
+	return &RegisterStack{
+		stack: []Register{},
+	}
+}
+
+func NewRegisterStackWith(registers []Register) *RegisterStack {
+	return &RegisterStack{
+		stack: registers,
+	}
+}
+
+func (registerStack *RegisterStack) Length() int {
+	return len(registerStack.stack)
+}
+
+func (registerStack *RegisterStack) Pop() Register {
+	if len(registerStack.stack) != 0 {
+		register := registerStack.stack[len(registerStack.stack)-1]
+		registerStack.stack = registerStack.stack[:len(registerStack.stack)-1]
+		return register
+	}
+	fmt.Println("Internal compiler error")
+	return UNDEFINED
+}
+
+func (registerStack *RegisterStack) Peek() Register {
+	if len(registerStack.stack) != 0 {
+		register := registerStack.stack[len(registerStack.stack)-1]
+		return register
+	}
+	fmt.Println("Internal compiler error")
+	return UNDEFINED
+}
+
+func (registerStack *RegisterStack) Push(register Register) {
+	registerStack.stack = append(registerStack.stack, register)
+}
+
+func (registerStack *RegisterStack) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("[ ")
+	for _, r := range registerStack.stack {
+		buf.WriteString(r.String() + " ")
+	}
+	buf.WriteString("]")
+	return buf.String()
 }
