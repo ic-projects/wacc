@@ -1,10 +1,10 @@
 package codegen
 
 import (
+	"ast"
 	"bufio"
 	"bytes"
 	"fmt"
-	"ast"
 	"location"
 	"os"
 	"strconv"
@@ -239,9 +239,8 @@ func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 		ast.LoopNode,
 		ast.NewPairNode,
 		ast.ReadNode,
+		ast.FunctionCallNode,
 		ast.BinaryOperatorNode:
-		return true
-	case ast.FunctionCallNode:
 		return true
 	default:
 		return false
@@ -275,7 +274,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				i += ast.SizeOf(e.T)
 				dec.AddLocation(location.NewStackOffsetLocation(i))
 			} else {
-				dec.AddLocation(location.NewStackOffsetLocation(j - 4))
+				dec.AddLocation(location.NewStackOffsetLocation(j - ast.SizeOf(ast.NewBaseTypeNode(ast.INT))))
 				j -= ast.SizeOf(e.T)
 			}
 		}
@@ -288,11 +287,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
-				if ast.SizeOf(e.T) == 1 {
-					v.addCode("STRB " + registers[n].String() + ", " + v.LocationOf(dec.Location))
-				} else {
-					v.addCode("STR " + registers[n].String() + ", " + v.LocationOf(dec.Location))
-				}
+				v.addCode(store(ast.SizeOf(e.T), registers[n].String(), v.LocationOf(dec.Location)))
 			}
 		}
 	case ast.ParameterNode:
@@ -309,53 +304,37 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		switch lhsNode := node.Lhs.(type) {
 		case ast.ArrayElementNode:
 			ast.Walk(v, lhsNode)
-			lhsRegister := v.returnRegisters.Pop()
+			lhsRegister := v.getReturnRegister()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
 			arr := dec.T.(ast.ArrayTypeNode)
-			if ast.SizeOf(arr.T) == 1 && len(lhsNode.Exprs) == arr.Dim {
-				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
-			} else {
-				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
+
+			if len(lhsNode.Exprs) == arr.Dim {
+				v.addCode(store(ast.SizeOf(arr.T), rhsRegister.String(), "["+lhsRegister.String()+"]"))
 			}
 		case ast.PairFirstElementNode:
 			ast.Walk(v, lhsNode)
-			lhsRegister := v.returnRegisters.Pop()
-			if ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable)) == 1 {
-				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
-			} else {
-				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
-			}
+			lhsRegister := v.getReturnRegister()
+			v.addCode(store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable)), rhsRegister.String(), "["+lhsRegister.String()+"]"))
 		case ast.PairSecondElementNode:
 			ast.Walk(v, lhsNode)
-			lhsRegister := v.returnRegisters.Pop()
-			if ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable)) == 1 {
-				v.addCode(fmt.Sprintf("STRB %s, [%s]", rhsRegister, lhsRegister))
-			} else {
-				v.addCode(fmt.Sprintf("STR %s, [%s]", rhsRegister, lhsRegister))
-			}
+			lhsRegister := v.getReturnRegister()
+			v.addCode(store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable)), rhsRegister.String(), "["+lhsRegister.String()+"]"))
 		case ast.IdentifierNode:
 			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident)
 			if ident.Location != nil {
-				if ast.SizeOf(ident.T) == 1 {
-					v.addCode("STRB " + rhsRegister.String() + ", " + v.LocationOf(ident.Location))
-				} else {
-					v.addCode("STR " + rhsRegister.String() + ", " + v.LocationOf(ident.Location))
-				}
+				v.addCode(store(ast.SizeOf(ident.T), rhsRegister.String(), v.LocationOf(ident.Location)))
 			}
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case ast.ReadNode:
 
 		if ident, ok := node.Lhs.(ast.IdentifierNode); ok {
-			register := v.freeRegisters.Pop()
 			dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
-			v.addCode("ADD " + register.String() + ", " + v.PointerTo(dec.Location))
-			v.returnRegisters.Push(register)
+			v.addCode("ADD " + v.getFreeRegister().String() + ", " + v.PointerTo(dec.Location))
 		} else {
 			ast.Walk(v, node.Lhs)
 		}
-		register := v.returnRegisters.Pop()
-		v.addCode("MOV r0, " + register.String())
+		v.addCode("MOV r0, " + v.getReturnRegister().String())
 		if ast.SizeOf(ast.Type(node.Lhs, v.symbolTable)) == 1 {
 			v.addCode("BL " + READ_CHAR.String())
 			v.usesFunction(READ_CHAR)
@@ -363,7 +342,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			v.addCode("BL " + READ_INT.String())
 			v.usesFunction(READ_INT)
 		}
-		v.freeRegisters.Push(register)
 	case ast.FreeNode:
 
 	case ast.ReturnNode:
@@ -381,9 +359,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.labelCount += 2
 		// Cond
 		ast.Walk(v, node.Expr)
-		r := v.returnRegisters.Pop()
-		v.addCode(fmt.Sprintf("CMP %s, #0", r))
-		v.freeRegisters.Push(r)
+		v.addCode(fmt.Sprintf("CMP %s, #0", v.getReturnRegister()))
 		v.addCode(fmt.Sprintf("BEQ ELSE%d", elseLabel))
 		// If
 		ast.Walk(v, node.IfStats)
@@ -407,21 +383,13 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode(fmt.Sprintf("WHILE%d:", whileLabel))
 		v.labelCount++
 		ast.Walk(v, node.Expr)
-		r := v.returnRegisters.Pop()
-		v.addCode(fmt.Sprintf("CMP %s, #1", r))
-		v.freeRegisters.Push(r)
+		v.addCode(fmt.Sprintf("CMP %s, #1", v.getReturnRegister()))
 		v.addCode(fmt.Sprintf("BEQ DO%d", doLabel))
 	case ast.ScopeNode:
 
 	case ast.IdentifierNode:
-		register := v.freeRegisters.Pop()
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
-		if ast.SizeOf(dec.T) == 1 {
-			v.addCode("LDRSB " + register.String() + ", " + v.LocationOf(dec.Location))
-		} else {
-			v.addCode("LDR " + register.String() + ", " + v.LocationOf(dec.Location))
-		}
-		v.returnRegisters.Push(register)
+		v.addCode(load(ast.SizeOf(dec.T), v.getFreeRegister().String(), v.LocationOf(dec.Location)))
 	case ast.PairFirstElementNode:
 
 	case ast.PairSecondElementNode:
@@ -437,8 +405,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]
 			ast.Walk(v, expr)
-			exprRegister := v.returnRegisters.Pop()
-			v.freeRegisters.Push(exprRegister)
+			exprRegister := v.getReturnRegister()
 			if i > 0 {
 				//v.addCode("LDR " + identRegister.String() + ", [" + identRegister.String() + "]")
 			}
@@ -469,7 +436,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		v.returnRegisters.Push(identRegister)
 	case ast.ArrayLiteralNode:
-		register := v.freeRegisters.Pop()
+		register := v.getFreeRegister()
 		length := len(node.Exprs)
 		size := 0
 		if length > 0 {
@@ -481,22 +448,15 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			"MOV "+register.String()+", r0")
 		for i := 0; i < length; i++ {
 			ast.Walk(v, node.Exprs[i])
-			exprRegister := v.returnRegisters.Pop()
-			v.freeRegisters.Push(exprRegister)
-			if size == 1 {
-				v.addCode("STRB " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*size) + "]")
-			} else {
-				v.addCode("STR " + exprRegister.String() + ", [" + register.String() + ", #" + strconv.Itoa(4+i*size) + "]")
-			}
+			exprRegister := v.getReturnRegister()
+			v.addCode(store(size, exprRegister.String(), "["+register.String()+", #"+strconv.Itoa(4+i*size)+"]"))
 		}
-		lengthRegister := v.freeRegisters.Pop()
+		lengthRegister := v.freeRegisters.Peek()
 		v.addCode(
 			"LDR "+lengthRegister.String()+", ="+strconv.Itoa(length),
 			"STR "+lengthRegister.String()+", ["+register.String()+"]")
-		v.freeRegisters.Push(lengthRegister)
-		v.returnRegisters.Push(register)
 	case ast.NewPairNode:
-		register := v.freeRegisters.Pop()
+		register := v.getFreeRegister()
 
 		// Make space for 2 new pointers on heap
 		v.addCode("LDR r0, =8",
@@ -505,49 +465,33 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		// Store first element
 		ast.Walk(v, node.Fst)
-		fst := v.returnRegisters.Pop()
+		fst := v.getReturnRegister()
 		fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
 		v.addCode("LDR r0, ="+strconv.Itoa(fstSize),
 			"BL malloc",
 			"STR r0, ["+register.String()+"]")
-		if fstSize == 1 {
-			v.addCode("STRB " + fst.String() + ", [r0]")
-		} else {
-			v.addCode("STR " + fst.String() + ", [r0]")
-		}
-		v.freeRegisters.Push(fst)
+		v.addCode(store(fstSize, fst.String(), "[r0]"))
 
 		// Store second element
 		ast.Walk(v, node.Snd)
-		snd := v.returnRegisters.Pop()
+		v.getReturnRegister()
 		sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
 		v.addCode("LDR r0, ="+strconv.Itoa(sndSize),
 			"BL malloc",
 			"STR r0, ["+register.String()+", #4]")
-		if sndSize == 1 {
-			v.addCode("STRB " + snd.String() + ", [r0]")
-		} else {
-			v.addCode("STR " + snd.String() + ", [r0]")
-		}
-		v.freeRegisters.Push(snd)
-		v.returnRegisters.Push(register)
+		v.addCode(store(sndSize, fst.String(), "[r0]"))
 	case ast.FunctionCallNode:
-		registers := []location.Register{location.R0, location.R1, location.R2, location.R3}
+		registers := location.ReturnRegisters()
 		size := 0
 		for i := len(node.Exprs) - 1; i >= 0; i-- {
 			ast.Walk(v, node.Exprs[i])
-			register := v.returnRegisters.Pop()
-			v.freeRegisters.Push(register)
+			register := v.getReturnRegister()
 			if i < len(registers) {
 				v.addCode("MOV " + registers[i].String() + ", " + register.String())
 			} else {
 				f, _ := v.symbolTable.SearchForFunction(node.Ident.Ident)
 				v.addCode("SUB sp, sp, #" + strconv.Itoa(ast.SizeOf(f.Params[i].T)))
-				if ast.SizeOf(f.Params[i].T) == 1 {
-					v.addCode("STRB " + register.String() + ", [sp]")
-				} else {
-					v.addCode("STR " + register.String() + ", [sp]")
-				}
+				v.addCode(store(ast.SizeOf(f.Params[i].T), register.String(), ", [sp]"))
 				//		v.addCode("PUSH {" + register.String() + "}")
 				size += ast.SizeOf(f.Params[i].T)
 				v.currentStackPos += ast.SizeOf(f.Params[i].T)
@@ -559,8 +503,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			v.currentStackPos -= size
 		}
 
-		register := v.freeRegisters.Pop()
-		v.returnRegisters.Push(register)
+		register := v.getFreeRegister()
 		v.addCode("MOV " + register.String() + ", " + location.R0.String())
 	case ast.BaseTypeNode:
 
@@ -573,30 +516,21 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case ast.BinaryOperator:
 
 	case ast.IntegerLiteralNode:
-		register := v.freeRegisters.Pop()
-		v.addCode("LDR " + register.String() + ", =" + strconv.Itoa(node.Val))
-		v.returnRegisters.Push(register)
+		v.addCode("LDR " + v.getFreeRegister().String() + ", =" + strconv.Itoa(node.Val))
 	case ast.BooleanLiteralNode:
-		register := v.freeRegisters.Pop()
+		register := v.getFreeRegister()
 		if node.Val {
 			v.addCode("MOV " + register.String() + ", #1") // True
 		} else {
 			v.addCode("MOV " + register.String() + ", #0") // False
 		}
-		v.returnRegisters.Push(register)
 	case ast.CharacterLiteralNode:
-		register := v.freeRegisters.Pop()
-		v.addCode("MOV " + register.String() + ", #'" + string(node.Val) + "'")
-		v.returnRegisters.Push(register)
+		v.addCode("MOV " + v.getFreeRegister().String() + ", #'" + string(node.Val) + "'")
 	case ast.StringLiteralNode:
-		register := v.freeRegisters.Pop()
 		label := v.addData(node.Val)
-		v.addCode("LDR " + register.String() + ", =" + label)
-		v.returnRegisters.Push(register)
+		v.addCode("LDR " + v.getFreeRegister().String() + ", =" + label)
 	case ast.PairLiteralNode:
-		register := v.freeRegisters.Pop()
-		v.returnRegisters.Push(register)
-		v.addCode("LDR " + register.String() + ", =0")
+		v.addCode("LDR " + v.getFreeRegister().String() + ", =0")
 	case ast.UnaryOperatorNode:
 		switch node.Op {
 		case ast.NOT:
@@ -614,7 +548,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		operand2 := location.UNDEFINED
 		operand1 := location.UNDEFINED
 
-		if len(v.freeRegisters.stack) == 2 {
+		if v.freeRegisters.Length() == 2 {
 			ast.Walk(v, node.Expr2)
 			operand2 = v.returnRegisters.Pop()
 			v.addCode("PUSH {" + operand2.String() + "}")
@@ -735,43 +669,27 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.addCode(".ltorg")
 	case ast.ArrayLiteralNode:
 	case ast.FreeNode:
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String(),
+		v.addCode("MOV r0, "+v.getReturnRegister().String(),
 			"BL "+FREE.String())
 		v.usesFunction(FREE)
 	case ast.DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
 		if dec.Location != nil {
-			if ast.SizeOf(dec.T) == 1 {
-				v.addCode("STRB " + register.String() + ", " + v.LocationOf(dec.Location))
-			} else {
-				v.addCode("STR " + register.String() + ", " + v.LocationOf(dec.Location))
-			}
+			v.addCode(store(ast.SizeOf(dec.T), v.getReturnRegister().String(), v.LocationOf(dec.Location)))
 		}
 	case ast.PrintNode:
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, " + register.String())
+		v.addCode("MOV r0, " + v.getReturnRegister().String())
 		v.addPrint(ast.Type(node.Expr, v.symbolTable))
 	case ast.PrintlnNode:
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, " + register.String())
+		v.addCode("MOV r0, " + v.getReturnRegister().String())
 		v.addPrint(ast.Type(node.Expr, v.symbolTable))
 		v.addCode("BL " + PRINT_LN.String())
 		v.usesFunction(PRINT_LN)
 	case ast.ExitNode:
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
-		v.addCode("MOV r0, "+register.String(),
+		v.addCode("MOV r0, "+v.getReturnRegister().String(),
 			"BL exit")
 	case ast.ReturnNode:
-		register := v.returnRegisters.Pop()
-		v.freeRegisters.Push(register)
 		i := 0
 		for t := v.symbolTable.CurrentScope; t != v.symbolTable.Head; t = t.ParentScope {
 			i += t.ScopeSize
@@ -779,7 +697,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		if i > 0 {
 			v.addCode("ADD sp, sp, #" + strconv.Itoa(i))
 		}
-		v.addCode("MOV r0, "+register.String(),
+		v.addCode("MOV r0, "+v.getReturnRegister().String(),
 			"POP {pc}")
 
 	case ast.PairFirstElementNode:
@@ -788,13 +706,9 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+"]")
 
-		// If we don'T want a Pointer then don'T retrieve the value
+		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			if ast.SizeOf(ast.Type(node.Expr, v.symbolTable)) == 1 {
-				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
-			} else {
-				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
-			}
+			v.addCode(load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable)), register.String(), "["+register.String()+"]"))
 		}
 		v.usesFunction(CHECK_NULL_POINTER)
 	case ast.PairSecondElementNode:
@@ -803,13 +717,9 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			"BL "+CHECK_NULL_POINTER.String(),
 			"LDR "+register.String()+", ["+register.String()+", #4]")
 
-		// If we don'T want a Pointer then don'T retrieve the value
+		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			if ast.SizeOf(ast.Type(node.Expr, v.symbolTable)) == 1 {
-				v.addCode("LDRSB " + register.String() + ", [" + register.String() + "]")
-			} else {
-				v.addCode("LDR " + register.String() + ", [" + register.String() + "]")
-			}
+			v.addCode(load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable)), register.String(), "["+register.String()+"]"))
 		}
 		v.usesFunction(CHECK_NULL_POINTER)
 	case ast.UnaryOperatorNode:
