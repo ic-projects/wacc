@@ -11,22 +11,22 @@ type LHSNode interface {
 
 // IdentifierNode is a struct that stores the position and string of an identifier.
 type IdentifierNode struct {
-	pos   Position
-	ident string
+	Pos   Position
+	Ident string
 }
 
 func NewIdentifierNode(pos Position, ident string) IdentifierNode {
 	return IdentifierNode{
-		pos:   pos,
-		ident: ident,
+		Pos:   pos,
+		Ident: ident,
 	}
 }
 
 func (node IdentifierNode) String() string {
-	if node.ident == "" {
+	if node.Ident == "" {
 		return "- main"
 	}
-	return fmt.Sprintf("- %s", node.ident)
+	return fmt.Sprintf("- %s", node.Ident)
 }
 
 // PairFirstElementNode is a struct that stores the position and expression of
@@ -34,29 +34,29 @@ func (node IdentifierNode) String() string {
 //
 // E.g.
 //
-//  fst i
+//  Fst i
 type PairFirstElementNode struct {
-	pos     Position
-	expr    ExpressionNode
-	pointer bool
+	Pos     Position
+	Expr    ExpressionNode
+	Pointer bool
 }
 
 func (fst *PairFirstElementNode) SetPointer(p bool) {
-	fst.pointer = p
+	fst.Pointer = p
 }
 
 func NewPairFirstElementNode(pos Position, expr ExpressionNode) PairFirstElementNode {
 	return PairFirstElementNode{
-		pos:     pos,
-		expr:    expr,
-		pointer: false,
+		Pos:     pos,
+		Expr:    expr,
+		Pointer: false,
 	}
 }
 
 func (node PairFirstElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FST"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -65,29 +65,29 @@ func (node PairFirstElementNode) String() string {
 //
 // E.g.
 //
-//  snd i
+//  Snd i
 type PairSecondElementNode struct {
-	pos     Position
-	expr    ExpressionNode
-	pointer bool
+	Pos     Position
+	Expr    ExpressionNode
+	Pointer bool
 }
 
 func (snd *PairSecondElementNode) SetPointer(p bool) {
-	snd.pointer = p
+	snd.Pointer = p
 }
 
 func NewPairSecondElementNode(pos Position, expr ExpressionNode) PairSecondElementNode {
 	return PairSecondElementNode{
-		pos:     pos,
-		expr:    expr,
-		pointer: false,
+		Pos:     pos,
+		Expr:    expr,
+		Pointer: false,
 	}
 }
 
 func (node PairSecondElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SND"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -97,29 +97,29 @@ func (node PairSecondElementNode) String() string {
 // E.g.
 //  i[4][3+2]
 type ArrayElementNode struct {
-	pos     Position
-	ident   IdentifierNode
-	exprs   []ExpressionNode
-	pointer bool
+	Pos     Position
+	Ident   IdentifierNode
+	Exprs   []ExpressionNode
+	Pointer bool
 }
 
 func (arr *ArrayElementNode) SetPointer(p bool) {
-	arr.pointer = p
+	arr.Pointer = p
 }
 
 func NewArrayElementNode(pos Position, ident IdentifierNode, exprs []ExpressionNode) ArrayElementNode {
 	return ArrayElementNode{
-		pos:     pos,
-		ident:   ident,
-		exprs:   exprs,
-		pointer: false,
+		Pos:     pos,
+		Ident:   ident,
+		Exprs:   exprs,
+		Pointer: false,
 	}
 }
 
 func (node ArrayElementNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s\n", node.ident))
-	for _, e := range node.exprs {
+	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
+	for _, e := range node.Exprs {
 		buf.WriteString(fmt.Sprintln("  - []"))
 		buf.WriteString(indent(fmt.Sprintf("%s\n", e), "    "))
 	}

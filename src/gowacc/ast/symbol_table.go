@@ -27,7 +27,7 @@ func NewSymbolTable() *SymbolTable {
 }
 
 // SymbolTableNode is a struct that stores its scope, the scopes below it and a
-// pointer to the scope above itself.
+// Pointer to the scope above itself.
 type SymbolTableNode struct {
 	scope       map[string]*IdentifierDeclaration
 	childScopes []*SymbolTableNode
@@ -206,7 +206,7 @@ func (node *SymbolTableNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Scope:\n")
 	for _, s := range node.scope {
-		buf.WriteString(fmt.Sprintf("  - Ident: %s, with type: %s\n", s.ident.ident, s.t))
+		buf.WriteString(fmt.Sprintf("  - Ident: %s, with type: %s\n", s.ident.Ident, s.t))
 	}
 	if len(node.childScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")

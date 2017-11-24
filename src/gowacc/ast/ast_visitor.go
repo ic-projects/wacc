@@ -73,22 +73,22 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		case IdentifierNode:
 
 		case PairFirstElementNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case PairSecondElementNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case ArrayElementNode:
-			for _, e := range node.exprs {
+			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
 		case ArrayLiteralNode:
-			for _, e := range node.exprs {
+			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
 		case NewPairNode:
-			Walk(visitor, node.fst)
-			Walk(visitor, node.snd)
+			Walk(visitor, node.Fst)
+			Walk(visitor, node.Snd)
 		case FunctionCallNode:
-			for _, e := range node.exprs {
+			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
 		case BaseType:

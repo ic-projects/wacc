@@ -35,15 +35,15 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	case StringLiteralNode:
 		return NewStringArrayTypeNode()
 	case ArrayElementNode:
-		a, _ := s.SearchForIdent(node.ident.ident)
+		a, _ := s.SearchForIdent(node.Ident.Ident)
 		arr := a.t.(ArrayTypeNode)
-		if dimLeft := arr.dim - len(node.exprs); dimLeft == 0 {
+		if dimLeft := arr.dim - len(node.Exprs); dimLeft == 0 {
 			return arr.t
 		} else {
 			return NewArrayTypeNode(arr.t, dimLeft)
 		}
 	case IdentifierNode:
-		v, _ := s.SearchForIdent(node.ident)
+		v, _ := s.SearchForIdent(node.Ident)
 		return v.t
 	}
 	return nil
