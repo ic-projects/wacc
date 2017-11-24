@@ -1,4 +1,4 @@
-package semantic_checker
+package semantics
 
 import (
 	"bufio"
