@@ -672,11 +672,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case IntegerLiteralNode:
 		register := v.freeRegisters.Pop()
-		v.addCode("LDR " + register.String() + ", =" + strconv.Itoa(node.val))
+		v.addCode("LDR " + register.String() + ", =" + strconv.Itoa(node.Val))
 		v.returnRegisters.Push(register)
 	case BooleanLiteralNode:
 		register := v.freeRegisters.Pop()
-		if node.val {
+		if node.Val {
 			v.addCode("MOV " + register.String() + ", #1") // True
 		} else {
 			v.addCode("MOV " + register.String() + ", #0") // False
@@ -684,11 +684,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.returnRegisters.Push(register)
 	case CharacterLiteralNode:
 		register := v.freeRegisters.Pop()
-		v.addCode("MOV " + register.String() + ", #'" + string(node.val) + "'")
+		v.addCode("MOV " + register.String() + ", #'" + string(node.Val) + "'")
 		v.returnRegisters.Push(register)
 	case StringLiteralNode:
 		register := v.freeRegisters.Pop()
-		label := v.addData(node.val)
+		label := v.addData(node.Val)
 		v.addCode("LDR " + register.String() + ", =" + label)
 		v.returnRegisters.Push(register)
 	case PairLiteralNode:
@@ -696,7 +696,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.returnRegisters.Push(register)
 		v.addCode("LDR " + register.String() + ", =0")
 	case UnaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case NOT:
 
 		case NEG:
@@ -709,7 +709,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		}
 	case BinaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case MUL, DIV, MOD, ADD, SUB:
 
 		case GT, GEQ, LT, LEQ:
@@ -842,7 +842,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.usesFunction(CHECK_NULL_POINTER)
 	case UnaryOperatorNode:
 		register := v.returnRegisters.Peek()
-		switch node.op {
+		switch node.Op {
 		case NOT:
 			v.addCode("EOR " + register.String() + ", " + register.String() + ", #1")
 		case NEG:
@@ -859,7 +859,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case BinaryOperatorNode:
 		operand2 := v.returnRegisters.Pop()
 		operand1 := v.returnRegisters.Pop()
-		switch node.op {
+		switch node.Op {
 		case MUL:
 			v.addCode("SMULL "+operand1.String()+", "+operand2.String()+", "+operand1.String()+", "+operand2.String(),
 				"CMP "+operand2.String()+", "+operand1.String()+", ASR #31",

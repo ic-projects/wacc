@@ -162,47 +162,47 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case UnaryOperator:
 	case BinaryOperator:
 	case IntegerLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 	case BooleanLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 	case CharacterLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
 	case StringLiteralNode:
-		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.Pos)
 	case PairLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.pos)
+		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.Pos)
 	case UnaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case NOT:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		case NEG:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(ArrayTypeNode{})
 		case ORD:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(CHAR))
 		case CHR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		}
 	case BinaryOperatorNode:
-		switch node.op {
+		switch node.Op {
 		case MUL, DIV, MOD, ADD, SUB:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case GT, GEQ, LT, LEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewSetExpectance([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)}))
 		case EQ, NEQ:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewAnyExpectance())
 		case AND, OR:
-			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.pos)
+			foundError = v.typeChecker.seen(NewBaseTypeNode(BOOL)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 			v.typeChecker.expect(NewBaseTypeNode(BOOL))
 		}

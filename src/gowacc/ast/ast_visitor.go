@@ -114,10 +114,10 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		case PairLiteralNode:
 
 		case UnaryOperatorNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case BinaryOperatorNode:
-			Walk(visitor, node.expr1)
-			Walk(visitor, node.expr2)
+			Walk(visitor, node.Expr1)
+			Walk(visitor, node.Expr2)
 		default:
 
 		}
