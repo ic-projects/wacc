@@ -660,13 +660,13 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		case ast.DIV:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", CHECK_OVERFLOW)
+			v.callLibraryFunction("BL", CHECK_DIVIDE)
 			v.addCode("BL __aeabi_idiv")
 			v.addCode("MOV %s, r0", operand1)
 		case ast.MOD:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", CHECK_OVERFLOW)
+			v.callLibraryFunction("BL", CHECK_DIVIDE)
 			v.addCode("BL __aeabi_idivmod")
 			v.addCode("MOV %s, r1", operand1)
 		case ast.ADD:
