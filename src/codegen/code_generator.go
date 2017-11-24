@@ -267,25 +267,27 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("PUSH {lr}")
 	case []ast.ParameterNode:
 		registers := location.ReturnRegisters()
-		i := 0
-		j := 0
+		parametersFromRegsSize := 0
+		parametersFromStackSize := 0
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			dec.IsDeclared = true
 			if n < len(registers) {
-				i += ast.SizeOf(e.T)
-				dec.AddLocation(location.NewStackOffsetLocation(i))
+				// Go through parameters stored in R0 - R4 first
+				parametersFromRegsSize += ast.SizeOf(e.T)
+				dec.AddLocation(location.NewStackOffsetLocation(parametersFromRegsSize))
 			} else {
-				dec.AddLocation(location.NewStackOffsetLocation(j - ast.SizeOf(ast.NewBaseTypeNode(ast.INT))))
-				j -= ast.SizeOf(e.T)
+				// Then go through parameters stored on stack
+				dec.AddLocation(location.NewStackOffsetLocation(parametersFromStackSize - ast.SizeOf(ast.NewBaseTypeNode(ast.INT))))
+				parametersFromStackSize -= ast.SizeOf(e.T)
 			}
 		}
 
-		if i > 0 {
-			v.addCode("SUB sp, sp, #%d", i)
+		if parametersFromRegsSize > 0 {
+			v.subtractFromStackPointer(parametersFromRegsSize)
 		}
-		v.symbolTable.CurrentScope.ScopeSize = i
-		v.currentStackPos += i
+
+		v.symbolTable.CurrentScope.ScopeSize = parametersFromRegsSize
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
@@ -327,7 +329,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case ast.ReadNode:
-
 		if ident, ok := node.Lhs.(ast.IdentifierNode); ok {
 			dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
 			v.addCode("ADD %s, %s", v.getFreeRegister(), v.PointerTo(dec.Location))
@@ -472,17 +473,14 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				v.addCode("MOV %s, %s", registers[i], register)
 			} else {
 				f, _ := v.symbolTable.SearchForFunction(node.Ident.Ident)
-				v.addCode("SUB sp, sp, #%d", ast.SizeOf(f.Params[i].T))
+				v.subtractFromStackPointer(ast.SizeOf(f.Params[i].T))
 				v.addCode("%s %s, [sp]", store(ast.SizeOf(f.Params[i].T)), register)
-				//		v.addCode("PUSH {" + register.String() + "}")
 				size += ast.SizeOf(f.Params[i].T)
-				v.currentStackPos += ast.SizeOf(f.Params[i].T)
 			}
 		}
 		v.addCode("BL f_%s", node.Ident.Ident)
 		if size > 0 {
-			v.addCode("ADD sp, sp, #%d", size)
-			v.currentStackPos -= size
+			v.addToStackPointer(size)
 		}
 
 		v.addCode("MOV %s, r0", v.getFreeRegister())
@@ -514,7 +512,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		case ast.LEN:
 		case ast.ORD:
 		case ast.CHR:
-
 		}
 	case ast.BinaryOperatorNode:
 		operand2 := location.UNDEFINED
@@ -600,14 +597,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			dec.AddLocation(location.NewStackOffsetLocation(v.currentStackPos + size))
 		}
 		if size != 0 {
-			i := size
-			for ; i > 1024; i -= 1024 {
-				v.addCode("SUB sp, sp, #1024")
-			}
-			v.addCode("SUB sp, sp, #%d", i)
+			v.subtractFromStackPointer(size)
 		}
 		v.symbolTable.CurrentScope.ScopeSize = size
-		v.currentStackPos += size
 	}
 }
 
@@ -616,17 +608,21 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case []ast.StatementNode:
 		if v.symbolTable.CurrentScope.ScopeSize != 0 {
-			i := v.symbolTable.CurrentScope.ScopeSize
-			v.currentStackPos -= i
-			for ; i > 1024; i -= 1024 {
-				v.addCode("ADD sp, sp, #1024")
-			}
-			v.addCode("ADD sp, sp, #%d", i)
+			v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 		}
 		v.symbolTable.MoveUpScope()
 	case ast.FunctionNode:
 		if v.symbolTable.CurrentScope.ScopeSize > 0 {
-			v.addCode("ADD sp, sp, #%d", v.symbolTable.CurrentScope.ScopeSize)
+			// Cannot add more than 1024 from SP at once, so do it in multiple
+			// iterations.
+
+			// Not using addToStackPointer function as we want v.currentStackPos to be
+			// unchanged.
+			i := v.symbolTable.CurrentScope.ScopeSize
+			for ; i > 1024; i -= 1024 {
+				v.addCode("ADD sp, sp, #1024")
+			}
+			v.addCode("ADD sp, sp, #%d", i)
 		}
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
@@ -655,11 +651,20 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addCode("BL exit")
 	case ast.ReturnNode:
-		i := 0
-		for t := v.symbolTable.CurrentScope; t != v.symbolTable.Head; t = t.ParentScope {
-			i += t.ScopeSize
+		sizeOfAllVariablesInScope := 0
+		for scope := v.symbolTable.CurrentScope; scope != v.symbolTable.Head; scope = scope.ParentScope {
+			sizeOfAllVariablesInScope += scope.ScopeSize
 		}
-		if i > 0 {
+		if sizeOfAllVariablesInScope > 0 {
+			// Cannot add more than 1024 from SP at once, so do it in multiple
+			// iterations.
+
+			// Not using addToStackPointer function as we want v.currentStackPos to be
+			// unchanged.
+			i := sizeOfAllVariablesInScope
+			for ; i > 1024; i -= 1024 {
+				v.addCode("ADD sp, sp, #1024")
+			}
 			v.addCode("ADD sp, sp, #%d", i)
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
@@ -698,6 +703,32 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		case ast.CHR:
 		}
 	}
+}
+
+// addToStackPointer increments the stack pointer by the size parameter.
+// If size is greater than 1024 then it will increment in multiple iterations.
+func (v *CodeGenerator) addToStackPointer(size int) {
+	// Cannot add more than 1024 from SP at once, so do it in multiple
+	// iterations.
+	i := size
+	v.currentStackPos -= i
+	for ; i > 1024; i -= 1024 {
+		v.addCode("ADD sp, sp, #1024")
+	}
+	v.addCode("ADD sp, sp, #%d", i)
+}
+
+// subtractFromStackPointer decrements the stack pointer by the size parameter.
+// If size is greater than 1024 then it will decrement in multiple iterations.
+func (v *CodeGenerator) subtractFromStackPointer(size int) {
+	// Cannot subtract more than 1024 from SP at once, so do it in multiple
+	// iterations.
+	i := size
+	v.currentStackPos += size
+	for ; i > 1024; i -= 1024 {
+		v.addCode("SUB sp, sp, #1024")
+	}
+	v.addCode("SUB sp, sp, #%d", i)
 }
 
 // getFreeRegister pops a register from freeRegisters, and returns it
