@@ -11,12 +11,12 @@ type StatementNode interface {
 
 // SkipNode is a struct that stores the position of a skip statement.
 type SkipNode struct {
-	pos Position
+	Pos Position
 }
 
 func NewSkipNode(pos Position) SkipNode {
 	return SkipNode{
-		pos: pos,
+		Pos: pos,
 	}
 }
 
@@ -31,18 +31,18 @@ func (node SkipNode) String() string {
 //
 //  int i = 5
 type DeclareNode struct {
-	pos   Position
-	t     TypeNode
-	ident IdentifierNode
-	rhs   RHSNode
+	Pos   Position
+	T     TypeNode
+	Ident IdentifierNode
+	Rhs   RHSNode
 }
 
 func NewDeclareNode(pos Position, t TypeNode, ident IdentifierNode, rhs RHSNode) DeclareNode {
 	return DeclareNode{
-		pos:   pos,
-		t:     t,
-		ident: ident,
-		rhs:   rhs,
+		Pos:   pos,
+		T:     t,
+		Ident: ident,
+		Rhs:   rhs,
 	}
 }
 
@@ -50,11 +50,11 @@ func (node DeclareNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- DECLARE"))
 	buf.WriteString(fmt.Sprintln("  - TYPE"))
-	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.t), "    "))
+	buf.WriteString(indent(fmt.Sprintf("- %s\n", node.T), "    "))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.ident), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Ident), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s\n", node.rhs), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s\n", node.Rhs), "    "))
 	return buf.String()
 }
 
@@ -64,16 +64,16 @@ func (node DeclareNode) String() string {
 // E.g.
 //  i = 4
 type AssignNode struct {
-	pos Position
-	lhs LHSNode
-	rhs RHSNode
+	Pos Position
+	Lhs LHSNode
+	Rhs RHSNode
 }
 
 func NewAssignNode(pos Position, lhs LHSNode, rhs RHSNode) AssignNode {
 	return AssignNode{
-		pos: pos,
-		lhs: lhs,
-		rhs: rhs,
+		Pos: pos,
+		Lhs: lhs,
+		Rhs: rhs,
 	}
 }
 
@@ -81,9 +81,9 @@ func (node AssignNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ASSIGNMENT"))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.lhs), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Lhs), "    "))
 	buf.WriteString(fmt.Sprintln("  - RHS"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.rhs), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Rhs), "    "))
 	return buf.String()
 }
 
@@ -93,21 +93,21 @@ func (node AssignNode) String() string {
 // E.g.
 //  read i
 type ReadNode struct {
-	pos Position
-	lhs LHSNode
+	Pos Position
+	Lhs LHSNode
 }
 
 func NewReadNode(pos Position, lhs LHSNode) ReadNode {
 	return ReadNode{
-		pos: pos,
-		lhs: lhs,
+		Pos: pos,
+		Lhs: lhs,
 	}
 }
 
 func (node ReadNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- READ"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.lhs), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Lhs), "  "))
 	return buf.String()
 }
 
@@ -117,21 +117,21 @@ func (node ReadNode) String() string {
 //
 //  free p
 type FreeNode struct {
-	pos  Position
-	expr ExpressionNode
+	Pos  Position
+	Expr ExpressionNode
 }
 
 func NewFreeNode(pos Position, expr ExpressionNode) FreeNode {
 	return FreeNode{
-		pos:  pos,
-		expr: expr,
+		Pos:  pos,
+		Expr: expr,
 	}
 }
 
 func (node FreeNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FREE"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -141,21 +141,21 @@ func (node FreeNode) String() string {
 //
 //  return 5
 type ReturnNode struct {
-	pos  Position
-	expr ExpressionNode
+	Pos  Position
+	Expr ExpressionNode
 }
 
 func NewReturnNode(pos Position, expr ExpressionNode) ReturnNode {
 	return ReturnNode{
-		pos:  pos,
-		expr: expr,
+		Pos:  pos,
+		Expr: expr,
 	}
 }
 
 func (node ReturnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- RETURN"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -165,21 +165,21 @@ func (node ReturnNode) String() string {
 //
 //  exit 255
 type ExitNode struct {
-	pos  Position
-	expr ExpressionNode
+	Pos  Position
+	Expr ExpressionNode
 }
 
 func NewExitNode(pos Position, expr ExpressionNode) ExitNode {
 	return ExitNode{
-		pos:  pos,
-		expr: expr,
+		Pos:  pos,
+		Expr: expr,
 	}
 }
 
 func (node ExitNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- EXIT"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -189,21 +189,21 @@ func (node ExitNode) String() string {
 //
 //  print "printing"
 type PrintNode struct {
-	pos  Position
-	expr ExpressionNode
+	Pos  Position
+	Expr ExpressionNode
 }
 
 func NewPrintNode(pos Position, expr ExpressionNode) PrintNode {
 	return PrintNode{
-		pos:  pos,
-		expr: expr,
+		Pos:  pos,
+		Expr: expr,
 	}
 }
 
 func (node PrintNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINT"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -213,21 +213,21 @@ func (node PrintNode) String() string {
 //
 //  println "printing"
 type PrintlnNode struct {
-	pos  Position
-	expr ExpressionNode
+	Pos  Position
+	Expr ExpressionNode
 }
 
 func NewPrintlnNode(pos Position, expr ExpressionNode) PrintlnNode {
 	return PrintlnNode{
-		pos:  pos,
-		expr: expr,
+		Pos:  pos,
+		Expr: expr,
 	}
 }
 
 func (node PrintlnNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- PRINTLN"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "  "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -238,18 +238,18 @@ func (node PrintlnNode) String() string {
 //
 //  if true then skip else skip fi
 type IfNode struct {
-	pos       Position
-	expr      ExpressionNode
-	ifStats   []StatementNode
-	elseStats []StatementNode
+	Pos       Position
+	Expr      ExpressionNode
+	IfStats   []StatementNode
+	ElseStats []StatementNode
 }
 
 func NewIfNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseStats []StatementNode) IfNode {
 	return IfNode{
-		pos:       pos,
-		expr:      expr,
-		ifStats:   ifStats,
-		elseStats: elseStats,
+		Pos:       pos,
+		Expr:      expr,
+		IfStats:   ifStats,
+		ElseStats: elseStats,
 	}
 }
 
@@ -257,13 +257,13 @@ func (node IfNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- IF"))
 	buf.WriteString(indent(fmt.Sprintln("- CONDITION"), "  "))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "    "))
 	buf.WriteString(indent(fmt.Sprintln("- THEN"), "  "))
-	for _, s := range node.ifStats {
+	for _, s := range node.IfStats {
 		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
 	buf.WriteString(indent(fmt.Sprintln("- ELSE"), "  "))
-	for _, s := range node.elseStats {
+	for _, s := range node.ElseStats {
 		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
@@ -276,16 +276,16 @@ func (node IfNode) String() string {
 //
 //  while true do skip done
 type LoopNode struct {
-	pos   Position
-	expr  ExpressionNode
-	stats []StatementNode
+	Pos   Position
+	Expr  ExpressionNode
+	Stats []StatementNode
 }
 
 func NewLoopNode(pos Position, expr ExpressionNode, stats []StatementNode) LoopNode {
 	return LoopNode{
-		pos:   pos,
-		expr:  expr,
-		stats: stats,
+		Pos:   pos,
+		Expr:  expr,
+		Stats: stats,
 	}
 }
 
@@ -293,9 +293,9 @@ func (node LoopNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- LOOP"))
 	buf.WriteString(fmt.Sprintln("  - CONDITION"))
-	buf.WriteString(indent(fmt.Sprintf("%s", node.expr), "    "))
+	buf.WriteString(indent(fmt.Sprintf("%s", node.Expr), "    "))
 	buf.WriteString(fmt.Sprintln("  - DO"))
-	for _, s := range node.stats {
+	for _, s := range node.Stats {
 		buf.WriteString(indent(fmt.Sprintf("%s", s), "    "))
 	}
 	return buf.String()
@@ -307,21 +307,21 @@ func (node LoopNode) String() string {
 //
 //  begin skip end
 type ScopeNode struct {
-	pos   Position
-	stats []StatementNode
+	Pos   Position
+	Stats []StatementNode
 }
 
 func NewScopeNode(pos Position, stats []StatementNode) ScopeNode {
 	return ScopeNode{
-		pos:   pos,
-		stats: stats,
+		Pos:   pos,
+		Stats: stats,
 	}
 }
 
 func (node ScopeNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SCOPE"))
-	for _, s := range node.stats {
+	for _, s := range node.Stats {
 		buf.WriteString(indent(fmt.Sprintf("%s", s), "  "))
 	}
 	return buf.String()

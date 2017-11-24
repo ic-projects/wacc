@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// RHSNode is an empty interface for lhs nodes to implement.
+// RHSNode is an empty interface for Lhs nodes to implement.
 type RHSNode interface {
 }
 

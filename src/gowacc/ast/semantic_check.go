@@ -55,11 +55,11 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case SkipNode:
 	case DeclareNode:
-		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.Ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.pos, false, true, node.ident.Ident), declareNode.pos)
+		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
+			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.pos)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.expect(node.t)
+			v.typeChecker.expect(node.T)
 		}
 	case AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
@@ -227,8 +227,8 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	case ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	case DeclareNode:
-		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.ident.Ident); !ok {
-			v.symbolTable.AddToScope(node.ident.Ident, node)
+		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); !ok {
+			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}
 	case ParameterNode:
 		if _, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {

@@ -45,31 +45,31 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		case SkipNode:
 
 		case DeclareNode:
-			Walk(visitor, node.rhs)
+			Walk(visitor, node.Rhs)
 		case AssignNode:
-			Walk(visitor, node.lhs)
-			Walk(visitor, node.rhs)
+			Walk(visitor, node.Lhs)
+			Walk(visitor, node.Rhs)
 		case ReadNode:
-			Walk(visitor, node.lhs)
+			Walk(visitor, node.Lhs)
 		case FreeNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case ReturnNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case ExitNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case PrintNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case PrintlnNode:
-			Walk(visitor, node.expr)
+			Walk(visitor, node.Expr)
 		case IfNode:
-			Walk(visitor, node.expr)
-			Walk(visitor, node.ifStats)
-			Walk(visitor, node.elseStats)
+			Walk(visitor, node.Expr)
+			Walk(visitor, node.IfStats)
+			Walk(visitor, node.ElseStats)
 		case LoopNode:
-			Walk(visitor, node.expr)
-			Walk(visitor, node.stats)
+			Walk(visitor, node.Expr)
+			Walk(visitor, node.Stats)
 		case ScopeNode:
-			Walk(visitor, node.stats)
+			Walk(visitor, node.Stats)
 		case IdentifierNode:
 
 		case PairFirstElementNode:

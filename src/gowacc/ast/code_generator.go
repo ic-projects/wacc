@@ -401,10 +401,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 	case AssignNode:
 		// Rhs
-		Walk(v, node.rhs)
+		Walk(v, node.Rhs)
 		rhsRegister := v.returnRegisters.Pop()
 		// Lhs
-		switch lhsNode := node.lhs.(type) {
+		switch lhsNode := node.Lhs.(type) {
 		case ArrayElementNode:
 			Walk(v, lhsNode)
 			lhsRegister := v.returnRegisters.Pop()
@@ -444,17 +444,17 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.freeRegisters.Push(rhsRegister)
 	case ReadNode:
 
-		if ident, ok := node.lhs.(IdentifierNode); ok {
+		if ident, ok := node.Lhs.(IdentifierNode); ok {
 			register := v.freeRegisters.Pop()
 			dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
 			v.addCode("ADD " + register.String() + ", " + dec.location.PointerTo())
 			v.returnRegisters.Push(register)
 		} else {
-			Walk(v, node.lhs)
+			Walk(v, node.Lhs)
 		}
 		register := v.returnRegisters.Pop()
 		v.addCode("MOV r0, " + register.String())
-		if SizeOf(Type(node.lhs, v.symbolTable)) == 1 {
+		if SizeOf(Type(node.Lhs, v.symbolTable)) == 1 {
 			v.addCode("BL " + READ_CHAR.String())
 			v.usesFunction(READ_CHAR)
 		} else {
@@ -478,17 +478,17 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		endifLabel := v.labelCount + 1
 		v.labelCount += 2
 		// Cond
-		Walk(v, node.expr)
+		Walk(v, node.Expr)
 		r := v.returnRegisters.Pop()
 		v.addCode(fmt.Sprintf("CMP %s, #0", r))
 		v.freeRegisters.Push(r)
 		v.addCode(fmt.Sprintf("BEQ ELSE%d", elseLabel))
 		// If
-		Walk(v, node.ifStats)
+		Walk(v, node.IfStats)
 		v.addCode(fmt.Sprintf("B ENDIF%d", endifLabel))
 		// Else
 		v.addCode(fmt.Sprintf("ELSE%d:", elseLabel))
-		Walk(v, node.elseStats)
+		Walk(v, node.ElseStats)
 		// Fi
 		v.addCode(fmt.Sprintf("ENDIF%d:", endifLabel))
 	case LoopNode:
@@ -500,11 +500,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		// Do
 		v.addCode(fmt.Sprintf("DO%d:", doLabel))
 		v.labelCount++
-		Walk(v, node.stats)
+		Walk(v, node.Stats)
 		// While
 		v.addCode(fmt.Sprintf("WHILE%d:", whileLabel))
 		v.labelCount++
-		Walk(v, node.expr)
+		Walk(v, node.Expr)
 		r := v.returnRegisters.Pop()
 		v.addCode(fmt.Sprintf("CMP %s, #1", r))
 		v.freeRegisters.Push(r)
@@ -769,7 +769,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			"BL "+FREE.String())
 		v.usesFunction(FREE)
 	case DeclareNode:
-		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.ident.Ident)
+		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.isDeclared = true
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
@@ -784,12 +784,12 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
 		v.addCode("MOV r0, " + register.String())
-		v.addPrint(Type(node.expr, v.symbolTable))
+		v.addPrint(Type(node.Expr, v.symbolTable))
 	case PrintlnNode:
 		register := v.returnRegisters.Pop()
 		v.freeRegisters.Push(register)
 		v.addCode("MOV r0, " + register.String())
-		v.addPrint(Type(node.expr, v.symbolTable))
+		v.addPrint(Type(node.Expr, v.symbolTable))
 		v.addCode("BL " + PRINT_LN.String())
 		v.usesFunction(PRINT_LN)
 	case ExitNode:

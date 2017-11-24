@@ -16,13 +16,13 @@ func FinalStatIsValid(s StatementNode) bool {
 	case ExitNode:
 		return true
 	case ScopeNode:
-		stats := s.(ScopeNode).stats
+		stats := s.(ScopeNode).Stats
 		finalStat := stats[len(stats)-1]
 		return FinalStatIsValid(finalStat)
 	case IfNode:
-		ifStats := s.(IfNode).ifStats
+		ifStats := s.(IfNode).IfStats
 		ifFinalStat := ifStats[len(ifStats)-1]
-		elseStats := s.(IfNode).elseStats
+		elseStats := s.(IfNode).ElseStats
 		elseFinalStat := elseStats[len(elseStats)-1]
 		return FinalStatIsValid(ifFinalStat) && FinalStatIsValid(elseFinalStat)
 	default:

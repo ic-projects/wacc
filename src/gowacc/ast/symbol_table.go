@@ -65,9 +65,9 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 		}
 	case DeclareNode:
 		return &IdentifierDeclaration{
-			pos:        node.pos,
-			t:          node.t,
-			ident:      node.ident,
+			pos:        node.Pos,
+			t:          node.T,
+			ident:      node.Ident,
 			isDeclared: false,
 		}
 	default:
