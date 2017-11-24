@@ -77,6 +77,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	}
 }
 
+// AddLocation will add a location to a declaration.
 func (dec *IdentifierDeclaration) AddLocation(location *location.Location) {
 	dec.Location = location
 }
