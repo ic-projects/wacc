@@ -304,7 +304,6 @@ func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case ast.Program:
-
 	case ast.FunctionNode:
 		v.currentStackPos = 0
 		v.freeRegisters.stack = []location.Register{location.R11, location.R10, location.R9, location.R8, location.R7, location.R6, location.R5, location.R4}
@@ -347,11 +346,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			}
 		}
 	case ast.ParameterNode:
-
 	case ast.SkipNode:
-
 	case ast.DeclareNode:
-
 	case ast.AssignNode:
 		// Rhs
 		ast.Walk(v, node.Rhs)
@@ -414,15 +410,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.freeRegisters.Push(register)
 	case ast.FreeNode:
-
 	case ast.ReturnNode:
-
 	case ast.ExitNode:
-
 	case ast.PrintNode:
-
 	case ast.PrintlnNode:
-
 	case ast.IfNode:
 		// Labels
 		elseLabel := v.labelCount + 1
@@ -461,7 +452,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.freeRegisters.Push(r)
 		v.addCode("BEQ DO%d", doLabel)
 	case ast.ScopeNode:
-
 	case ast.IdentifierNode:
 		register := v.freeRegisters.Pop()
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
@@ -472,9 +462,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.returnRegisters.Push(register)
 	case ast.PairFirstElementNode:
-
 	case ast.PairSecondElementNode:
-
 	case ast.ArrayElementNode:
 		ast.Walk(v, node.Ident)
 		identRegister := v.returnRegisters.Pop()
@@ -604,15 +592,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.returnRegisters.Push(register)
 		v.addCode("MOV %s, r0", register)
 	case ast.BaseTypeNode:
-
 	case ast.ArrayTypeNode:
-
 	case ast.PairTypeNode:
-
 	case ast.UnaryOperator:
-
 	case ast.BinaryOperator:
-
 	case ast.IntegerLiteralNode:
 		register := v.freeRegisters.Pop()
 		v.addCode("LDR %s, =%d", register, node.Val)
@@ -641,13 +624,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case ast.UnaryOperatorNode:
 		switch node.Op {
 		case ast.NOT:
-
 		case ast.NEG:
-
 		case ast.LEN:
-
 		case ast.ORD:
-
 		case ast.CHR:
 
 		}
@@ -854,9 +833,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		case ast.LEN:
 			v.addCode("LDR %s, [%s]", register, register)
 		case ast.ORD:
-
 		case ast.CHR:
-
 		}
 	}
 }
