@@ -16,7 +16,7 @@ IDENT ← !RESERVED ((
 	[0-9])*
 ) {
 
-	return ret(ast.NewIdentifierNode(
+	return ret(NewIdentifierNode(
 		c.getPosition(),
 		string(c.text),
 	))
@@ -69,9 +69,9 @@ PAIRELEM ←
 // PairFirstElementNode
 FST ← "fst" __ e:EXPR {
 
-	return ret(ast.NewPairFirstElementNode(
+	return ret(NewPairFirstElementNode(
 		c.getPosition(),
-		e.(ast.ExpressionNode),
+		e.(ExpressionNode),
 	))
 
 }
@@ -79,9 +79,9 @@ FST ← "fst" __ e:EXPR {
 // PairSecondElementNode
 SND ← "snd" __ e:EXPR {
 
-	return ret(ast.NewPairSecondElementNode(
+	return ret(NewPairSecondElementNode(
 		c.getPosition(),
-		e.(ast.ExpressionNode),
+		e.(ExpressionNode),
 	))
 
 }
@@ -89,17 +89,17 @@ SND ← "snd" __ e:EXPR {
 // ArrayElementNode
 ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
 
-	var expressionNodes  []ast.ExpressionNode
+	var expressionNodes  []ExpressionNode
 	for _, e := range toSlice(exprs) {
 			expressionNodes = append(
 				expressionNodes,
-				getItem(e, 3).(ast.ExpressionNode),
+				getItem(e, 3).(ExpressionNode),
 			)
 	}
 
-	return ret(ast.NewArrayElementNode(
+	return ret(NewArrayElementNode(
 		c.getPosition(),
-		ident.(*ast.IdentifierNode), 
+		ident.(*IdentifierNode),
 		expressionNodes,
 	))
 

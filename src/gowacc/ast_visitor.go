@@ -1,4 +1,4 @@
-package ast
+package main
 
 // Visitor is an interface that must be implemented to use the walker.
 type Visitor interface {

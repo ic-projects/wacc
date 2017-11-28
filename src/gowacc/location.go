@@ -1,6 +1,6 @@
-package location
+package main
 
-// Location is a struct which stores a particular location. This can be a
+// Location is a struct which stores a particular  This can be a
 // register, an address (on the heap) or a position on the stack.
 type Location struct {
 	Register Register

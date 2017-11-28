@@ -1,4 +1,4 @@
-package utils
+package main
 
 // Max returns the greater of two integer values
 func Max(x int, y int) int {

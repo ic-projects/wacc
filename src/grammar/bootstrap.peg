@@ -2,7 +2,6 @@
     package main
 
     import (
-        "ast"
         "fmt"
         "strconv"
         "strings"
@@ -11,8 +10,8 @@
 
     // getPosition is a function to create an AST position reference from the 
     // current pigeon object.
-    func (c *current) getPosition() ast.Position {
-        return ast.NewPosition(c.pos.line, c.pos.col, c.pos.offset)
+    func (c *current) getPosition() Position {
+        return NewPosition(c.pos.line, c.pos.col, c.pos.offset)
     }
 
     // toSlice is a helper function that asserts its argument is a slice.
@@ -38,9 +37,9 @@
 
     // parseBinOps is a helper function to build a binary operations tree
     // given two expressions, which is used in wacc_expression.peg.
-    func parseBinOps(e1 interface{}, e2 interface{}, p ast.Position) (interface{}, error) {
+    func parseBinOps(e1 interface{}, e2 interface{}, p Position) (interface{}, error) {
         if (len(toSlice(e2)) > 0) {
-            return ret(ast.BuildBinOpTree(
+            return ret(BuildBinOpTree(
                 e1,
                 toSlice(e2),
                 p,

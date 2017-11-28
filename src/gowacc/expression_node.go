@@ -1,10 +1,9 @@
-package ast
+package main
 
 import (
 	"bytes"
 	"fmt"
 	"strconv"
-	"utils"
 )
 
 // ExpressionNode is an empty interface for expression nodes to implement.
@@ -334,7 +333,7 @@ func (node UnaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 
 	return buf.String()
 }
@@ -372,8 +371,8 @@ func (node BinaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
 
 	return buf.String()
 }
@@ -385,9 +384,9 @@ func Weight(n ExpressionNode) int {
 	case *UnaryOperatorNode:
 		return Weight(node.Expr)
 	case *BinaryOperatorNode:
-		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
-		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
-		return utils.Min(lhsWeight, rhsWeight)
+		lhsWeight := Max(Weight(node.Expr1), Weight(node.Expr2)+1)
+		rhsWeight := Max(Weight(node.Expr1)+1, Weight(node.Expr2))
+		return Min(lhsWeight, rhsWeight)
 	}
 	return 1
 }

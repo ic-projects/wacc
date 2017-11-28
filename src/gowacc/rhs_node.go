@@ -1,9 +1,8 @@
-package ast
+package main
 
 import (
 	"bytes"
 	"fmt"
-	"utils"
 )
 
 // RHSNode is an empty interface for Lhs nodes to implement.
@@ -40,7 +39,7 @@ func (node ArrayLiteralNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
 	for _, e := range node.Exprs {
-		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "  "))
+		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
 	}
 	return buf.String()
 }
@@ -72,10 +71,10 @@ func NewNewPairNode(
 func (node NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
-	buf.WriteString(utils.Indent(fmt.Sprintln("- FST"), "  "))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Fst), "    "))
-	buf.WriteString(utils.Indent(fmt.Sprintln("- SND"), "  "))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
+	buf.WriteString(Indent(fmt.Sprintln("- FST"), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Fst), "    "))
+	buf.WriteString(Indent(fmt.Sprintln("- SND"), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
 }
 

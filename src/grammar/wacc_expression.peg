@@ -65,23 +65,23 @@ UNARYOPER ←
 	CHR
 
 NOT ← '!' {
-	return ret(ast.NOT)
+	return ret(NOT)
 }
 
 NEG ← '-' {
-	return ret(ast.NEG)
+	return ret(NEG)
 }
 
 LEN ← "len" __ {
-	return ret(ast.LEN)
+	return ret(LEN)
 }
 
 ORD ← "ord" __ {
-	return ret(ast.ORD)
+	return ret(ORD)
 }
 
 CHR ← "chr" __ {
-	return ret(ast.CHR)
+	return ret(CHR)
 }
 
 // BinaryOperator
@@ -105,55 +105,55 @@ EQUOP ←
 	NEQ
 
 OR ← "||" {
-	return ret(ast.OR)
+	return ret(OR)
 }
 
 AND ← "&&" {
-	return ret(ast.AND)
+	return ret(AND)
 }
 
 MULT ← '*' {
-	return ret(ast.MUL)
+	return ret(MUL)
 }
 
 DIV ← '/' {
-	return ret(ast.DIV)
+	return ret(DIV)
 }
 
 MOD ← '%' {
-	return ret(ast.MOD)
+	return ret(MOD)
 }
 
 SUB ← '-' {
-	return ret(ast.SUB)
+	return ret(SUB)
 }
 
 PLUS ← '+' {
-	return ret(ast.ADD)
+	return ret(ADD)
 }
 
 GEQ ← ">=" {
-	return ret(ast.GEQ)
+	return ret(GEQ)
 }
 
 GT ← '>' {
-	return ret(ast.GT)
+	return ret(GT)
 }
 
 LEQ ← "<=" {
-	return ret(ast.LEQ)
+	return ret(LEQ)
 }
 
 LT ← '<' {
-	return ret(ast.LT)
+	return ret(LT)
 }
 
 EQ ← "==" {
-	return ret(ast.EQ)
+	return ret(EQ)
 }
 
 NEQ ← "!=" {
-	return ret(ast.NEQ)
+	return ret(NEQ)
 }
 
 // IntegerLiteralNode
@@ -173,7 +173,7 @@ INTLITER ← INTSIGN? _ DIGIT+ {
 		err = errors.New(errmsg)
 	}
 
-	return ast.NewIntegerLiteralNode(
+	return NewIntegerLiteralNode(
 		c.getPosition(),
 		int(i),
 	), err
@@ -193,7 +193,7 @@ BOOLLITER ←
 
 TRUE ← "true" {
 
-	return ret(ast.NewBooleanLiteralNode(
+	return ret(NewBooleanLiteralNode(
 		c.getPosition(),
 		true,
 	))
@@ -202,7 +202,7 @@ TRUE ← "true" {
 
 FALSE ← "false" {
 
-	return ret(ast.NewBooleanLiteralNode(
+	return ret(NewBooleanLiteralNode(
 		c.getPosition(),
 		false,
 	))
@@ -214,7 +214,7 @@ CHARLITER ← "'" char:CHARACTER "'" {
 
 	r, _ := utf8.DecodeRune(char.([]byte))
 
-	return ret(ast.NewCharacterLiteralNode(
+	return ret(NewCharacterLiteralNode(
 		c.getPosition(),
 		r,
 	))
@@ -226,7 +226,7 @@ CHARLITER ← "'" char:CHARACTER "'" {
 	errmsg := fmt.Sprintf("Invalid character, %s (must be escaped)", c.text)
 	err := errors.New(errmsg)
 
-	return ast.NewCharacterLiteralNode(
+	return NewCharacterLiteralNode(
 		c.getPosition(),
 		r,
 	), err
@@ -270,7 +270,7 @@ ESCAPEDCHAR ← [0btnfr""''\\]
 // StringLiteralNode
 STRLITER ← '"' (str:STR) '"' {
 
-	return ret(ast.NewStringLiteralNode(
+	return ret(NewStringLiteralNode(
 		c.getPosition(),
 		str.(string),
 	))
@@ -285,7 +285,7 @@ STR ← CHARACTER* {
 // PairLiteralNode
 PAIRLITER ← "null" {
 
-	return ret(ast.NewPairLiteralNode(
+	return ret(NewPairLiteralNode(
 		c.getPosition(),
 	))
 
@@ -298,10 +298,10 @@ PAIRLITER ← "null" {
 // UnaryOperatorNode
 UNARYEXPR ← op:UNARYOPER _ expr:EXPR {
 
-	return ret(ast.NewUnaryOperatorNode(
+	return ret(NewUnaryOperatorNode(
 		c.getPosition(),
-		op.(ast.UnaryOperator),
-		expr.(ast.ExpressionNode),
+		op.(UnaryOperator),
+		expr.(ExpressionNode),
 	))
 
 }

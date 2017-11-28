@@ -2,8 +2,8 @@
 TYPE ← t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
 
 	if (len(toSlice(array)) > 0) {
-		return ret(ast.NewArrayTypeNode(
-			t.(ast.TypeNode),
+		return ret(NewArrayTypeNode(
+			t.(TypeNode),
 			len(toSlice(array)),
 		))
 	}
@@ -20,23 +20,23 @@ BASETYPE ←
 	STRING
 
 INT ← "int" {
-	return ret(ast.NewBaseTypeNode(ast.INT))
+	return ret(NewBaseTypeNode(INT))
 }
 
 BOOL ← "bool" {
-	return ret(ast.NewBaseTypeNode(ast.BOOL))
+	return ret(NewBaseTypeNode(BOOL))
 }
 
 CHAR ← "char" {
-	return ret(ast.NewBaseTypeNode(ast.CHAR))
+	return ret(NewBaseTypeNode(CHAR))
 }
 
 STRING ← "string" {
-	return ret(ast.NewStringArrayTypeNode())
+	return ret(NewStringArrayTypeNode())
 }
 
 PAIR ← "pair" {
-	return ret(ast.NewBaseTypeNode(ast.PAIR))
+	return ret(NewBaseTypeNode(PAIR))
 }
 
 // ArrayTypeNode
@@ -44,17 +44,17 @@ ARRAYTYPE ← '[' _ ']'
 
 // PairTypeNode
 PAIRTYPE ← "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
-	return ret(ast.NewPairTypeNode(
-		t1.(ast.TypeNode),
-		t2.(ast.TypeNode),
+	return ret(NewPairTypeNode(
+		t1.(TypeNode),
+		t2.(TypeNode),
 	))
 }
 
 PAIRELEMTYPE ← (t:BASETYPE array:(_ ARRAYTYPE)*) {
 
 	if (len(array.([]interface{})) > 0) {
-		return ret(ast.NewArrayTypeNode(
-			t.(ast.TypeNode),
+		return ret(NewArrayTypeNode(
+			t.(TypeNode),
 			len(toSlice(array)),
 		))
 	}
@@ -63,8 +63,8 @@ PAIRELEMTYPE ← (t:BASETYPE array:(_ ARRAYTYPE)*) {
 
 } / (t:PAIRTYPE array:(_ ARRAYTYPE)+) {
 
-	return ret(ast.NewArrayTypeNode(
-		t.(ast.TypeNode),
+	return ret(NewArrayTypeNode(
+		t.(TypeNode),
 		len(toSlice(array)),
 	))
 

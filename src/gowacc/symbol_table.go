@@ -1,10 +1,8 @@
-package ast
+package main
 
 import (
 	"bytes"
 	"fmt"
-	"location"
-	"utils"
 )
 
 /******************** SYMBOL TABLE ********************/
@@ -58,7 +56,7 @@ type IdentifierDeclaration struct {
 	Pos        Position
 	T          TypeNode
 	ident      *IdentifierNode
-	Location   *location.Location
+	Location   *Location
 	IsDeclared bool
 }
 
@@ -84,7 +82,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 }
 
 // AddLocation will add a location to a declaration.
-func (dec *IdentifierDeclaration) AddLocation(location *location.Location) {
+func (dec *IdentifierDeclaration) AddLocation(location *Location) {
 	dec.Location = location
 }
 
@@ -214,7 +212,7 @@ func (table *SymbolTable) String() string {
 	}
 	buf.WriteString("- Scopes:\n")
 	for _, s := range table.Head.childScopes {
-		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
+		buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
 }
@@ -230,7 +228,7 @@ func (node *SymbolTableNode) String() string {
 	if len(node.childScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")
 		for _, s := range node.childScopes {
-			buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
+			buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
 		}
 	}
 	return buf.String()

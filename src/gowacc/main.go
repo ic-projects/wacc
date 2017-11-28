@@ -1,13 +1,13 @@
 package main
 
 import (
-	"ast"
-	"codegen"
+
+
 	"flag"
 	"fmt"
 	"os"
 	"path"
-	"semantics"
+
 	"strings"
 )
 
@@ -21,11 +21,11 @@ func main() {
 	filepath := os.Args[len(os.Args)-1]
 	flag.Parse()
 	if *debugMode {
-		ast.DEBUG_MODE = true
+		DEBUG_MODE = true
 	}
 
 	// Load the file and parse into an AST
-	var tree ast.ProgramNode
+	var tree ProgramNode
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
 		var err error
@@ -37,7 +37,7 @@ func main() {
 			os.Exit(100)
 		}
 
-		tree = treeValue.(ast.ProgramNode)
+		tree = treeValue.(ProgramNode)
 
 	} else {
 		fmt.Println("Error: No file provided")
@@ -46,8 +46,8 @@ func main() {
 	if !*parseOnly {
 
 		// Perform semantic error checking
-		checker := semantics.NewSemanticCheck()
-		ast.Walk(checker, tree)
+		checker := NewSemanticCheck()
+		Walk(checker, tree)
 
 		// Print out all semantic errors that occur
 		if len(checker.Errors) > 0 {
@@ -64,7 +64,7 @@ func main() {
 		if !*semanticOnly {
 
 			// Generate assembly Code
-			asm := codegen.GenerateCode(tree, checker.SymbolTable())
+			asm := GenerateCode(tree, checker.SymbolTable())
 
 			// Save assembly code to files
 			savepath := strings.TrimSuffix(path.Base(filepath), ".wacc") + ".s"

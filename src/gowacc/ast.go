@@ -1,10 +1,9 @@
-package ast
+package main
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
-	"utils"
 )
 
 var DEBUG_MODE bool
@@ -33,7 +32,7 @@ func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.Functions {
-		tempbuf.WriteString(utils.Indent(fmt.Sprintf("%s", f), "  "))
+		tempbuf.WriteString(Indent(fmt.Sprintf("%s", f), "  "))
 	}
 	var buf bytes.Buffer
 	for i, line := range strings.Split(tempbuf.String(), "\n") {
@@ -91,7 +90,7 @@ func (node FunctionNode) String() string {
 	}
 	buf.WriteString(fmt.Sprintln(")"))
 	for _, s := range node.Stats {
-		buf.WriteString(utils.Indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(Indent(fmt.Sprintf("%s", s), "  "))
 	}
 	return buf.String()
 }

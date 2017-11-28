@@ -6,21 +6,21 @@ ASSIGNRHS ← ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
 // ArrayLiteralNode
 ARRAYLITER ← '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
 
-	var expressions []ast.ExpressionNode
+	var expressions []ExpressionNode
 	if (exprs == nil) {
 		expressions = nil
 	} else {
-		firstExpression := getItem(exprs, 0).(ast.ExpressionNode)
-		expressions = []ast.ExpressionNode{firstExpression}
+		firstExpression := getItem(exprs, 0).(ExpressionNode)
+		expressions = []ExpressionNode{firstExpression}
 		for _, e := range toSlice(getItem(exprs, 1)) {
 			expressions = append(
 				expressions,
-				getItem(e, 3).(ast.ExpressionNode),
+				getItem(e, 3).(ExpressionNode),
 			)
 		}
 	}
 
-	return ret(ast.NewArrayLiteralNode(
+	return ret(NewArrayLiteralNode(
 		c.getPosition(),
 		expressions,
 	))
@@ -30,10 +30,10 @@ ARRAYLITER ← '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
 // NewPairNode
 NEWPAIR ← "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 
-	return ret(ast.NewNewPairNode(
+	return ret(NewNewPairNode(
 		c.getPosition(),
-		t1.(ast.ExpressionNode),
-		t2.(ast.ExpressionNode),
+		t1.(ExpressionNode),
+		t2.(ExpressionNode),
 	))
 
 }
@@ -46,26 +46,26 @@ NEWPAIR ← "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 CALL ← "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
 
 	if(args == nil) {
-		return ret(ast.NewFunctionCallNode(
+		return ret(NewFunctionCallNode(
 			c.getPosition(),
-			i.(*ast.IdentifierNode),
-			[]ast.ExpressionNode{},
+			i.(*IdentifierNode),
+			[]ExpressionNode{},
 		))
 	}
 
-	return ret(ast.NewFunctionCallNode(
+	return ret(NewFunctionCallNode(
 		c.getPosition(),
-		i.(*ast.IdentifierNode),
-		args.([]ast.ExpressionNode),
+		i.(*IdentifierNode),
+		args.([]ExpressionNode),
 	))
 
 }
 
 ARGLIST ← expr:EXPR exprs:(_ ',' _ EXPR)* {
 
-	argList := []ast.ExpressionNode{expr}
+	argList := []ExpressionNode{expr}
 	for _, e := range toSlice(exprs) {
-		argList = append(argList, getItem(e, 3).(ast.ExpressionNode))
+		argList = append(argList, getItem(e, 3).(ExpressionNode))
 	}
 
 	return ret(argList)

@@ -1,9 +1,8 @@
-package ast
+package main
 
 import (
 	"bytes"
 	"fmt"
-	"utils"
 )
 
 // LHSNode is an empty interface for Lhs nodes to implement.
@@ -65,7 +64,7 @@ func NewPairFirstElementNode(
 func (node PairFirstElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FST"))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -101,7 +100,7 @@ func NewPairSecondElementNode(
 func (node PairSecondElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SND"))
-	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 	return buf.String()
 }
 
@@ -141,7 +140,7 @@ func (node ArrayElementNode) String() string {
 	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
 	for _, e := range node.Exprs {
 		buf.WriteString(fmt.Sprintln("  - []"))
-		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "    "))
+		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
 }

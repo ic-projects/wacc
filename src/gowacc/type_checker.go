@@ -1,23 +1,22 @@
-package semantics
+package main
 
 import (
-	"ast"
 	"fmt"
 )
 
 // Expectance is an interface used to store what type is expected.
 type Expectance interface {
-	seen(*TypeChecker, ast.TypeNode) TypeError
+	seen(*TypeChecker, TypeNode) TypeError
 }
 
 // SetExpectance is a struct that stores a set of acceptable types that can
 // be seen. It implements Expectance.
 type SetExpectance struct {
-	set map[ast.TypeNode]bool
+	set map[TypeNode]bool
 }
 
-func NewSetExpectance(ts []ast.TypeNode) SetExpectance {
-	set := make(map[ast.TypeNode]bool)
+func NewSetExpectance(ts []TypeNode) SetExpectance {
+	set := make(map[TypeNode]bool)
 	for _, t := range ts {
 		set[t] = true
 	}
@@ -27,15 +26,15 @@ func NewSetExpectance(ts []ast.TypeNode) SetExpectance {
 }
 
 // arrayCase handles the multiple options where we have seen an Array.
-func arrayCase(check *TypeChecker, validTypes map[ast.TypeNode]bool, t ast.ArrayTypeNode) bool {
+func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode) bool {
 	_, match := validTypes[t]
-	nilArray := ast.ArrayTypeNode{}
+	nilArray := ArrayTypeNode{}
 	expectingAnyArray := false
 	matchOnAnyArray := t == nilArray
-	var found ast.ArrayTypeNode
+	var found ArrayTypeNode
 	for key := range validTypes {
 		if StripType(key) == nilArray {
-			found = key.(ast.ArrayTypeNode)
+			found = key.(ArrayTypeNode)
 			expectingAnyArray = true
 			break
 		}
@@ -46,7 +45,7 @@ func arrayCase(check *TypeChecker, validTypes map[ast.TypeNode]bool, t ast.Array
 		if found.Dim == 1 {
 			check.expectRepeatUntilForce(found.T)
 		} else {
-			check.expectRepeatUntilForce(ast.NewArrayTypeNode(found.T, found.Dim-1))
+			check.expectRepeatUntilForce(NewArrayTypeNode(found.T, found.Dim-1))
 		}
 		return true
 	}
@@ -54,16 +53,16 @@ func arrayCase(check *TypeChecker, validTypes map[ast.TypeNode]bool, t ast.Array
 }
 
 // pairCase handles the multiple options where we have seen an pair.
-func pairCase(check *TypeChecker, validTypes map[ast.TypeNode]bool, basePairMatch bool, t ast.PairTypeNode) bool {
+func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t PairTypeNode) bool {
 	_, match := validTypes[t]
-	_, matchBase := validTypes[ast.NewBaseTypeNode(ast.PAIR)]
-	nilPair := ast.PairTypeNode{}
+	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]
+	nilPair := PairTypeNode{}
 	matchOnAnyPair := t == nilPair
-	var nilMatch ast.PairTypeNode
+	var nilMatch PairTypeNode
 	expectingAnyPair := false
 	for key := range validTypes {
 		if StripType(key) == nilPair {
-			nilMatch = key.(ast.PairTypeNode)
+			nilMatch = key.(PairTypeNode)
 			expectingAnyPair = true
 			break
 		}
@@ -86,25 +85,25 @@ func pairCase(check *TypeChecker, validTypes map[ast.TypeNode]bool, basePairMatc
 }
 
 // seen is called when we have seen a SetExpectance.
-func (exp SetExpectance) seen(check *TypeChecker, typeNode ast.TypeNode) TypeError {
+func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
 
 	switch t := typeNode.(type) {
-	case ast.ArrayTypeNode:
+	case ArrayTypeNode:
 		found := arrayCase(check, validTypes, t)
 		if !found {
 			return NewTypeError(t, validTypes)
 		}
-	case ast.PairTypeNode:
+	case PairTypeNode:
 		found := pairCase(check, validTypes, false, t)
 		if !found {
 			return NewTypeError(t, validTypes)
 		}
-	case ast.BaseTypeNode:
-		if t.T == ast.PAIR {
+	case BaseTypeNode:
+		if t.T == PAIR {
 			_, found := validTypes[t]
 			if !found {
-				found = pairCase(check, validTypes, true, ast.PairTypeNode{})
+				found = pairCase(check, validTypes, true, PairTypeNode{})
 			}
 			if !found {
 				return NewTypeError(t, validTypes)
@@ -139,7 +138,7 @@ func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 }
 
 // seen is called when we have seen a TwiceSameExpectance.
-func (exp TwiceSameExpectance) seen(check *TypeChecker, t ast.TypeNode) TypeError {
+func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	typeError := exp.exp.seen(check, t)
 	if t == nil {
 		check.expectAny()
@@ -166,7 +165,7 @@ func NewRepeatExpectance(exp Expectance) RepeatExpectance {
 // seen is called when we have seen a RepeatExpectance. It will stop it from
 // being removed from the stack by adding an extra expectance before seeing
 // the expectance.
-func (exp RepeatExpectance) seen(check *TypeChecker, t ast.TypeNode) TypeError {
+func (exp RepeatExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	check.stack = append(check.stack, exp)
 	return exp.exp.seen(check, t)
 }
@@ -180,7 +179,7 @@ func NewAnyExpectance() AnyExpectance {
 
 // seen is called when we have seen an AnyExpectance. It allows anything, and
 // returns an empty error, i.e. no error.
-func (exp AnyExpectance) seen(check *TypeChecker, t ast.TypeNode) TypeError {
+func (exp AnyExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	return TypeError{}
 }
 
@@ -190,7 +189,7 @@ func (exp AnyExpectance) seen(check *TypeChecker, t ast.TypeNode) TypeError {
 // happen after some errors.
 type TypeChecker struct {
 	stack      []Expectance
-	frozenNode ast.ProgramNode
+	frozenNode ProgramNode
 }
 
 // NewTypeChecker will return an initialised TypeChecker, with an empty stack.
@@ -203,7 +202,7 @@ func NewTypeChecker() *TypeChecker {
 
 // seen will pop the type from the stack, and return a TypeError corresponding
 // to the mismatch between the type popped off the stack and the TypeNode given.
-func (check *TypeChecker) seen(t ast.TypeNode) TypeError {
+func (check *TypeChecker) seen(t TypeNode) TypeError {
 	if check.frozen() {
 		return TypeError{}
 	}
@@ -211,7 +210,7 @@ func (check *TypeChecker) seen(t ast.TypeNode) TypeError {
 		fmt.Println("Internal type checker error")
 		return TypeError{}
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Printf("Seen %s\n", t)
 	}
 
@@ -223,12 +222,12 @@ func (check *TypeChecker) seen(t ast.TypeNode) TypeError {
 
 // StripType is used to remove the type of Arrays and Pairs, which is useful
 // for comparing types.
-func StripType(t ast.TypeNode) ast.TypeNode {
+func StripType(t TypeNode) TypeNode {
 	switch t.(type) {
-	case ast.ArrayTypeNode:
-		return ast.ArrayTypeNode{}
-	case ast.PairTypeNode:
-		return ast.PairTypeNode{}
+	case ArrayTypeNode:
+		return ArrayTypeNode{}
+	case PairTypeNode:
+		return PairTypeNode{}
 	}
 	return t
 }
@@ -239,7 +238,7 @@ func (check *TypeChecker) forcePop() {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Println("Force pop")
 	}
 	if len(check.stack) < 1 {
@@ -254,7 +253,7 @@ func (check *TypeChecker) expectAny() {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Println("Expecting any")
 	}
 	check.stack = append(check.stack, NewAnyExpectance())
@@ -265,7 +264,7 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Println("Expecting twice")
 	}
 	check.stack = append(check.stack, NewTwiceSameExpectance(ex))
@@ -273,30 +272,30 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 
 // expectRepeatUntilForce adds a RepeatExpectance to the stack, if not
 // frozen.
-func (check *TypeChecker) expectRepeatUntilForce(t ast.TypeNode) {
+func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Printf("Expecting repeat %s\n", t)
 	}
-	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]ast.TypeNode{t})))
+	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
 }
 
 // expect adds a SetExpectance with the given TypeNode the only element in the set,
 // if not frozen.
-func (check *TypeChecker) expect(t ast.TypeNode) {
+func (check *TypeChecker) expect(t TypeNode) {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Printf("Expecting %s\n", t)
 	}
-	check.expectSet([]ast.TypeNode{t})
+	check.expectSet([]TypeNode{t})
 }
 
 // expectSet adds an SetExpectance to the stack, if not frozen.
-func (check *TypeChecker) expectSet(ts []ast.TypeNode) {
+func (check *TypeChecker) expectSet(ts []TypeNode) {
 	if check.frozen() {
 		return
 	}
@@ -309,11 +308,11 @@ func (check *TypeChecker) frozen() bool {
 }
 
 // freeze freezes the type checker on a node.
-func (check *TypeChecker) freeze(node ast.ProgramNode) {
+func (check *TypeChecker) freeze(node ProgramNode) {
 	if check.frozen() {
 		return
 	}
-	if ast.DEBUG_MODE {
+	if DEBUG_MODE {
 		fmt.Printf("Frozen on %s\n", node)
 	}
 	check.frozenNode = node
@@ -321,11 +320,11 @@ func (check *TypeChecker) freeze(node ast.ProgramNode) {
 
 // isSameNode Compares equality of ProgramNodes. As FunctionCallNode and ArrayElementNode
 // are not comparable with the == operator, we define our own function that compares types first.
-func isSameNode(n1 ast.ProgramNode, n2 ast.ProgramNode) bool {
-	_, n1FunctionCall := n1.(*ast.FunctionCallNode)
-	_, n2FunctionCall := n2.(*ast.FunctionCallNode)
-	_, n1ArrayElement := n1.(*ast.ArrayElementNode)
-	_, n2ArrayElement := n2.(*ast.ArrayElementNode)
+func isSameNode(n1 ProgramNode, n2 ProgramNode) bool {
+	_, n1FunctionCall := n1.(*FunctionCallNode)
+	_, n2FunctionCall := n2.(*FunctionCallNode)
+	_, n1ArrayElement := n1.(*ArrayElementNode)
+	_, n2ArrayElement := n2.(*ArrayElementNode)
 
 	if (n1FunctionCall && n2FunctionCall) ||
 		(n1ArrayElement && n2ArrayElement) {
@@ -339,9 +338,9 @@ func isSameNode(n1 ast.ProgramNode, n2 ast.ProgramNode) bool {
 }
 
 // unfreeze will unfreeze the checker, if the given node is the same as the frozen node.
-func (check *TypeChecker) unfreeze(node ast.ProgramNode) {
+func (check *TypeChecker) unfreeze(node ProgramNode) {
 	if isSameNode(node, check.frozenNode) {
-		if ast.DEBUG_MODE {
+		if DEBUG_MODE {
 			fmt.Printf("Unfrozen on %s\n", node)
 		}
 		check.frozenNode = nil
