@@ -15,14 +15,14 @@ type ExpressionNode interface {
 
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
-	case BinaryOperatorNode:
+	case *BinaryOperatorNode:
 		switch node.Op {
 		case MUL, DIV, MOD, ADD, SUB:
 			return NewBaseTypeNode(INT)
 		case GT, GEQ, LT, LEQ, EQ, NEQ, AND, OR:
 			return NewBaseTypeNode(BOOL)
 		}
-	case UnaryOperatorNode:
+	case *UnaryOperatorNode:
 		switch node.Op {
 		case NOT:
 			return NewBaseTypeNode(BOOL)
@@ -31,17 +31,17 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		case CHR:
 			return NewBaseTypeNode(CHAR)
 		}
-	case PairLiteralNode, PairTypeNode:
+	case *PairLiteralNode, PairTypeNode:
 		return NewBaseTypeNode(PAIR)
-	case IntegerLiteralNode:
+	case *IntegerLiteralNode:
 		return NewBaseTypeNode(INT)
-	case BooleanLiteralNode:
+	case *BooleanLiteralNode:
 		return NewBaseTypeNode(BOOL)
-	case CharacterLiteralNode:
+	case *CharacterLiteralNode:
 		return NewBaseTypeNode(CHAR)
-	case StringLiteralNode:
+	case *StringLiteralNode:
 		return NewStringArrayTypeNode()
-	case ArrayElementNode:
+	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
 		arr := a.T.(ArrayTypeNode)
 		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
@@ -49,7 +49,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		} else {
 			return NewArrayTypeNode(arr.T, dimLeft)
 		}
-	case IdentifierNode:
+	case *IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
 		return v.T
 	}
@@ -191,8 +191,8 @@ type IntegerLiteralNode struct {
 	Val int
 }
 
-func NewIntegerLiteralNode(pos Position, val int) IntegerLiteralNode {
-	return IntegerLiteralNode{
+func NewIntegerLiteralNode(pos Position, val int) *IntegerLiteralNode {
+	return &IntegerLiteralNode{
 		Pos: pos,
 		Val: val,
 	}
@@ -214,8 +214,8 @@ type BooleanLiteralNode struct {
 	Val bool
 }
 
-func NewBooleanLiteralNode(pos Position, val bool) BooleanLiteralNode {
-	return BooleanLiteralNode{
+func NewBooleanLiteralNode(pos Position, val bool) *BooleanLiteralNode {
+	return &BooleanLiteralNode{
 		Pos: pos,
 		Val: val,
 	}
@@ -237,8 +237,8 @@ type CharacterLiteralNode struct {
 	Val rune
 }
 
-func NewCharacterLiteralNode(pos Position, val rune) CharacterLiteralNode {
-	return CharacterLiteralNode{
+func NewCharacterLiteralNode(pos Position, val rune) *CharacterLiteralNode {
+	return &CharacterLiteralNode{
 		Pos: pos,
 		Val: val,
 	}
@@ -266,8 +266,8 @@ type StringLiteralNode struct {
 	Val string
 }
 
-func NewStringLiteralNode(pos Position, val string) StringLiteralNode {
-	return StringLiteralNode{
+func NewStringLiteralNode(pos Position, val string) *StringLiteralNode {
+	return &StringLiteralNode{
 		Pos: pos,
 		Val: val,
 	}
@@ -286,8 +286,8 @@ type PairLiteralNode struct {
 	Pos Position
 }
 
-func NewPairLiteralNode(pos Position) PairLiteralNode {
-	return PairLiteralNode{
+func NewPairLiteralNode(pos Position) *PairLiteralNode {
+	return &PairLiteralNode{
 		Pos: pos,
 	}
 }
@@ -322,8 +322,8 @@ func NewUnaryOperatorNode(
 	pos Position,
 	op UnaryOperator,
 	expr ExpressionNode,
-) UnaryOperatorNode {
-	return UnaryOperatorNode{
+) *UnaryOperatorNode {
+	return &UnaryOperatorNode{
 		Pos:  pos,
 		Op:   op,
 		Expr: expr,
@@ -359,8 +359,8 @@ func NewBinaryOperatorNode(
 	op BinaryOperator,
 	expr1 ExpressionNode,
 	expr2 ExpressionNode,
-) BinaryOperatorNode {
-	return BinaryOperatorNode{
+) *BinaryOperatorNode {
+	return &BinaryOperatorNode{
 		Pos:   pos,
 		Op:    op,
 		Expr1: expr1,
@@ -382,9 +382,9 @@ func (node BinaryOperatorNode) String() string {
 // ExpressionNode.
 func Weight(n ExpressionNode) int {
 	switch node := n.(type) {
-	case UnaryOperatorNode:
+	case *UnaryOperatorNode:
 		return Weight(node.Expr)
-	case BinaryOperatorNode:
+	case *BinaryOperatorNode:
 		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
 		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
 		return utils.Min(lhsWeight, rhsWeight)

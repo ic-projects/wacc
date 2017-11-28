@@ -14,7 +14,7 @@ ARRAYLITER ← '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
 		expressions = []ast.ExpressionNode{firstExpression}
 		for _, e := range toSlice(getItem(exprs, 1)) {
 			expressions = append(
-				expressions, 
+				expressions,
 				getItem(e, 3).(ast.ExpressionNode),
 			)
 		}
@@ -48,14 +48,14 @@ CALL ← "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
 	if(args == nil) {
 		return ret(ast.NewFunctionCallNode(
 			c.getPosition(),
-			i.(ast.IdentifierNode),
+			i.(*ast.IdentifierNode),
 			[]ast.ExpressionNode{},
 		))
 	}
-	
+
 	return ret(ast.NewFunctionCallNode(
 		c.getPosition(),
-		i.(ast.IdentifierNode),
+		i.(*ast.IdentifierNode),
 		args.([]ast.ExpressionNode),
 	))
 

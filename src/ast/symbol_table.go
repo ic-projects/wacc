@@ -14,7 +14,7 @@ import (
 type SymbolTable struct {
 	Head           *SymbolTableNode
 	CurrentScope   *SymbolTableNode
-	functions      map[string]FunctionNode
+	functions      map[string]*FunctionNode
 	functionsOrder []string
 }
 
@@ -25,7 +25,7 @@ func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		Head:           head,
 		CurrentScope:   head,
-		functions:      make(map[string]FunctionNode),
+		functions:      make(map[string]*FunctionNode),
 		functionsOrder: make([]string, 0),
 	}
 }
@@ -57,21 +57,21 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 type IdentifierDeclaration struct {
 	Pos        Position
 	T          TypeNode
-	ident      IdentifierNode
+	ident      *IdentifierNode
 	Location   *location.Location
 	IsDeclared bool
 }
 
 func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 	switch node := programNode.(type) {
-	case ParameterNode:
+	case *ParameterNode:
 		return &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
 			ident:      node.Ident,
 			IsDeclared: false,
 		}
-	case DeclareNode:
+	case *DeclareNode:
 		return &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
@@ -153,7 +153,7 @@ func (table *SymbolTable) SearchForIdentInCurrentScope(identifier string) (*Iden
 
 // SearchForFunction will search for a function, returning false as its second
 // return if it is not found.
-func (table *SymbolTable) SearchForFunction(identifier string) (FunctionNode, bool) {
+func (table *SymbolTable) SearchForFunction(identifier string) (*FunctionNode, bool) {
 	node, ok := table.functions[identifier]
 	return node, ok
 }
@@ -166,7 +166,7 @@ func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode)
 }
 
 // AddFunction will add a function to the symbolTable
-func (table *SymbolTable) AddFunction(identifier string, node FunctionNode) {
+func (table *SymbolTable) AddFunction(identifier string, node *FunctionNode) {
 	table.functions[identifier] = node
 }
 

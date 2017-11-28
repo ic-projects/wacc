@@ -322,10 +322,10 @@ func (check *TypeChecker) freeze(node ast.ProgramNode) {
 // isSameNode Compares equality of ProgramNodes. As FunctionCallNode and ArrayElementNode
 // are not comparable with the == operator, we define our own function that compares types first.
 func isSameNode(n1 ast.ProgramNode, n2 ast.ProgramNode) bool {
-	_, n1FunctionCall := n1.(ast.FunctionCallNode)
-	_, n2FunctionCall := n2.(ast.FunctionCallNode)
-	_, n1ArrayElement := n1.(ast.ArrayElementNode)
-	_, n2ArrayElement := n2.(ast.ArrayElementNode)
+	_, n1FunctionCall := n1.(*ast.FunctionCallNode)
+	_, n2FunctionCall := n2.(*ast.FunctionCallNode)
+	_, n1ArrayElement := n1.(*ast.ArrayElementNode)
+	_, n2ArrayElement := n2.(*ast.ArrayElementNode)
 
 	if (n1FunctionCall && n2FunctionCall) ||
 		(n1ArrayElement && n2ArrayElement) {

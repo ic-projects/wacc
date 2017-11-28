@@ -17,18 +17,18 @@ type StatementNode interface {
 // such as a return or exit.
 func FinalStatIsValid(s StatementNode) bool {
 	switch s.(type) {
-	case ReturnNode:
+	case *ReturnNode:
 		return true
-	case ExitNode:
+	case *ExitNode:
 		return true
-	case ScopeNode:
-		stats := s.(ScopeNode).Stats
+	case *ScopeNode:
+		stats := s.(*ScopeNode).Stats
 		finalStat := stats[len(stats)-1]
 		return FinalStatIsValid(finalStat)
-	case IfNode:
-		ifStats := s.(IfNode).IfStats
+	case *IfNode:
+		ifStats := s.(*IfNode).IfStats
 		ifFinalStat := ifStats[len(ifStats)-1]
-		elseStats := s.(IfNode).ElseStats
+		elseStats := s.(*IfNode).ElseStats
 		elseFinalStat := elseStats[len(elseStats)-1]
 		return FinalStatIsValid(ifFinalStat) && FinalStatIsValid(elseFinalStat)
 	default:
@@ -43,8 +43,8 @@ type SkipNode struct {
 	Pos Position
 }
 
-func NewSkipNode(pos Position) SkipNode {
-	return SkipNode{
+func NewSkipNode(pos Position) *SkipNode {
+	return &SkipNode{
 		Pos: pos,
 	}
 }
@@ -64,12 +64,12 @@ func (node SkipNode) String() string {
 type DeclareNode struct {
 	Pos   Position
 	T     TypeNode
-	Ident IdentifierNode
+	Ident *IdentifierNode
 	Rhs   RHSNode
 }
 
-func NewDeclareNode(pos Position, t TypeNode, ident IdentifierNode, rhs RHSNode) DeclareNode {
-	return DeclareNode{
+func NewDeclareNode(pos Position, t TypeNode, ident *IdentifierNode, rhs RHSNode) *DeclareNode {
+	return &DeclareNode{
 		Pos:   pos,
 		T:     t,
 		Ident: ident,
@@ -102,8 +102,8 @@ type AssignNode struct {
 	Rhs RHSNode
 }
 
-func NewAssignNode(pos Position, lhs LHSNode, rhs RHSNode) AssignNode {
-	return AssignNode{
+func NewAssignNode(pos Position, lhs LHSNode, rhs RHSNode) *AssignNode {
+	return &AssignNode{
 		Pos: pos,
 		Lhs: lhs,
 		Rhs: rhs,
@@ -132,8 +132,8 @@ type ReadNode struct {
 	Lhs LHSNode
 }
 
-func NewReadNode(pos Position, lhs LHSNode) ReadNode {
-	return ReadNode{
+func NewReadNode(pos Position, lhs LHSNode) *ReadNode {
+	return &ReadNode{
 		Pos: pos,
 		Lhs: lhs,
 	}
@@ -158,8 +158,8 @@ type FreeNode struct {
 	Expr ExpressionNode
 }
 
-func NewFreeNode(pos Position, expr ExpressionNode) FreeNode {
-	return FreeNode{
+func NewFreeNode(pos Position, expr ExpressionNode) *FreeNode {
+	return &FreeNode{
 		Pos:  pos,
 		Expr: expr,
 	}
@@ -184,8 +184,8 @@ type ReturnNode struct {
 	Expr ExpressionNode
 }
 
-func NewReturnNode(pos Position, expr ExpressionNode) ReturnNode {
-	return ReturnNode{
+func NewReturnNode(pos Position, expr ExpressionNode) *ReturnNode {
+	return &ReturnNode{
 		Pos:  pos,
 		Expr: expr,
 	}
@@ -210,8 +210,8 @@ type ExitNode struct {
 	Expr ExpressionNode
 }
 
-func NewExitNode(pos Position, expr ExpressionNode) ExitNode {
-	return ExitNode{
+func NewExitNode(pos Position, expr ExpressionNode) *ExitNode {
+	return &ExitNode{
 		Pos:  pos,
 		Expr: expr,
 	}
@@ -236,8 +236,8 @@ type PrintNode struct {
 	Expr ExpressionNode
 }
 
-func NewPrintNode(pos Position, expr ExpressionNode) PrintNode {
-	return PrintNode{
+func NewPrintNode(pos Position, expr ExpressionNode) *PrintNode {
+	return &PrintNode{
 		Pos:  pos,
 		Expr: expr,
 	}
@@ -262,8 +262,8 @@ type PrintlnNode struct {
 	Expr ExpressionNode
 }
 
-func NewPrintlnNode(pos Position, expr ExpressionNode) PrintlnNode {
-	return PrintlnNode{
+func NewPrintlnNode(pos Position, expr ExpressionNode) *PrintlnNode {
+	return &PrintlnNode{
 		Pos:  pos,
 		Expr: expr,
 	}
@@ -291,8 +291,8 @@ type IfNode struct {
 	ElseStats []StatementNode
 }
 
-func NewIfNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseStats []StatementNode) IfNode {
-	return IfNode{
+func NewIfNode(pos Position, expr ExpressionNode, ifStats []StatementNode, elseStats []StatementNode) *IfNode {
+	return &IfNode{
 		Pos:       pos,
 		Expr:      expr,
 		IfStats:   ifStats,
@@ -330,8 +330,8 @@ type LoopNode struct {
 	Stats []StatementNode
 }
 
-func NewLoopNode(pos Position, expr ExpressionNode, stats []StatementNode) LoopNode {
-	return LoopNode{
+func NewLoopNode(pos Position, expr ExpressionNode, stats []StatementNode) *LoopNode {
+	return &LoopNode{
 		Pos:   pos,
 		Expr:  expr,
 		Stats: stats,
@@ -362,8 +362,8 @@ type ScopeNode struct {
 	Stats []StatementNode
 }
 
-func NewScopeNode(pos Position, stats []StatementNode) ScopeNode {
-	return ScopeNode{
+func NewScopeNode(pos Position, stats []StatementNode) *ScopeNode {
+	return &ScopeNode{
 		Pos:   pos,
 		Stats: stats,
 	}

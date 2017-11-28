@@ -57,7 +57,7 @@ BREXPR ← '(' _ expr:EXPR {
 }
 
 // UnaryOperator
-UNARYOPER ← 
+UNARYOPER ←
 	NOT /
 	NEG /
 	LEN /
@@ -85,7 +85,7 @@ CHR ← "chr" __ {
 }
 
 // BinaryOperator
-MULOP ← 
+MULOP ←
 	MULT /
 	DIV /
 	MOD
@@ -94,13 +94,13 @@ ADDOP ←
 	SUB /
 	PLUS
 
-COMPOP ← 
+COMPOP ←
 	GEQ /
-	GT / 
+	GT /
 	LEQ /
 	LT
 
-EQUOP ← 
+EQUOP ←
 	EQ  /
 	NEQ
 
@@ -167,7 +167,7 @@ INTLITER ← INTSIGN? _ DIGIT+ {
 		errmsg := fmt.Sprintf(
 			"Integer value \"%s\" is badly formatted " +
 			"(either it has a badly defined sign " +
-			"or it is too large for a 32-bit signed integer)", 
+			"or it is too large for a 32-bit signed integer)",
 			val,
 		)
 		err = errors.New(errmsg)
@@ -180,14 +180,14 @@ INTLITER ← INTSIGN? _ DIGIT+ {
 
 }
 
-INTSIGN ← 
+INTSIGN ←
 	'+' /
 	'-'
 
 DIGIT ← [0-9]
 
 // BooleanLiteralNode
-BOOLLITER ← 
+BOOLLITER ←
 	TRUE /
 	FALSE
 
