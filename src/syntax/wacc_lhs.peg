@@ -17,7 +17,7 @@ IDENT ← !RESERVED ((
 ) {
 
 	return ret(ast.NewIdentifierNode(
-		c.getPosition(), 
+		c.getPosition(),
 		string(c.text),
 	))
 
@@ -56,7 +56,7 @@ RESERVED ← (
 	"done" /
 	"call"
 ) !(
-	'_' / 
+	'_' /
 	[a-z] /
 	[A-Z] /
 	[0-9]
@@ -92,14 +92,14 @@ ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
 	var expressionNodes  []ast.ExpressionNode
 	for _, e := range toSlice(exprs) {
 			expressionNodes = append(
-				expressionNodes, 
+				expressionNodes,
 				getItem(e, 3).(ast.ExpressionNode),
 			)
 	}
 
 	return ret(ast.NewArrayElementNode(
 		c.getPosition(),
-		ident.(ast.IdentifierNode), 
+		ident.(*ast.IdentifierNode), 
 		expressionNodes,
 	))
 

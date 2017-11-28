@@ -27,70 +27,70 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 	visitor.Visit(programNode)
 	if v, ok := visitor.(EntryExitVisitorOptional); !ok ||
 		!v.NoRecurse(programNode) {
-		switch node := programNode.(type) {
+		switch node := (programNode).(type) {
 		case []StatementNode:
 			for _, s := range node {
 				Walk(visitor, s)
 			}
-		case Program:
+		case *Program:
 			for _, f := range node.Functions {
 				Walk(visitor, f)
 			}
-		case FunctionNode:
+		case *FunctionNode:
 			Walk(visitor, node.Params)
 			Walk(visitor, node.Stats)
-		case []ParameterNode:
+		case []*ParameterNode:
 			for _, p := range node {
 				Walk(visitor, p)
 			}
-		case DeclareNode:
+		case *DeclareNode:
 			Walk(visitor, node.Rhs)
-		case AssignNode:
+		case *AssignNode:
 			Walk(visitor, node.Lhs)
 			Walk(visitor, node.Rhs)
-		case ReadNode:
+		case *ReadNode:
 			Walk(visitor, node.Lhs)
-		case FreeNode:
+		case *FreeNode:
 			Walk(visitor, node.Expr)
-		case ReturnNode:
+		case *ReturnNode:
 			Walk(visitor, node.Expr)
-		case ExitNode:
+		case *ExitNode:
 			Walk(visitor, node.Expr)
-		case PrintNode:
+		case *PrintNode:
 			Walk(visitor, node.Expr)
-		case PrintlnNode:
+		case *PrintlnNode:
 			Walk(visitor, node.Expr)
-		case IfNode:
+		case *IfNode:
 			Walk(visitor, node.Expr)
 			Walk(visitor, node.IfStats)
 			Walk(visitor, node.ElseStats)
-		case LoopNode:
+		case *LoopNode:
 			Walk(visitor, node.Expr)
 			Walk(visitor, node.Stats)
-		case ScopeNode:
+		case *ScopeNode:
 			Walk(visitor, node.Stats)
-		case PairFirstElementNode:
+		case *PairFirstElementNode:
 			Walk(visitor, node.Expr)
-		case PairSecondElementNode:
+		case *PairSecondElementNode:
 			Walk(visitor, node.Expr)
-		case ArrayElementNode:
+		case *ArrayElementNode:
 			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
-		case ArrayLiteralNode:
+		case *ArrayLiteralNode:
 			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
-		case NewPairNode:
+		case *NewPairNode:
 			Walk(visitor, node.Fst)
 			Walk(visitor, node.Snd)
-		case FunctionCallNode:
+		case *FunctionCallNode:
 			for _, e := range node.Exprs {
 				Walk(visitor, e)
 			}
-		case UnaryOperatorNode:
+		case *UnaryOperatorNode:
 			Walk(visitor, node.Expr)
-		case BinaryOperatorNode:
+		case *BinaryOperatorNode:
 			Walk(visitor, node.Expr1)
 			Walk(visitor, node.Expr2)
 		}

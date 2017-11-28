@@ -29,8 +29,8 @@ type ArrayLiteralNode struct {
 func NewArrayLiteralNode(
 	pos Position,
 	exprs []ExpressionNode,
-) ArrayLiteralNode {
-	return ArrayLiteralNode{
+) *ArrayLiteralNode {
+	return &ArrayLiteralNode{
 		Pos:   pos,
 		Exprs: exprs,
 	}
@@ -61,8 +61,8 @@ func NewNewPairNode(
 	pos Position,
 	fst ExpressionNode,
 	snd ExpressionNode,
-) NewPairNode {
-	return NewPairNode{
+) *NewPairNode {
+	return &NewPairNode{
 		Pos: pos,
 		Fst: fst,
 		Snd: snd,
@@ -96,16 +96,16 @@ func (node NewPairNode) String() string {
 //  call f(true, false)
 type FunctionCallNode struct {
 	Pos   Position
-	Ident IdentifierNode
+	Ident *IdentifierNode
 	Exprs []ExpressionNode
 }
 
 func NewFunctionCallNode(
 	pos Position,
-	ident IdentifierNode,
+	ident *IdentifierNode,
 	exprs []ExpressionNode,
-) FunctionCallNode {
-	return FunctionCallNode{
+) *FunctionCallNode {
+	return &FunctionCallNode{
 		Pos:   pos,
 		Ident: ident,
 		Exprs: exprs,

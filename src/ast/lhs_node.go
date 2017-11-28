@@ -19,8 +19,8 @@ type IdentifierNode struct {
 	Ident string
 }
 
-func NewIdentifierNode(pos Position, ident string) IdentifierNode {
-	return IdentifierNode{
+func NewIdentifierNode(pos Position, ident string) *IdentifierNode {
+	return &IdentifierNode{
 		Pos:   pos,
 		Ident: ident,
 	}
@@ -54,8 +54,8 @@ func (fst *PairFirstElementNode) SetPointer(p bool) {
 func NewPairFirstElementNode(
 	pos Position,
 	expr ExpressionNode,
-) PairFirstElementNode {
-	return PairFirstElementNode{
+) *PairFirstElementNode {
+	return &PairFirstElementNode{
 		Pos:     pos,
 		Expr:    expr,
 		Pointer: false,
@@ -90,8 +90,8 @@ func (snd *PairSecondElementNode) SetPointer(p bool) {
 func NewPairSecondElementNode(
 	pos Position,
 	expr ExpressionNode,
-) PairSecondElementNode {
-	return PairSecondElementNode{
+) *PairSecondElementNode {
+	return &PairSecondElementNode{
 		Pos:     pos,
 		Expr:    expr,
 		Pointer: false,
@@ -114,7 +114,7 @@ func (node PairSecondElementNode) String() string {
 //  i[4][3+2]
 type ArrayElementNode struct {
 	Pos     Position
-	Ident   IdentifierNode
+	Ident   *IdentifierNode
 	Exprs   []ExpressionNode
 	Pointer bool
 }
@@ -125,10 +125,10 @@ func (arr *ArrayElementNode) SetPointer(p bool) {
 
 func NewArrayElementNode(
 	pos Position,
-	ident IdentifierNode,
+	ident *IdentifierNode,
 	exprs []ExpressionNode,
-) ArrayElementNode {
-	return ArrayElementNode{
+) *ArrayElementNode {
+	return &ArrayElementNode{
 		Pos:     pos,
 		Ident:   ident,
 		Exprs:   exprs,

@@ -20,11 +20,11 @@ type ProgramNode interface {
 type Program struct {
 	// Functions the list of all the Functions in the program in the order they
 	// are declared, the last function will be the "main" function.
-	Functions []FunctionNode
+	Functions []*FunctionNode
 }
 
-func NewProgram(functions []FunctionNode) Program {
-	return Program{
+func NewProgram(functions []*FunctionNode) *Program {
+	return &Program{
 		Functions: functions,
 	}
 }
@@ -55,10 +55,10 @@ type FunctionNode struct {
 	T TypeNode
 
 	// Ident is the identifier used to reference the function.
-	Ident IdentifierNode
+	Ident *IdentifierNode
 
 	// Params is the list of parameters required to call the function.
-	Params []ParameterNode
+	Params []*ParameterNode
 
 	// Stats is the list of statements contained within the function body.
 	Stats []StatementNode
@@ -66,11 +66,11 @@ type FunctionNode struct {
 
 func NewFunctionNode(
 	pos Position, t TypeNode,
-	ident IdentifierNode,
-	params []ParameterNode,
+	ident *IdentifierNode,
+	params []*ParameterNode,
 	stats []StatementNode,
-) FunctionNode {
-	return FunctionNode{
+) *FunctionNode {
+	return &FunctionNode{
 		Pos:    pos,
 		T:      t,
 		Ident:  ident,
@@ -107,15 +107,15 @@ type ParameterNode struct {
 	T TypeNode
 
 	// Ident is the identifier used for the parameter.
-	Ident IdentifierNode
+	Ident *IdentifierNode
 }
 
 func NewParameterNode(
 	pos Position,
 	t TypeNode,
-	ident IdentifierNode,
-) ParameterNode {
-	return ParameterNode{
+	ident *IdentifierNode,
+) *ParameterNode {
+	return &ParameterNode{
 		Pos:   pos,
 		T:     t,
 		Ident: ident,

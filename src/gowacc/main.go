@@ -25,16 +25,20 @@ func main() {
 	}
 
 	// Load the file and parse into an AST
-	var tree interface{}
+	var tree ast.ProgramNode
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
 		var err error
-		tree, err = ParseFile(filepath)
+		treeValue, err := ParseFile(filepath)
+
 		if err != nil {
 			fmt.Println("Errors detected during compilation! Exit code 100 returned.")
 			fmt.Println(err)
 			os.Exit(100)
 		}
+
+		tree = treeValue.(ast.ProgramNode)
+
 	} else {
 		fmt.Println("Error: No file provided")
 	}
