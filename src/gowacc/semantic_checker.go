@@ -152,6 +152,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
+			node.SetStructType(structNode.Types[found])
 			foundError = v.typeChecker.seen(structNode.Types[found].T).addPos(node.Pos)
 		}
 	case *ArrayElementNode:
@@ -190,6 +191,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
+			node.SetStructType(structNode)
 			for i := len(structNode.Types) - 1; i >= 0; i-- {
 				v.typeChecker.expect(structNode.Types[i].T)
 			}

@@ -146,10 +146,15 @@ func (node ArrayElementNode) String() string {
 }
 
 type StructElementNode struct {
-	Pos     Position
-	Struct  *IdentifierNode
-	Ident   *IdentifierNode
-	Pointer bool
+	Pos       Position
+	Struct    *IdentifierNode
+	Ident     *IdentifierNode
+	stuctType *StructInternalNode
+	Pointer   bool
+}
+
+func (s *StructElementNode) SetStructType(p *StructInternalNode) {
+	s.stuctType = p
 }
 
 func (s *StructElementNode) SetPointer(p bool) {

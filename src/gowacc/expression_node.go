@@ -48,6 +48,8 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		} else {
 			return NewArrayTypeNode(arr.T, dimLeft)
 		}
+	case *StructElementNode:
+		return node.stuctType.T
 	case *IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
 		return v.T

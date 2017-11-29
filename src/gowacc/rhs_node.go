@@ -121,9 +121,14 @@ func (node FunctionCallNode) String() string {
 }
 
 type StructNewNode struct {
-	Pos   Position
-	T     StructTypeNode
-	Exprs []ExpressionNode
+	Pos        Position
+	T          StructTypeNode
+	Exprs      []ExpressionNode
+	structNode *StructNode
+}
+
+func (s *StructNewNode) SetStructType(p *StructNode) {
+	s.structNode = p
 }
 
 func NewStructNewNode(
