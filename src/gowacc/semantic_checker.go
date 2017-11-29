@@ -39,7 +39,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case *Program:
 		for _, s := range node.Structs {
-			if _, ok := v.symbolTable.SearchForStruct(s.Ident.Ident); !ok {
+			if _, ok := v.symbolTable.SearchForStruct(s.Ident.Ident); ok {
+				foundError = NewDeclarationError(s.Pos, false, true, s.Ident.Ident)
+			} else {
 				v.symbolTable.AddStruct(s.Ident.Ident, s)
 			}
 		}
@@ -150,7 +152,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(structNode.Types[found]).addPos(node.Pos)
+			foundError = v.typeChecker.seen(structNode.Types[found].T).addPos(node.Pos)
 		}
 	case *ArrayElementNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
