@@ -156,6 +156,17 @@ type StructTypeNode struct {
 	Ident string
 }
 
+type NullTypeNode struct {
+}
+
+func NewNullTypeNode() NullTypeNode {
+	return NullTypeNode{}
+}
+
+func (node NullTypeNode) String() string {
+	return "null"
+}
+
 func NewStructTypeNode(i *IdentifierNode) StructTypeNode {
 	return StructTypeNode{
 		Ident: i.Ident,

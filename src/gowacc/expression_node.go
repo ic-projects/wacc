@@ -30,7 +30,9 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		case CHR:
 			return NewBaseTypeNode(CHAR)
 		}
-	case *PairLiteralNode, PairTypeNode:
+	case NullNode:
+		return NewNullTypeNode()
+	case PairTypeNode:
 		return NewBaseTypeNode(PAIR)
 	case *IntegerLiteralNode:
 		return NewBaseTypeNode(INT)
@@ -283,17 +285,17 @@ func (node StringLiteralNode) String() string {
 // PairLiteralNode is a struct which stores the position of a pair literal.
 // This does not store the value of the pair literal since the value of a pair
 // literal is always null.
-type PairLiteralNode struct {
+type NullNode struct {
 	Pos Position
 }
 
-func NewPairLiteralNode(pos Position) *PairLiteralNode {
-	return &PairLiteralNode{
+func NewNullNode(pos Position) *NullNode {
+	return &NullNode{
 		Pos: pos,
 	}
 }
 
-func (node PairLiteralNode) String() string {
+func (node NullNode) String() string {
 	return "- null\n"
 }
 

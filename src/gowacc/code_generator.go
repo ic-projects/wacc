@@ -584,7 +584,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case *StringLiteralNode:
 		label := v.addData(node.Val)
 		v.addCode("LDR %s, =%s", v.getFreeRegister(), label)
-	case *PairLiteralNode:
+	case *NullNode:
 		v.addCode("LDR %s, =0", v.getFreeRegister())
 	case *UnaryOperatorNode:
 		switch node.Op {

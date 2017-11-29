@@ -224,8 +224,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		foundError = v.typeChecker.seen(NewBaseTypeNode(CHAR)).addPos(node.Pos)
 	case *StringLiteralNode:
 		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.Pos)
-	case *PairLiteralNode:
-		foundError = v.typeChecker.seen(NewBaseTypeNode(PAIR)).addPos(node.Pos)
+	case *NullNode:
+		foundError = v.typeChecker.seen(nil).addPos(node.Pos)
 	case *UnaryOperatorNode:
 		switch node.Op {
 		case NOT:
