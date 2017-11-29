@@ -19,11 +19,13 @@ type ProgramNode interface {
 type Program struct {
 	// Functions the list of all the Functions in the program in the order they
 	// are declared, the last function will be the "main" function.
+	Structs   []*StructNode
 	Functions []*FunctionNode
 }
 
-func NewProgram(functions []*FunctionNode) *Program {
+func NewProgram(structs []*StructNode, functions []*FunctionNode) *Program {
 	return &Program{
+		Structs:   structs,
 		Functions: functions,
 	}
 }
@@ -31,6 +33,9 @@ func NewProgram(functions []*FunctionNode) *Program {
 func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
+	for _, f := range program.Structs {
+		tempbuf.WriteString(Indent(fmt.Sprintf("%s", f), "  "))
+	}
 	for _, f := range program.Functions {
 		tempbuf.WriteString(Indent(fmt.Sprintf("%s", f), "  "))
 	}
@@ -41,6 +46,55 @@ func (program Program) String() string {
 		}
 	}
 	return buf.String()
+}
+
+type StructNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+	Types []*StructTypeNode
+}
+
+func NewStructNode(
+	pos Position,
+	ident *IdentifierNode,
+	types []*StructTypeNode,
+) *StructNode {
+	return &StructNode{
+		Pos:   pos,
+		Ident: ident,
+		Types: types,
+	}
+}
+
+func (node StructNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- STRUCT %s \n", node.Ident.String()[2:]))
+	for _, p := range node.Types {
+		buf.WriteString(fmt.Sprintf("%s\n", p))
+	}
+	return buf.String()
+}
+
+type StructTypeNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+	T     TypeNode
+}
+
+func NewStructTypeNode(
+	pos Position,
+	ident *IdentifierNode,
+	t TypeNode,
+) *StructTypeNode {
+	return &StructTypeNode{
+		Pos:   pos,
+		Ident: ident,
+		T:     t,
+	}
+}
+
+func (node StructTypeNode) String() string {
+	return fmt.Sprintf("  %s %s", node.Ident, node.T)
 }
 
 /**************** FUNCTION NODE ********************/

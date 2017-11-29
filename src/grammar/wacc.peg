@@ -3,7 +3,7 @@ START ←_ p:PROGRAM {
     return ret(p)
 }
 
-PROGRAM ← ss:(STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
+PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 
 	main := NewFunctionNode(
 		c.getPosition(),
@@ -26,7 +26,7 @@ PROGRAM ← ss:(STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 
 	return ret(NewProgram(structs, functions))
 
-} / structs:(STRUCT)* _ "begin" fs:(__ FUNC)* _ "end" _ !. {
+} / ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ "end" _ !. {
 
 	functions := []*FunctionNode{}
 	for _, f := range toSlice(fs) {
@@ -43,18 +43,25 @@ PROGRAM ← ss:(STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 	return NewProgram(structs, functions), err
 }
 
-STRUCT ← i:IDENT __ "is" __ ts:(STRUCTTYPE)? __ "end" {
-
-	structList := []StructTypeNode{}
-	for _, t := range toSlice(ts) {
-		structList = append(structList, getItem(t, 1).(*StructTypeNode))
-	}
-
-	return ret(NewStructNode(i, structList))
+STRUCT ← "struct" __ i:IDENT __ "is" __ ts:STRUCTTYPELIST? __ "end" {
+  if ts != nil {
+	   return ret(NewStructNode(c.getPosition(), i.(*IdentifierNode), ts.([]*StructTypeNode)))
+  } else {
+    return ret(NewStructNode(c.getPosition(), i.(*IdentifierNode), []*StructTypeNode{}))
+  }
 }
 
-StructTypeNode ← t:TYPE __ i:IDENT _ ';' {
-	return ret(NewStructTypeNode(i, t))
+STRUCTTYPELIST ← s:STRUCTTYPE ss:(_ STRUCTTYPE)* {
+	structList := []*StructTypeNode{s.(*StructTypeNode)}
+	for _, p := range toSlice(ss) {
+		structList = append(structList, getItem(p, 1).(*StructTypeNode))
+	}
+
+	return ret(structList)
+}
+
+STRUCTTYPE ← t:TYPE __ i:IDENT _ ';' {
+	return ret(NewStructTypeNode(c.getPosition(), i.(*IdentifierNode), t.(TypeNode)))
 }
 
 // FunctionNode
