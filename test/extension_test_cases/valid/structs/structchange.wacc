@@ -1,0 +1,45 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType is
+  char a ;
+  bool b5 ;
+  bool b4 ;
+  bool b3 ;
+  bool b2 ;
+end
+
+struct MyType2 is
+  int lhs ;
+  int rhs ;
+end
+
+begin
+  struct MyType2 i = new MyType2(5, 7) ;
+  println i.lhs ;
+  println i.rhs ;
+  i.lhs = 1 ;
+  println i.lhs ;
+  println i.rhs ;
+  i.lhs = i.rhs ;
+  i.rhs = -9 ;
+  println i.lhs ;
+  println i.rhs ;
+  struct MyType2 i2 = new MyType2(2, 2) ;
+  println i2 ;
+  println i2.lhs ;
+  println i2.rhs ;
+  i2 = i ;
+  println i2 ;
+  println i2.lhs ;
+  println i2.rhs ;
+  $MyType i3 = new MyType('a', true, true, false, false || true) ;
+  exit 0
+end

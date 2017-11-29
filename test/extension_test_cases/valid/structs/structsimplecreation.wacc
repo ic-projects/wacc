@@ -8,19 +8,15 @@
 
 # Program:
 
-struct MyType is
-  char a ;
-  bool b5 ;
-  bool b4 ;
-  bool b3 ;
-  bool b2 ;
-end
-
 struct MyType2 is
   int lhs ;
   int rhs ;
 end
 
 begin
+  $MyType2 i = new MyType2(5, 7);
+  println i ;
+  println i.lhs ;
+  println i.rhs ;
   exit 0
 end
