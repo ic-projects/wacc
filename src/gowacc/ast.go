@@ -49,9 +49,10 @@ func (program Program) String() string {
 }
 
 type StructNode struct {
-	Pos   Position
-	Ident *IdentifierNode
-	Types []*StructTypeNode
+	Pos        Position
+	Ident      *IdentifierNode
+	Types      []*StructTypeNode
+	memorySize int
 }
 
 func NewStructNode(
@@ -59,16 +60,23 @@ func NewStructNode(
 	ident *IdentifierNode,
 	types []*StructTypeNode,
 ) *StructNode {
-	return &StructNode{
+	structNode := StructNode{
 		Pos:   pos,
 		Ident: ident,
 		Types: types,
 	}
+	mem := 0
+	for _, t := range structNode.Types {
+		t.memoryOffset = mem
+		mem += SizeOf(t.T)
+	}
+	structNode.memorySize = mem
+	return &structNode
 }
 
 func (node StructNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- STRUCT %s \n", node.Ident.String()[2:]))
+	buf.WriteString(fmt.Sprintf("- STRUCT %s (size: %d)\n", node.Ident.String()[2:], node.memorySize))
 	for _, p := range node.Types {
 		buf.WriteString(fmt.Sprintf("%s\n", p))
 	}
@@ -76,9 +84,10 @@ func (node StructNode) String() string {
 }
 
 type StructTypeNode struct {
-	Pos   Position
-	Ident *IdentifierNode
-	T     TypeNode
+	Pos          Position
+	Ident        *IdentifierNode
+	T            TypeNode
+	memoryOffset int
 }
 
 func NewStructTypeNode(
@@ -94,7 +103,7 @@ func NewStructTypeNode(
 }
 
 func (node StructTypeNode) String() string {
-	return fmt.Sprintf("  %s %s", node.Ident, node.T)
+	return fmt.Sprintf("  %s %s (offset: %d)", node.Ident, node.T, node.memoryOffset)
 }
 
 /**************** FUNCTION NODE ********************/
