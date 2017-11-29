@@ -1,0 +1,26 @@
+# variable can have _ in their names
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType is
+char a ;
+bool b5 ;
+bool b4 ;
+bool b3 ;
+bool b2 ;
+end
+
+struct MyType2 is
+int lhs ;
+int rhs ;
+end
+
+begin
+  exit 0
+end
