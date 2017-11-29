@@ -144,3 +144,31 @@ func (node ArrayElementNode) String() string {
 	}
 	return buf.String()
 }
+
+type StructElementNode struct {
+	Pos     Position
+	Struct  *IdentifierNode
+	Ident   *IdentifierNode
+	Pointer bool
+}
+
+func (s *StructElementNode) SetPointer(p bool) {
+	s.Pointer = p
+}
+
+func NewStructElementNode(
+	pos Position,
+	struc *IdentifierNode,
+	ident *IdentifierNode,
+) *StructElementNode {
+	return &StructElementNode{
+		Pos:     pos,
+		Struct:  struc,
+		Ident:   ident,
+		Pointer: false,
+	}
+}
+
+func (node StructElementNode) String() string {
+	return fmt.Sprintf("structelem %s.%s (pointer: %t)\n", node.Struct, node.Ident.String()[2:], node.Pointer)
+}

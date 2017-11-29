@@ -35,6 +35,7 @@ PREC7 ← bre:BREXPR _ ')' {
 	PAIRLITER /
 	UNARYEXPR /
 	ARRAYELEM /
+	STRUCTELEM /
 	IDENT
 ) {
 

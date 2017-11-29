@@ -69,6 +69,14 @@ ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 			rhs.(LHSNode),
 		))
 	}
+	if s, ok := lhs.(*StructElementNode); ok {
+		s.SetPointer(true)
+		return ret(NewAssignNode(
+			c.getPosition(),
+			s,
+			rhs.(LHSNode),
+		))
+	}
 	if fst, ok := lhs.(*PairFirstElementNode); ok {
 		fst.SetPointer(true)
 		return ret(NewAssignNode(
@@ -102,6 +110,13 @@ READ ← "read" __ lhs:ASSIGNLHS {
 		return ret(NewReadNode(
 			c.getPosition(),
 			arr,
+		))
+	}
+	if s, ok := lhs.(*StructElementNode); ok {
+		s.SetPointer(true)
+		return ret(NewReadNode(
+			c.getPosition(),
+			s,
 		))
 	}
 	if fst, ok := lhs.(*PairFirstElementNode); ok {
