@@ -51,14 +51,14 @@ func (program Program) String() string {
 type StructNode struct {
 	Pos        Position
 	Ident      *IdentifierNode
-	Types      []*StructTypeNode
+	Types      []*StructInternalNode
 	memorySize int
 }
 
 func NewStructNode(
 	pos Position,
 	ident *IdentifierNode,
-	types []*StructTypeNode,
+	types []*StructInternalNode,
 ) *StructNode {
 	structNode := StructNode{
 		Pos:   pos,
@@ -83,26 +83,26 @@ func (node StructNode) String() string {
 	return buf.String()
 }
 
-type StructTypeNode struct {
+type StructInternalNode struct {
 	Pos          Position
 	Ident        *IdentifierNode
 	T            TypeNode
 	memoryOffset int
 }
 
-func NewStructTypeNode(
+func NewStructInternalNode(
 	pos Position,
 	ident *IdentifierNode,
 	t TypeNode,
-) *StructTypeNode {
-	return &StructTypeNode{
+) *StructInternalNode {
+	return &StructInternalNode{
 		Pos:   pos,
 		Ident: ident,
 		T:     t,
 	}
 }
 
-func (node StructTypeNode) String() string {
+func (node StructInternalNode) String() string {
 	return fmt.Sprintf("  %s %s (offset: %d)", node.Ident, node.T, node.memoryOffset)
 }
 

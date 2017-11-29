@@ -32,6 +32,8 @@ RESERVED ← (
 	"false" /
 	"true" /
 	"newpair" /
+	"struct" /
+	"new" /
 	"null" /
 	"begin" /
 	"end" /

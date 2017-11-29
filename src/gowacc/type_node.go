@@ -151,3 +151,17 @@ func (node PairTypeNode) String() string {
 	}
 	return fmt.Sprintf("pair(%s, %s)", node.T1, node.T2)
 }
+
+type StructTypeNode struct {
+	Ident *IdentifierNode
+}
+
+func NewStructTypeNode(i *IdentifierNode) StructTypeNode {
+	return StructTypeNode{
+		Ident: i,
+	}
+}
+
+func (node StructTypeNode) String() string {
+	return fmt.Sprintf("struct %s", node.Ident.String()[2:])
+}
