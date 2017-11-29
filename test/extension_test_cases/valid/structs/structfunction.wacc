@@ -1,0 +1,46 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+
+struct Node is
+  int lhs ;
+  int rhs ;
+end
+
+begin
+  int sum($Node n) is
+    return n.lhs + n.rhs
+  end
+
+  int swap($Node n) is
+    int temp = n.lhs ;
+    n.lhs = n.rhs ;
+    n.rhs = temp ;
+    return 0
+  end
+  
+  struct Node i = new Node(5, 7) ;
+  println i ;
+  println i.lhs ;
+  println i.rhs ;
+  int x = call sum(i) ;
+  println x ;
+  println i ;
+  println i.lhs ;
+  println i.rhs ;
+
+  x = call swap(i) ;
+  println x ;
+  println i ;
+  println i.lhs ;
+  println i.rhs ;
+
+  exit 0
+end

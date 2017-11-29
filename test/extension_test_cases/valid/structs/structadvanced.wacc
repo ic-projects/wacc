@@ -1,0 +1,57 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+
+struct Node is
+  $Node lhs ;
+  $Node rhs ;
+  int value ;
+end
+
+begin
+  int printTree($Node n) is
+    if n != null
+    then
+      print "[" ;
+      print n.value ;
+      print " -> " ;
+      int x = call printTree(n.lhs) ;
+      x = call printTree(n.rhs) ;
+      print "]"
+    else
+      skip
+    fi ;
+    return 0
+  end
+
+  int swap($Node n) is
+    $Node temp = n.lhs ;
+    n.lhs = n.rhs ;
+    n.rhs = temp ;
+    return 0
+  end
+
+  $Node i = new Node(null, null, 1) ;
+  $Node i2 = new Node(null, null, 2) ;
+  $Node i3 = new Node(i, i2, 3) ;
+  $Node i4 = new Node(i3, null, 4) ;
+  $Node i5 = new Node(null, null, 5) ;
+  $Node i6 = new Node(null, null, 6) ;
+  $Node i7 = new Node(i6, i5, 7) ;
+  $Node i8 = new Node(i7, i4, 8) ;
+  int x = call printTree(i8) ;
+  println x ;
+  int i9 = call swap(i8) ;
+  println "=========" ;
+  x = call printTree(i8) ;
+  println x ;
+
+  exit 0
+end

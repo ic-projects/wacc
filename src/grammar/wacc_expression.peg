@@ -35,6 +35,7 @@ PREC7 ← bre:BREXPR _ ')' {
 	PAIRLITER /
 	UNARYEXPR /
 	ARRAYELEM /
+	STRUCTELEM /
 	IDENT
 ) {
 
@@ -285,7 +286,7 @@ STR ← CHARACTER* {
 // PairLiteralNode
 PAIRLITER ← "null" {
 
-	return ret(NewPairLiteralNode(
+	return ret(NewNullNode(
 		c.getPosition(),
 	))
 

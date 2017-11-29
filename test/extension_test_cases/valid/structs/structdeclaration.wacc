@@ -1,0 +1,18 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType is
+  int a ;
+  int b ;
+end
+
+begin
+  exit 0
+end

@@ -1,5 +1,5 @@
 // RHSNode
-ASSIGNRHS ← ARRAYLITER / NEWPAIR / PAIRELEM / CALL / EXPR
+ASSIGNRHS ← ARRAYLITER / NEWPAIR / NEWSTRUCT / PAIRELEM / CALL / EXPR
 
 // ExpressionNode - defined in wacc_expression.peg
 
@@ -35,6 +35,25 @@ NEWPAIR ← "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 		t1.(ExpressionNode),
 		t2.(ExpressionNode),
 	))
+
+}
+
+// NewStructNode
+NEWSTRUCT ← "new" __ i:IDENT _ '(' _  args:ARGLIST? _ ')' {
+
+	if args == nil {
+		return ret(NewStructNewNode(
+			c.getPosition(),
+			i.(*IdentifierNode),
+			[]ExpressionNode{},
+		))
+	} else {
+		return ret(NewStructNewNode(
+			c.getPosition(),
+			i.(*IdentifierNode),
+			args.([]ExpressionNode),
+		))
+	}
 
 }
 

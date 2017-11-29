@@ -13,6 +13,7 @@ type SymbolTable struct {
 	Head           *SymbolTableNode
 	CurrentScope   *SymbolTableNode
 	functions      map[string]*FunctionNode
+	structs        map[string]*StructNode
 	functionsOrder []string
 }
 
@@ -24,6 +25,7 @@ func NewSymbolTable() *SymbolTable {
 		Head:           head,
 		CurrentScope:   head,
 		functions:      make(map[string]*FunctionNode),
+		structs:        make(map[string]*StructNode),
 		functionsOrder: make([]string, 0),
 	}
 }
@@ -156,6 +158,11 @@ func (table *SymbolTable) SearchForFunction(identifier string) (*FunctionNode, b
 	return node, ok
 }
 
+func (table *SymbolTable) SearchForStruct(identifier string) (*StructNode, bool) {
+	node, ok := table.structs[identifier]
+	return node, ok
+}
+
 /******************** ADDING HELPER FUNCTIONS ********************/
 
 // AddToScope will add an identifier to the CurrentScope.
@@ -166,6 +173,10 @@ func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode)
 // AddFunction will add a function to the symbolTable
 func (table *SymbolTable) AddFunction(identifier string, node *FunctionNode) {
 	table.functions[identifier] = node
+}
+
+func (table *SymbolTable) AddStruct(identifier string, node *StructNode) {
+	table.structs[identifier] = node
 }
 
 /******************** PRINTING HELPER FUNCTIONS ********************/
@@ -185,6 +196,10 @@ func (node SymbolTableNode) Print() {
 // print the CurrentScope and all parentScopes, along with the Functions.
 func (table *SymbolTable) Print() {
 	fmt.Println("------- Begin Symbol table -------")
+	fmt.Println("Structs ------------------------")
+	for _, f := range table.structs {
+		fmt.Printf("%s", f)
+	}
 	fmt.Println("Functions ------------------------")
 	for _, f := range table.functions {
 		fmt.Printf("%s of type %s\n", f.Ident, f.T)
@@ -198,6 +213,10 @@ func (table *SymbolTable) Print() {
 // top level Scope down.
 func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
+	buf.WriteString("- Structs:\n")
+	for _, f := range table.structs {
+		buf.WriteString(fmt.Sprintf("%s", f))
+	}
 	buf.WriteString("- Functions:\n")
 	for _, f := range table.functions {
 		buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))

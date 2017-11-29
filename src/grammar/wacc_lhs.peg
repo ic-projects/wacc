@@ -2,6 +2,7 @@
 ASSIGNLHS ←
 	PAIRELEM /
 	ARRAYELEM /
+	STRUCTELEM /
 	IDENT
 
 // IdentifierNode
@@ -32,6 +33,8 @@ RESERVED ← (
 	"false" /
 	"true" /
 	"newpair" /
+	"struct" /
+	"new" /
 	"null" /
 	"begin" /
 	"end" /
@@ -101,6 +104,16 @@ ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
 		c.getPosition(),
 		ident.(*IdentifierNode),
 		expressionNodes,
+	))
+
+}
+
+// ArrayElementNode
+STRUCTELEM ← ident:IDENT '.' ident2:IDENT {
+	return ret(NewStructElementNode(
+		c.getPosition(),
+		ident.(*IdentifierNode),
+		ident2.(*IdentifierNode),
 	))
 
 }

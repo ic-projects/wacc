@@ -1,0 +1,22 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType2 is
+  int lhs ;
+  int rhs ;
+end
+
+begin
+  $MyType2 i = new MyType2(5, 7);
+  println i ;
+  println i.lhs ;
+  println i.rhs ;
+  exit 0
+end

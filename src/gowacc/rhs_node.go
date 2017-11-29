@@ -119,3 +119,35 @@ func (node FunctionCallNode) String() string {
 	}
 	return buf.String()
 }
+
+type StructNewNode struct {
+	Pos        Position
+	T          StructTypeNode
+	Exprs      []ExpressionNode
+	structNode *StructNode
+}
+
+func (s *StructNewNode) SetStructType(p *StructNode) {
+	s.structNode = p
+}
+
+func NewStructNewNode(
+	pos Position,
+	ident *IdentifierNode,
+	exprs []ExpressionNode,
+) *StructNewNode {
+	return &StructNewNode{
+		Pos:   pos,
+		T:     NewStructTypeNode(ident),
+		Exprs: exprs,
+	}
+}
+
+func (node StructNewNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("new %s \n", node.T))
+	for _, e := range node.Exprs {
+		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
+	}
+	return buf.String()
+}

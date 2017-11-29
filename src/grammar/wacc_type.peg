@@ -1,5 +1,5 @@
 // TypeNode
-TYPE ← t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
+TYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* {
 
 	if (len(toSlice(array)) > 0) {
 		return ret(NewArrayTypeNode(
@@ -10,6 +10,12 @@ TYPE ← t:(BASETYPE / PAIRTYPE) array:(_ ARRAYTYPE)* {
 
 	return ret(t)
 
+}
+
+STRUCTTYPE ← '$' i:IDENT {
+	return ret(NewStructTypeNode(i.(*IdentifierNode)))
+} / "struct" __ i:IDENT {
+	return ret(NewStructTypeNode(i.(*IdentifierNode)))
 }
 
 // BaseTypeNode

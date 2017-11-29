@@ -187,6 +187,8 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	case PairTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
+	case StructTypeNode:
+		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
 
@@ -255,6 +257,7 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 		*ArrayElementNode,
 		*LoopNode,
 		*NewPairNode,
+		*StructNewNode,
 		*ReadNode,
 		*FunctionCallNode,
 		*BinaryOperatorNode:
@@ -332,6 +335,13 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			} else {
 				v.addCode("STR %s, [%s]", rhsRegister, lhsRegister)
 			}
+		case *StructElementNode:
+			Walk(v, lhsNode)
+			lhsRegister := v.getReturnRegister()
+			v.addCode("%s %s, [%s]",
+				store(SizeOf(lhsNode.stuctType.T)),
+				rhsRegister,
+				lhsRegister)
 		case *PairFirstElementNode:
 			Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
@@ -455,6 +465,21 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 
 		v.returnRegisters.Push(identRegister)
+
+	case *StructElementNode:
+		Walk(v, node.Struct)
+
+		register := v.returnRegisters.Peek()
+		v.addCode("MOV r0, %s", register)
+		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.addCode("ADD %s, %s, #%d", register, register, node.stuctType.memoryOffset)
+		// If we don't want a Pointer then don't retrieve the value
+		if !node.Pointer {
+			v.addCode("%s %s, [%s]",
+				load(SizeOf(node.stuctType.T)),
+				register,
+				register)
+		}
 	case *ArrayLiteralNode:
 		register := v.getFreeRegister()
 		length := len(node.Exprs)
@@ -477,6 +502,22 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		lengthRegister := v.freeRegisters.Peek()
 		v.addCode("LDR %s, =%d", lengthRegister, length)
 		v.addCode("STR %s, [%s]", lengthRegister, register)
+	case *StructNewNode:
+		register := v.getFreeRegister()
+
+		v.addCode("LDR r0, =%d", node.structNode.memorySize)
+		v.addCode("BL malloc")
+		v.addCode("MOV %s, r0", register)
+		for index, n := range node.structNode.Types {
+			Walk(v, node.Exprs[index])
+			exprRegister := v.getReturnRegister()
+			v.addCode("%s %s, [%s, #%d]",
+				store(SizeOf(n.T)),
+				exprRegister,
+				register,
+				n.memoryOffset,
+			)
+		}
 	case *NewPairNode:
 		register := v.getFreeRegister()
 
@@ -502,6 +543,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("BL malloc")
 		v.addCode("STR r0, [%s, #4]", register)
 		v.addCode("%s %s, [r0]", store(sndSize), snd)
+
 	case *FunctionCallNode:
 		registers := ReturnRegisters()
 		size := 0
@@ -542,7 +584,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case *StringLiteralNode:
 		label := v.addData(node.Val)
 		v.addCode("LDR %s, =%s", v.getFreeRegister(), label)
-	case *PairLiteralNode:
+	case *NullNode:
 		v.addCode("LDR %s, =0", v.getFreeRegister())
 	case *UnaryOperatorNode:
 		switch node.Op {

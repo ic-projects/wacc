@@ -1,0 +1,29 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType is
+char a ;
+bool b5 ;
+bool b4 ;
+bool b3 ;
+bool b2 ;
+end
+
+struct MyType2 is
+int lhs ;
+int rhs ;
+end
+
+begin
+  struct MyType3 i4 = new MyType3(5, 'a');
+  struct MyType2 i = new MyType2(5, 'a');
+  $MyType i2 = new MyType('a', true, true, false || true);
+  exit 0
+end
