@@ -3,7 +3,7 @@ START ←_ p:PROGRAM {
     return ret(p)
 }
 
-PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
+PROGRAM ← ss:(STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 
 	main := NewFunctionNode(
 		c.getPosition(),
@@ -19,19 +19,42 @@ PROGRAM ← "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 	}
 	functions = append(functions, main)
 
-	return ret(NewProgram(functions))
+  structs := []*StructNode{}
+	for _, s := range toSlice(ss) {
+		structs = append(structs, getItem(s, 1).(*StructNode))
+	}
 
-} / "begin" fs:(__ FUNC)* _ "end" _ !. {
+	return ret(NewProgram(structs, functions))
+
+} / structs:(STRUCT)* _ "begin" fs:(__ FUNC)* _ "end" _ !. {
 
 	functions := []*FunctionNode{}
 	for _, f := range toSlice(fs) {
 		functions = append(functions, getItem(f, 1).(*FunctionNode))
 	}
 
+  structs := []*StructNode{}
+	for _, s := range toSlice(ss) {
+		structs = append(structs, getItem(s, 1).(*StructNode))
+	}
+
 	err := errors.New("Program body empty")
 
-	return NewProgram(functions), err
+	return NewProgram(structs, functions), err
+}
 
+STRUCT ← i:IDENT __ "is" __ ts:(STRUCTTYPE)? __ "end" {
+
+	structList := []StructTypeNode{}
+	for _, t := range toSlice(ts) {
+		structList = append(structList, getItem(t, 1).(*StructTypeNode))
+	}
+
+	return ret(NewStructNode(i, structList))
+}
+
+StructTypeNode ← t:TYPE __ i:IDENT _ ';' {
+	return ret(NewStructTypeNode(i, t))
 }
 
 // FunctionNode
