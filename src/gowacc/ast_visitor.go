@@ -33,7 +33,14 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 				Walk(visitor, s)
 			}
 		case *Program:
+			for _, f := range node.Structs {
+				Walk(visitor, f)
+			}
 			for _, f := range node.Functions {
+				Walk(visitor, f)
+			}
+		case *StructNode:
+			for _, f := range node.Types {
 				Walk(visitor, f)
 			}
 		case *FunctionNode:
@@ -84,6 +91,10 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		case *NewPairNode:
 			Walk(visitor, node.Fst)
 			Walk(visitor, node.Snd)
+		case *StructNewNode:
+			for _, e := range node.Exprs {
+				Walk(visitor, e)
+			}
 		case *FunctionCallNode:
 			for _, e := range node.Exprs {
 				Walk(visitor, e)

@@ -153,15 +153,15 @@ func (node PairTypeNode) String() string {
 }
 
 type StructTypeNode struct {
-	Ident *IdentifierNode
+	Ident string
 }
 
 func NewStructTypeNode(i *IdentifierNode) StructTypeNode {
 	return StructTypeNode{
-		Ident: i,
+		Ident: i.Ident,
 	}
 }
 
 func (node StructTypeNode) String() string {
-	return fmt.Sprintf("struct %s", node.Ident.String()[2:])
+	return fmt.Sprintf("struct %s", node.Ident)
 }

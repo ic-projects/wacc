@@ -52,6 +52,7 @@ type StructNode struct {
 	Pos        Position
 	Ident      *IdentifierNode
 	Types      []*StructInternalNode
+	TypesMap   map[string]int
 	memorySize int
 }
 
@@ -61,14 +62,16 @@ func NewStructNode(
 	types []*StructInternalNode,
 ) *StructNode {
 	structNode := StructNode{
-		Pos:   pos,
-		Ident: ident,
-		Types: types,
+		Pos:      pos,
+		Ident:    ident,
+		Types:    types,
+		TypesMap: make(map[string]int),
 	}
 	mem := 0
-	for _, t := range structNode.Types {
+	for i, t := range structNode.Types {
 		t.memoryOffset = mem
 		mem += SizeOf(t.T)
+		structNode.TypesMap[t.Ident.Ident] = i
 	}
 	structNode.memorySize = mem
 	return &structNode
