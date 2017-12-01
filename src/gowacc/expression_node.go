@@ -30,9 +30,9 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		case CHR:
 			return NewBaseTypeNode(CHAR)
 		}
-	case NullNode:
+	case *NullNode:
 		return NewNullTypeNode()
-	case PairTypeNode:
+	case *PairTypeNode:
 		return NewBaseTypeNode(PAIR)
 	case *IntegerLiteralNode:
 		return NewBaseTypeNode(INT)
@@ -44,7 +44,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		return NewStringArrayTypeNode()
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
-		arr := a.T.(ArrayTypeNode)
+		arr := a.T.(*ArrayTypeNode)
 		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
 			return arr.T
 		} else {

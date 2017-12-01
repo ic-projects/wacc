@@ -26,15 +26,17 @@ func NewSetExpectance(ts []TypeNode) SetExpectance {
 }
 
 // arrayCase handles the multiple options where we have seen an Array.
-func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode) bool {
-	_, match := validTypes[t]
+func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t *ArrayTypeNode) bool {
+	_, match := validTypes[*t]
 	nilArray := ArrayTypeNode{}
 	expectingAnyArray := false
-	matchOnAnyArray := t == nilArray
-	var found ArrayTypeNode
+	matchOnAnyArray := *t == nilArray
+	var found *ArrayTypeNode
 	for key := range validTypes {
 		if StripType(key) == nilArray {
-			found = key.(ArrayTypeNode)
+			if matchOnAnyArray {
+				found = key.(*ArrayTypeNode)
+			}
 			expectingAnyArray = true
 			break
 		}
@@ -53,16 +55,18 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t ArrayTypeNode
 }
 
 // pairCase handles the multiple options where we have seen an pair.
-func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t PairTypeNode) bool {
-	_, match := validTypes[t]
+func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t *PairTypeNode) bool {
+	_, match := validTypes[*t]
 	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]
 	nilPair := PairTypeNode{}
-	matchOnAnyPair := t == nilPair
-	var nilMatch PairTypeNode
+	matchOnAnyPair := *t == nilPair
+	var nilMatch *PairTypeNode
 	expectingAnyPair := false
 	for key := range validTypes {
 		if StripType(key) == nilPair {
-			nilMatch = key.(PairTypeNode)
+			if !basePairMatch {
+				nilMatch = key.(*PairTypeNode)
+			}
 			expectingAnyPair = true
 			break
 		}
@@ -89,36 +93,33 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
 
 	switch t := typeNode.(type) {
-	case ArrayTypeNode:
+	case *ArrayTypeNode:
 		found := arrayCase(check, validTypes, t)
 		if !found {
 			return NewTypeError(t, validTypes)
 		}
-	case PairTypeNode:
+	case *PairTypeNode:
 		found := pairCase(check, validTypes, false, t)
 		if !found {
 			return NewTypeError(t, validTypes)
 		}
-	case BaseTypeNode:
+	case *BaseTypeNode:
 		if t.T == PAIR {
-			_, found := validTypes[t]
+			_, found := validTypes[*t]
 			if !found {
-				found = pairCase(check, validTypes, true, PairTypeNode{})
+				found = pairCase(check, validTypes, true, &PairTypeNode{})
 			}
 			if !found {
 				return NewTypeError(t, validTypes)
 			}
 		} else {
-			_, found := validTypes[t]
+			_, found := validTypes[*t]
 			if !found {
 				return NewTypeError(t, validTypes)
 			}
 		}
 	default:
-		_, found := validTypes[t]
-		if !found {
-			return NewTypeError(t, validTypes)
-		}
+		fmt.Println("Type checker error, unknown type in seen")
 	}
 
 	return TypeError{}
@@ -140,7 +141,7 @@ func NewTwiceSameExpectance(exp Expectance) TwiceSameExpectance {
 // seen is called when we have seen a TwiceSameExpectance.
 func (exp TwiceSameExpectance) seen(check *TypeChecker, t TypeNode) TypeError {
 	typeError := exp.exp.seen(check, t)
-	if t == nil {
+	if t == nil { //hmm
 		check.expectAny()
 	} else {
 		check.expect(t)
@@ -224,10 +225,12 @@ func (check *TypeChecker) seen(t TypeNode) TypeError {
 // for comparing types.
 func StripType(t TypeNode) TypeNode {
 	switch t.(type) {
-	case ArrayTypeNode:
+	case *ArrayTypeNode:
 		return ArrayTypeNode{}
-	case PairTypeNode:
+	case *PairTypeNode:
 		return PairTypeNode{}
+	default:
+		fmt.Println("Internal type checker error, unknown typenode")
 	}
 	return t
 }
@@ -242,7 +245,7 @@ func (check *TypeChecker) forcePop() {
 		fmt.Println("Force pop")
 	}
 	if len(check.stack) < 1 {
-		fmt.Println("Internal type checker error")
+		fmt.Println("Internal type checker error, stack ran out")
 		return
 	}
 	check.stack = check.stack[:len(check.stack)-1]
@@ -339,7 +342,7 @@ func isSameNode(n1 ProgramNode, n2 ProgramNode) bool {
 
 // unfreeze will unfreeze the checker, if the given node is the same as the frozen node.
 func (check *TypeChecker) unfreeze(node ProgramNode) {
-	if isSameNode(node, check.frozenNode) {
+	if node == check.frozenNode { // isSameNode(node, check.frozenNode) {
 		if DEBUG_MODE {
 			fmt.Printf("Unfrozen on %s\n", node)
 		}

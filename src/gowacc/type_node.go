@@ -62,8 +62,8 @@ type BaseTypeNode struct {
 	T BaseType
 }
 
-func NewBaseTypeNode(t BaseType) BaseTypeNode {
-	return BaseTypeNode{
+func NewBaseTypeNode(t BaseType) *BaseTypeNode {
+	return &BaseTypeNode{
 		T: t,
 	}
 }
@@ -85,12 +85,12 @@ type ArrayTypeNode struct {
 // NewArrayTypeNode returns an initialised ArrayTypeNode. If the type provided
 // is an array, it will increase the dimensions of the given array, and return
 // it.
-func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
-	if array, ok := t.(ArrayTypeNode); ok {
+func NewArrayTypeNode(t TypeNode, dim int) *ArrayTypeNode {
+	if array, ok := t.(*ArrayTypeNode); ok {
 		array.Dim += dim
 		return array
 	}
-	return ArrayTypeNode{
+	return &ArrayTypeNode{
 		T:        t,
 		Dim:      dim,
 		IsString: false,
@@ -98,8 +98,8 @@ func NewArrayTypeNode(t TypeNode, dim int) ArrayTypeNode {
 }
 
 // NewStringArrayTypeNode returns an initialised ArrayTypeNode for a string.
-func NewStringArrayTypeNode() ArrayTypeNode {
-	return ArrayTypeNode{
+func NewStringArrayTypeNode() *ArrayTypeNode {
+	return &ArrayTypeNode{
 		T:        NewBaseTypeNode(CHAR),
 		Dim:      1,
 		IsString: true,
@@ -138,8 +138,8 @@ type PairTypeNode struct {
 	T2 TypeNode
 }
 
-func NewPairTypeNode(t1 TypeNode, t2 TypeNode) PairTypeNode {
-	return PairTypeNode{
+func NewPairTypeNode(t1 TypeNode, t2 TypeNode) *PairTypeNode {
+	return &PairTypeNode{
 		T1: t1,
 		T2: t2,
 	}
@@ -159,16 +159,16 @@ type StructTypeNode struct {
 type NullTypeNode struct {
 }
 
-func NewNullTypeNode() NullTypeNode {
-	return NullTypeNode{}
+func NewNullTypeNode() *NullTypeNode {
+	return &NullTypeNode{}
 }
 
 func (node NullTypeNode) String() string {
 	return "null"
 }
 
-func NewStructTypeNode(i *IdentifierNode) StructTypeNode {
-	return StructTypeNode{
+func NewStructTypeNode(i *IdentifierNode) *StructTypeNode {
+	return &StructTypeNode{
 		Ident: i.Ident,
 	}
 }

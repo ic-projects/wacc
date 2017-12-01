@@ -122,7 +122,7 @@ func (node FunctionCallNode) String() string {
 
 type StructNewNode struct {
 	Pos        Position
-	T          StructTypeNode
+	T          *StructTypeNode
 	Exprs      []ExpressionNode
 	structNode *StructNode
 }

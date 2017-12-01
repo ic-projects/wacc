@@ -61,7 +61,7 @@ func (e TypeError) String() string {
 	i := 1
 	for t := range e.expected {
 		// If type mismatch on VOID, then trying to return from global Scope
-		if node, ok := t.(BaseTypeNode); ok {
+		if node, ok := t.(*BaseTypeNode); ok {
 			if node.T == VOID {
 				return "Cannot return from global Scope"
 			}
