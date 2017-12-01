@@ -83,7 +83,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case *ReadNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
 	case *FreeNode:
-		v.typeChecker.expectSet([]TypeNode{PairTypeNode{}, ArrayTypeNode{}})
+		v.typeChecker.expectSet([]TypeNode{&PairTypeNode{}, &ArrayTypeNode{}})
 	case *ReturnNode:
 	case *ExitNode:
 		v.typeChecker.expect(NewBaseTypeNode(INT))
@@ -177,9 +177,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 
 	case *ArrayLiteralNode:
-		foundError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.Pos)
+		foundError = v.typeChecker.seen(&ArrayTypeNode{}).addPos(node.Pos)
 	case *NewPairNode:
-		foundError = v.typeChecker.seen(PairTypeNode{}).addPos(node.Pos)
+		foundError = v.typeChecker.seen(&PairTypeNode{}).addPos(node.Pos)
 	case *StructNewNode:
 		foundError = v.typeChecker.seen(node.T).addPos(node.Pos)
 		if structNode, ok := v.symbolTable.SearchForStruct(node.T.Ident); !ok {
@@ -236,7 +236,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
 			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(ArrayTypeNode{})
+			v.typeChecker.expect(&ArrayTypeNode{})
 		case ORD:
 			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(CHAR))

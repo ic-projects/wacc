@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Expectance is an interface used to store what type is expected.
@@ -12,21 +13,98 @@ type Expectance interface {
 // SetExpectance is a struct that stores a set of acceptable types that can
 // be seen. It implements Expectance.
 type SetExpectance struct {
-	set map[TypeNode]bool
+	set []TypeNode
 }
 
 func NewSetExpectance(ts []TypeNode) SetExpectance {
-	set := make(map[TypeNode]bool)
-	for _, t := range ts {
-		set[t] = true
-	}
 	return SetExpectance{
-		set: set,
+		set: ts,
+	}
+}
+
+func contains(check *TypeChecker, arr []TypeNode, t TypeNode) bool {
+	for _, a := range arr {
+		if checkEquals(check, a, t) {
+			return true
+		}
+	}
+	return false
+}
+
+func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
+	expectingValue := toValue(expecting)
+	seenValue := toValue(seen)
+	switch seenValue.(type) {
+	case ArrayTypeNode:
+		if found, ok := expectingValue.(ArrayTypeNode); ok {
+			if seenValue == (ArrayTypeNode{}) {
+				if found.Dim == 1 {
+					check.expectRepeatUntilForce(found.T)
+				} else {
+					check.expectRepeatUntilForce(NewArrayTypeNode(found.T, found.Dim-1))
+				}
+				return true
+			}
+			return expectingValue == (ArrayTypeNode{}) || expectingValue.equals(seenValue)
+		}
+	case PairTypeNode:
+		if found, ok := expectingValue.(PairTypeNode); ok {
+			if seenValue == (PairTypeNode{}) {
+				if expectingValue == (PairTypeNode{}) {
+					return false
+				}
+				check.expect(found.T2)
+				check.expect(found.T1)
+				return true
+			}
+			return expectingValue.equals(seenValue) || expectingValue == (PairTypeNode{})
+		} else if _, ok := expectingValue.(BaseTypeNode); ok && expectingValue.equals(toValue(NewBaseTypeNode(PAIR))) {
+			return true
+		}
+	case BaseTypeNode:
+		if seenValue.equals(toValue(NewBaseTypeNode(PAIR))) {
+			if _, ok := expectingValue.(PairTypeNode); ok {
+				if seenValue == (PairTypeNode{}) {
+					if expectingValue == (PairTypeNode{}) {
+						return false
+					}
+					return true
+				}
+				return true
+			}
+		}
+
+		return expectingValue.equals(seenValue)
+	case StructTypeNode:
+	case NullTypeNode:
+		return true
+	default:
+		fmt.Println(reflect.TypeOf(seen))
+		fmt.Println(reflect.TypeOf(seenValue))
+		fmt.Println(reflect.TypeOf(expecting))
+		fmt.Println(reflect.TypeOf(expectingValue))
+		fmt.Println("Unknown type for checkEquals")
+	}
+	return false
+}
+
+func toValue(typeNode TypeNode) TypeNode {
+	switch t := typeNode.(type) {
+	case *ArrayTypeNode:
+		return *t
+	case *PairTypeNode:
+		return *t
+	case *BaseTypeNode:
+		return *t
+	case *StructTypeNode:
+		return *t
+	default:
+		return t
 	}
 }
 
 // arrayCase handles the multiple options where we have seen an Array.
-func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t *ArrayTypeNode) bool {
+/*func arrayCase(check *TypeChecker, validTypes []TypeNode, t *ArrayTypeNode) bool {
 	_, match := validTypes[*t]
 	nilArray := ArrayTypeNode{}
 	expectingAnyArray := false
@@ -55,9 +133,9 @@ func arrayCase(check *TypeChecker, validTypes map[TypeNode]bool, t *ArrayTypeNod
 }
 
 // pairCase handles the multiple options where we have seen an pair.
-func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bool, t *PairTypeNode) bool {
+func pairCase(check *TypeChecker, validTypes []TypeNode, basePairMatch bool, t *PairTypeNode) bool {
 	_, match := validTypes[*t]
-	_, matchBase := validTypes[NewBaseTypeNode(PAIR)]
+	_, matchBase := validTypes[*NewBaseTypeNode(PAIR)]
 	nilPair := PairTypeNode{}
 	matchOnAnyPair := *t == nilPair
 	var nilMatch *PairTypeNode
@@ -86,43 +164,46 @@ func pairCase(check *TypeChecker, validTypes map[TypeNode]bool, basePairMatch bo
 	}
 
 	return match || matchBase || expectingAnyPair
-}
+}*/
 
 // seen is called when we have seen a SetExpectance.
 func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
-
-	switch t := typeNode.(type) {
-	case *ArrayTypeNode:
-		found := arrayCase(check, validTypes, t)
-		if !found {
-			return NewTypeError(t, validTypes)
-		}
-	case *PairTypeNode:
-		found := pairCase(check, validTypes, false, t)
-		if !found {
-			return NewTypeError(t, validTypes)
-		}
-	case *BaseTypeNode:
-		if t.T == PAIR {
-			_, found := validTypes[*t]
-			if !found {
-				found = pairCase(check, validTypes, true, &PairTypeNode{})
-			}
-			if !found {
-				return NewTypeError(t, validTypes)
-			}
-		} else {
-			_, found := validTypes[*t]
-			if !found {
-				return NewTypeError(t, validTypes)
-			}
-		}
-	default:
-		fmt.Println("Type checker error, unknown type in seen")
+	if contains(check, validTypes, typeNode) {
+		return TypeError{}
+	} else {
+		return NewTypeError(typeNode, validTypes)
 	}
+	// switch t := typeNode.(type) {
+	// case *ArrayTypeNode:
+	// 	found := arrayCase(check, validTypes, t)
+	// 	if !found {
+	// 		return NewTypeError(t, validTypes)
+	// 	}
+	// case *PairTypeNode:
+	// 	found := pairCase(check, validTypes, false, t)
+	// 	if !found {
+	// 		return NewTypeError(t, validTypes)
+	// 	}
+	// case *BaseTypeNode:
+	// 	if t.T == PAIR {
+	// 		_, found := validTypes[*t]
+	// 		if !found {
+	// 			found = pairCase(check, validTypes, true, &PairTypeNode{})
+	// 		}
+	// 		if !found {
+	// 			return NewTypeError(t, validTypes)
+	// 		}
+	// 	} else {
+	// 		_, found := validTypes[*t]
+	// 		if !found {
+	// 			return NewTypeError(t, validTypes)
+	// 		}
+	// 	}
+	// default:
+	// 	fmt.Println("Type checker error, unknown type in seen")
+	// }
 
-	return TypeError{}
 }
 
 // TwiceSameExpectance is a struct for when we want the next two types to be

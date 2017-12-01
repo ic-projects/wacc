@@ -7,12 +7,13 @@ import (
 
 // TypeNode is an empty interface for all types to implement.
 type TypeNode interface {
+	equals(TypeNode) bool
 }
 
 /******************** TYPE NODE HELPER FUNCTIONS ********************/
 
 func SizeOf(t TypeNode) int {
-	switch node := t.(type) {
+	switch node := toValue(t).(type) {
 	case BaseTypeNode:
 		switch node.T {
 		case CHAR, BOOL:
@@ -72,6 +73,13 @@ func (node BaseTypeNode) String() string {
 	return fmt.Sprintf("%s", node.T)
 }
 
+func (node BaseTypeNode) equals(t TypeNode) bool {
+	if arr, ok := toValue(t).(BaseTypeNode); ok {
+		return node.T == arr.T
+	}
+	return false
+}
+
 /******************** ARRAY TYPE NODE ********************/
 
 // ArrayTypeNode stores the type, and dimension of the array. It stores if it is
@@ -125,6 +133,13 @@ func (node ArrayTypeNode) String() string {
 	return buf.String()
 }
 
+func (node ArrayTypeNode) equals(t TypeNode) bool {
+	if arr, ok := toValue(t).(ArrayTypeNode); ok {
+		return arr.Dim == node.Dim && node.T.equals(arr.T)
+	}
+	return false
+}
+
 /******************** PAIR TYPE NODE ********************/
 
 // PairTypeNode is a struct that stores the types of the first and second
@@ -152,6 +167,13 @@ func (node PairTypeNode) String() string {
 	return fmt.Sprintf("pair(%s, %s)", node.T1, node.T2)
 }
 
+func (node PairTypeNode) equals(t TypeNode) bool {
+	if arr, ok := toValue(t).(PairTypeNode); ok {
+		return node.T1.equals(arr.T1) && node.T2.equals(arr.T2)
+	}
+	return false
+}
+
 type StructTypeNode struct {
 	Ident string
 }
@@ -161,6 +183,11 @@ type NullTypeNode struct {
 
 func NewNullTypeNode() *NullTypeNode {
 	return &NullTypeNode{}
+}
+
+func (node NullTypeNode) equals(t TypeNode) bool {
+	_, ok := toValue(t).(NullTypeNode)
+	return ok
 }
 
 func (node NullTypeNode) String() string {
@@ -175,4 +202,11 @@ func NewStructTypeNode(i *IdentifierNode) *StructTypeNode {
 
 func (node StructTypeNode) String() string {
 	return fmt.Sprintf("struct %s", node.Ident)
+}
+
+func (node StructTypeNode) equals(t TypeNode) bool {
+	if arr, ok := toValue(t).(StructTypeNode); ok {
+		return arr.Ident == node.Ident
+	}
+	return false
 }

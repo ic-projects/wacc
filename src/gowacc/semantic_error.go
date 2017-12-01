@@ -41,10 +41,10 @@ func (e CustomError) String() string {
 type TypeError struct {
 	pos      Position
 	got      TypeNode
-	expected map[TypeNode]bool
+	expected []TypeNode
 }
 
-func NewTypeError(got TypeNode, expected map[TypeNode]bool) TypeError {
+func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
 	return TypeError{
 		got:      got,
 		expected: expected,
@@ -59,7 +59,7 @@ func (e TypeError) String() string {
 	var b bytes.Buffer
 	b.WriteString("Expected type ")
 	i := 1
-	for t := range e.expected {
+	for _, t := range e.expected {
 		// If type mismatch on VOID, then trying to return from global Scope
 		if node, ok := t.(*BaseTypeNode); ok {
 			if node.T == VOID {
