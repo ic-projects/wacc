@@ -2,3 +2,4 @@ src/vendor/
 /lib/
 /gowacc
 /src/gowacc/wacc.go
+.atomenv.json
