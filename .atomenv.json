@@ -1,5 +1,0 @@
-{
-  "env": {
-    "GOPATH": "$HOME/coding/:$ATOM_PROJECT_PATH"
-  }
-}
