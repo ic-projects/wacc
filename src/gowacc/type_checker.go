@@ -76,6 +76,7 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 
 		return expectingValue.equals(seenValue)
 	case StructTypeNode:
+		return expectingValue.equals(seenValue)
 	case NullTypeNode:
 		return true
 	default:
