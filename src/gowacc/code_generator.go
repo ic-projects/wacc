@@ -189,6 +189,8 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	case StructTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
+	case NullTypeNode:
+		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
 
