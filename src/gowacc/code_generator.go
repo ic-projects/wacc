@@ -165,8 +165,8 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 
 // addPrint will add the correct type of print function for the type given.
 func (v *CodeGenerator) addPrint(t TypeNode) {
-	switch node := t.(type) {
-	case *BaseTypeNode:
+	switch node := toValue(t).(type) {
+	case BaseTypeNode:
 		switch node.T {
 		case BOOL:
 			v.callLibraryFunction("BL", PRINT_BOOL)
@@ -177,17 +177,17 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 		case PAIR:
 			v.callLibraryFunction("BL", PRINT_REFERENCE)
 		}
-	case *ArrayTypeNode:
-		if arr, ok := node.T.(BaseTypeNode); ok {
+	case ArrayTypeNode:
+		if arr, ok := toValue(node.T).(BaseTypeNode); ok {
 			if arr.T == CHAR && node.Dim == 1 {
 				v.callLibraryFunction("BL", PRINT_STRING)
 				return
 			}
 		}
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case *PairTypeNode:
+	case PairTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case *StructTypeNode:
+	case StructTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
