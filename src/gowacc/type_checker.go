@@ -57,7 +57,7 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 				check.expect(found.T1)
 				return true
 			}
-			return expectingValue.equals(seenValue) || expectingValue == (PairTypeNode{})
+			return expectingValue == (PairTypeNode{}) || expectingValue.equals(seenValue)
 		} else if _, ok := expectingValue.(BaseTypeNode); ok && expectingValue.equals(toValue(NewBaseTypeNode(PAIR))) {
 			return true
 		}
@@ -98,6 +98,8 @@ func toValue(typeNode TypeNode) TypeNode {
 	case *BaseTypeNode:
 		return *t
 	case *StructTypeNode:
+		return *t
+	case *NullTypeNode:
 		return *t
 	default:
 		return t
