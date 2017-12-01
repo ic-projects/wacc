@@ -165,7 +165,7 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 
 // addPrint will add the correct type of print function for the type given.
 func (v *CodeGenerator) addPrint(t TypeNode) {
-	switch node := t.(type) {
+	switch node := toValue(t).(type) {
 	case BaseTypeNode:
 		switch node.T {
 		case BOOL:
@@ -178,7 +178,7 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 			v.callLibraryFunction("BL", PRINT_REFERENCE)
 		}
 	case ArrayTypeNode:
-		if arr, ok := node.T.(BaseTypeNode); ok {
+		if arr, ok := toValue(node.T).(BaseTypeNode); ok {
 			if arr.T == CHAR && node.Dim == 1 {
 				v.callLibraryFunction("BL", PRINT_STRING)
 				return
@@ -188,6 +188,8 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 	case PairTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	case StructTypeNode:
+		v.callLibraryFunction("BL", PRINT_REFERENCE)
+	case NullTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
@@ -329,7 +331,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
-			arr := dec.T.(ArrayTypeNode)
+			arr := dec.T.(*ArrayTypeNode)
 			if SizeOf(arr.T) == 1 && len(lhsNode.Exprs) == arr.Dim {
 				v.addCode("STRB %s, [%s]", rhsRegister, lhsRegister)
 			} else {
@@ -432,8 +434,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-		lastIsCharOrBool := SizeOf(symbol.T.(ArrayTypeNode).T) == 1 &&
-			symbol.T.(ArrayTypeNode).Dim == length
+		lastIsCharOrBool := SizeOf(symbol.T.(*ArrayTypeNode).T) == 1 &&
+			symbol.T.(*ArrayTypeNode).Dim == length
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]

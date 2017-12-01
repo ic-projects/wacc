@@ -8,7 +8,7 @@ import (
 // Walk. It stores a SymbolTable, a TypeChecker, and a list of GenericErrors.
 type SemanticCheck struct {
 	symbolTable *SymbolTable
-	typeTable   map[string]StructNode
+	typeTable   map[string]*StructNode
 	typeChecker *TypeChecker
 	Errors      []GenericError
 }
@@ -17,7 +17,7 @@ type SemanticCheck struct {
 func NewSemanticCheck() *SemanticCheck {
 	return &SemanticCheck{
 		symbolTable: NewSymbolTable(),
-		typeTable:   make(map[string]StructNode),
+		typeTable:   make(map[string]*StructNode),
 		typeChecker: NewTypeChecker(),
 		Errors:      make([]GenericError, 0),
 	}
@@ -83,7 +83,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case *ReadNode:
 		v.typeChecker.expectSet([]TypeNode{NewBaseTypeNode(INT), NewBaseTypeNode(CHAR)})
 	case *FreeNode:
-		v.typeChecker.expectSet([]TypeNode{PairTypeNode{}, ArrayTypeNode{}})
+		v.typeChecker.expectSet([]TypeNode{&PairTypeNode{}, &ArrayTypeNode{}})
 	case *ReturnNode:
 	case *ExitNode:
 		v.typeChecker.expect(NewBaseTypeNode(INT))
@@ -118,7 +118,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.T.(PairTypeNode).T1).addPos(node.Pos)
+			foundError = v.typeChecker.seen(identDec.T.(*PairTypeNode).T1).addPos(node.Pos)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *PairSecondElementNode:
@@ -131,7 +131,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.T.(PairTypeNode).T2)
+			v.typeChecker.seen(identDec.T.(*PairTypeNode).T2)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *StructElementNode:
@@ -139,7 +139,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Struct.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if struc, ok := id.T.(StructTypeNode); !ok {
+		} else if struc, ok := id.T.(*StructTypeNode); !ok {
 			foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -160,7 +160,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if arrayNode, ok := identDec.T.(ArrayTypeNode); !ok {
+		} else if arrayNode, ok := identDec.T.(*ArrayTypeNode); !ok {
 			foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.Ident.Ident))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -177,9 +177,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 
 	case *ArrayLiteralNode:
-		foundError = v.typeChecker.seen(ArrayTypeNode{}).addPos(node.Pos)
+		foundError = v.typeChecker.seen(&ArrayTypeNode{}).addPos(node.Pos)
 	case *NewPairNode:
-		foundError = v.typeChecker.seen(PairTypeNode{}).addPos(node.Pos)
+		foundError = v.typeChecker.seen(&PairTypeNode{}).addPos(node.Pos)
 	case *StructNewNode:
 		foundError = v.typeChecker.seen(node.T).addPos(node.Pos)
 		if structNode, ok := v.symbolTable.SearchForStruct(node.T.Ident); !ok {
@@ -225,7 +225,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 	case *StringLiteralNode:
 		foundError = v.typeChecker.seen(NewStringArrayTypeNode()).addPos(node.Pos)
 	case *NullNode:
-		foundError = v.typeChecker.seen(nil).addPos(node.Pos)
+		foundError = v.typeChecker.seen(NewNullTypeNode()).addPos(node.Pos)
 	case *UnaryOperatorNode:
 		switch node.Op {
 		case NOT:
@@ -236,7 +236,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.expect(NewBaseTypeNode(INT))
 		case LEN:
 			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
-			v.typeChecker.expect(ArrayTypeNode{})
+			v.typeChecker.expect(&ArrayTypeNode{})
 		case ORD:
 			foundError = v.typeChecker.seen(NewBaseTypeNode(INT)).addPos(node.Pos)
 			v.typeChecker.expect(NewBaseTypeNode(CHAR))
