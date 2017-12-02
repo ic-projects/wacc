@@ -151,3 +151,15 @@ func (node StructNewNode) String() string {
 	}
 	return buf.String()
 }
+
+type PointerNewNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerNewNode(pos Position, ident *IdentifierNode) *PointerNewNode {
+	return &PointerNewNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}
