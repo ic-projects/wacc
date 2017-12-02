@@ -163,3 +163,18 @@ func NewPointerNewNode(pos Position, ident *IdentifierNode) *PointerNewNode {
 		Ident: ident,
 	}
 }
+
+type PointerDereferenceNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerDereferenceNode(
+	pos Position,
+	ident *IdentifierNode,
+) *PointerDereferenceNode {
+	return &PointerDereferenceNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}
