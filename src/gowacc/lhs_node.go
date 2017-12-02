@@ -177,3 +177,15 @@ func NewStructElementNode(
 func (node StructElementNode) String() string {
 	return fmt.Sprintf("structelem %s.%s (pointer: %t)\n", node.Struct, node.Ident.String()[2:], node.Pointer)
 }
+
+type PointerNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerNode(pos Position, ident *IdentifierNode) *PointerNode {
+	return &PointerNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}
