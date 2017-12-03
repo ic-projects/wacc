@@ -40,7 +40,7 @@ func (p Position) String() string {
 		colNum--
 	}
 
-	if DEBUG_MODE {
+	if DebugMode {
 		offsetNum := p.offset
 		if offsetNum != 0 {
 			offsetNum--

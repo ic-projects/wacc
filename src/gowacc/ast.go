@@ -6,9 +6,10 @@ import (
 	"strings"
 )
 
-var DEBUG_MODE bool
+// DebugMode is a setting for printing extra debugging information when true.
+var DebugMode bool
 
-// ProgramNode is an empty interface for AST nodes to implement.
+// ProgramNode is an interface for AST nodes to implement.
 type ProgramNode interface {
 }
 

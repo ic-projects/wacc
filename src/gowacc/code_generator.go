@@ -273,7 +273,6 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 // Walk.
 func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	switch node := programNode.(type) {
-	case *Program:
 	case *FunctionNode:
 		v.currentStackPos = 0
 		v.freeRegisters = NewRegisterStackWith(FreeRegisters())
