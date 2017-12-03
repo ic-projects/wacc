@@ -24,6 +24,7 @@ type Program struct {
 	Functions []*FunctionNode
 }
 
+// NewProgram initialises a Program
 func NewProgram(structs []*StructNode, functions []*FunctionNode) *Program {
 	return &Program{
 		Structs:   structs,
@@ -35,10 +36,10 @@ func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.Structs {
-		tempbuf.WriteString(Indent(fmt.Sprintf("%s", f), "  "))
+		tempbuf.WriteString(Indent(f.String(), "  "))
 	}
 	for _, f := range program.Functions {
-		tempbuf.WriteString(Indent(fmt.Sprintf("%s", f), "  "))
+		tempbuf.WriteString(Indent(f.String(), "  "))
 	}
 	var buf bytes.Buffer
 	for i, line := range strings.Split(tempbuf.String(), "\n") {
