@@ -12,12 +12,13 @@ import (
 
 /**************** CODE GENERATOR STRUCTS ****************/
 
-// AsciiWord is a struct that stores the length and string of an ascii string.
+// ASCIIWord is a struct that stores the length and string of an ASCII string.
 type ASCIIWord struct {
 	length int
 	text   string
 }
 
+// NewASCIIWord builds an ASCIIWord.
 func NewASCIIWord(length int, text string) ASCIIWord {
 	return ASCIIWord{
 		length: length,
@@ -25,8 +26,8 @@ func NewASCIIWord(length int, text string) ASCIIWord {
 	}
 }
 
-// Assembly is a struct that stores the different parts of the assembly. It stores
-// the .data, .text and global.
+// Assembly is a struct that stores the different parts of the assembly. It
+// stores the .data, .text and global.
 type Assembly struct {
 	data        map[string](ASCIIWord)
 	dataCounter int
@@ -34,6 +35,7 @@ type Assembly struct {
 	global      map[string]([]string)
 }
 
+// NewAssembly builds an Assembly object.
 func NewAssembly() *Assembly {
 	return &Assembly{
 		data:        make(map[string]ASCIIWord),
@@ -81,19 +83,20 @@ func (asm *Assembly) NumberedCode() string {
 // overwriting any file already there.
 func (asm *Assembly) SaveToFile(savepath string) error {
 	file, err := os.Create(savepath)
-	defer file.Close()
 	if err != nil {
 		return err
 	}
 
 	w := bufio.NewWriter(file)
-	defer w.Flush()
-	_, err = w.WriteString(asm.String())
-	if err != nil {
+	if _, err = w.WriteString(asm.String()); err != nil {
 		return err
 	}
 
-	return nil
+	if err := w.Flush(); err != nil {
+		return err
+	}
+
+	return file.Close()
 }
 
 // LocationOf will return the location of a
