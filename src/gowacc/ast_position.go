@@ -12,6 +12,7 @@ type Position struct {
 	offset     int
 }
 
+// NewPosition builds an AST position.
 func NewPosition(lineNumber int, colNumber int, offset int) Position {
 	return Position{
 		lineNumber: lineNumber,
@@ -45,7 +46,12 @@ func (p Position) String() string {
 		if offsetNum != 0 {
 			offsetNum--
 		}
-		return fmt.Sprintf("line %d, column %d, offset %d", p.lineNumber, colNum, offsetNum)
+		return fmt.Sprintf(
+			"line %d, column %d, offset %d",
+			p.lineNumber,
+			colNum,
+			offsetNum,
+		)
 	}
 
 	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)
