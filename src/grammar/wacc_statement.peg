@@ -34,7 +34,7 @@ SKIP ← "skip" {
 }
 
 // DeclareNode
-NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
+NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 
 	return ret(NewDeclareNode(
 		c.getPosition(),
@@ -43,7 +43,7 @@ NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 		rhs.(RHSNode),
 	))
 
-} / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
+} / t:TYPE ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
 
 	name := string(getItem(ident, 0).([]byte))
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
