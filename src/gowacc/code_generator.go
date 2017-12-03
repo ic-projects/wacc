@@ -318,9 +318,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 					v.LocationOf(dec.Location))
 			}
 		}
-	case *ParameterNode:
-	case *SkipNode:
-	case *DeclareNode:
 	case *AssignNode:
 		// Rhs
 		Walk(v, node.Rhs)
@@ -381,11 +378,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		} else {
 			v.callLibraryFunction("BL", READ_INT)
 		}
-	case *FreeNode:
-	case *ReturnNode:
-	case *ExitNode:
-	case *PrintNode:
-	case *PrintlnNode:
 	case *IfNode:
 		// Labels
 		elseLabel := v.labelCount + 1
@@ -419,15 +411,12 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
 		v.addCode("BEQ DO%d", doLabel)
-	case *ScopeNode:
 	case *IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
 		v.addCode("%s %s, %s",
 			load(SizeOf(dec.T)),
 			v.getFreeRegister(),
 			v.LocationOf(dec.Location))
-	case *PairFirstElementNode:
-	case *PairSecondElementNode:
 	case *ArrayElementNode:
 		Walk(v, node.Ident)
 		identRegister := v.returnRegisters.Pop()
@@ -467,7 +456,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 
 		v.returnRegisters.Push(identRegister)
-
 	case *StructElementNode:
 		Walk(v, node.Struct)
 
@@ -567,11 +555,6 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 
 		v.addCode("MOV %s, r0", v.getFreeRegister())
-	case BaseTypeNode:
-	case ArrayTypeNode:
-	case PairTypeNode:
-	case *UnaryOperator:
-	case *BinaryOperator:
 	case *IntegerLiteralNode:
 		v.addCode("LDR %s, =%d", v.getFreeRegister(), node.Val)
 	case *BooleanLiteralNode:
@@ -763,7 +746,6 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addCode("POP {pc}")
-
 	case *PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
