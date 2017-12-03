@@ -68,7 +68,8 @@ func (asm *Assembly) String() string {
 	return buf.String()
 }
 
-// NumberedCode will return the string format of the Assembly code with line numbers.
+// NumberedCode will return the string format of the Assembly code with line
+// numbers.
 func (asm *Assembly) NumberedCode() string {
 	var buf bytes.Buffer
 	for i, line := range strings.Split(asm.String(), "\n") {
@@ -100,7 +101,7 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 }
 
 // LocationOf will return the location of a
-func (codeGenerator *CodeGenerator) LocationOf(loc *Location) string {
+func (v *CodeGenerator) LocationOf(loc *Location) string {
 	// Location is a register
 	if loc.Register != UNDEFINED {
 		return loc.Register.String()
@@ -113,15 +114,15 @@ func (codeGenerator *CodeGenerator) LocationOf(loc *Location) string {
 
 	// Location is a stack offset
 	return "[sp, #" +
-		strconv.Itoa(codeGenerator.currentStackPos-loc.CurrentPos) +
+		strconv.Itoa(v.currentStackPos-loc.CurrentPos) +
 		"]"
 }
 
-func (codeGenerator *CodeGenerator) PointerTo(
-	location *Location,
-) string {
+// PointerTo returns a string, that when added gives the object's location in
+// memory
+func (v *CodeGenerator) PointerTo(location *Location) string {
 	return "sp, #" +
-		strconv.Itoa(codeGenerator.currentStackPos-location.CurrentPos)
+		strconv.Itoa(v.currentStackPos-location.CurrentPos)
 }
 
 // GenerateCode is a function that will generate and return the finished assembly
@@ -188,11 +189,7 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 			}
 		}
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case PairTypeNode:
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case StructTypeNode:
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case NullTypeNode:
+	case PairTypeNode, StructTypeNode, NullTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
@@ -215,14 +212,6 @@ func (v *CodeGenerator) addDataWithLabel(label string, text string) {
 		}
 	}
 	v.asm.data[label] = NewASCIIWord(length, text)
-}
-
-// addText add lines of assembly to the already text part of the generated
-// assembly code
-func (v *CodeGenerator) addText(lines ...string) {
-	for _, line := range lines {
-		v.asm.text = append(v.asm.text, line+"\n")
-	}
 }
 
 // addCode formats and adds one line of assembly to the correct location in then
