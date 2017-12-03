@@ -13,13 +13,13 @@ import (
 /**************** CODE GENERATOR STRUCTS ****************/
 
 // AsciiWord is a struct that stores the length and string of an ascii string.
-type AsciiWord struct {
+type ASCIIWord struct {
 	length int
 	text   string
 }
 
-func NewAsciiWord(length int, text string) AsciiWord {
-	return AsciiWord{
+func NewASCIIWord(length int, text string) ASCIIWord {
+	return ASCIIWord{
 		length: length,
 		text:   text,
 	}
@@ -28,7 +28,7 @@ func NewAsciiWord(length int, text string) AsciiWord {
 // Assembly is a struct that stores the different parts of the assembly. It stores
 // the .data, .text and global.
 type Assembly struct {
-	data        map[string](AsciiWord)
+	data        map[string](ASCIIWord)
 	dataCounter int
 	text        []string
 	global      map[string]([]string)
@@ -36,7 +36,7 @@ type Assembly struct {
 
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:        make(map[string]AsciiWord),
+		data:        make(map[string]ASCIIWord),
 		dataCounter: 0,
 		text:        make([]string, 0),
 		global:      make(map[string]([]string)),
@@ -211,7 +211,7 @@ func (v *CodeGenerator) addDataWithLabel(label string, text string) {
 			i++
 		}
 	}
-	v.asm.data[label] = NewAsciiWord(length, text)
+	v.asm.data[label] = NewASCIIWord(length, text)
 }
 
 // addText add lines of assembly to the already text part of the generated
