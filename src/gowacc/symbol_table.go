@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-/******************** SYMBOL TABLE ********************/
+/**************** SYMBOL TABLE ****************/
 
 // SymbolTable is a struct that stores the symboltable and the CurrentScope that
 // the program is in.
@@ -30,7 +30,7 @@ func NewSymbolTable() *SymbolTable {
 	}
 }
 
-/******************** SYMBOL TABLE NODE ********************/
+/**************** SYMBOL TABLE NODE ****************/
 
 // SymbolTableNode is a struct that stores its Scope, the scopes below it and a
 // Pointer to the Scope above itself.
@@ -51,7 +51,7 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	}
 }
 
-/******************** IDENTIFIER DECLARATION ********************/
+/**************** IDENTIFIER DECLARATION ****************/
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
@@ -88,7 +88,7 @@ func (dec *IdentifierDeclaration) AddLocation(location *Location) {
 	dec.Location = location
 }
 
-/******************** MOVING SCOPE HELPER FUNCTIONS ********************/
+/**************** MOVING SCOPE HELPER FUNCTIONS ****************/
 
 // MoveDownScope creates a new Scope such that it is a chile of the currentscope,
 // and then sets the CurrentScope to be the new Scope.
@@ -114,7 +114,7 @@ func (table *SymbolTable) MoveUpScope() {
 	}
 }
 
-/******************** SEARCHING HELPER FUNCTIONS ********************/
+/**************** SEARCHING HELPER FUNCTIONS ****************/
 
 // SearchForIdent will search for an identifier, first checking the CurrentScope
 // and then will iterate through to the Head Scope. It will return false as its second return
@@ -163,7 +163,7 @@ func (table *SymbolTable) SearchForStruct(identifier string) (*StructNode, bool)
 	return node, ok
 }
 
-/******************** ADDING HELPER FUNCTIONS ********************/
+/**************** ADDING HELPER FUNCTIONS ****************/
 
 // AddToScope will add an identifier to the CurrentScope.
 func (table *SymbolTable) AddToScope(identifier string, programNode ProgramNode) {
@@ -179,7 +179,7 @@ func (table *SymbolTable) AddStruct(identifier string, node *StructNode) {
 	table.structs[identifier] = node
 }
 
-/******************** PRINTING HELPER FUNCTIONS ********************/
+/**************** PRINTING HELPER FUNCTIONS ****************/
 
 // Print will print a Node, and all of its parents
 func (node SymbolTableNode) Print() {

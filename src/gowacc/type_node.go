@@ -10,7 +10,7 @@ type TypeNode interface {
 	equals(TypeNode) bool
 }
 
-/******************** TYPE NODE HELPER FUNCTIONS ********************/
+/**************** TYPE NODE HELPER FUNCTIONS ****************/
 
 func SizeOf(t TypeNode) int {
 	switch node := toValue(t).(type) {
@@ -23,7 +23,7 @@ func SizeOf(t TypeNode) int {
 	return 4
 }
 
-/******************** BASE TYPE ********************/
+/**************** BASE TYPE ****************/
 
 type BaseType int
 
@@ -56,7 +56,7 @@ func (t BaseType) String() string {
 	return ""
 }
 
-/******************** BASE TYPE NODE ********************/
+/**************** BASE TYPE NODE ****************/
 
 // BaseTypeNode is a struct that stores a BaseType.
 type BaseTypeNode struct {
@@ -80,7 +80,7 @@ func (node BaseTypeNode) equals(t TypeNode) bool {
 	return false
 }
 
-/******************** ARRAY TYPE NODE ********************/
+/**************** ARRAY TYPE NODE ****************/
 
 // ArrayTypeNode stores the type, and dimension of the array. It stores if it is
 // a string additionally to distinguish between a char array and a string.
@@ -140,7 +140,7 @@ func (node ArrayTypeNode) equals(t TypeNode) bool {
 	return false
 }
 
-/******************** PAIR TYPE NODE ********************/
+/**************** PAIR TYPE NODE ****************/
 
 // PairTypeNode is a struct that stores the types of the first and second
 // elements of the pair.

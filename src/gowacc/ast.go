@@ -12,7 +12,7 @@ var DEBUG_MODE bool
 type ProgramNode interface {
 }
 
-/******************** PROGRAM ********************/
+/**************** PROGRAM ****************/
 
 // Program the struct that encapsulates the entire program and will be the root
 // of the AST.
@@ -109,7 +109,7 @@ func (node StructInternalNode) String() string {
 	return fmt.Sprintf("  %s %s (offset: %d)", node.Ident, node.T, node.memoryOffset)
 }
 
-/**************** FUNCTION NODE ********************/
+/**************** FUNCTION NODE ****************/
 
 // FunctionNode is the struct that holds information about a function, the
 // return type, parameters and internal body.
@@ -161,7 +161,7 @@ func (node FunctionNode) String() string {
 	return buf.String()
 }
 
-/******************** PARAMETER NODE ********************/
+/**************** PARAMETER NODE ****************/
 
 // ParameterNode is the struct that holds information about a parameter for a
 // function, the type and identifier of the single parameter.

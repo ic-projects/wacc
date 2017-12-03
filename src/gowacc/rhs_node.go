@@ -9,11 +9,11 @@ import (
 type RHSNode interface {
 }
 
-/******************** EXPRESSION NODE ********************/
+/**************** EXPRESSION NODE ****************/
 
 // ExpressionNode - defined in expression_node.go
 
-/******************** ARRAY LITERAL NODE ********************/
+/**************** ARRAY LITERAL NODE ****************/
 
 // ArrayLiteralNode stores the position and elements of an array literal.
 //
@@ -44,7 +44,7 @@ func (node ArrayLiteralNode) String() string {
 	return buf.String()
 }
 
-/******************** NEW PAIR NODE ********************/
+/**************** NEW PAIR NODE ****************/
 
 // NewPairNode stores the position and elements of a newpair call.
 //
@@ -78,15 +78,15 @@ func (node NewPairNode) String() string {
 	return buf.String()
 }
 
-/******************** PAIR FIRST ELEMENT NODE ********************/
+/**************** PAIR FIRST ELEMENT NODE ****************/
 
 // PairFirstElementNode - defined in lhs_node.go
 
-/******************** PAIR SECOND ELEMENT NODE ********************/
+/**************** PAIR SECOND ELEMENT NODE ****************/
 
 // PairSecondElementNode - defined in lhs_node.go
 
-/******************** FUNCTION CALL NODE ********************/
+/**************** FUNCTION CALL NODE ****************/
 
 // FunctionCallNode stores the position, identifier and passed in parameters for
 // a function call.

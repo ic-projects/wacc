@@ -9,7 +9,7 @@ import (
 type LHSNode interface {
 }
 
-/******************** IDENTIFIER NODE ********************/
+/**************** IDENTIFIER NODE ****************/
 
 // IdentifierNode is a struct that stores the position and string of an
 // identifier.
@@ -32,7 +32,7 @@ func (node IdentifierNode) String() string {
 	return fmt.Sprintf("- %s", node.Ident)
 }
 
-/******************** PAIR FIRST ELEMENT NODE ********************/
+/**************** PAIR FIRST ELEMENT NODE ****************/
 
 // PairFirstElementNode is a struct that stores the position and expression of
 // an access to a pair's first element.
@@ -68,7 +68,7 @@ func (node PairFirstElementNode) String() string {
 	return buf.String()
 }
 
-/******************** PAIR SECOND ELEMENT NODE ********************/
+/**************** PAIR SECOND ELEMENT NODE ****************/
 
 // PairSecondElementNode is a struct that stores the position and expression of
 // an access to a pair's second element.
@@ -104,7 +104,7 @@ func (node PairSecondElementNode) String() string {
 	return buf.String()
 }
 
-/******************** ARRAY ELEMENT NODE ********************/
+/**************** ARRAY ELEMENT NODE ****************/
 
 // ArrayElementNode is a struct that stores the position, identifier and
 // expressions of an access to an array.
