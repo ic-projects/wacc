@@ -1,66 +1,57 @@
-.PHONY = all build check lint fmt vet cyclo spellcheck test doc clean clean-lib
+# ***************** GOPATH CONFIG ****************
 
 GOPATH := $(CURDIR)/lib/:$(CURDIR)
 export GOPATH
-GOBIN = $(CURDIR)/lib/bin
 
-GOLINT = $(GOBIN)/golint
-PIGEON = $(GOBIN)/pigeon
-GOCYCLO = $(GOBIN)/gocyclo
-MISSPELL = $(GOBIN)/misspell
+PIGEON = $(CURDIR)/lib/bin/pigeon
+GOLINT = $(CURDIR)/lib/bin/gometalinter
 
 SRC = src/**/*.go
-BUILD = src/gowacc/wacc.go
+GRAMMAR = src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
 
-all: pigeon build
+# ***************** BUILDING ****************
+
+.PHONY: all
+
+all: $(SRC)
 	go build gowacc
 
-build: $(SRC) $(BUILD)
-
-src/gowacc/wacc.go: src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
+src/gowacc/wacc.go: $(GRAMMAR)
+	@go get github.com/ic-projects/pigeon
 	cat $^ | $(PIGEON) > $@
 
-check: spellcheck fmt vet lint cyclo tests
+# ***************** LINTING and TESTING ****************
 
-lint: golint
-	@echo "\n== Lint Checking =="
-	$(GOLINT) $(SRC)
+.PHONY: check lint fmt tests
+
+check: lint fmt tests
+
+lint:
+	@go get github.com/alecthomas/gometalinter
+	@$(GOLINT) --install --update
+	@echo "\n== Linting =="
+	$(GOLINT) --enable-all --skip=lib ./...
 
 fmt:
 	@echo "\n== Formatting =="
-	gofmt -w $(SRC)
-
-vet:
-	@echo "\n== Vetting =="
-	go tool vet $(SRC)
-
-cyclo: gocyclo
-	@echo "\n== Cyclo =="
-	$(GOCYCLO) $(SRC)
-
-spellcheck: misspell
-	@echo "\n== Spell Checking =="
-	$(MISSPELL) $(SRC)
-
-golint:
-	@go get github.com/golang/lint/golint
-
-pigeon:
-	@go get github.com/ic-projects/pigeon
-
-gocyclo:
-	@go get github.com/fzipp/gocyclo
-
-misspell:
-	@go get github.com/client9/misspell/cmd/misspell
+	gofmt -s -w $(SRC)
 
 tests:
-	@echo "\n== To view the gowacc tests, visit http://localhost:18000/ =="
+	@echo "\n== Testing at http://localhost:18000/ =="
 	ruby test/testserver.rb .
 
+# ***************** DOCUMENTATION ****************
+
+.PHONY: docs
+
 docs:
-	@echo "\n== To view the gowacc documentation, visit http://localhost:8080/pkg/gowacc/ =="
+	@go get golang.org/x/tools/cmd/godoc
+	@echo "\n== Generating docs at http://localhost:8080/pkg/gowacc/ =="
 	godoc -http=:8080 -goroot=$(CURDIR)
+
+# ***************** CLEANING ****************
+
+.PHONY: clean clean-lib
 
 clean:
 	rm -rf $(BUILD)
