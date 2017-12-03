@@ -12,31 +12,33 @@ import (
 
 /**************** CODE GENERATOR STRUCTS ****************/
 
-// AsciiWord is a struct that stores the length and string of an ascii string.
-type AsciiWord struct {
+// ASCIIWord is a struct that stores the length and string of an ASCII string.
+type ASCIIWord struct {
 	length int
 	text   string
 }
 
-func NewAsciiWord(length int, text string) AsciiWord {
-	return AsciiWord{
+// NewASCIIWord builds an ASCIIWord.
+func NewASCIIWord(length int, text string) ASCIIWord {
+	return ASCIIWord{
 		length: length,
 		text:   text,
 	}
 }
 
-// Assembly is a struct that stores the different parts of the assembly. It stores
-// the .data, .text and global.
+// Assembly is a struct that stores the different parts of the assembly. It
+// stores the .data, .text and global.
 type Assembly struct {
-	data        map[string](AsciiWord)
+	data        map[string](ASCIIWord)
 	dataCounter int
 	text        []string
 	global      map[string]([]string)
 }
 
+// NewAssembly builds an Assembly object.
 func NewAssembly() *Assembly {
 	return &Assembly{
-		data:        make(map[string]AsciiWord),
+		data:        make(map[string]ASCIIWord),
 		dataCounter: 0,
 		text:        make([]string, 0),
 		global:      make(map[string]([]string)),
@@ -66,7 +68,8 @@ func (asm *Assembly) String() string {
 	return buf.String()
 }
 
-// NumberedCode will return the string format of the Assembly code with line numbers.
+// NumberedCode will return the string format of the Assembly code with line
+// numbers.
 func (asm *Assembly) NumberedCode() string {
 	var buf bytes.Buffer
 	for i, line := range strings.Split(asm.String(), "\n") {
@@ -81,23 +84,24 @@ func (asm *Assembly) NumberedCode() string {
 // overwriting any file already there.
 func (asm *Assembly) SaveToFile(savepath string) error {
 	file, err := os.Create(savepath)
-	defer file.Close()
 	if err != nil {
 		return err
 	}
 
 	w := bufio.NewWriter(file)
-	defer w.Flush()
-	_, err = w.WriteString(asm.String())
-	if err != nil {
+	if _, err = w.WriteString(asm.String()); err != nil {
 		return err
 	}
 
-	return nil
+	if err := w.Flush(); err != nil {
+		return err
+	}
+
+	return file.Close()
 }
 
 // LocationOf will return the location of a
-func (codeGenerator *CodeGenerator) LocationOf(loc *Location) string {
+func (v *CodeGenerator) LocationOf(loc *Location) string {
 	// Location is a register
 	if loc.Register != UNDEFINED {
 		return loc.Register.String()
@@ -110,15 +114,15 @@ func (codeGenerator *CodeGenerator) LocationOf(loc *Location) string {
 
 	// Location is a stack offset
 	return "[sp, #" +
-		strconv.Itoa(codeGenerator.currentStackPos-loc.CurrentPos) +
+		strconv.Itoa(v.currentStackPos-loc.CurrentPos) +
 		"]"
 }
 
-func (codeGenerator *CodeGenerator) PointerTo(
-	location *Location,
-) string {
+// PointerTo returns a string, that when added gives the object's location in
+// memory
+func (v *CodeGenerator) PointerTo(location *Location) string {
 	return "sp, #" +
-		strconv.Itoa(codeGenerator.currentStackPos-location.CurrentPos)
+		strconv.Itoa(v.currentStackPos-location.CurrentPos)
 }
 
 // GenerateCode is a function that will generate and return the finished assembly
@@ -185,11 +189,7 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 			}
 		}
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case PairTypeNode:
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case StructTypeNode:
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
-	case NullTypeNode:
+	case PairTypeNode, StructTypeNode, NullTypeNode:
 		v.callLibraryFunction("BL", PRINT_REFERENCE)
 	}
 }
@@ -211,15 +211,7 @@ func (v *CodeGenerator) addDataWithLabel(label string, text string) {
 			i++
 		}
 	}
-	v.asm.data[label] = NewAsciiWord(length, text)
-}
-
-// addText add lines of assembly to the already text part of the generated
-// assembly code
-func (v *CodeGenerator) addText(lines ...string) {
-	for _, line := range lines {
-		v.asm.text = append(v.asm.text, line+"\n")
-	}
+	v.asm.data[label] = NewASCIIWord(length, text)
 }
 
 // addCode formats and adds one line of assembly to the correct location in then
@@ -273,7 +265,6 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 // Walk.
 func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	switch node := programNode.(type) {
-	case *Program:
 	case *FunctionNode:
 		v.currentStackPos = 0
 		v.freeRegisters = NewRegisterStackWith(FreeRegisters())

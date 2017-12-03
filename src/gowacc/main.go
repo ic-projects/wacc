@@ -19,7 +19,7 @@ func main() {
 	filepath := os.Args[len(os.Args)-1]
 	flag.Parse()
 	if *debugMode {
-		DEBUG_MODE = true
+		DebugMode = true
 	}
 
 	// Load the file and parse into an AST

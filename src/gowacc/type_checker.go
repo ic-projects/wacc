@@ -295,7 +295,7 @@ func (check *TypeChecker) seen(t TypeNode) TypeError {
 		fmt.Println("Internal type checker error")
 		return TypeError{}
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Printf("Seen %s\n", t)
 	}
 
@@ -325,7 +325,7 @@ func (check *TypeChecker) forcePop() {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Println("Force pop")
 	}
 	if len(check.stack) < 1 {
@@ -340,7 +340,7 @@ func (check *TypeChecker) expectAny() {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Println("Expecting any")
 	}
 	check.stack = append(check.stack, NewAnyExpectance())
@@ -351,7 +351,7 @@ func (check *TypeChecker) expectTwiceSame(ex Expectance) {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Println("Expecting twice")
 	}
 	check.stack = append(check.stack, NewTwiceSameExpectance(ex))
@@ -363,7 +363,7 @@ func (check *TypeChecker) expectRepeatUntilForce(t TypeNode) {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Printf("Expecting repeat %s\n", t)
 	}
 	check.stack = append(check.stack, NewRepeatExpectance(NewSetExpectance([]TypeNode{t})))
@@ -375,7 +375,7 @@ func (check *TypeChecker) expect(t TypeNode) {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Printf("Expecting %s\n", t)
 	}
 	check.expectSet([]TypeNode{t})
@@ -399,7 +399,7 @@ func (check *TypeChecker) freeze(node ProgramNode) {
 	if check.frozen() {
 		return
 	}
-	if DEBUG_MODE {
+	if DebugMode {
 		fmt.Printf("Frozen on %s\n", node)
 	}
 	check.frozenNode = node
@@ -427,7 +427,7 @@ func isSameNode(n1 ProgramNode, n2 ProgramNode) bool {
 // unfreeze will unfreeze the checker, if the given node is the same as the frozen node.
 func (check *TypeChecker) unfreeze(node ProgramNode) {
 	if node == check.frozenNode { // isSameNode(node, check.frozenNode) {
-		if DEBUG_MODE {
+		if DebugMode {
 			fmt.Printf("Unfrozen on %s\n", node)
 		}
 		check.frozenNode = nil
