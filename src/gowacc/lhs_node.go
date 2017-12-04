@@ -18,6 +18,7 @@ type IdentifierNode struct {
 	Ident string
 }
 
+// NewIdentifierNode builds an IdentifierNode
 func NewIdentifierNode(pos Position, ident string) *IdentifierNode {
 	return &IdentifierNode{
 		Pos:   pos,
@@ -50,6 +51,7 @@ func (fst *PairFirstElementNode) SetPointer(p bool) {
 	fst.Pointer = p
 }
 
+// NewPairFirstElemNode builds a PairFirstElemNode
 func NewPairFirstElementNode(
 	pos Position,
 	expr ExpressionNode,
@@ -86,6 +88,7 @@ func (snd *PairSecondElementNode) SetPointer(p bool) {
 	snd.Pointer = p
 }
 
+// NewPairSecondElemNode builds a PairSecondElemNode
 func NewPairSecondElementNode(
 	pos Position,
 	expr ExpressionNode,
@@ -122,6 +125,7 @@ func (arr *ArrayElementNode) SetPointer(p bool) {
 	arr.Pointer = p
 }
 
+// NewArrayElementNode builds an ArrayElementNode
 func NewArrayElementNode(
 	pos Position,
 	ident *IdentifierNode,
@@ -145,6 +149,13 @@ func (node ArrayElementNode) String() string {
 	return buf.String()
 }
 
+/**************** STRUCT ELEMENT NODE ****************/
+
+// StructElementNode is a struct that stores the position, identifier and
+// member of an access to a struct.
+//
+// E.g.
+//  s.lhs
 type StructElementNode struct {
 	Pos       Position
 	Struct    *IdentifierNode
@@ -161,6 +172,7 @@ func (s *StructElementNode) SetPointer(p bool) {
 	s.Pointer = p
 }
 
+// NewStructElementNode builds an StructElementNode
 func NewStructElementNode(
 	pos Position,
 	struc *IdentifierNode,
@@ -175,5 +187,10 @@ func NewStructElementNode(
 }
 
 func (node StructElementNode) String() string {
-	return fmt.Sprintf("structelem %s.%s (pointer: %t)\n", node.Struct, node.Ident.String()[2:], node.Pointer)
+	return fmt.Sprintf(
+		"structelem %s.%s (pointer: %t)\n",
+		node.Struct,
+		node.Ident.String()[2:],
+		node.Pointer,
+	)
 }
