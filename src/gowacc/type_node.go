@@ -26,6 +26,10 @@ func SizeOf(t TypeNode) int {
 func toValue(typeNode TypeNode) TypeNode {
 	switch t := typeNode.(type) {
 	case *ArrayTypeNode:
+		if inside, ok := toValue(t.T).(ArrayTypeNode); ok {
+			t.Dim += inside.Dim
+			t.T = inside.T
+		}
 		return *t
 	case *PairTypeNode:
 		return *t
@@ -42,8 +46,37 @@ func toValue(typeNode TypeNode) TypeNode {
 		} else {
 			return toValue(t2)
 		}
+	case ArrayTypeNode:
+		if inside, ok := toValue(t.T).(ArrayTypeNode); ok {
+			t.Dim += inside.Dim
+			t.T = inside.T
+		}
+		return t
 	default:
 		return t
+	}
+}
+
+func validType(T TypeNode, i *IdentifierNode) GenericError {
+	switch t := toValue(T).(type) {
+	case ArrayTypeNode:
+		if validType(t.T, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case DynamicTypeNode:
+		fmt.Println("here")
+		if len(t.T.poss) != 1 || validType(t.T.poss[0], i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case PairTypeNode:
+		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	default:
+		return nil
 	}
 }
 
@@ -240,8 +273,10 @@ func (node StructTypeNode) equals(t TypeNode) bool {
 }
 
 type DynamicTypeNode struct {
-	T          *InternalDynamicType
-	insidePair bool
+	T            *InternalDynamicType
+	insidePair   bool
+	insideArray  bool
+	arrayPointer *ArrayTypeNode
 }
 
 type InternalDynamicType struct {
@@ -255,8 +290,9 @@ func NewDynamicTypeNode() *DynamicTypeNode {
 		poss: make([]TypeNode, 0),
 	}
 	return &DynamicTypeNode{
-		T:          t,
-		insidePair: false,
+		T:           t,
+		insidePair:  false,
+		insideArray: false,
 	}
 }
 
@@ -266,13 +302,29 @@ func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
 		poss: make([]TypeNode, 0),
 	}
 	return &DynamicTypeNode{
-		T:          t,
-		insidePair: true,
+		T:           t,
+		insidePair:  true,
+		insideArray: false,
+	}
+}
+
+func NewDynamicTypeInsideArrayNode() *DynamicTypeNode {
+	t := &InternalDynamicType{
+		init: false,
+		poss: make([]TypeNode, 0),
+	}
+	return &DynamicTypeNode{
+		T:           t,
+		insidePair:  false,
+		insideArray: true,
 	}
 }
 
 func (node InternalDynamicType) String() string {
 	if node.init {
+		if len(node.poss) == 1 {
+			return fmt.Sprintf("%s", node.poss[0])
+		}
 		return fmt.Sprintf("%s", node.poss)
 	}
 	return fmt.Sprintf("unknown")
@@ -304,10 +356,23 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 	if len(node.T.poss) == 1 {
 		t := node.T.poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
+			/*if node.insideArray {
+				if arr.T == nil {
+					node.arrayPointer.T = NewDynamicTypeInsideArrayNode()
+				} else {
+					node.arrayPointer.T = arr.T
+				}
+				node.arrayPointer.Dim++
+				node.T.poss[0] = node.arrayPointer
+				t = node.T.poss[0]
+			} else {*/
 			if arr.T == nil {
-				node.T.poss[0] = NewArrayTypeNode(NewDynamicTypeNode(), 1)
+				arr := NewArrayTypeNode(NewDynamicTypeInsideArrayNode(), 1)
+				arr.T.(*DynamicTypeNode).arrayPointer = arr
+				node.T.poss[0] = arr
 				t = node.T.poss[0]
 			}
+			//}
 		} else if pair, ok := t.(*PairTypeNode); ok {
 			if !node.insidePair {
 				if pair.T2 == nil && pair.T1 == nil {

@@ -32,6 +32,13 @@ func (v *SemanticCheck) SymbolTable() *SymbolTable {
 	return v.symbolTable
 }
 
+func (v *SemanticCheck) hasErrors() bool {
+	if len(v.Errors) > 0 {
+		return true
+	}
+	return v.symbolTable.checkForDynamicErrors(&v.Errors)
+}
+
 // Visit will apply the correct rule for the programNode given, to be used with
 // Walk.
 func (v *SemanticCheck) Visit(programNode ProgramNode) {
