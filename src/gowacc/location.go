@@ -10,19 +10,7 @@ type Location struct {
 	CurrentPos int
 }
 
-func NewRegisterLocation(register Register) *Location {
-	return &Location{
-		Register: register,
-	}
-}
-
-func NewAddressLocation(address int) *Location {
-	return &Location{
-		Register: UNDEFINED,
-		Address:  address,
-	}
-}
-
+// NewStackOffsetLocation builds a location using a stack position
 func NewStackOffsetLocation(currentPos int) *Location {
 	return &Location{
 		Register:   UNDEFINED,
