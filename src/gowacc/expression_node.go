@@ -12,6 +12,7 @@ type ExpressionNode interface {
 
 /**************** EXPRESSION HELPER FUNCTIONS ****************/
 
+// Type returns the correct TypeNode for a given ExpressionNode
 func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	switch node := e.(type) {
 	case *BinaryOperatorNode:
@@ -45,11 +46,11 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
 		arr := a.T.(*ArrayTypeNode)
-		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
+		dimLeft := arr.Dim - len(node.Exprs)
+		if dimLeft == 0 {
 			return arr.T
-		} else {
-			return NewArrayTypeNode(arr.T, dimLeft)
 		}
+		return NewArrayTypeNode(arr.T, dimLeft)
 	case *StructElementNode:
 		return node.stuctType.T
 	case *IdentifierNode:
@@ -106,11 +107,16 @@ func BuildBinOpTree(
 type UnaryOperator int
 
 const (
-	NOT UnaryOperator = iota // Not (!)
-	NEG                      // Negate (-)
-	LEN                      // Length (len)
-	ORD                      // Ordinate (ord)
-	CHR                      // Character (chr)
+	// NOT Not (!)
+	NOT UnaryOperator = iota
+	// NEG Negate (-)
+	NEG
+	// LEN Length (len)
+	LEN
+	// ORD Ordinate (ord)
+	ORD
+	// CHR Character (chr)
+	CHR
 )
 
 func (unOp UnaryOperator) String() string {
@@ -135,19 +141,32 @@ func (unOp UnaryOperator) String() string {
 type BinaryOperator int
 
 const (
-	MUL BinaryOperator = iota // Multiply (*)
-	DIV                       // Divide (/)
-	MOD                       // Modulus (%)
-	ADD                       // Add (+)
-	SUB                       // Subtract (-)
-	GT                        // Greater than (>)
-	GEQ                       // Greater than or equal to (>=)
-	LT                        // Less than (<)
-	LEQ                       // Less than or equal to (<=)
-	EQ                        // Equal (==)
-	NEQ                       // Not equal (!=)
-	AND                       // And (&&)
-	OR                        // Or (||)
+	// MUL Multiply (*)
+	MUL BinaryOperator = iota
+	// DIV Divide (/)
+	DIV
+	// MOD Modulus (%)
+	MOD
+	// ADD Add (+)
+	ADD
+	// SUB Subtract (-)
+	SUB
+	// GT Greater than (>)
+	GT
+	// GEQ Greater than or equal to (>=)
+	GEQ
+	// LT Less than (<)
+	LT
+	// LEQ Less than or equal to (<=)
+	LEQ
+	// EQ Equal (==)
+	EQ
+	// NEQ Not equal (!=)
+	NEQ
+	// AND And (&&)
+	AND
+	// OR Or (||)
+	OR
 )
 
 func (binOp BinaryOperator) String() string {
@@ -194,6 +213,7 @@ type IntegerLiteralNode struct {
 	Val int
 }
 
+// NewIntegerLiteralNode builds an IntegerLiteralNode
 func NewIntegerLiteralNode(pos Position, val int) *IntegerLiteralNode {
 	return &IntegerLiteralNode{
 		Pos: pos,
@@ -217,6 +237,7 @@ type BooleanLiteralNode struct {
 	Val bool
 }
 
+// NewBooleanLiteralNode builds an BooleanLiteralNode
 func NewBooleanLiteralNode(pos Position, val bool) *BooleanLiteralNode {
 	return &BooleanLiteralNode{
 		Pos: pos,
@@ -240,6 +261,7 @@ type CharacterLiteralNode struct {
 	Val rune
 }
 
+// NewCharacterLiteralNode builds a CharacterLiteralNode
 func NewCharacterLiteralNode(pos Position, val rune) *CharacterLiteralNode {
 	return &CharacterLiteralNode{
 		Pos: pos,
@@ -269,6 +291,7 @@ type StringLiteralNode struct {
 	Val string
 }
 
+// NewStringLiteralNode builds a StringLiteralNode
 func NewStringLiteralNode(pos Position, val string) *StringLiteralNode {
 	return &StringLiteralNode{
 		Pos: pos,
@@ -280,15 +303,16 @@ func (node StringLiteralNode) String() string {
 	return fmt.Sprintf("- \"%s\"", node.Val)
 }
 
-/**************** PAIR LITERAL NODE ****************/
+/**************** NULL NODE ****************/
 
-// PairLiteralNode is a struct which stores the position of a pair literal.
+// NullNode is a struct which stores the position of a pair literal.
 // This does not store the value of the pair literal since the value of a pair
 // literal is always null.
 type NullNode struct {
 	Pos Position
 }
 
+// NewNullNode builds a NullNode
 func NewNullNode(pos Position) *NullNode {
 	return &NullNode{
 		Pos: pos,
@@ -321,6 +345,7 @@ type UnaryOperatorNode struct {
 	Expr ExpressionNode
 }
 
+// NewUnaryOperatorNode builds a UnaryOperatorNode
 func NewUnaryOperatorNode(
 	pos Position,
 	op UnaryOperator,
@@ -357,6 +382,7 @@ type BinaryOperatorNode struct {
 	Expr2 ExpressionNode
 }
 
+// NewBinaryOperatorNode builds a BinaryOperatorNode
 func NewBinaryOperatorNode(
 	pos Position,
 	op BinaryOperator,
