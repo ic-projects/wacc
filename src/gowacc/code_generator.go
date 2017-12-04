@@ -125,8 +125,8 @@ func (v *CodeGenerator) PointerTo(location *Location) string {
 		strconv.Itoa(v.currentStackPos-location.CurrentPos)
 }
 
-// GenerateCode is a function that will generate and return the finished assembly
-// code for a given AST.
+// GenerateCode is a function that will generate and return the finished
+// assembly code for a given AST.
 func GenerateCode(
 	tree ProgramNode,
 	symbolTable *SymbolTable,
@@ -139,10 +139,11 @@ func GenerateCode(
 }
 
 // CodeGenerator is a struct that implements EntryExitVisitor to be called with
-// Walk. It stores the assembly, a label count (used for ensuring distinct labels)
-// the currentFunction (so when we add code we add to the currentFunction), a symbolTable,
-// a stack of freeRegisters and returnRegisters, a predefined function Library,
-// and the current position of the stack.
+// Walk. It stores the assembly, a label count (used for ensuring distinct
+// labels) the currentFunction (so when we add code we add to the
+// currentFunction), a symbolTable, a stack of freeRegisters and
+// returnRegisters, a predefined function Library, and the current position of
+// the stack.
 type CodeGenerator struct {
 	asm             *Assembly
 	labelCount      int
@@ -194,7 +195,8 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 	}
 }
 
-// addDataWithLabel adds a ascii word to the data section generating a unique label
+// addDataWithLabel adds a ascii word to the data section generating a unique
+// label
 func (v *CodeGenerator) addData(text string) string {
 	label := "msg_" + strconv.Itoa(v.asm.dataCounter)
 	v.asm.dataCounter++
@@ -228,9 +230,9 @@ func (v *CodeGenerator) addFunction(name string) {
 	v.currentFunction = name
 }
 
-// callLibraryFunction adds the corresponding predefined function to the assembly if
-// it is not already added. It also adds the call to the function to the assembly, using
-// call as the instruction before the label.
+// callLibraryFunction adds the corresponding predefined function to the
+// assembly if it is not already added. It also adds the call to the function to
+// the assembly, using call as the instruction before the label.
 func (v *CodeGenerator) callLibraryFunction(
 	call string,
 	function LibraryFunction,
@@ -359,7 +361,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	case *ReadNode:
 		if ident, ok := node.Lhs.(*IdentifierNode); ok {
 			dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
-			v.addCode("ADD %s, %s", v.getFreeRegister(), v.PointerTo(dec.Location))
+			v.addCode(
+				"ADD %s, %s", v.getFreeRegister(),
+				v.PointerTo(dec.Location),
+			)
 		} else {
 			Walk(v, node.Lhs)
 		}
@@ -427,7 +432,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			v.addCode("ADD %s, %s, #4", identRegister, identRegister)
 
 			if i == length-1 && lastIsCharOrBool {
-				v.addCode("ADD %s, %s, %s", identRegister, identRegister, exprRegister)
+				v.addCode(
+					"ADD %s, %s, %s", identRegister,
+					identRegister,
+					exprRegister,
+				)
 			} else {
 				v.addCode("ADD %s, %s, %s, LSL #2",
 					identRegister,
@@ -435,8 +444,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 					exprRegister)
 			}
 
-			// If it is an assignment leave the Pointer to the element in the register
-			// otherwise convert to value
+			// If it is an assignment leave the Pointer to the element in the
+			// register otherwise convert to value
 			if !node.Pointer {
 				if i == length-1 && lastIsCharOrBool {
 					v.addCode("LDRSB %s, [%s]", identRegister, identRegister)
@@ -453,7 +462,12 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
 		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
-		v.addCode("ADD %s, %s, #%d", register, register, node.stuctType.memoryOffset)
+		v.addCode(
+			"ADD %s, %s, #%d",
+			register,
+			register,
+			node.stuctType.memoryOffset,
+		)
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
 			v.addCode("%s %s, [%s]",
@@ -571,8 +585,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		case CHR:
 		}
 	case *BinaryOperatorNode:
-		operand2 := UNDEFINED
-		operand1 := UNDEFINED
+		var operand2 Register
+		var operand1 Register
 
 		if v.freeRegisters.Length() == 2 {
 			Walk(v, node.Expr2)
@@ -602,7 +616,13 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 		switch node.Op {
 		case MUL:
-			v.addCode("SMULL %s, %s, %s, %s", operand1, operand2, operand1, operand2)
+			v.addCode(
+				"SMULL %s, %s, %s, %s",
+				operand1,
+				operand2,
+				operand1,
+				operand2,
+			)
 			v.addCode("CMP %s, %s, ASR #31", operand2, operand1)
 			v.callLibraryFunction("BLNE", CHECK_OVERFLOW)
 		case DIV:
@@ -681,8 +701,8 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			// Cannot add more than 1024 from SP at once, so do it in multiple
 			// iterations.
 
-			// Not using addToStackPointer function as we want v.currentStackPos to be
-			// unchanged.
+			// Not using addToStackPointer function as we want v.currentStackPos
+			// to be unchanged.
 			i := v.symbolTable.CurrentScope.ScopeSize
 			for ; i > 1024; i -= 1024 {
 				v.addCode("ADD sp, sp, #1024")
@@ -720,15 +740,16 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 		v.addCode("BL exit")
 	case *ReturnNode:
 		sizeOfAllVariablesInScope := 0
-		for scope := v.symbolTable.CurrentScope; scope != v.symbolTable.Head; scope = scope.ParentScope {
+		for scope := v.symbolTable.CurrentScope; scope !=
+			v.symbolTable.Head; scope = scope.ParentScope {
 			sizeOfAllVariablesInScope += scope.ScopeSize
 		}
 		if sizeOfAllVariablesInScope > 0 {
 			// Cannot add more than 1024 from SP at once, so do it in multiple
 			// iterations.
 
-			// Not using addToStackPointer function as we want v.currentStackPos to be
-			// unchanged.
+			// Not using addToStackPointer function as we want v.currentStackPos
+			// to be unchanged.
 			i := sizeOfAllVariablesInScope
 			for ; i > 1024; i -= 1024 {
 				v.addCode("ADD sp, sp, #1024")
