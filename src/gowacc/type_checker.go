@@ -34,6 +34,7 @@ func contains(check *TypeChecker, arr []TypeNode, t TypeNode) bool {
 func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 	expectingValue := toValue(expecting)
 	seenValue := toValue(seen)
+	fmt.Println(fmt.Sprintf("checkEquals expect %s and seen %s", expectingValue, seenValue))
 	switch seenValue.(type) {
 	case ArrayTypeNode:
 		if found, ok := expectingValue.(ArrayTypeNode); ok {
@@ -48,8 +49,10 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 			return expectingValue == (ArrayTypeNode{}) || expectingValue.equals(seenValue)
 		}
 	case PairTypeNode:
+		fmt.Println("pair case")
 		if found, ok := expectingValue.(PairTypeNode); ok {
 			if seenValue == (PairTypeNode{}) {
+				fmt.Println("pair case 2")
 				if expectingValue == (PairTypeNode{}) {
 					return false
 				}
@@ -57,6 +60,7 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 				check.expect(found.T1)
 				return true
 			}
+			fmt.Println("pair case 3")
 			return expectingValue == (PairTypeNode{}) || expectingValue.equals(seenValue)
 		} else if _, ok := expectingValue.(BaseTypeNode); ok && expectingValue.equals(toValue(NewBaseTypeNode(PAIR))) {
 			return true
@@ -87,23 +91,6 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 		fmt.Println("Unknown type for checkEquals")
 	}
 	return false
-}
-
-func toValue(typeNode TypeNode) TypeNode {
-	switch t := typeNode.(type) {
-	case *ArrayTypeNode:
-		return *t
-	case *PairTypeNode:
-		return *t
-	case *BaseTypeNode:
-		return *t
-	case *StructTypeNode:
-		return *t
-	case *NullTypeNode:
-		return *t
-	default:
-		return t
-	}
 }
 
 // arrayCase handles the multiple options where we have seen an Array.
@@ -172,6 +159,31 @@ func pairCase(check *TypeChecker, validTypes []TypeNode, basePairMatch bool, t *
 // seen is called when we have seen a SetExpectance.
 func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
+	fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+	if dyn, ok := typeNode.(*DynamicTypeNode); ok {
+		if _, ok := validTypes[0].(*NullTypeNode); !ok && typeNode != nil {
+			if newType, ok := dyn.reduceSet(validTypes); ok {
+				fmt.Println(fmt.Sprintf("Reduced seen to %s", newType))
+				typeNode = newType
+			} else {
+				return NewTypeError(typeNode, validTypes)
+			}
+		}
+	}
+	fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+	if dyn, ok := validTypes[0].(*DynamicTypeNode); len(validTypes) == 1 && ok {
+		if _, ok := typeNode.(*NullTypeNode); !ok && typeNode != nil {
+			fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+			if newType, ok := dyn.reduceSet([]TypeNode{typeNode}); ok {
+				fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+				validTypes[0] = newType
+				fmt.Println(fmt.Sprintf("Reduced expect to %s", validTypes[0]))
+			} else {
+				return NewTypeError(typeNode, validTypes)
+			}
+		}
+	}
+	fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
 	if contains(check, validTypes, typeNode) {
 		return TypeError{}
 	} else {
@@ -296,13 +308,15 @@ func (check *TypeChecker) seen(t TypeNode) TypeError {
 		return TypeError{}
 	}
 	if DebugMode {
-		fmt.Printf("Seen %s\n", t)
+		fmt.Printf("Seen %s  -- p %T: &p=%p p=&i=%p \n", t, t, &t, t)
 	}
 
 	expectance := check.stack[len(check.stack)-1]
 	check.stack = check.stack[:len(check.stack)-1]
 
-	return expectance.seen(check, t)
+	e := expectance.seen(check, t)
+	fmt.Printf("Seen done %s  -- p %T: &p=%p p=&i=%p \n", t, t, &t, t)
+	return e
 }
 
 // StripType is used to remove the type of Arrays and Pairs, which is useful
@@ -376,7 +390,7 @@ func (check *TypeChecker) expect(t TypeNode) {
 		return
 	}
 	if DebugMode {
-		fmt.Printf("Expecting %s\n", t)
+		fmt.Printf("Expecting %s  -- p %T: &p=%p p=&i=%p \n", t, t, &t, t)
 	}
 	check.expectSet([]TypeNode{t})
 }

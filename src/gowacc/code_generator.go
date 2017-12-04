@@ -321,7 +321,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
-			arr := dec.T.(*ArrayTypeNode)
+			arr := toValue(dec.T).(ArrayTypeNode)
 			if SizeOf(arr.T) == 1 && len(lhsNode.Exprs) == arr.Dim {
 				v.addCode("STRB %s, [%s]", rhsRegister, lhsRegister)
 			} else {
@@ -419,8 +419,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-		lastIsCharOrBool := SizeOf(symbol.T.(*ArrayTypeNode).T) == 1 &&
-			symbol.T.(*ArrayTypeNode).Dim == length
+		lastIsCharOrBool := SizeOf(toValue(symbol.T).(ArrayTypeNode).T) == 1 &&
+			toValue(symbol.T).(*ArrayTypeNode).Dim == length
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]

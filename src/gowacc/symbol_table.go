@@ -72,12 +72,15 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 			IsDeclared: false,
 		}
 	case *DeclareNode:
-		return &IdentifierDeclaration{
+		fmt.Printf("1. symbol  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
+		a := &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
 			ident:      node.Ident,
 			IsDeclared: false,
 		}
+		fmt.Printf("2. symbol  -- p %T: &p=%p p=&i=%p \n", a.T, &a.T, a.T)
+		return a
 	default:
 		return &IdentifierDeclaration{}
 	}

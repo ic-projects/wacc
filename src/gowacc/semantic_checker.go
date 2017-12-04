@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with
@@ -72,12 +73,19 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case *SkipNode:
 	case *DeclareNode:
+		fmt.Printf("2. declare first  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
 		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.Pos)
-			v.typeChecker.freeze(node)
+			if _, ok := node.T.(*DynamicTypeNode); !ok {
+				foundError = NewPreviouslyDeclared(NewDeclarationError(node.Pos, false, true, node.Ident.Ident), declareNode.Pos)
+				v.typeChecker.freeze(node)
+			} else {
+				v.typeChecker.expect(declareNode.T)
+			}
 		} else {
 			v.typeChecker.expect(node.T)
 		}
+		//fmt.Printf("2. main  -- p %T: &p=%p p=&i=%p \n", n.T, &n.T, n.T)
+		fmt.Printf("2. main  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
 	case *AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 	case *ReadNode:
@@ -102,7 +110,10 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
+			fmt.Printf("2. identifier  -- p %T: &p=%p p=&i=%p \n", identDec.T, &identDec.T, identDec.T)
+			//fmt.Printf("2. identifier  -- p %T: &p=%p p=&i=%p \n", identDec.T, identDec.T, identDec.T)
 			foundError = v.typeChecker.seen(identDec.T).addPos(node.Pos)
+			fmt.Printf("2. identifier  -- p %T: &p=%p p=&i=%p \n", identDec.T, &identDec.T, identDec.T)
 			if foundError != nil {
 				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
 			}
@@ -118,7 +129,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(identDec.T.(*PairTypeNode).T1).addPos(node.Pos)
+			foundError = v.typeChecker.seen(toValue(identDec.T).(PairTypeNode).T1).addPos(node.Pos)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *PairSecondElementNode:
@@ -131,7 +142,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.T.(*PairTypeNode).T2)
+			v.typeChecker.seen(toValue(identDec.T).(PairTypeNode).T2)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *StructElementNode:
@@ -139,7 +150,7 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Struct.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if struc, ok := id.T.(*StructTypeNode); !ok {
+		} else if struc, ok := toValue(id.T).(StructTypeNode); !ok {
 			foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -160,8 +171,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if arrayNode, ok := identDec.T.(*ArrayTypeNode); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\"", node.Ident.Ident))
+		} else if arrayNode, ok := toValue(identDec.T).(ArrayTypeNode); !ok {
+			foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\" of type %s", node.Ident.Ident, identDec.T))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
@@ -282,9 +293,19 @@ func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	case *ArrayLiteralNode:
 		v.typeChecker.forcePop()
 	case *DeclareNode:
+		fmt.Printf("1. main  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
 		if _, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); !ok {
 			v.symbolTable.AddToScope(node.Ident.Ident, node)
 		}
+		fmt.Println("left declare")
+		fmt.Println(node)
+		fmt.Println(node.T)
+		n, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
+		fmt.Println(n.T)
+		fmt.Println(reflect.TypeOf(n))
+		fmt.Printf("2. main  -- p %T: &p=%p p=&i=%p \n", n.T, &n.T, n.T)
+		fmt.Printf("3. main  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
+		fmt.Println(reflect.TypeOf(n.T))
 	case *ParameterNode:
 		if _, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
 			v.symbolTable.AddToScope(node.Ident.Ident, node)

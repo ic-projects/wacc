@@ -10,6 +10,8 @@ TYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* {
 
 	return ret(t)
 
+} / _ {
+	return ret(NewDynamicTypeNode())
 }
 
 STRUCTTYPE ← '$' i:IDENT {
