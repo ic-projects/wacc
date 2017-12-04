@@ -1,0 +1,22 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  a = 1 ;
+  println a ;
+  b = 2 ;
+  println a + b ;
+  c = "ceee" ;
+  d = 'd' ;
+  println c ;
+  println d ;
+  println c[0] == d ;
+  exit 0
+end
