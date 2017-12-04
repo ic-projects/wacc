@@ -174,24 +174,24 @@ func (v *CodeGenerator) addPrint(t TypeNode) {
 	case BaseTypeNode:
 		switch node.T {
 		case BOOL:
-			v.callLibraryFunction("BL", PRINT_BOOL)
+			v.callLibraryFunction("BL", printBool)
 		case INT:
-			v.callLibraryFunction("BL", PRINT_INT)
+			v.callLibraryFunction("BL", printInt)
 		case CHAR:
 			v.addCode("BL putchar")
 		case PAIR:
-			v.callLibraryFunction("BL", PRINT_REFERENCE)
+			v.callLibraryFunction("BL", printReference)
 		}
 	case ArrayTypeNode:
 		if arr, ok := toValue(node.T).(BaseTypeNode); ok {
 			if arr.T == CHAR && node.Dim == 1 {
-				v.callLibraryFunction("BL", PRINT_STRING)
+				v.callLibraryFunction("BL", printString)
 				return
 			}
 		}
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
+		v.callLibraryFunction("BL", printReference)
 	case PairTypeNode, StructTypeNode, NullTypeNode:
-		v.callLibraryFunction("BL", PRINT_REFERENCE)
+		v.callLibraryFunction("BL", printReference)
 	}
 }
 
@@ -370,9 +370,9 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		if SizeOf(Type(node.Lhs, v.symbolTable)) == 1 {
-			v.callLibraryFunction("BL", READ_CHAR)
+			v.callLibraryFunction("BL", readChar)
 		} else {
-			v.callLibraryFunction("BL", READ_INT)
+			v.callLibraryFunction("BL", readInt)
 		}
 	case *IfNode:
 		// Labels
@@ -428,7 +428,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			exprRegister := v.getReturnRegister()
 			v.addCode("MOV r0, %s", exprRegister)
 			v.addCode("MOV r1, %s", identRegister)
-			v.callLibraryFunction("BL", CHECK_ARRAY_INDEX)
+			v.callLibraryFunction("BL", checkArrayIndex)
 			v.addCode("ADD %s, %s, #4", identRegister, identRegister)
 
 			if i == length-1 && lastIsCharOrBool {
@@ -461,7 +461,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.callLibraryFunction("BL", checkNullPointer)
 		v.addCode(
 			"ADD %s, %s, #%d",
 			register,
@@ -624,25 +624,25 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 				operand2,
 			)
 			v.addCode("CMP %s, %s, ASR #31", operand2, operand1)
-			v.callLibraryFunction("BLNE", CHECK_OVERFLOW)
+			v.callLibraryFunction("BLNE", checkOverflow)
 		case DIV:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", CHECK_DIVIDE)
+			v.callLibraryFunction("BL", checkDivide)
 			v.addCode("BL __aeabi_idiv")
 			v.addCode("MOV %s, r0", operand1)
 		case MOD:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", CHECK_DIVIDE)
+			v.callLibraryFunction("BL", checkDivide)
 			v.addCode("BL __aeabi_idivmod")
 			v.addCode("MOV %s, r1", operand1)
 		case ADD:
 			v.addCode("ADDS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
+			v.callLibraryFunction("BLVS", checkOverflow)
 		case SUB:
 			v.addCode("SUBS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
+			v.callLibraryFunction("BLVS", checkOverflow)
 		case GT:
 			v.addCode("CMP %s, %s", operand1, operand2)
 			v.addCode("MOVGT %s, #1", operand1)
@@ -718,7 +718,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case *ArrayLiteralNode:
 	case *FreeNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.callLibraryFunction("BL", FREE)
+		v.callLibraryFunction("BL", free)
 	case *DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
@@ -734,7 +734,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case *PrintlnNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addPrint(Type(node.Expr, v.symbolTable))
-		v.callLibraryFunction("BL", PRINT_LN)
+		v.callLibraryFunction("BL", printLn)
 	case *ExitNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addCode("BL exit")
@@ -761,7 +761,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case *PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.callLibraryFunction("BL", checkNullPointer)
 		v.addCode("LDR %s, [%s]", register, register)
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
@@ -773,7 +773,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 	case *PairSecondElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", CHECK_NULL_POINTER)
+		v.callLibraryFunction("BL", checkNullPointer)
 		v.addCode("LDR %s, [%s, #4]", register, register)
 
 		// If we don't want a Pointer then don't retrieve the value
@@ -790,7 +790,7 @@ func (v *CodeGenerator) Leave(programNode ProgramNode) {
 			v.addCode("EOR %s, %s, #1", register, register)
 		case NEG:
 			v.addCode("RSBS %s, %s, #0", register, register)
-			v.callLibraryFunction("BLVS", CHECK_OVERFLOW)
+			v.callLibraryFunction("BLVS", checkOverflow)
 		case LEN:
 			v.addCode("LDR %s, [%s]", register, register)
 		case ORD:
