@@ -228,7 +228,7 @@ func (node PointerTypeNode) String() string {
 
 func (node PointerTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(PointerTypeNode); ok {
-		return arr.T == node.T
+		return toValue(arr.T) == toValue(node.T)
 	}
 	return false
 }
