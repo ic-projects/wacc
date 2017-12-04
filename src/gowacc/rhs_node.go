@@ -164,6 +164,10 @@ func NewPointerNewNode(pos Position, ident *IdentifierNode) *PointerNewNode {
 	}
 }
 
+func (node PointerNewNode) String() string {
+	return fmt.Sprintf("- &%s\n", node.Ident.Ident)
+}
+
 type PointerDereferenceNode struct {
 	Pos   Position
 	Ident *IdentifierNode
@@ -177,4 +181,8 @@ func NewPointerDereferenceNode(
 		Pos:   pos,
 		Ident: ident,
 	}
+}
+
+func (node PointerDereferenceNode) String() string {
+	return fmt.Sprintf("- *%s\n", node.Ident.Ident)
 }
