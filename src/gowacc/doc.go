@@ -5,10 +5,10 @@ Compilation
 
 To compile the gowacc tool, you should run the 'make' command from the project
 root directory. This builds a 'gowacc' executable in the project root directory,
-and handles all required dependancies for you automatically.
+and handles all required dependencies for you automatically.
 
 Alternatively, if you have set up your GOPATH and GOBIN correctly, you can use
-'go build' or 'go install' as usual. Go should handle dependancies for you.
+'go build' or 'go install' as usual. Go should handle dependencies for you.
 
 Command-line usage
 
@@ -48,7 +48,8 @@ changes to the stack during semantic checking (default: false).
 
     -asm
 
-Prints out generated assembly. Additionally saves the assembly to a given filepath.
+Prints out generated assembly. Additionally saves the assembly to a given
+filepath.
 
 WACC Syntax
 
@@ -79,15 +80,17 @@ syntax tree, to represent a wacc program. We have designed it ourselves to
 make it as easy-to-use as possible. This also contains an AST walker, which uses
 a visitor pattern.
 
-4. The semantics package. This contains the semantic checking code, which uses the ast walker.
+4. The semantics package. This contains the semantic checking code, which uses
+the ast walker.
 
-5. The location package. This contains datatypes to store registers and pointers.
+5. The location package. This contains datatypes to store registers and
+pointers.
 
 6. The codegen package. This contains the code generator. All code involved with
 generating assembly is here. It uses the ast walker and the location package.
 
-7. The utils package. A small package for utility functions that are used in various
-places throughout the code base.
+7. The utils package. A small package for utility functions that are used in
+various places throughout the code base.
 
 Testing
 
