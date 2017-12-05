@@ -1,0 +1,27 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct Node is
+  next ;
+  value ;
+end
+
+begin
+  i = new Node(null, 1) ;
+  i2 = new Node(i, 2) ;
+  i3 = new Node(i2, 3) ;
+  println i.value ;
+  i9 = i3.next ;
+  println i9.value ;
+  i3.next = i ;
+  i9 = i3.next ;
+  println i9.value ;
+  exit 0
+end
