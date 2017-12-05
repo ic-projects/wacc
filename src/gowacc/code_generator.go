@@ -248,6 +248,7 @@ func (v *CodeGenerator) callLibraryFunction(
 func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 	switch programNode.(type) {
 	case *IfNode,
+		*SwitchNode,
 		*AssignNode,
 		*ArrayLiteralNode,
 		*ArrayElementNode,
@@ -392,6 +393,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		Walk(v, node.ElseStats)
 		// Fi
 		v.addCode("ENDIF%d:", endifLabel)
+	case *SwitchNode:
+		// Labels
+		endLabel := v.labelCount + 1
+		v.labelCount += 1
+		Walk(v, node.Expr)
+		r := v.returnRegisters.Pop()
+		for i, c := range node.Cases {
+			Walk(v, c.Expr)
+			v.addCode("CMP %s, %s", v.getReturnRegister(), r)
+			v.addCode("BEQ CASE%d_%d", endLabel, i)
+		}
+		v.freeRegisters.Push(r)
+		for i, c := range node.Cases {
+			v.addCode("CASE%d_%d:", endLabel, i)
+			Walk(v, c.Stats)
+			v.addCode("B END%d", endLabel)
+		}
+		v.addCode("END%d:", endLabel)
 	case *LoopNode:
 		// Labels
 		doLabel := v.labelCount + 1
