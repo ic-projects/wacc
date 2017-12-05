@@ -1,0 +1,25 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  a = null ;
+  b = null ;
+  a = 'a' ;
+  b = a ;
+  int c = 7 ;
+  int d = 9 ;
+  f = false ;
+  g = f || b ;
+  e = c + d + d + g;
+  println e ;
+  println a ;
+  println b ;
+  exit 0
+end

@@ -1,11 +1,13 @@
 // TypeNode
-TYPE ← t:POINTERTYPE _ {
+TYPE ← t:POINTERTYPE {
 	return ret(t)
-} / t:NONPOINTERTYPE __ {
+} / t:NONPOINTERTYPE _ {
 	return ret(t)
+} / _ {
+	return ret(NewDynamicTypeNode())
 }
 
-NONPOINTERTYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* {
+NONPOINTERTYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* __ {
 
 	if (len(toSlice(array)) > 0) {
 		return ret(NewArrayTypeNode(

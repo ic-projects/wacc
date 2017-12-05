@@ -1,0 +1,23 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+j = null ;
+println j ;
+j = 5 ;
+println j ;
+j = 'j' ;
+println j ;
+c = newpair(null, null) ;
+fst c = 1 ;
+snd c = 'a' ;
+println c ;
+exit 0
+end

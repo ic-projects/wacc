@@ -1,0 +1,22 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  doSomething(a, b, c) is
+    return a[b][c]
+  end
+  bools = [ false, true ] ;
+  bb = [bools, true] ;
+  i = true ;
+  answer = call doSomething(bb, i, 0) ;
+  print "answer is " ;
+  println answer ;
+  exit 0
+end

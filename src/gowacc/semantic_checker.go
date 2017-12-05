@@ -43,7 +43,12 @@ func (v *SemanticCheck) PrintErrors(filepath string) {
 	PrintErrors(v.Errors, filepath)
 }
 
-/**************** WALKER FUNCTIONS ****************/
+func (v *SemanticCheck) hasErrors() bool {
+	if len(v.Errors) > 0 {
+		return true
+	}
+	return v.symbolTable.checkForDynamicErrors(&v.Errors)
+}
 
 // Visit will apply the correct rule for the programNode given, to be used with
 // Walk.
@@ -107,15 +112,15 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		}
 	case *SkipNode:
 	case *DeclareNode:
-		if declareNode, ok :=
-			v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
-			foundError = NewPreviouslyDeclared(NewDeclarationError(
-				node.Pos,
-				false,
-				true,
-				node.Ident.Ident,
-			), declareNode.Pos)
-			v.typeChecker.freeze(node)
+		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
+			if _, ok := node.T.(*DynamicTypeNode); !ok {
+				foundError = NewPreviouslyDeclared(
+					NewDeclarationError(node.Pos, false, true, node.Ident.Ident),
+					declareNode.Pos)
+				v.typeChecker.freeze(node)
+			} else {
+				v.typeChecker.expect(declareNode.T)
+			}
 		} else {
 			v.typeChecker.expect(node.T)
 		}
@@ -190,9 +195,12 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			foundError = v.typeChecker.seen(
-				identDec.T.(*PairTypeNode).T1,
-			).addPos(node.Pos)
+			if dyn, ok := toValue(identDec.T).(*DynamicTypeNode); ok {
+				dyn.reduceSet([]TypeNode{NewPairTypeNode(
+					NewDynamicTypeInsidePairNode(),
+					NewDynamicTypeInsidePairNode())})
+			}
+			foundError = v.typeChecker.seen(toValue(identDec.T).(PairTypeNode).T1).addPos(node.Pos)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *PairSecondElementNode:
@@ -214,7 +222,12 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
-			v.typeChecker.seen(identDec.T.(*PairTypeNode).T2)
+			if dyn, ok := toValue(identDec.T).(*DynamicTypeNode); ok {
+				dyn.reduceSet([]TypeNode{NewPairTypeNode(
+					NewDynamicTypeInsidePairNode(),
+					NewDynamicTypeInsidePairNode())})
+			}
+			v.typeChecker.seen(toValue(identDec.T).(PairTypeNode).T2)
 			v.typeChecker.expect(identDec.T)
 		}
 	case *StructElementNode:
@@ -227,35 +240,29 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if struc, ok := id.T.(*StructTypeNode); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf(
-				"Struct access on non-struct variable \"%s\"",
-				node.Ident.Ident,
-			))
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
-		} else if structNode, ok :=
-			v.symbolTable.SearchForStruct(struc.Ident); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf(
-				"Struct access on non-struct variable \"%s\"",
-				node.Ident.Ident,
-			))
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
-		} else if found, ok := structNode.TypesMap[node.Ident.Ident]; !ok {
-			foundError = NewDeclarationError(
-				node.Pos,
-				false,
-				false,
-				node.Ident.Ident,
-			)
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
 		} else {
-			node.SetStructType(structNode.Types[found])
-			foundError = v.typeChecker.seen(
-				structNode.Types[found].T,
-			).addPos(node.Pos)
+			if dyn, ok := toValue(id.T).(*DynamicTypeNode); ok {
+				poss := v.symbolTable.SearchForStructByUsage(node.Struct.Ident)
+				dyn.reduceSet(poss)
+				v.typeChecker.seen(nil)
+			} else {
+				if struc, ok := toValue(id.T).(StructTypeNode); !ok {
+					foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else if structNode, ok := v.symbolTable.SearchForStruct(struc.Ident); !ok {
+					foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else if found, ok := structNode.TypesMap[node.Ident.Ident]; !ok {
+					foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else {
+					node.SetStructType(structNode.Types[found])
+					foundError = v.typeChecker.seen(structNode.Types[found].T).addPos(node.Pos)
+				}
+			}
 		}
 	case *ArrayElementNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
@@ -267,23 +274,22 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if arrayNode, ok := identDec.T.(*ArrayTypeNode); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf(
-				"Array access on non-array variable \"%s\"",
-				node.Ident.Ident,
-			))
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
 		} else {
-			// If we have an array or a single element (for use in newsted
-			// arrays).
-			if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
-				foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
+			if dyn, ok := toValue(identDec.T).(*DynamicTypeNode); ok {
+				dyn.reduceSet([]TypeNode{NewArrayTypeNode(NewDynamicTypeNode(), len(node.Exprs))})
+			}
+
+			if arrayNode, ok := toValue(identDec.T).(ArrayTypeNode); !ok {
+				foundError = NewCustomError(node.Pos, fmt.Sprintf("Array access on non-array variable \"%s\" of type %s", node.Ident.Ident, identDec.T))
+				v.typeChecker.seen(nil)
+				v.typeChecker.freeze(node)
 			} else {
-				foundError = v.typeChecker.seen(NewArrayTypeNode(
-					arrayNode.T,
-					dimLeft,
-				)).addPos(node.Pos)
+				// If we have an array or a single element (for use in newsted arrays).
+				if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
+					foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
+				} else {
+					foundError = v.typeChecker.seen(NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
+				}
 			}
 		}
 		for i := 0; i < len(node.Exprs); i++ {

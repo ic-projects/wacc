@@ -1,0 +1,26 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  c = newpair(1, 2) ;
+  p = newpair(c , 3) ;
+  println p ;
+  p1 = fst p ;
+  p2 = snd p ;
+  println p1 ;
+  println p2 ;
+  p2 = 7 ;
+  println p2 ;
+  fst p = p ;
+  p3 = fst p ;
+  println p ;
+  println p3 ;
+  exit 0
+end

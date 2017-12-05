@@ -75,19 +75,16 @@ STRUCTINTERNALLIST ← s:STRUCTINTERNAL ss:(_ STRUCTINTERNAL)* {
 
 }
 
-STRUCTINTERNAL ← t:TYPE __ i:IDENT _ ';' {
-
+STRUCTINTERNAL ← t:TYPE _ i:IDENT _ ';' {
 	return ret(NewStructInternalNode(
 		c.getPosition(),
 		i.(*IdentifierNode),
-		t.(TypeNode),
-	))
-
+		t.(TypeNode)))
 }
 
 // FunctionNode
-FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
-	   _ "end" {
+FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
+       _ "end" {
 
 	stats := s.([]StatementNode)
 	finalStat := stats[len(stats)-1]
@@ -120,8 +117,8 @@ FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 		stats,
 	), err
 
-} / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
-	_ "end" {
+} / t:TYPE _ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
+    _ "end" {
 
 	name := string(getItem(ident, 0).([]byte))
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
@@ -149,7 +146,7 @@ PARAMLIST ← param:PARAM params:(_ ',' _ PARAM)* {
 }
 
 // Parameter Node
-PARAM ← t:TYPE __ i:IDENT {
+PARAM ← t:TYPE _ i:IDENT {
 
 	return ret(NewParameterNode(
 		c.getPosition(),

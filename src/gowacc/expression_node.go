@@ -46,12 +46,12 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		return NewStringArrayTypeNode()
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
-		arr := a.T.(*ArrayTypeNode)
-		dimLeft := arr.Dim - len(node.Exprs)
-		if dimLeft == 0 {
+		arr := toValue(a.T).(ArrayTypeNode)
+		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
 			return arr.T
 		}
-		return NewArrayTypeNode(arr.T, dimLeft)
+	case *DynamicTypeNode:
+		return node.getValue()
 	case *StructElementNode:
 		return node.stuctType.T
 	case *IdentifierNode:

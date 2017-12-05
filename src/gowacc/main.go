@@ -74,9 +74,8 @@ func main() {
 		Walk(checker, tree)
 
 		// Print out all semantic errors that occur
-		if len(checker.Errors) > 0 {
-			fmt.Println("Errors detected during compilation! " +
-				"Exit code 200 returned.")
+		if checker.hasErrors() {
+			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
 			checker.PrintErrors(filepath)
 			os.Exit(200)
 		}

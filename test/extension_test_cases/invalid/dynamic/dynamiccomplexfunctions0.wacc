@@ -1,0 +1,21 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  doNothing(a) is
+    return a
+  end
+  i = null ;
+  i = call doNothing() ;
+  i = call doNothing('a') ;
+  print "answer is " ;
+  println i ;
+  exit 0
+end

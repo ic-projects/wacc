@@ -9,7 +9,6 @@ import (
 type TypeNode interface {
 	fmt.Stringer
 	equals(TypeNode) bool
-	String() string
 }
 
 /**************** TYPE NODE HELPER FUNCTIONS ****************/
@@ -27,7 +26,67 @@ func SizeOf(t TypeNode) int {
 	return 4
 }
 
-/**************** BASE TYPE ****************/
+func toValue(typeNode TypeNode) TypeNode {
+	switch t := typeNode.(type) {
+	case *ArrayTypeNode:
+		if inside, ok := toValue(t.T).(ArrayTypeNode); ok {
+			t.Dim += inside.Dim
+			t.T = inside.T
+		}
+		return *t
+	case *PairTypeNode:
+		return *t
+	case *BaseTypeNode:
+		return *t
+	case *PointerTypeNode:
+		return *t
+	case *StructTypeNode:
+		return *t
+	case *NullTypeNode:
+		return *t
+	case *DynamicTypeNode:
+		t2 := t.getValue()
+		if _, ok := t2.(*DynamicTypeNode); ok {
+			return t2
+		}
+		return toValue(t2)
+	case ArrayTypeNode:
+		if inside, ok := toValue(t.T).(ArrayTypeNode); ok {
+			t.Dim += inside.Dim
+			t.T = inside.T
+		}
+		return t
+	default:
+		return t
+	}
+}
+
+func validType(T TypeNode, i *IdentifierNode) GenericError {
+	switch t := toValue(T).(type) {
+	case ArrayTypeNode:
+		if validType(t.T, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case DynamicTypeNode:
+		if len(t.T.poss) > 1 {
+			return NewCustomError(i.Pos, fmt.Sprint("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.poss))
+		}
+		if len(t.T.poss) != 1 || validType(t.T.poss[0], i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case PairTypeNode:
+		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	default:
+		return nil
+	}
+}
+
+/******************** BASE TYPE ********************/
 
 // BaseType is a representation of a simple WACC type, that may form a type by
 // itself, or as part of a more complex array or pair type.
@@ -90,6 +149,8 @@ func (node BaseTypeNode) String() string {
 func (node BaseTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(BaseTypeNode); ok {
 		return node.T == arr.T
+	} else if _, ok := toValue(t).(PairTypeNode); ok && node.T == PAIR {
+		return true
 	}
 	return false
 }
@@ -149,7 +210,9 @@ func (node ArrayTypeNode) String() string {
 
 func (node ArrayTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(ArrayTypeNode); ok {
-		return arr.Dim == node.Dim && node.T.equals(arr.T)
+		if arr2, ok := toValue(node).(ArrayTypeNode); ok {
+			return (arr == ArrayTypeNode{}) || (arr2 == ArrayTypeNode{}) || (arr.Dim == arr2.Dim && arr2.T.equals(arr.T))
+		}
 	}
 	return false
 }
@@ -185,6 +248,8 @@ func (node PairTypeNode) String() string {
 func (node PairTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(PairTypeNode); ok {
 		return node.T1.equals(arr.T1) && node.T2.equals(arr.T2)
+	} else if arr, ok := toValue(t).(BaseTypeNode); ok && arr.T == PAIR {
+		return true
 	}
 	return false
 }
@@ -214,12 +279,21 @@ func (node NullTypeNode) String() string {
 // StructTypeNode stores a user-defined type.
 type StructTypeNode struct {
 	Ident string
+	poss  []string
 }
 
 // NewStructTypeNode builds a StructTypeNode.
 func NewStructTypeNode(i *IdentifierNode) *StructTypeNode {
 	return &StructTypeNode{
 		Ident: i.Ident,
+		poss:  make([]string, 0),
+	}
+}
+
+func NewStrucDynamictTypeNode() *StructTypeNode {
+	return &StructTypeNode{
+		Ident: "",
+		poss:  make([]string, 0),
 	}
 }
 
@@ -229,6 +303,40 @@ func (node StructTypeNode) String() string {
 
 func (node StructTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(StructTypeNode); ok {
+		/*if arr.Ident == "" && node.Ident == "" {
+			newSet := make([]string, 0)
+			for _, t := range arr.poss {
+				for _, t2 := range node.poss {
+					if t == t2 {
+						newSet = append(newSet, t)
+					}
+				}
+			}
+
+			arr.poss = newSet
+			node.poss = newSet
+			if len(newSet) == 1 {
+				node.Ident = newSet[0]
+				arr.Ident = newSet[0]
+			}
+			return len(newSet) > 0
+		}
+		if arr.Ident == "" {
+			for _, t := range arr.poss {
+				if t == node.Ident {
+					arr.Ident = t
+					return true
+				}
+			}
+		}
+		if node.Ident == "" {
+			for _, t := range node.poss {
+				if t == arr.Ident {
+					node.Ident = t
+					return true
+				}
+			}
+		}*/
 		return arr.Ident == node.Ident
 	}
 	return false
@@ -253,4 +361,164 @@ func (node PointerTypeNode) equals(t TypeNode) bool {
 		return arr.T.equals(node.T)
 	}
 	return false
+}
+
+type DynamicTypeNode struct {
+	T            *InternalDynamicType
+	insidePair   bool
+	arrayPointer *ArrayTypeNode
+}
+
+type InternalDynamicType struct {
+	init     bool
+	poss     []TypeNode
+	watchers *[]*DynamicTypeNode
+}
+
+func NewDynamicTypeNode() *DynamicTypeNode {
+	watchers := make([]*DynamicTypeNode, 0)
+	node := &DynamicTypeNode{
+		T: &InternalDynamicType{
+			init:     false,
+			poss:     make([]TypeNode, 0),
+			watchers: &watchers,
+		},
+		insidePair: false,
+	}
+	*node.T.watchers = append(*node.T.watchers, node)
+	return node
+}
+
+func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
+	watchers := make([]*DynamicTypeNode, 0)
+	node := &DynamicTypeNode{
+		T: &InternalDynamicType{
+			init:     false,
+			poss:     make([]TypeNode, 0),
+			watchers: &watchers,
+		},
+		insidePair: true,
+	}
+	*node.T.watchers = append(*node.T.watchers, node)
+	return node
+}
+
+func (node *DynamicTypeNode) changeToWatch(other *DynamicTypeNode) {
+	*other.T.watchers = append(*other.T.watchers, *node.T.watchers...)
+	for _, watcher := range *node.T.watchers {
+		watcher.T = node.T
+	}
+	node.T = other.T
+}
+
+func (node InternalDynamicType) String() string {
+	if node.init {
+		if len(node.poss) == 1 {
+			return fmt.Sprintf("%s", node.poss[0])
+		}
+		return fmt.Sprintf("%s", node.poss)
+	}
+	return fmt.Sprintf("unknown")
+}
+
+func (node DynamicTypeNode) String() string {
+	return fmt.Sprintf("dynamic (%s) %p", node.T, node.T)
+}
+
+func (node DynamicTypeNode) equals(t TypeNode) bool {
+	_, ok := node.reduceSet([]TypeNode{t})
+	return ok
+}
+
+func (node *DynamicTypeNode) getValue() TypeNode {
+	if len(node.T.poss) == 1 {
+		t := node.T.poss[0]
+		if arr, ok := t.(*ArrayTypeNode); ok {
+			if arr.T == nil {
+				arr := NewArrayTypeNode(NewDynamicTypeNode(), 1)
+				arr.T.(*DynamicTypeNode).arrayPointer = arr
+				node.T.poss[0] = arr
+				t = node.T.poss[0]
+			}
+			//}
+		} else if pair, ok := t.(*PairTypeNode); ok {
+			if !node.insidePair {
+				if pair.T2 == nil && pair.T1 == nil {
+					node.T.poss[0] = NewPairTypeNode(
+						NewDynamicTypeInsidePairNode(),
+						NewDynamicTypeInsidePairNode())
+					t = node.T.poss[0]
+				} else if pair.T1 == nil {
+					pair.T1 = NewDynamicTypeInsidePairNode()
+				} else if pair.T2 == nil {
+					pair.T2 = NewDynamicTypeInsidePairNode()
+				}
+			} else {
+				node.T.poss[0] = NewBaseTypeNode(PAIR)
+				t = node.T.poss[0]
+			}
+		}
+		return t
+	}
+	return node
+}
+
+func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
+	//fmt.Println(fmt.Sprintf("Special double dynamic reduction"))
+	if node.T.init && dyn.T.init {
+		if len(node.T.poss) == 1 && len(dyn.T.poss) == 1 {
+			if node.T.poss[0].equals(dyn.T.poss[0]) {
+				return node.getValue(), true
+			} else {
+				return nil, false
+			}
+		}
+		t, ok := node.reduceSet(dyn.T.poss)
+		if ok {
+			dyn.changeToWatch(node)
+		}
+		return t, ok
+	} else if node.T.init && !dyn.T.init {
+		dyn.changeToWatch(node)
+	} else if !node.T.init && dyn.T.init {
+		node.changeToWatch(dyn)
+	} else {
+		node.changeToWatch(dyn)
+		dyn.changeToWatch(node)
+		return nil, true
+	}
+	dyn.changeToWatch(node)
+	return node.getValue(), true
+}
+
+func (node *DynamicTypeNode) reduceSet(ts []TypeNode) (TypeNode, bool) {
+	//fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
+	// Dynamic type saw another dynamic type
+	if dyn, ok := ts[0].(*DynamicTypeNode); len(ts) == 1 && ok {
+		return node.reduce(dyn)
+	}
+	if node.T.init {
+		newSet := make([]TypeNode, 0)
+		for _, t := range ts {
+			for _, t2 := range node.T.poss {
+				if t.equals(t2) {
+					newSet = append(newSet, t2)
+				}
+			}
+		}
+
+		// Reduce leaves no possibilities
+		if len(newSet) == 0 {
+			//fmt.Println(fmt.Sprintf("Reducing failed"))
+			return nil, false
+		}
+		//fmt.Println(fmt.Sprintf("Reducing success"))
+		node.T.poss = newSet
+	} else {
+		//fmt.Println(fmt.Sprintf("Reducing caused init"))
+		node.T.init = true
+		node.T.poss = ts
+	}
+
+	return node.getValue(), true
 }

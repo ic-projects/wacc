@@ -74,12 +74,13 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 			IsDeclared: false,
 		}
 	case *DeclareNode:
-		return &IdentifierDeclaration{
+		a := &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
 			ident:      node.Ident,
 			IsDeclared: false,
 		}
+		return a
 	default:
 		return &IdentifierDeclaration{}
 	}
@@ -188,6 +189,16 @@ func (table *SymbolTable) SearchForStruct(
 	return node, ok
 }
 
+func (table *SymbolTable) SearchForStructByUsage(usage string) []TypeNode {
+	set := make([]TypeNode, 0)
+	for _, s := range table.structs {
+		if t, ok := s.TypesMap[usage]; ok {
+			set = append(set, s.Types[t].T)
+		}
+	}
+	return set
+}
+
 /**************** ADDING HELPER FUNCTIONS ****************/
 
 // AddToScope will add an identifier to the CurrentScope.
@@ -208,7 +219,55 @@ func (table *SymbolTable) AddStruct(identifier string, node *StructNode) {
 	table.structs[identifier] = node
 }
 
-/**************** PRINTING HELPER FUNCTIONS ****************/
+func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
+	for _, f := range table.structs {
+		for _, t := range f.Types {
+			err := validType(t.T, t.Ident)
+			if err != nil {
+				*e = append(*e, err)
+			}
+		}
+	}
+
+	for _, f := range table.functions {
+		for _, t := range f.Params {
+			err := validType(t.T, t.Ident)
+			if err != nil {
+				*e = append(*e, err)
+			}
+		}
+	}
+
+	for _, s := range table.Head.childScopes {
+		err := s.checkForValidTypes()
+		if err != nil {
+			*e = append(*e, err...)
+		}
+	}
+
+	return len(*e) > 0
+}
+
+func (node SymbolTableNode) checkForValidTypes() []GenericError {
+	e := make([]GenericError, 0)
+	for _, ident := range node.Scope {
+		err := validType(ident.T, ident.ident)
+		if err != nil {
+			e = append(e, err)
+		}
+	}
+
+	for _, s := range node.childScopes {
+		err := s.checkForValidTypes()
+		if err != nil {
+			e = append(e, err...)
+		}
+	}
+
+	return e
+}
+
+/******************** PRINTING HELPER FUNCTIONS ********************/
 
 // Print will print a Node, and all of its parents
 func (node SymbolTableNode) Print() {
