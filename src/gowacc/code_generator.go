@@ -252,6 +252,7 @@ func (v *CodeGenerator) NoRecurse(programNode ProgramNode) bool {
 		*ArrayLiteralNode,
 		*ArrayElementNode,
 		*LoopNode,
+		*ForLoopNode,
 		*NewPairNode,
 		*StructNewNode,
 		*ReadNode,
@@ -401,6 +402,24 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("DO%d:", doLabel)
 		v.labelCount++
 		Walk(v, node.Stats)
+		// While
+		v.addCode("WHILE%d:", whileLabel)
+		v.labelCount++
+		Walk(v, node.Expr)
+		v.addCode("CMP %s, #1", v.getReturnRegister())
+		v.addCode("BEQ DO%d", doLabel)
+	case *ForLoopNode:
+		Walk(v, node.Initial)
+		// Labels
+		doLabel := v.labelCount + 1
+		whileLabel := v.labelCount + 1
+		v.labelCount += 2
+		v.addCode("B WHILE%d", whileLabel)
+		// Do
+		v.addCode("DO%d:", doLabel)
+		v.labelCount++
+		Walk(v, node.Stats)
+		Walk(v, node.Update)
 		// While
 		v.addCode("WHILE%d:", whileLabel)
 		v.labelCount++
