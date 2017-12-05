@@ -72,14 +72,12 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 			IsDeclared: false,
 		}
 	case *DeclareNode:
-		fmt.Printf("1. symbol  -- p %T: &p=%p p=&i=%p \n", node.T, &node.T, node.T)
 		a := &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
 			ident:      node.Ident,
 			IsDeclared: false,
 		}
-		fmt.Printf("2. symbol  -- p %T: &p=%p p=&i=%p \n", a.T, &a.T, a.T)
 		return a
 	default:
 		return &IdentifierDeclaration{}
@@ -164,6 +162,16 @@ func (table *SymbolTable) SearchForFunction(identifier string) (*FunctionNode, b
 func (table *SymbolTable) SearchForStruct(identifier string) (*StructNode, bool) {
 	node, ok := table.structs[identifier]
 	return node, ok
+}
+
+func (table *SymbolTable) SearchForStructByUsage(usage string) []TypeNode {
+	set := make([]TypeNode, 0)
+	for _, s := range table.structs {
+		if t, ok := s.TypesMap[usage]; ok {
+			set = append(set, s.Types[t].T)
+		}
+	}
+	return set
 }
 
 /**************** ADDING HELPER FUNCTIONS ****************/

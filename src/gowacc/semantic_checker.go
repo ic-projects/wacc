@@ -160,21 +160,29 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Struct.Ident)
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
-		} else if struc, ok := toValue(id.T).(StructTypeNode); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
-		} else if structNode, ok := v.symbolTable.SearchForStruct(struc.Ident); !ok {
-			foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
-		} else if found, ok := structNode.TypesMap[node.Ident.Ident]; !ok {
-			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
-			v.typeChecker.seen(nil)
-			v.typeChecker.freeze(node)
 		} else {
-			node.SetStructType(structNode.Types[found])
-			foundError = v.typeChecker.seen(structNode.Types[found].T).addPos(node.Pos)
+			if dyn, ok := toValue(id.T).(*DynamicTypeNode); ok {
+				poss := v.symbolTable.SearchForStructByUsage(node.Struct.Ident)
+				dyn.reduceSet(poss)
+				v.typeChecker.seen(nil)
+			} else {
+				if struc, ok := toValue(id.T).(StructTypeNode); !ok {
+					foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else if structNode, ok := v.symbolTable.SearchForStruct(struc.Ident); !ok {
+					foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else if found, ok := structNode.TypesMap[node.Ident.Ident]; !ok {
+					foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
+					v.typeChecker.seen(nil)
+					v.typeChecker.freeze(node)
+				} else {
+					node.SetStructType(structNode.Types[found])
+					foundError = v.typeChecker.seen(structNode.Types[found].T).addPos(node.Pos)
+				}
+			}
 		}
 	case *ArrayElementNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {

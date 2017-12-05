@@ -43,9 +43,8 @@ func toValue(typeNode TypeNode) TypeNode {
 		t2 := t.getValue()
 		if _, ok := t2.(*DynamicTypeNode); ok {
 			return t2
-		} else {
-			return toValue(t2)
 		}
+		return toValue(t2)
 	case ArrayTypeNode:
 		if inside, ok := toValue(t.T).(ArrayTypeNode); ok {
 			t.Dim += inside.Dim
@@ -61,18 +60,20 @@ func validType(T TypeNode, i *IdentifierNode) GenericError {
 	switch t := toValue(T).(type) {
 	case ArrayTypeNode:
 		if validType(t.T, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
 	case DynamicTypeNode:
-		fmt.Println("here")
+		if len(t.T.poss) > 1 {
+			return NewCustomError(i.Pos, fmt.Sprint("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.poss))
+		}
 		if len(t.T.poss) != 1 || validType(t.T.poss[0], i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
 	case PairTypeNode:
 		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
 	default:
@@ -193,7 +194,6 @@ func (node ArrayTypeNode) String() string {
 }
 
 func (node ArrayTypeNode) equals(t TypeNode) bool {
-	fmt.Println(fmt.Sprintf("array equals on %s and %s", node, t))
 	if arr, ok := toValue(t).(ArrayTypeNode); ok {
 		if arr2, ok := toValue(node).(ArrayTypeNode); ok {
 			return (arr == ArrayTypeNode{}) || (arr2 == ArrayTypeNode{}) || (arr.Dim == arr2.Dim && arr2.T.equals(arr.T))
@@ -238,10 +238,6 @@ func (node PairTypeNode) equals(t TypeNode) bool {
 	return false
 }
 
-type StructTypeNode struct {
-	Ident string
-}
-
 type NullTypeNode struct {
 }
 
@@ -258,9 +254,22 @@ func (node NullTypeNode) String() string {
 	return "null"
 }
 
+type StructTypeNode struct {
+	Ident string
+	poss  []string
+}
+
 func NewStructTypeNode(i *IdentifierNode) *StructTypeNode {
 	return &StructTypeNode{
 		Ident: i.Ident,
+		poss:  make([]string, 0),
+	}
+}
+
+func NewStrucDynamictTypeNode() *StructTypeNode {
+	return &StructTypeNode{
+		Ident: "",
+		poss:  make([]string, 0),
 	}
 }
 
@@ -270,6 +279,40 @@ func (node StructTypeNode) String() string {
 
 func (node StructTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(StructTypeNode); ok {
+		/*if arr.Ident == "" && node.Ident == "" {
+			newSet := make([]string, 0)
+			for _, t := range arr.poss {
+				for _, t2 := range node.poss {
+					if t == t2 {
+						newSet = append(newSet, t)
+					}
+				}
+			}
+
+			arr.poss = newSet
+			node.poss = newSet
+			if len(newSet) == 1 {
+				node.Ident = newSet[0]
+				arr.Ident = newSet[0]
+			}
+			return len(newSet) > 0
+		}
+		if arr.Ident == "" {
+			for _, t := range arr.poss {
+				if t == node.Ident {
+					arr.Ident = t
+					return true
+				}
+			}
+		}
+		if node.Ident == "" {
+			for _, t := range node.poss {
+				if t == arr.Ident {
+					node.Ident = t
+					return true
+				}
+			}
+		}*/
 		return arr.Ident == node.Ident
 	}
 	return false
@@ -338,7 +381,6 @@ func (node DynamicTypeNode) String() string {
 }
 
 func (node DynamicTypeNode) equals(t TypeNode) bool {
-	fmt.Println(fmt.Sprintf("WARNING, equals called on dynamic type: (%s) and (%s)", node, t))
 	_, ok := node.reduceSet([]TypeNode{t})
 	return ok
 }
@@ -426,11 +468,9 @@ func (node *DynamicTypeNode) reduceSet(ts []TypeNode) (TypeNode, bool) {
 		fmt.Println(fmt.Sprintf("Reducing success"))
 		node.T.poss = newSet
 	} else {
-		fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
 		fmt.Println(fmt.Sprintf("Reducing caused init"))
 		node.T.init = true
 		node.T.poss = ts
-		fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
 	}
 
 	return node.getValue(), true
