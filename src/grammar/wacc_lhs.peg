@@ -57,6 +57,7 @@ RESERVED ← (
 	"while" /
 	"do" /
 	"done" /
+  "for" /
 	"call"
 ) !(
 	'_' /

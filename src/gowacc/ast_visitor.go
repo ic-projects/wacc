@@ -74,6 +74,11 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 		case *LoopNode:
 			Walk(visitor, node.Expr)
 			Walk(visitor, node.Stats)
+		case *ForLoopNode:
+			Walk(visitor, node.Initial)
+			Walk(visitor, node.Expr)
+			Walk(visitor, node.Update)
+			Walk(visitor, node.Stats)
 		case *ScopeNode:
 			Walk(visitor, node.Stats)
 		case *PairFirstElementNode:

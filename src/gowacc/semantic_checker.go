@@ -95,6 +95,9 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		v.typeChecker.expect(NewBaseTypeNode(BOOL))
 	case *LoopNode:
 		v.typeChecker.expect(NewBaseTypeNode(BOOL))
+	case *ForLoopNode:
+		v.typeChecker.expect(NewBaseTypeNode(BOOL))
+		v.symbolTable.MoveDownScope()
 	case *ScopeNode:
 	case *IdentifierNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident); !ok {
@@ -275,6 +278,8 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 func (v *SemanticCheck) Leave(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case []StatementNode:
+		v.symbolTable.MoveUpScope()
+	case []ForLoopNode:
 		v.symbolTable.MoveUpScope()
 	case *FunctionNode:
 		v.symbolTable.MoveUpScope()

@@ -22,6 +22,7 @@ STAT ←
 	IF /
 	WHILE /
 	SCOPE /
+  FOR /
 	ASSIGN
 
 // SkipNode
@@ -209,6 +210,18 @@ WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
 	return ret(NewLoopNode(
 		c.getPosition(),
 		cond.(ExpressionNode),
+		stats.([]StatementNode),
+	))
+
+}
+
+FOR ← "for" __ initial:(NEWASSIGN/ASSIGN) _ ";" _ cond:EXPR _ ";" _ update:(NEWASSIGN/ASSIGN) _ "do" __ stats:STATS _ "done" {
+
+  return ret(NewForLoopNode(
+		c.getPosition(),
+    initial.(StatementNode),
+		cond.(ExpressionNode),
+    update.(StatementNode),
 		stats.([]StatementNode),
 	))
 
