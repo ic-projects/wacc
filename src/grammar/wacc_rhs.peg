@@ -82,7 +82,7 @@ CALL ← "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
 
 ARGLIST ← expr:EXPR exprs:(_ ',' _ EXPR)* {
 
-	argList := []ExpressionNode{expr}
+	argList := []ExpressionNode{expr.(ExpressionNode)}
 	for _, e := range toSlice(exprs) {
 		argList = append(argList, getItem(e, 3).(ExpressionNode))
 	}

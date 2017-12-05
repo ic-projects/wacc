@@ -1,6 +1,6 @@
 // ProgramNode
 START ←_ p:PROGRAM {
-    return ret(p)
+	return ret(p)
 }
 
 PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
@@ -19,7 +19,7 @@ PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 	}
 	functions = append(functions, main)
 
-  structs := []*StructNode{}
+	structs := []*StructNode{}
 	for _, s := range toSlice(ss) {
 		structs = append(structs, getItem(s, 1).(*StructNode))
 	}
@@ -33,7 +33,7 @@ PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 		functions = append(functions, getItem(f, 1).(*FunctionNode))
 	}
 
-  structs := []*StructNode{}
+	structs := []*StructNode{}
 	for _, s := range toSlice(ss) {
 		structs = append(structs, getItem(s, 1).(*StructNode))
 	}
@@ -44,29 +44,50 @@ PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 }
 
 STRUCT ← "struct" __ i:IDENT __ "is" __ ts:STRUCTINTERNALLIST? __ "end" {
-  if ts != nil {
-	   return ret(NewStructNode(c.getPosition(), i.(*IdentifierNode), ts.([]*StructInternalNode)))
-  } else {
-    return ret(NewStructNode(c.getPosition(), i.(*IdentifierNode), []*StructInternalNode{}))
-  }
+
+	if ts != nil {
+
+		return ret(NewStructNode(
+			c.getPosition(),
+			i.(*IdentifierNode),
+			ts.([]*StructInternalNode),
+		))
+
+	} else {
+
+		return ret(NewStructNode(
+			c.getPosition(),
+			i.(*IdentifierNode),
+			[]*StructInternalNode{},
+		))
+
+	}
 }
 
 STRUCTINTERNALLIST ← s:STRUCTINTERNAL ss:(_ STRUCTINTERNAL)* {
+
 	structList := []*StructInternalNode{s.(*StructInternalNode)}
 	for _, p := range toSlice(ss) {
 		structList = append(structList, getItem(p, 1).(*StructInternalNode))
 	}
 
 	return ret(structList)
+
 }
 
 STRUCTINTERNAL ← t:TYPE __ i:IDENT _ ';' {
-	return ret(NewStructInternalNode(c.getPosition(), i.(*IdentifierNode), t.(TypeNode)))
+
+	return ret(NewStructInternalNode(
+		c.getPosition(),
+		i.(*IdentifierNode),
+		t.(TypeNode),
+	))
+
 }
 
 // FunctionNode
 FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
-       _ "end" {
+	   _ "end" {
 
 	stats := s.([]StatementNode)
 	finalStat := stats[len(stats)-1]
@@ -100,7 +121,7 @@ FUNC ← t:TYPE __ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 	), err
 
 } / t:TYPE __ ident:RESERVED _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
-    _ "end" {
+	_ "end" {
 
 	name := string(getItem(ident, 0).([]byte))
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)

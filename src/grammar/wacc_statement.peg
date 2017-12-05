@@ -1,7 +1,7 @@
 // StatementNode
 STATS ← stat:STAT stats:(_ ';' _ STAT)* {
 
-	statements := []StatementNode{stat}
+	statements := []StatementNode{stat.(StatementNode)}
 	for _, s := range toSlice(stats) {
 		statements = append(statements, getItem(s, 3).(StatementNode))
 	}
