@@ -1,5 +1,5 @@
 {
-    package main
+    package grammar
 
     import (
         "ast"
@@ -9,7 +9,7 @@
         "unicode/utf8"
     )
 
-    // getPosition is a function to create an AST position reference from the 
+    // getPosition is a function to create an AST position reference from the
     // current pigeon object.
     func (c *current) getPosition() utils.Position {
         return utils.NewPosition(c.pos.line, c.pos.col, c.pos.offset)

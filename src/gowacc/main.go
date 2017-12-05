@@ -4,9 +4,9 @@ import (
 	"ast"
 	"flag"
 	"fmt"
+	"grammar"
 	"os"
 	"path"
-
 	"strings"
 )
 
@@ -53,7 +53,7 @@ func main() {
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
 		var err error
-		treeValue, err := ParseFile(filepath)
+		treeValue, err := grammar.ParseFile(filepath)
 
 		if err != nil {
 			fmt.Println("Errors detected during compilation! " +

@@ -13,17 +13,17 @@ SRC = src/**/*.go
 GRAMMAR = src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
 
 # Generated Files / Binaries
-BINARY = gowacc
-GENERATED = src/gowacc/wacc.go
+BINARY = bin/gowacc
+GENERATED = src/grammar/wacc.go
 
 # ***************** BUILDING ****************
 
 .PHONY: all
 
-all: gowacc
+all: $(BINARY)
 
 $(BINARY): $(SRC) $(GENERATED)
-	go build $@
+	go install gowacc
 
 $(GENERATED): $(GRAMMAR)
 	@go get github.com/ic-projects/pigeon

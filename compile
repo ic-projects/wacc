@@ -21,7 +21,7 @@ END {
   files.each do |file_path|
     # Call the gowacc compiler with requested flags,
     # save its exit status, and print its output
-    output = %x(./gowacc #{$opts.join(" ")} #{file_path})
+    output = %x(./bin/gowacc #{$opts.join(" ")} #{file_path})
     exit_status = $?.exitstatus
     puts output
 
