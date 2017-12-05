@@ -272,6 +272,66 @@ func (node PrintlnNode) String() string {
 	return writeSimpleString("PRINTLN", node.Expr)
 }
 
+/**************** SWITCH NODE ****************/
+
+// SwitchNode stores the position, condition and the branches of a switch
+// statement.
+//
+// E.g.
+//
+//  todo
+type SwitchNode struct {
+	Pos   Position
+	Expr  ExpressionNode
+	Cases []CaseNode
+}
+
+func NewSwitchNode(pos Position, expr ExpressionNode, cases []CaseNode) *SwitchNode {
+	return &SwitchNode{
+		Pos:   pos,
+		Expr:  expr,
+		Cases: cases,
+	}
+}
+
+func (node SwitchNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("- SWITCH"))
+	buf.WriteString(Indent(fmt.Sprintln("- EXPRESSION"), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s", node.Expr), "    "))
+	//	buf.WriteString(Indent(fmt.Sprintln("- THEN"), "  "))
+	for _, s := range node.Cases {
+		buf.WriteString(Indent(fmt.Sprintf("%s", s), "    "))
+	}
+	return buf.String()
+}
+
+type CaseNode struct {
+	Pos   Position
+	Expr  ExpressionNode
+	Stats []StatementNode
+}
+
+func NewCaseNode(pos Position, expr ExpressionNode, stats []StatementNode) CaseNode {
+	return CaseNode{
+		Pos:   pos,
+		Expr:  expr,
+		Stats: stats,
+	}
+}
+
+func (node CaseNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("- CASE"))
+	buf.WriteString(Indent(fmt.Sprintln("- EXPRESSION"), "  "))
+	buf.WriteString(Indent(fmt.Sprintf("%s", node.Expr), "    "))
+	buf.WriteString(Indent(fmt.Sprintln("- THEN"), "  "))
+	for _, s := range node.Stats {
+		buf.WriteString(Indent(fmt.Sprintf("%s", s), "    "))
+	}
+	return buf.String()
+}
+
 /**************** IF NODE ****************/
 
 // IfNode stores the position, condition and the two branches of an if else

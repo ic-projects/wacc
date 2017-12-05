@@ -71,6 +71,12 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 			Walk(visitor, node.Expr)
 			Walk(visitor, node.IfStats)
 			Walk(visitor, node.ElseStats)
+		case *SwitchNode:
+			Walk(visitor, node.Expr)
+			for _, c := range node.Cases {
+				Walk(visitor, c.Expr)
+				Walk(visitor, c.Stats)
+			}
 		case *LoopNode:
 			Walk(visitor, node.Expr)
 			Walk(visitor, node.Stats)

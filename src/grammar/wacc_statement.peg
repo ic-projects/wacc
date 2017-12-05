@@ -22,6 +22,7 @@ STAT ←
 	IF /
 	WHILE /
 	SCOPE /
+  SWITCH /
   FOR /
 	ASSIGN
 
@@ -192,6 +193,27 @@ PRINTLN ← "println" __ expr:EXPR {
 
 }
 
+// SwitchNode
+SWITCH ← "case" __ expr:EXPR __ cases:(_ CASE)+ __ "fi" {
+  var caseNodes []CaseNode
+  for _, e := range toSlice(cases) {
+    caseNodes = append(caseNodes, getItem(e, 1).(CaseNode))
+  }
+  return ret(NewSwitchNode(
+    c.getPosition(),
+    expr.(ExpressionNode),
+    caseNodes,
+    ))
+}
+
+CASE ← "when" __ expr:EXPR _ ':' _ stats:STATS _ "end" {
+  return ret(NewCaseNode(
+    c.getPosition(),
+    expr.(ExpressionNode),
+    stats.([]StatementNode),
+  ))
+}
+
 // IfNode
 IF ← "if" __ cond:EXPR _ "then" __ ifStats:STATS _ "else" __ elseStats:STATS _ "fi" {
 
@@ -215,6 +237,7 @@ WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
 
 }
 
+// ForLoopNode
 FOR ← "for" __ initial:(NEWASSIGN/ASSIGN) _ ";" _ cond:EXPR _ ";" _ update:(NEWASSIGN/ASSIGN) _ "do" __ stats:STATS _ "done" {
 
   return ret(NewForLoopNode(
