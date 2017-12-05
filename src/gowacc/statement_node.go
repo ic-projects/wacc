@@ -349,6 +349,48 @@ func (node LoopNode) String() string {
 	return buf.String()
 }
 
+/**************** FOR LOOP NODE ****************/
+
+// ForLoopNode stores the position, inital statement, condition, update
+// statement and loop statements for a for loop statement
+//
+// E.g.
+//
+//  for int i = 0; i > 3; i = i + 1 do skip done
+type ForLoopNode struct {
+	Pos     Position
+	Initial StatementNode
+	Expr    ExpressionNode
+	Update  StatementNode
+	Stats   []StatementNode
+}
+
+func NewForLoopNode(pos Position, initial StatementNode, expr ExpressionNode, update StatementNode, stats []StatementNode) *ForLoopNode {
+	return &ForLoopNode{
+		Pos:     pos,
+		Initial: initial,
+		Expr:    expr,
+		Update:  update,
+		Stats:   stats,
+	}
+}
+
+func (node ForLoopNode) String() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln("- FOR"))
+	buf.WriteString(fmt.Sprintln("  - INITAL"))
+	buf.WriteString(Indent(fmt.Sprintf("%s", node.Initial), "    "))
+	buf.WriteString(fmt.Sprintln("  - CONDITION"))
+	buf.WriteString(Indent(fmt.Sprintf("%s", node.Expr), "    "))
+	buf.WriteString(fmt.Sprintln("  - UPDATE"))
+	buf.WriteString(Indent(fmt.Sprintf("%s", node.Update), "    "))
+	buf.WriteString(fmt.Sprintln("  - DO"))
+	for _, s := range node.Stats {
+		buf.WriteString(Indent(fmt.Sprintf("%s", s), "    "))
+	}
+	return buf.String()
+}
+
 /**************** SCOPE NODE ****************/
 
 // ScopeNode stores the position and statement of a new scope.
