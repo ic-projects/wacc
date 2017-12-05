@@ -400,11 +400,9 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("B WHILE%d", whileLabel)
 		// Do
 		v.addCode("DO%d:", doLabel)
-		v.labelCount++
 		Walk(v, node.Stats)
 		// While
 		v.addCode("WHILE%d:", whileLabel)
-		v.labelCount++
 		Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
 		v.addCode("BEQ DO%d", doLabel)
@@ -417,12 +415,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("B WHILE%d", whileLabel)
 		// Do
 		v.addCode("DO%d:", doLabel)
-		v.labelCount++
 		Walk(v, node.Stats)
 		Walk(v, node.Update)
 		// While
 		v.addCode("WHILE%d:", whileLabel)
-		v.labelCount++
 		Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
 		v.addCode("BEQ DO%d", doLabel)
