@@ -14,21 +14,21 @@ ASSIGNRHS ←
 // ArrayLiteralNode
 ARRAYLITER ← '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
 
-	var expressions []ExpressionNode
+	var expressions []ast.ExpressionNode
 	if (exprs == nil) {
 		expressions = nil
 	} else {
-		firstExpression := getItem(exprs, 0).(ExpressionNode)
-		expressions = []ExpressionNode{firstExpression}
+		firstExpression := getItem(exprs, 0).(ast.ExpressionNode)
+		expressions = []ast.ExpressionNode{firstExpression}
 		for _, e := range toSlice(getItem(exprs, 1)) {
 			expressions = append(
 				expressions,
-				getItem(e, 3).(ExpressionNode),
+				getItem(e, 3).(ast.ExpressionNode),
 			)
 		}
 	}
 
-	return ret(NewArrayLiteralNode(
+	return ret(ast.NewArrayLiteralNode(
 		c.getPosition(),
 		expressions,
 	))
@@ -38,10 +38,10 @@ ARRAYLITER ← '[' _ exprs:(EXPR (_ ',' _ EXPR)*)? _ ']' {
 // NewPairNode
 NEWPAIR ← "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 
-	return ret(NewNewPairNode(
+	return ret(ast.NewNewPairNode(
 		c.getPosition(),
-		t1.(ExpressionNode),
-		t2.(ExpressionNode),
+		t1.(ast.ExpressionNode),
+		t2.(ast.ExpressionNode),
 	))
 
 }
@@ -50,16 +50,16 @@ NEWPAIR ← "newpair" _ '(' _ t1:EXPR _ ',' _ t2:EXPR _ ')' {
 NEWSTRUCT ← "new" __ i:IDENT _ '(' _  args:ARGLIST? _ ')' {
 
 	if args == nil {
-		return ret(NewStructNewNode(
+		return ret(ast.NewStructNewNode(
 			c.getPosition(),
-			i.(*IdentifierNode),
-			[]ExpressionNode{},
+			i.(*ast.IdentifierNode),
+			[]ast.ExpressionNode{},
 		))
 	} else {
-		return ret(NewStructNewNode(
+		return ret(ast.NewStructNewNode(
 			c.getPosition(),
-			i.(*IdentifierNode),
-			args.([]ExpressionNode),
+			i.(*ast.IdentifierNode),
+			args.([]ast.ExpressionNode),
 		))
 	}
 
@@ -68,9 +68,9 @@ NEWSTRUCT ← "new" __ i:IDENT _ '(' _  args:ARGLIST? _ ')' {
 // PointerNewNode
 POINTERNEW ← '&' ident:IDENT {
 
-	return ret(NewPointerNewNode(
+	return ret(ast.NewPointerNewNode(
 		c.getPosition(),
-		ident.(*IdentifierNode),
+		ident.(*ast.IdentifierNode),
 	))
 
 }
@@ -78,9 +78,9 @@ POINTERNEW ← '&' ident:IDENT {
 // PointerDereferenceNode
 POINTERDEREFERENCE ← '*' ident:IDENT {
 
-	return ret(NewPointerDereferenceNode(
+	return ret(ast.NewPointerDereferenceNode(
 		c.getPosition(),
-		ident.(*IdentifierNode),
+		ident.(*ast.IdentifierNode),
 	))
 
 }
@@ -93,26 +93,26 @@ POINTERDEREFERENCE ← '*' ident:IDENT {
 CALL ← "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
 
 	if(args == nil) {
-		return ret(NewFunctionCallNode(
+		return ret(ast.NewFunctionCallNode(
 			c.getPosition(),
-			i.(*IdentifierNode),
-			[]ExpressionNode{},
+			i.(*ast.IdentifierNode),
+			[]ast.ExpressionNode{},
 		))
 	}
 
-	return ret(NewFunctionCallNode(
+	return ret(ast.NewFunctionCallNode(
 		c.getPosition(),
-		i.(*IdentifierNode),
-		args.([]ExpressionNode),
+		i.(*ast.IdentifierNode),
+		args.([]ast.ExpressionNode),
 	))
 
 }
 
 ARGLIST ← expr:EXPR exprs:(_ ',' _ EXPR)* {
 
-	argList := []ExpressionNode{expr.(ExpressionNode)}
+	argList := []ast.ExpressionNode{expr.(ast.ExpressionNode)}
 	for _, e := range toSlice(exprs) {
-		argList = append(argList, getItem(e, 3).(ExpressionNode))
+		argList = append(argList, getItem(e, 3).(ast.ExpressionNode))
 	}
 
 	return ret(argList)

@@ -2,6 +2,7 @@
     package main
 
     import (
+        "ast"
         "fmt"
         "strconv"
         "strings"
@@ -10,8 +11,8 @@
 
     // getPosition is a function to create an AST position reference from the 
     // current pigeon object.
-    func (c *current) getPosition() Position {
-        return NewPosition(c.pos.line, c.pos.col, c.pos.offset)
+    func (c *current) getPosition() utils.Position {
+        return utils.NewPosition(c.pos.line, c.pos.col, c.pos.offset)
     }
 
     // toSlice is a helper function that asserts its argument is a slice.
@@ -40,11 +41,11 @@
     func parseBinOps(
         e1 interface{},
         e2 interface{},
-        p Position,
+        p utils.Position,
     ) (interface{}, error) {
         if (len(toSlice(e2)) > 0) {
-            return ret(BuildBinOpTree(
-                e1.(ExpressionNode),
+            return ret(ast.BuildBinOpTree(
+                e1.(ast.ExpressionNode),
                 toSlice(e2),
                 p,
             ))

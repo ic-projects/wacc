@@ -1,4 +1,4 @@
-package main
+package ast
 
 import (
 	"bytes"
@@ -156,16 +156,16 @@ func (node ArrayElementNode) String() string {
 // E.g.
 //  s.lhs
 type StructElementNode struct {
-	Pos       utils.Position
-	Struct    *IdentifierNode
-	Ident     *IdentifierNode
-	stuctType *StructInternalNode
-	Pointer   bool
+	Pos        utils.Position
+	Struct     *IdentifierNode
+	Ident      *IdentifierNode
+	StructType *StructInternalNode
+	Pointer    bool
 }
 
 // SetStructType sets the type of a struct element.
 func (node *StructElementNode) SetStructType(p *StructInternalNode) {
-	node.stuctType = p
+	node.StructType = p
 }
 
 // SetPointer sets whether this is accessed using a pointer.

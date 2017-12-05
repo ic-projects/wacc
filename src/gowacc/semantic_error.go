@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ast"
 	"bufio"
 	"bytes"
 	"fmt"
@@ -54,12 +55,12 @@ func (e CustomError) String() string {
 // TypeNodes, and the actual (wrong) TypeNode the semantic checker saw.
 type TypeError struct {
 	pos      utils.Position
-	got      TypeNode
-	expected []TypeNode
+	got      ast.TypeNode
+	expected []ast.TypeNode
 }
 
 // NewTypeError builds a TypeError
-func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
+func NewTypeError(got ast.TypeNode, expected []ast.TypeNode) TypeError {
 	return TypeError{
 		got:      got,
 		expected: expected,
@@ -77,8 +78,8 @@ func (e TypeError) String() string {
 	i := 1
 	for _, t := range e.expected {
 		// If type mismatch on VOID, then trying to return from global Scope
-		if node, ok := t.(*BaseTypeNode); ok {
-			if node.T == VOID {
+		if node, ok := t.(*ast.BaseTypeNode); ok {
+			if node.T == ast.VOID {
 				return "Cannot return from global Scope"
 			}
 		}

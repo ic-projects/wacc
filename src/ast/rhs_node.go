@@ -1,4 +1,4 @@
-package main
+package ast
 
 import (
 	"bytes"
@@ -128,12 +128,12 @@ type StructNewNode struct {
 	Pos        utils.Position
 	T          *StructTypeNode
 	Exprs      []ExpressionNode
-	structNode *StructNode
+	StructNode *StructNode
 }
 
 // SetStructType replaces a StructNewNode's StructNode.
 func (node *StructNewNode) SetStructType(t *StructNode) {
-	node.structNode = t
+	node.StructNode = t
 }
 
 // NewStructNewNode builds a StructNewNode.

@@ -1,4 +1,4 @@
-package main
+package ast
 
 import (
 	"bytes"
@@ -47,14 +47,14 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		return NewStringArrayTypeNode()
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
-		arr := toValue(a.T).(ArrayTypeNode)
+		arr := ToValue(a.T).(ArrayTypeNode)
 		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
 			return arr.T
 		}
 	case *DynamicTypeNode:
 		return node.getValue()
 	case *StructElementNode:
-		return node.stuctType.T
+		return node.StructType.T
 	case *IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
 		return v.T

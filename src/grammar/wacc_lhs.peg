@@ -17,7 +17,7 @@ IDENT ← !RESERVED ((
 	[0-9])*
 ) {
 
-	return ret(NewIdentifierNode(
+	return ret(ast.NewIdentifierNode(
 		c.getPosition(),
 		string(c.text),
 	))
@@ -73,9 +73,9 @@ PAIRELEM ←
 // PairFirstElementNode
 FST ← "fst" __ e:EXPR {
 
-	return ret(NewPairFirstElementNode(
+	return ret(ast.NewPairFirstElementNode(
 		c.getPosition(),
-		e.(ExpressionNode),
+		e.(ast.ExpressionNode),
 	))
 
 }
@@ -83,9 +83,9 @@ FST ← "fst" __ e:EXPR {
 // PairSecondElementNode
 SND ← "snd" __ e:EXPR {
 
-	return ret(NewPairSecondElementNode(
+	return ret(ast.NewPairSecondElementNode(
 		c.getPosition(),
-		e.(ExpressionNode),
+		e.(ast.ExpressionNode),
 	))
 
 }
@@ -93,17 +93,17 @@ SND ← "snd" __ e:EXPR {
 // ArrayElementNode
 ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
 
-	var expressionNodes  []ExpressionNode
+	var expressionNodes  []ast.ExpressionNode
 	for _, e := range toSlice(exprs) {
 			expressionNodes = append(
 				expressionNodes,
-				getItem(e, 3).(ExpressionNode),
+				getItem(e, 3).(ast.ExpressionNode),
 			)
 	}
 
-	return ret(NewArrayElementNode(
+	return ret(ast.NewArrayElementNode(
 		c.getPosition(),
-		ident.(*IdentifierNode),
+		ident.(*ast.IdentifierNode),
 		expressionNodes,
 	))
 
@@ -111,10 +111,10 @@ ARRAYELEM ← ident:IDENT exprs:(_ '[' _ EXPR _ ']')+ {
 
 // ArrayElementNode
 STRUCTELEM ← ident:IDENT '.' ident2:IDENT {
-	return ret(NewStructElementNode(
+	return ret(ast.NewStructElementNode(
 		c.getPosition(),
-		ident.(*IdentifierNode),
-		ident2.(*IdentifierNode),
+		ident.(*ast.IdentifierNode),
+		ident2.(*ast.IdentifierNode),
 	))
 
 }

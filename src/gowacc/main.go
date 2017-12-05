@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ast"
 	"flag"
 	"fmt"
 	"os"
@@ -44,11 +45,11 @@ func main() {
 	filepath := os.Args[len(os.Args)-1]
 	flag.Parse()
 	if *debugMode {
-		DebugMode = true
+		ast.DebugMode = true
 	}
 
 	// Load the file and parse into an AST
-	var tree ProgramNode
+	var tree ast.ProgramNode
 	if len(os.Args) > 1 {
 		fmt.Println("-- Compiling...")
 		var err error
@@ -61,7 +62,7 @@ func main() {
 			os.Exit(100)
 		}
 
-		tree = treeValue.(ProgramNode)
+		tree = treeValue.(ast.ProgramNode)
 
 	} else {
 		fmt.Println("Error: No file provided")
@@ -71,7 +72,7 @@ func main() {
 
 		// Perform semantic error checking
 		checker := NewSemanticCheck()
-		Walk(checker, tree)
+		ast.Walk(checker, tree)
 
 		// Print out all semantic errors that occur
 		if checker.hasErrors() {

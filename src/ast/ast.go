@@ -1,4 +1,4 @@
-package main
+package ast
 
 import (
 	"bytes"
@@ -80,7 +80,7 @@ type StructNode struct {
 	Ident      *IdentifierNode
 	Types      []*StructInternalNode
 	TypesMap   map[string]int
-	memorySize int
+	MemorySize int
 }
 
 // NewStructNode builds a StructNode.
@@ -97,11 +97,11 @@ func NewStructNode(
 	}
 	mem := 0
 	for i, t := range structNode.Types {
-		t.memoryOffset = mem
+		t.MemoryOffset = mem
 		mem += SizeOf(t.T)
 		structNode.TypesMap[t.Ident.Ident] = i
 	}
-	structNode.memorySize = mem
+	structNode.MemorySize = mem
 	return &structNode
 }
 
@@ -110,7 +110,7 @@ func (node StructNode) String() string {
 	buf.WriteString(fmt.Sprintf(
 		"- STRUCT %s (size: %d)\n",
 		node.Ident.String()[2:],
-		node.memorySize,
+		node.MemorySize,
 	))
 	for _, p := range node.Types {
 		buf.WriteString(fmt.Sprintf("%s\n", p))
@@ -125,7 +125,7 @@ type StructInternalNode struct {
 	Pos          utils.Position
 	Ident        *IdentifierNode
 	T            TypeNode
-	memoryOffset int
+	MemoryOffset int
 }
 
 // NewStructInternalNode builds a StructInternalNode.
@@ -146,7 +146,7 @@ func (node StructInternalNode) String() string {
 		"  %s %s (offset: %d)",
 		node.Ident,
 		node.T,
-		node.memoryOffset,
+		node.MemoryOffset,
 	)
 }
 

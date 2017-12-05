@@ -1,9 +1,9 @@
 // StatementNode
 STATS ← stat:STAT stats:(_ ';' _ STAT)* {
 
-	statements := []StatementNode{stat.(StatementNode)}
+	statements := []ast.StatementNode{stat.(ast.StatementNode)}
 	for _, s := range toSlice(stats) {
-		statements = append(statements, getItem(s, 3).(StatementNode))
+		statements = append(statements, getItem(s, 3).(ast.StatementNode))
 	}
 
 	return ret(statements)
@@ -29,7 +29,7 @@ STAT ←
 // SkipNode
 SKIP ← "skip" {
 
-	return ret(NewSkipNode(
+	return ret(ast.NewSkipNode(
 		c.getPosition(),
 	))
 
@@ -38,11 +38,11 @@ SKIP ← "skip" {
 // DeclareNode
 NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 
-	return ret(NewDeclareNode(
+	return ret(ast.NewDeclareNode(
 		c.getPosition(),
-		t.(TypeNode),
-		ident.(*IdentifierNode),
-		rhs.(RHSNode),
+		t.(ast.TypeNode),
+		ident.(*ast.IdentifierNode),
+		rhs.(ast.RHSNode),
 	))
 
 } / t:TYPE ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
@@ -51,11 +51,11 @@ NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
 	err := errors.New(errmsg)
 
-	return NewDeclareNode(
+	return ast.NewDeclareNode(
 		c.getPosition(),
-		t.(TypeNode),
-		NewIdentifierNode(c.getPosition(), name),
-		rhs.(RHSNode),
+		t.(ast.TypeNode),
+		ast.NewIdentifierNode(c.getPosition(), name),
+		rhs.(ast.RHSNode),
 	), err
 
 }
@@ -63,43 +63,43 @@ NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 // AssignNode
 ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 
-	if arr, ok := lhs.(*ArrayElementNode); ok {
+	if arr, ok := lhs.(*ast.ArrayElementNode); ok {
 		arr.SetPointer(true)
-		return ret(NewAssignNode(
+		return ret(ast.NewAssignNode(
 			c.getPosition(),
 			arr,
-			rhs.(LHSNode),
+			rhs.(ast.LHSNode),
 		))
 	}
-	if s, ok := lhs.(*StructElementNode); ok {
+	if s, ok := lhs.(*ast.StructElementNode); ok {
 		s.SetPointer(true)
-		return ret(NewAssignNode(
+		return ret(ast.NewAssignNode(
 			c.getPosition(),
 			s,
-			rhs.(LHSNode),
+			rhs.(ast.LHSNode),
 		))
 	}
-	if fst, ok := lhs.(*PairFirstElementNode); ok {
+	if fst, ok := lhs.(*ast.PairFirstElementNode); ok {
 		fst.SetPointer(true)
-		return ret(NewAssignNode(
+		return ret(ast.NewAssignNode(
 			c.getPosition(),
 			fst,
-			rhs.(LHSNode),
+			rhs.(ast.LHSNode),
 		))
 	}
-	if snd, ok := lhs.(*PairSecondElementNode); ok {
+	if snd, ok := lhs.(*ast.PairSecondElementNode); ok {
 		snd.SetPointer(true)
-		return ret(NewAssignNode(
+		return ret(ast.NewAssignNode(
 			c.getPosition(),
 			snd,
-			rhs.(LHSNode),
+			rhs.(ast.LHSNode),
 		))
 	}
 
-	return ret(NewAssignNode(
+	return ret(ast.NewAssignNode(
 		c.getPosition(),
-		lhs.(LHSNode),
-		rhs.(LHSNode),
+		lhs.(ast.LHSNode),
+		rhs.(ast.LHSNode),
 	))
 
 }
@@ -107,38 +107,38 @@ ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 // ReadNode
 READ ← "read" __ lhs:ASSIGNLHS {
 
-	if arr, ok := lhs.(*ArrayElementNode); ok {
+	if arr, ok := lhs.(*ast.ArrayElementNode); ok {
 		arr.SetPointer(true)
-		return ret(NewReadNode(
+		return ret(ast.NewReadNode(
 			c.getPosition(),
 			arr,
 		))
 	}
-	if s, ok := lhs.(*StructElementNode); ok {
+	if s, ok := lhs.(*ast.StructElementNode); ok {
 		s.SetPointer(true)
-		return ret(NewReadNode(
+		return ret(ast.NewReadNode(
 			c.getPosition(),
 			s,
 		))
 	}
-	if fst, ok := lhs.(*PairFirstElementNode); ok {
+	if fst, ok := lhs.(*ast.PairFirstElementNode); ok {
 		fst.SetPointer(true)
-		return ret(NewReadNode(
+		return ret(ast.NewReadNode(
 			c.getPosition(),
 			fst,
 		))
 	}
-	if snd, ok := lhs.(*PairSecondElementNode); ok {
+	if snd, ok := lhs.(*ast.PairSecondElementNode); ok {
 		snd.SetPointer(true)
-		return ret(NewReadNode(
+		return ret(ast.NewReadNode(
 			c.getPosition(),
 			snd,
 		))
 	}
 
-	return ret(NewReadNode(
+	return ret(ast.NewReadNode(
 		c.getPosition(),
-		lhs.(LHSNode),
+		lhs.(ast.LHSNode),
 	))
 
 }
@@ -146,9 +146,9 @@ READ ← "read" __ lhs:ASSIGNLHS {
 // FreeNode
 FREE ← "free" __ expr:EXPR {
 
-	return ret(NewFreeNode(
+	return ret(ast.NewFreeNode(
 		c.getPosition(),
-		expr.(ExpressionNode),
+		expr.(ast.ExpressionNode),
 	))
 
 }
@@ -156,9 +156,9 @@ FREE ← "free" __ expr:EXPR {
 // ReturnNode
 RETURN ← "return" __ expr:EXPR {
 
-	return ret(NewReturnNode(
+	return ret(ast.NewReturnNode(
 		c.getPosition(),
-		expr.(ExpressionNode),
+		expr.(ast.ExpressionNode),
 	))
 
 }
@@ -166,9 +166,9 @@ RETURN ← "return" __ expr:EXPR {
 // ExitNode
 EXIT ← "exit" __ expr:EXPR {
 
-	return ret(NewExitNode(
+	return ret(ast.NewExitNode(
 		c.getPosition(),
-		expr.(ExpressionNode),
+		expr.(ast.ExpressionNode),
 	))
 
 }
@@ -176,9 +176,9 @@ EXIT ← "exit" __ expr:EXPR {
 // PrintNode
 PRINT ← "print" __ expr:EXPR {
 
-	return ret(NewPrintNode(
+	return ret(ast.NewPrintNode(
 		c.getPosition(),
-		expr.(ExpressionNode),
+		expr.(ast.ExpressionNode),
 	))
 
 }
@@ -186,42 +186,42 @@ PRINT ← "print" __ expr:EXPR {
 // PrintlnNode
 PRINTLN ← "println" __ expr:EXPR {
 
-	return ret(NewPrintlnNode(
+	return ret(ast.NewPrintlnNode(
 		c.getPosition(),
-		expr.(ExpressionNode),
+		expr.(ast.ExpressionNode),
 	))
 
 }
 
 // SwitchNode
 SWITCH ← "case" __ expr:EXPR __ cases:(_ CASE)+ __ "fi" {
-  var caseNodes []CaseNode
+  var caseNodes []ast.CaseNode
   for _, e := range toSlice(cases) {
-    caseNodes = append(caseNodes, getItem(e, 1).(CaseNode))
+    caseNodes = append(caseNodes, getItem(e, 1).(ast.CaseNode))
   }
-  return ret(NewSwitchNode(
+  return ret(ast.NewSwitchNode(
     c.getPosition(),
-    expr.(ExpressionNode),
+    expr.(ast.ExpressionNode),
     caseNodes,
     ))
 }
 
 CASE ← "when" __ expr:EXPR _ ':' _ stats:STATS _ "end" {
-  return ret(NewCaseNode(
+  return ret(ast.NewCaseNode(
     c.getPosition(),
-    expr.(ExpressionNode),
-    stats.([]StatementNode),
+    expr.(ast.ExpressionNode),
+    stats.([]ast.StatementNode),
   ))
 }
 
 // IfNode
 IF ← "if" __ cond:EXPR _ "then" __ ifStats:STATS _ "else" __ elseStats:STATS _ "fi" {
 
-	return ret(NewIfNode(
+	return ret(ast.NewIfNode(
 		c.getPosition(),
-		cond.(ExpressionNode),
-		ifStats.([]StatementNode),
-		elseStats.([]StatementNode),
+		cond.(ast.ExpressionNode),
+		ifStats.([]ast.StatementNode),
+		elseStats.([]ast.StatementNode),
 	))
 
 }
@@ -229,10 +229,10 @@ IF ← "if" __ cond:EXPR _ "then" __ ifStats:STATS _ "else" __ elseStats:STATS _
 // LoopNode
 WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
 
-	return ret(NewLoopNode(
+	return ret(ast.NewLoopNode(
 		c.getPosition(),
-		cond.(ExpressionNode),
-		stats.([]StatementNode),
+		cond.(ast.ExpressionNode),
+		stats.([]ast.StatementNode),
 	))
 
 }
@@ -240,12 +240,12 @@ WHILE ← "while" __ cond:EXPR _ "do" __ stats:STATS _ "done" {
 // ForLoopNode
 FOR ← "for" __ initial:(NEWASSIGN/ASSIGN) _ ";" _ cond:EXPR _ ";" _ update:(NEWASSIGN/ASSIGN) _ "do" __ stats:STATS _ "done" {
 
-  return ret(NewForLoopNode(
+  return ret(ast.NewForLoopNode(
 		c.getPosition(),
-    initial.(StatementNode),
-		cond.(ExpressionNode),
-    update.(StatementNode),
-		stats.([]StatementNode),
+    initial.(ast.StatementNode),
+		cond.(ast.ExpressionNode),
+    update.(ast.StatementNode),
+		stats.([]ast.StatementNode),
 	))
 
 }
@@ -253,9 +253,9 @@ FOR ← "for" __ initial:(NEWASSIGN/ASSIGN) _ ";" _ cond:EXPR _ ";" _ update:(NE
 // ScopeNode
 SCOPE ← "begin" __ stats:STATS _ "end" {
 
-	return ret(NewScopeNode(
+	return ret(ast.NewScopeNode(
 		c.getPosition(),
-		stats.([]StatementNode),
+		stats.([]ast.StatementNode),
 	))
 
 }
