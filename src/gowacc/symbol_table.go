@@ -186,7 +186,7 @@ func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
 	for _, f := range table.structs {
 		for _, t := range f.Types {
 			err := validType(t.T, t.Ident)
-			if err == nil {
+			if err != nil {
 				*e = append(*e, err)
 			}
 		}
@@ -195,7 +195,7 @@ func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
 	for _, f := range table.functions {
 		for _, t := range f.Params {
 			err := validType(t.T, t.Ident)
-			if err == nil {
+			if err != nil {
 				*e = append(*e, err)
 			}
 		}
@@ -203,7 +203,7 @@ func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
 
 	for _, s := range table.Head.childScopes {
 		err := s.checkForValidTypes()
-		if err == nil {
+		if err != nil {
 			*e = append(*e, err...)
 		}
 	}
@@ -215,14 +215,14 @@ func (node SymbolTableNode) checkForValidTypes() []GenericError {
 	e := make([]GenericError, 0)
 	for _, ident := range node.Scope {
 		err := validType(ident.T, ident.ident)
-		if err == nil {
+		if err != nil {
 			e = append(e, err)
 		}
 	}
 
 	for _, s := range node.childScopes {
 		err := s.checkForValidTypes()
-		if err == nil {
+		if err != nil {
 			e = append(e, err...)
 		}
 	}

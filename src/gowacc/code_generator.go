@@ -420,7 +420,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
 		lastIsCharOrBool := SizeOf(toValue(symbol.T).(ArrayTypeNode).T) == 1 &&
-			toValue(symbol.T).(*ArrayTypeNode).Dim == length
+			toValue(symbol.T).(ArrayTypeNode).Dim == length
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]

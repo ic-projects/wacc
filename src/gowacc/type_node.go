@@ -193,8 +193,11 @@ func (node ArrayTypeNode) String() string {
 }
 
 func (node ArrayTypeNode) equals(t TypeNode) bool {
+	fmt.Println(fmt.Sprintf("array equals on %s and %s", node, t))
 	if arr, ok := toValue(t).(ArrayTypeNode); ok {
-		return arr.Dim == node.Dim && node.T.equals(arr.T)
+		if arr2, ok := toValue(node).(ArrayTypeNode); ok {
+			return (arr == ArrayTypeNode{}) || (arr2 == ArrayTypeNode{}) || (arr.Dim == arr2.Dim && arr2.T.equals(arr.T))
+		}
 	}
 	return false
 }
@@ -275,49 +278,49 @@ func (node StructTypeNode) equals(t TypeNode) bool {
 type DynamicTypeNode struct {
 	T            *InternalDynamicType
 	insidePair   bool
-	insideArray  bool
 	arrayPointer *ArrayTypeNode
 }
 
 type InternalDynamicType struct {
-	init bool
-	poss []TypeNode
+	init     bool
+	poss     []TypeNode
+	watchers *[]*DynamicTypeNode
 }
 
 func NewDynamicTypeNode() *DynamicTypeNode {
-	t := &InternalDynamicType{
-		init: false,
-		poss: make([]TypeNode, 0),
+	watchers := make([]*DynamicTypeNode, 0)
+	node := &DynamicTypeNode{
+		T: &InternalDynamicType{
+			init:     false,
+			poss:     make([]TypeNode, 0),
+			watchers: &watchers,
+		},
+		insidePair: false,
 	}
-	return &DynamicTypeNode{
-		T:           t,
-		insidePair:  false,
-		insideArray: false,
-	}
+	*node.T.watchers = append(*node.T.watchers, node)
+	return node
 }
 
 func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
-	t := &InternalDynamicType{
-		init: false,
-		poss: make([]TypeNode, 0),
+	watchers := make([]*DynamicTypeNode, 0)
+	node := &DynamicTypeNode{
+		T: &InternalDynamicType{
+			init:     false,
+			poss:     make([]TypeNode, 0),
+			watchers: &watchers,
+		},
+		insidePair: true,
 	}
-	return &DynamicTypeNode{
-		T:           t,
-		insidePair:  true,
-		insideArray: false,
-	}
+	*node.T.watchers = append(*node.T.watchers, node)
+	return node
 }
 
-func NewDynamicTypeInsideArrayNode() *DynamicTypeNode {
-	t := &InternalDynamicType{
-		init: false,
-		poss: make([]TypeNode, 0),
+func (node *DynamicTypeNode) changeToWatch(other *DynamicTypeNode) {
+	*other.T.watchers = append(*other.T.watchers, *node.T.watchers...)
+	for _, watcher := range *node.T.watchers {
+		watcher.T = node.T
 	}
-	return &DynamicTypeNode{
-		T:           t,
-		insidePair:  false,
-		insideArray: true,
-	}
+	node.T = other.T
 }
 
 func (node InternalDynamicType) String() string {
@@ -331,43 +334,21 @@ func (node InternalDynamicType) String() string {
 }
 
 func (node DynamicTypeNode) String() string {
-	return fmt.Sprintf("dynamic (%s)", node.T)
+	return fmt.Sprintf("dynamic (%s) %p", node.T, node.T)
 }
 
 func (node DynamicTypeNode) equals(t TypeNode) bool {
 	fmt.Println(fmt.Sprintf("WARNING, equals called on dynamic type: (%s) and (%s)", node, t))
-	// if node.T.init {
-	// 	if d, ok := toValue(t).(DynamicTypeNode); ok {
-	// 		if d.T.init {
-	// 			return true
-	// 		} else {
-	// 			return true
-	// 		}
-	// 	} else {
-	// 		return true
-	// 	}
-	// } else {
-	// 	return true
-	// }
-	return true
+	_, ok := node.reduceSet([]TypeNode{t})
+	return ok
 }
 
 func (node *DynamicTypeNode) getValue() TypeNode {
 	if len(node.T.poss) == 1 {
 		t := node.T.poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
-			/*if node.insideArray {
-				if arr.T == nil {
-					node.arrayPointer.T = NewDynamicTypeInsideArrayNode()
-				} else {
-					node.arrayPointer.T = arr.T
-				}
-				node.arrayPointer.Dim++
-				node.T.poss[0] = node.arrayPointer
-				t = node.T.poss[0]
-			} else {*/
 			if arr.T == nil {
-				arr := NewArrayTypeNode(NewDynamicTypeInsideArrayNode(), 1)
+				arr := NewArrayTypeNode(NewDynamicTypeNode(), 1)
 				arr.T.(*DynamicTypeNode).arrayPointer = arr
 				node.T.poss[0] = arr
 				t = node.T.poss[0]
@@ -405,19 +386,19 @@ func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 		}
 		t, ok := node.reduceSet(dyn.T.poss)
 		if ok {
-			dyn.T = node.T
+			dyn.changeToWatch(node)
 		}
 		return t, ok
 	} else if node.T.init && !dyn.T.init {
-		dyn.T = node.T
+		dyn.changeToWatch(node)
 	} else if !node.T.init && dyn.T.init {
-		node.T = dyn.T
+		node.changeToWatch(dyn)
 	} else {
-		node.T = dyn.T
+		node.changeToWatch(dyn)
+		dyn.changeToWatch(node)
 		return nil, true
 	}
-
-	dyn.T = node.T
+	dyn.changeToWatch(node)
 	return node.getValue(), true
 }
 
