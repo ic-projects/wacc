@@ -19,7 +19,7 @@ func writeSimpleString(name string, nodes ...fmt.Stringer) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", name))
 	for _, n := range nodes {
-		buf.WriteString(Indent(fmt.Sprintf("%s", n), "  "))
+		buf.WriteString(Indent(n.String(), "  "))
 	}
 	return buf.String()
 }
@@ -28,7 +28,7 @@ func writeExpressionsString(name string, exprs []ExpressionNode) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", name))
 	for _, e := range exprs {
-		buf.WriteString(Indent(fmt.Sprintf("%s", e), "  "))
+		buf.WriteString(Indent(e.String(), "  "))
 	}
 	return buf.String()
 }

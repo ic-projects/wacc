@@ -108,9 +108,18 @@ func NewFunctionCallNode(
 }
 
 func (node FunctionCallNode) String() string {
-	return writeExpressionsString(fmt.Sprintf("%s\n", node.Ident), node.Exprs)
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintln(node.Ident))
+	for _, e := range node.Exprs {
+		buf.WriteString(fmt.Sprintln(e))
+	}
+	return buf.String()
 }
 
+/**************** STRUCT NEW NODE ****************/
+
+// StructNewNode stores the position, type, and members of an initialised
+// struct.
 type StructNewNode struct {
 	Pos        Position
 	T          *StructTypeNode
