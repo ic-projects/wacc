@@ -420,7 +420,7 @@ func (node LoopNode) String() string {
 
 /**************** FOR LOOP NODE ****************/
 
-// ForLoopNode stores the position, inital statement, condition, update
+// ForLoopNode stores the position, initial statement, condition, update
 // statement and loop statements for a for loop statement
 //
 // E.g.
@@ -434,7 +434,13 @@ type ForLoopNode struct {
 	Stats   []StatementNode
 }
 
-func NewForLoopNode(pos utils.Position, initial StatementNode, expr ExpressionNode, update StatementNode, stats []StatementNode) *ForLoopNode {
+func NewForLoopNode(
+	pos utils.Position,
+	initial StatementNode,
+	expr ExpressionNode,
+	update StatementNode,
+	stats []StatementNode,
+) *ForLoopNode {
 	return &ForLoopNode{
 		Pos:     pos,
 		Initial: initial,
@@ -447,7 +453,7 @@ func NewForLoopNode(pos utils.Position, initial StatementNode, expr ExpressionNo
 func (node ForLoopNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FOR"))
-	buf.WriteString(fmt.Sprintln("  - INITAL"))
+	buf.WriteString(fmt.Sprintln("  - INITIAL"))
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Initial), "    "))
 	buf.WriteString(fmt.Sprintln("  - CONDITION"))
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s", node.Expr), "    "))
