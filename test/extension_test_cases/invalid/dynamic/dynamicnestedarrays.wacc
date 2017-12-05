@@ -1,0 +1,35 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+#  int ta = 1 ;
+#  int tb = 2 ;
+#  int[] tc = [ta, tb] ;
+#  int[] td = [0 , 1] ;
+#  int[][] te = [tc, td] ;
+#  println te[0][0] ;
+#  println te[0][1] ;
+#  println te[1][0] ;
+#  println te[1][1] ;
+#  int[][][] tf = [te, te, te] ;
+#  println te == tf[2] ;
+  a = 1 ;
+  b = 2 ;
+  c = [a, b] ;
+  d = [0 , 1] ;
+  e = [c, d] ;
+  println e[0][0] ;
+  println e[0][1] ;
+  println e[1][0] ;
+  println e[1]['a'] ;
+  f = [e, e, e] ;
+  println e == f[2] ;
+  exit 0
+end
