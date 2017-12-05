@@ -107,6 +107,10 @@ class TestSuite
                        ["--kill-after=5", "3", @compile, "-x", source],
                        nil, 1024 * 1024 * 100)
 
+    if File.file?(File.basename(source, ".wacc")) then
+      File.delete(File.basename(source, ".wacc"))
+    end
+
     expected_exit = "0"
 
     if(File.dirname(source) =~ /invalid\/semanticErr/)
@@ -129,7 +133,6 @@ class TestSuite
     end
 
     asmFile = File.absolute_path(File.join(@wacc_compile_script, File.basename(source, ".wacc") + ".s"))
-    puts asmFile
     if(File.file?(asmFile))
       asm = File.read(asmFile)
       removeAssembly = %x(rm #{asmFile})

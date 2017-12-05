@@ -1,5 +1,12 @@
-src/vendor/
+/bin/
 /lib/
-/gowacc
-/src/gowacc/wacc.go
+/pkg/
+/src/grammar/wacc.go
+
 .atomenv.json
+/.idea/
+
+*.aux
+*.log
+*.out
+*.pdf
