@@ -34,7 +34,7 @@ SKIP ← "skip" {
 }
 
 // DeclareNode
-NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
+NEWASSIGN ← t:TYPE _ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 
 	return ret(NewDeclareNode(
 		c.getPosition(),
@@ -43,16 +43,7 @@ NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 		rhs.(RHSNode),
 	))
 
-} / ident:IDENT _ '=' _ rhs:ASSIGNRHS {
-
-	return ret(NewDeclareNode(
-		c.getPosition(),
-		NewDynamicTypeNode(),
-		ident.(*IdentifierNode),
-		rhs.(RHSNode),
-	))
-
-} / t:TYPE __ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
+} / t:TYPE _ ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
 
 	name := string(getItem(ident, 0).([]byte))
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
@@ -65,7 +56,7 @@ NEWASSIGN ← t:TYPE __ ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 		rhs.(RHSNode),
 	), err
 
-}
+} 
 
 // AssignNode
 ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {

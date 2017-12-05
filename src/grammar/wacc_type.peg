@@ -1,5 +1,5 @@
 // TypeNode
-TYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* {
+TYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* __ {
 
 	if (len(toSlice(array)) > 0) {
 		return ret(NewArrayTypeNode(
