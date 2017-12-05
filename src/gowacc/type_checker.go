@@ -34,7 +34,7 @@ func contains(check *TypeChecker, arr []TypeNode, t TypeNode) bool {
 func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 	expectingValue := toValue(expecting)
 	seenValue := toValue(seen)
-	fmt.Println(fmt.Sprintf("checkEquals expect %s and seen %s", expectingValue, seenValue))
+	//fmt.Println(fmt.Sprintf("checkEquals expect %s and seen %s", expectingValue, seenValue))
 	switch seenValue.(type) {
 	case ArrayTypeNode:
 		if found, ok := expectingValue.(ArrayTypeNode); ok {
@@ -49,10 +49,8 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 			return expectingValue == (ArrayTypeNode{}) || expectingValue.equals(seenValue)
 		}
 	case PairTypeNode:
-		fmt.Println("pair case")
 		if found, ok := expectingValue.(PairTypeNode); ok {
 			if seenValue == (PairTypeNode{}) {
-				fmt.Println("pair case 2")
 				if expectingValue == (PairTypeNode{}) {
 					return false
 				}
@@ -60,7 +58,6 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 				check.expect(found.T1)
 				return true
 			}
-			fmt.Println("pair case 3")
 			return expectingValue == (PairTypeNode{}) || expectingValue.equals(seenValue)
 		} else if _, ok := expectingValue.(BaseTypeNode); ok && expectingValue.equals(toValue(NewBaseTypeNode(PAIR))) {
 			return true
@@ -160,7 +157,7 @@ func pairCase(check *TypeChecker, validTypes []TypeNode, basePairMatch bool, t *
 func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
 	redoSeen := false
-	fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+	//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
 	if dyn, ok := typeNode.(*DynamicTypeNode); ok {
 		if _, ok := validTypes[0].(*NullTypeNode); !ok && typeNode != nil {
 			if newType, ok := dyn.reduceSet(validTypes); ok {
@@ -190,7 +187,7 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 		return NewSetExpectance(validTypes).seen(check, typeNode)
 	}
 
-	fmt.Println(fmt.Sprintf("Final seen is: %s   Final expect is: %s", typeNode, validTypes))
+	//fmt.Println(fmt.Sprintf("Final seen is: %s   Final expect is: %s", typeNode, validTypes))
 	//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
 	if contains(check, validTypes, typeNode) {
 		return TypeError{}

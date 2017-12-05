@@ -417,7 +417,7 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 }
 
 func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
-	fmt.Println(fmt.Sprintf("Special double dynamic reduction"))
+	//fmt.Println(fmt.Sprintf("Special double dynamic reduction"))
 	if node.T.init && dyn.T.init {
 		if len(node.T.poss) == 1 && len(dyn.T.poss) == 1 {
 			if node.T.poss[0].equals(dyn.T.poss[0]) {
@@ -445,7 +445,7 @@ func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 }
 
 func (node *DynamicTypeNode) reduceSet(ts []TypeNode) (TypeNode, bool) {
-	fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
+	//fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
 	// Dynamic type saw another dynamic type
 	if dyn, ok := ts[0].(*DynamicTypeNode); len(ts) == 1 && ok {
 		return node.reduce(dyn)
@@ -462,13 +462,13 @@ func (node *DynamicTypeNode) reduceSet(ts []TypeNode) (TypeNode, bool) {
 
 		// Reduce leaves no possibilities
 		if len(newSet) == 0 {
-			fmt.Println(fmt.Sprintf("Reducing failed"))
+			//fmt.Println(fmt.Sprintf("Reducing failed"))
 			return nil, false
 		}
-		fmt.Println(fmt.Sprintf("Reducing success"))
+		//fmt.Println(fmt.Sprintf("Reducing success"))
 		node.T.poss = newSet
 	} else {
-		fmt.Println(fmt.Sprintf("Reducing caused init"))
+		//fmt.Println(fmt.Sprintf("Reducing caused init"))
 		node.T.init = true
 		node.T.poss = ts
 	}
