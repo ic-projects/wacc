@@ -13,6 +13,8 @@ type TypeNode interface {
 
 /**************** TYPE NODE HELPER FUNCTIONS ****************/
 
+// SizeOf returns the size, in bytes, required to store an element of the given
+// type.
 func SizeOf(t TypeNode) int {
 	switch node := toValue(t).(type) {
 	case BaseTypeNode:
@@ -26,15 +28,24 @@ func SizeOf(t TypeNode) int {
 
 /**************** BASE TYPE ****************/
 
+// BaseType is a representation of a simple WACC type, that may form a type by
+// itself, or as part of a more complex array or pair type.
 type BaseType int
 
 const (
-	INT    BaseType = iota // int
-	BOOL                   // bool
-	CHAR                   // char
-	STRING                 // string, but internally represented as an array of chars
-	PAIR                   // pair
-	VOID                   // void, used for the return type of the main function, as you cannot return from main.
+	// INT int type
+	INT BaseType = iota
+	// BOOL bool type
+	BOOL
+	// CHAR char type
+	CHAR
+	// STRING string type, but internally represented as an array of chars
+	STRING
+	// PAIR pair base type, used for nested pairs
+	PAIR
+	// VOID void type, used for the return type of the main function,
+	// as you cannot return from main.
+	VOID
 )
 
 // String will return the string format of the BaseType. Void returns "int" to
@@ -64,6 +75,7 @@ type BaseTypeNode struct {
 	T BaseType
 }
 
+// NewBaseTypeNode builds a BaseTypeNode.
 func NewBaseTypeNode(t BaseType) *BaseTypeNode {
 	return &BaseTypeNode{
 		T: t,
@@ -71,7 +83,7 @@ func NewBaseTypeNode(t BaseType) *BaseTypeNode {
 }
 
 func (node BaseTypeNode) String() string {
-	return fmt.Sprintf("%s", node.T)
+	return node.T.String()
 }
 
 func (node BaseTypeNode) equals(t TypeNode) bool {
@@ -126,7 +138,7 @@ func (node ArrayTypeNode) String() string {
 			buf.WriteString("[]")
 		}
 	} else {
-		buf.WriteString(fmt.Sprintf("%s", node.T))
+		buf.WriteString(node.T.String())
 		for i := 0; i < node.Dim; i++ {
 			buf.WriteString("[]")
 		}
@@ -154,6 +166,7 @@ type PairTypeNode struct {
 	T2 TypeNode
 }
 
+// NewPairTypeNode builds a PairTypeNode.
 func NewPairTypeNode(t1 TypeNode, t2 TypeNode) *PairTypeNode {
 	return &PairTypeNode{
 		T1: t1,
@@ -175,13 +188,13 @@ func (node PairTypeNode) equals(t TypeNode) bool {
 	return false
 }
 
-type StructTypeNode struct {
-	Ident string
-}
+/**************** NULL TYPE NODE ****************/
 
+// NullTypeNode is an empty struct used to represent a null type.
 type NullTypeNode struct {
 }
 
+// NewNullTypeNode builds a NullTypeNode.
 func NewNullTypeNode() *NullTypeNode {
 	return &NullTypeNode{}
 }
@@ -195,6 +208,14 @@ func (node NullTypeNode) String() string {
 	return "null"
 }
 
+/**************** STRUCT TYPE NODE ****************/
+
+// StructTypeNode stores a user-defined type.
+type StructTypeNode struct {
+	Ident string
+}
+
+// NewStructTypeNode builds a StructTypeNode.
 func NewStructTypeNode(i *IdentifierNode) *StructTypeNode {
 	return &StructTypeNode{
 		Ident: i.Ident,
