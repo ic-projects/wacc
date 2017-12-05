@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-
 	"os"
 	"strconv"
 	"strings"
+	"utils"
 )
 
 /**************** CODE GENERATOR STRUCTS ****************/
@@ -56,13 +56,13 @@ func (asm *Assembly) String() string {
 	}
 	buf.WriteString(".text\n")
 	for _, s := range asm.text {
-		buf.WriteString(Indent(s, "  "))
+		buf.WriteString(utils.Indent(s, "  "))
 	}
 	buf.WriteString(".global main\n")
 	for fname, f := range asm.global {
 		buf.WriteString(fname + ":\n")
 		for _, s := range f {
-			buf.WriteString(Indent(s, "  "))
+			buf.WriteString(utils.Indent(s, "  "))
 		}
 	}
 	return buf.String()
@@ -101,9 +101,9 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 }
 
 // LocationOf will return the location of a
-func (v *CodeGenerator) LocationOf(loc *Location) string {
+func (v *CodeGenerator) LocationOf(loc *utils.Location) string {
 	// Location is a register
-	if loc.Register != UNDEFINED {
+	if loc.Register != utils.UNDEFINED {
 		return loc.Register.String()
 	}
 
@@ -120,7 +120,7 @@ func (v *CodeGenerator) LocationOf(loc *Location) string {
 
 // PointerTo returns a string, that when added gives the object's location in
 // memory
-func (v *CodeGenerator) PointerTo(location *Location) string {
+func (v *CodeGenerator) PointerTo(location *utils.Location) string {
 	return "sp, #" +
 		strconv.Itoa(v.currentStackPos-location.CurrentPos)
 }
@@ -149,8 +149,8 @@ type CodeGenerator struct {
 	labelCount      int
 	currentFunction string
 	symbolTable     *SymbolTable
-	freeRegisters   *RegisterStack
-	returnRegisters *RegisterStack
+	freeRegisters   *utils.RegisterStack
+	returnRegisters *utils.RegisterStack
 	library         *Library
 	currentStackPos int
 }
@@ -161,8 +161,8 @@ func NewCodeGenerator(symbolTable *SymbolTable) *CodeGenerator {
 		asm:             NewAssembly(),
 		labelCount:      0,
 		symbolTable:     symbolTable,
-		freeRegisters:   NewRegisterStackWith(FreeRegisters()),
-		returnRegisters: NewRegisterStack(),
+		freeRegisters:   utils.NewRegisterStackWith(utils.FreeRegisters()),
+		returnRegisters: utils.NewRegisterStack(),
 		library:         GetLibrary(),
 		currentStackPos: 0,
 	}
@@ -271,7 +271,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 	switch node := programNode.(type) {
 	case *FunctionNode:
 		v.currentStackPos = 0
-		v.freeRegisters = NewRegisterStackWith(FreeRegisters())
+		v.freeRegisters = utils.NewRegisterStackWith(utils.FreeRegisters())
 		v.symbolTable.MoveNextScope()
 		if node.Ident.Ident == "" {
 			v.addFunction("main")
@@ -280,7 +280,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 		v.addCode("PUSH {lr}")
 	case []*ParameterNode:
-		registers := ReturnRegisters()
+		registers := utils.ReturnRegisters()
 		parametersFromRegsSize := 0
 		parametersFromStackSize := 0
 		for n, e := range node {
@@ -289,11 +289,11 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 			if n < len(registers) {
 				// Go through parameters stored in R0 - R4 first
 				parametersFromRegsSize += SizeOf(e.T)
-				dec.AddLocation(NewStackOffsetLocation(parametersFromRegsSize))
+				dec.AddLocation(utils.NewStackOffsetLocation(parametersFromRegsSize))
 			} else {
 				// Then go through parameters stored on stack
 				dec.AddLocation(
-					NewStackOffsetLocation(parametersFromStackSize -
+					utils.NewStackOffsetLocation(parametersFromStackSize -
 						SizeOf(NewBaseTypeNode(INT))))
 				parametersFromStackSize -= SizeOf(e.T)
 			}
@@ -574,7 +574,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		v.addCode("%s %s, [r0]", store(sndSize), snd)
 
 	case *FunctionCallNode:
-		registers := ReturnRegisters()
+		registers := utils.ReturnRegisters()
 		size := 0
 		for i := len(node.Exprs) - 1; i >= 0; i-- {
 			Walk(v, node.Exprs[i])
@@ -619,8 +619,8 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		case CHR:
 		}
 	case *BinaryOperatorNode:
-		var operand2 Register
-		var operand1 Register
+		var operand2 utils.Register
+		var operand1 utils.Register
 
 		if v.freeRegisters.Length() == 2 {
 			Walk(v, node.Expr2)
@@ -713,7 +713,7 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		size := 0
 		for _, dec := range v.symbolTable.CurrentScope.Scope {
 			size += SizeOf(dec.T)
-			dec.AddLocation(NewStackOffsetLocation(v.currentStackPos + size))
+			dec.AddLocation(utils.NewStackOffsetLocation(v.currentStackPos + size))
 		}
 		if size != 0 {
 			v.subtractFromStackPointer(size)
@@ -863,7 +863,7 @@ func (v *CodeGenerator) subtractFromStackPointer(size int) {
 
 // getFreeRegister pops a register from freeRegisters, and returns it
 // after pushing it onto the returnRegisters.
-func (v *CodeGenerator) getFreeRegister() Register {
+func (v *CodeGenerator) getFreeRegister() utils.Register {
 	register := v.freeRegisters.Pop()
 	v.returnRegisters.Push(register)
 	return register
@@ -871,7 +871,7 @@ func (v *CodeGenerator) getFreeRegister() Register {
 
 // getFreeRegister pops a register from returnRegister, and returns it
 // after pushing it onto the freeRegisters.
-func (v *CodeGenerator) getReturnRegister() Register {
+func (v *CodeGenerator) getReturnRegister() utils.Register {
 	register := v.returnRegisters.Pop()
 	v.freeRegisters.Push(register)
 	return register

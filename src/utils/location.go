@@ -1,4 +1,4 @@
-package main
+package utils
 
 // Location is a struct which stores a particular  This can be a
 // register, an address (on the heap) or a position on the stack.

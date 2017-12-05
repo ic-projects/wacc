@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 /**************** SYMBOL TABLE ****************/
@@ -56,10 +57,10 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
-	Pos        Position
+	Pos        utils.Position
 	T          TypeNode
 	ident      *IdentifierNode
-	Location   *Location
+	Location   *utils.Location
 	IsDeclared bool
 }
 
@@ -87,7 +88,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 }
 
 // AddLocation will add a location to a declaration.
-func (dec *IdentifierDeclaration) AddLocation(location *Location) {
+func (dec *IdentifierDeclaration) AddLocation(location *utils.Location) {
 	dec.Location = location
 }
 
@@ -219,54 +220,6 @@ func (table *SymbolTable) AddStruct(identifier string, node *StructNode) {
 	table.structs[identifier] = node
 }
 
-func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
-	for _, f := range table.structs {
-		for _, t := range f.Types {
-			err := validType(t.T, t.Ident)
-			if err != nil {
-				*e = append(*e, err)
-			}
-		}
-	}
-
-	for _, f := range table.functions {
-		for _, t := range f.Params {
-			err := validType(t.T, t.Ident)
-			if err != nil {
-				*e = append(*e, err)
-			}
-		}
-	}
-
-	for _, s := range table.Head.childScopes {
-		err := s.checkForValidTypes()
-		if err != nil {
-			*e = append(*e, err...)
-		}
-	}
-
-	return len(*e) > 0
-}
-
-func (node SymbolTableNode) checkForValidTypes() []GenericError {
-	e := make([]GenericError, 0)
-	for _, ident := range node.Scope {
-		err := validType(ident.T, ident.ident)
-		if err != nil {
-			e = append(e, err)
-		}
-	}
-
-	for _, s := range node.childScopes {
-		err := s.checkForValidTypes()
-		if err != nil {
-			e = append(e, err...)
-		}
-	}
-
-	return e
-}
-
 /******************** PRINTING HELPER FUNCTIONS ********************/
 
 // Print will print a Node, and all of its parents
@@ -319,7 +272,7 @@ func (table *SymbolTable) String() string {
 	}
 	buf.WriteString("- Scopes:\n")
 	for _, s := range table.Head.childScopes {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
 }
@@ -338,7 +291,7 @@ func (node *SymbolTableNode) String() string {
 	if len(node.childScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")
 		for _, s := range node.childScopes {
-			buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
+			buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 		}
 	}
 	return buf.String()

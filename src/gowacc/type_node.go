@@ -61,31 +61,6 @@ func toValue(typeNode TypeNode) TypeNode {
 	}
 }
 
-func validType(T TypeNode, i *IdentifierNode) GenericError {
-	switch t := toValue(T).(type) {
-	case ArrayTypeNode:
-		if validType(t.T, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
-		}
-		return nil
-	case DynamicTypeNode:
-		if len(t.T.poss) > 1 {
-			return NewCustomError(i.Pos, fmt.Sprint("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.poss))
-		}
-		if len(t.T.poss) != 1 || validType(t.T.poss[0], i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
-		}
-		return nil
-	case PairTypeNode:
-		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
-		}
-		return nil
-	default:
-		return nil
-	}
-}
-
 /******************** BASE TYPE ********************/
 
 // BaseType is a representation of a simple WACC type, that may form a type by

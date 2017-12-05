@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 // LHSNode is an empty interface for Lhs nodes to implement.
@@ -15,12 +16,12 @@ type LHSNode interface {
 // IdentifierNode is a struct that stores the position and string of an
 // identifier.
 type IdentifierNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Ident string
 }
 
 // NewIdentifierNode builds an IdentifierNode
-func NewIdentifierNode(pos Position, ident string) *IdentifierNode {
+func NewIdentifierNode(pos utils.Position, ident string) *IdentifierNode {
 	return &IdentifierNode{
 		Pos:   pos,
 		Ident: ident,
@@ -43,7 +44,7 @@ func (node IdentifierNode) String() string {
 //
 //  Fst i
 type PairFirstElementNode struct {
-	Pos     Position
+	Pos     utils.Position
 	Expr    ExpressionNode
 	Pointer bool
 }
@@ -55,7 +56,7 @@ func (node *PairFirstElementNode) SetPointer(p bool) {
 
 // NewPairFirstElementNode builds a PairFirstElementNode
 func NewPairFirstElementNode(
-	pos Position,
+	pos utils.Position,
 	expr ExpressionNode,
 ) *PairFirstElementNode {
 	return &PairFirstElementNode{
@@ -78,7 +79,7 @@ func (node PairFirstElementNode) String() string {
 //
 //  Snd i
 type PairSecondElementNode struct {
-	Pos     Position
+	Pos     utils.Position
 	Expr    ExpressionNode
 	Pointer bool
 }
@@ -90,7 +91,7 @@ func (node *PairSecondElementNode) SetPointer(p bool) {
 
 // NewPairSecondElementNode builds a PairSecondElementNode
 func NewPairSecondElementNode(
-	pos Position,
+	pos utils.Position,
 	expr ExpressionNode,
 ) *PairSecondElementNode {
 	return &PairSecondElementNode{
@@ -112,7 +113,7 @@ func (node PairSecondElementNode) String() string {
 // E.g.
 //  i[4][3+2]
 type ArrayElementNode struct {
-	Pos     Position
+	Pos     utils.Position
 	Ident   *IdentifierNode
 	Exprs   []ExpressionNode
 	Pointer bool
@@ -125,7 +126,7 @@ func (node *ArrayElementNode) SetPointer(p bool) {
 
 // NewArrayElementNode builds an ArrayElementNode
 func NewArrayElementNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 	exprs []ExpressionNode,
 ) *ArrayElementNode {
@@ -142,7 +143,7 @@ func (node ArrayElementNode) String() string {
 	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
 	for _, e := range node.Exprs {
 		buf.WriteString(fmt.Sprintln("  - []"))
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "    "))
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
 }
@@ -155,7 +156,7 @@ func (node ArrayElementNode) String() string {
 // E.g.
 //  s.lhs
 type StructElementNode struct {
-	Pos       Position
+	Pos       utils.Position
 	Struct    *IdentifierNode
 	Ident     *IdentifierNode
 	stuctType *StructInternalNode
@@ -174,7 +175,7 @@ func (node *StructElementNode) SetPointer(p bool) {
 
 // NewStructElementNode builds an StructElementNode
 func NewStructElementNode(
-	pos Position,
+	pos utils.Position,
 	struc *IdentifierNode,
 	ident *IdentifierNode,
 ) *StructElementNode {
@@ -196,11 +197,11 @@ func (node StructElementNode) String() string {
 }
 
 type PointerNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
-func NewPointerNode(pos Position, ident *IdentifierNode) *PointerNode {
+func NewPointerNode(pos utils.Position, ident *IdentifierNode) *PointerNode {
 	return &PointerNode{
 		Pos:   pos,
 		Ident: ident,

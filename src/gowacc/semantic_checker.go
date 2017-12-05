@@ -4,6 +4,79 @@ import (
 	"fmt"
 )
 
+func validType(T TypeNode, i *IdentifierNode) GenericError {
+	switch t := toValue(T).(type) {
+	case ArrayTypeNode:
+		if validType(t.T, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case DynamicTypeNode:
+		if len(t.T.poss) > 1 {
+			return NewCustomError(i.Pos, fmt.Sprint("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.poss))
+		}
+		if len(t.T.poss) != 1 || validType(t.T.poss[0], i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	case PairTypeNode:
+		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
+			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+		}
+		return nil
+	default:
+		return nil
+	}
+}
+
+func (v *SemanticCheck) checkForDynamicErrors(e *[]GenericError) bool {
+	for _, f := range v.symbolTable.structs {
+		for _, t := range f.Types {
+			err := validType(t.T, t.Ident)
+			if err != nil {
+				*e = append(*e, err)
+			}
+		}
+	}
+
+	for _, f := range v.symbolTable.functions {
+		for _, t := range f.Params {
+			err := validType(t.T, t.Ident)
+			if err != nil {
+				*e = append(*e, err)
+			}
+		}
+	}
+
+	for _, s := range v.symbolTable.Head.childScopes {
+		err := checkForValidTypes(s)
+		if err != nil {
+			*e = append(*e, err...)
+		}
+	}
+
+	return len(*e) > 0
+}
+
+func checkForValidTypes(node *SymbolTableNode) []GenericError {
+	e := make([]GenericError, 0)
+	for _, ident := range node.Scope {
+		err := validType(ident.T, ident.ident)
+		if err != nil {
+			e = append(e, err)
+		}
+	}
+
+	for _, s := range node.childScopes {
+		err := checkForValidTypes(s)
+		if err != nil {
+			e = append(e, err...)
+		}
+	}
+
+	return e
+}
+
 /**************** SEMANTIC CHECK ****************/
 
 // SemanticCheck is a struct that implements EntryExitVisitor to be called with
@@ -47,7 +120,7 @@ func (v *SemanticCheck) hasErrors() bool {
 	if len(v.Errors) > 0 {
 		return true
 	}
-	return v.symbolTable.checkForDynamicErrors(&v.Errors)
+	return v.checkForDynamicErrors(&v.Errors)
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
