@@ -1,22 +1,31 @@
-# ***************** GOPATH CONFIG ****************
+# ***************** CONFIG ****************
 
+# GOPATH
 GOPATH := $(CURDIR)/lib/:$(CURDIR)
 export GOPATH
 
+# Go tools
 PIGEON = $(CURDIR)/lib/bin/pigeon
 GOLINT = $(CURDIR)/lib/bin/gometalinter
 
+# Source Files
 SRC = src/**/*.go
 GRAMMAR = src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
+
+# Generated Files / Binaries
+BINARY = gowacc
+GENERATED = src/gowacc/wacc.go
 
 # ***************** BUILDING ****************
 
 .PHONY: all
 
-all: $(SRC)
-	go build gowacc
+all: gowacc
 
-src/gowacc/wacc.go: $(GRAMMAR)
+$(BINARY): $(SRC) $(GENERATED)
+	go build $@
+
+$(GENERATED): $(GRAMMAR)
 	@go get github.com/ic-projects/pigeon
 	cat $^ | $(PIGEON) > $@
 
@@ -30,7 +39,7 @@ lint:
 	@go get github.com/alecthomas/gometalinter
 	@$(GOLINT) --install --update
 	@echo "\n== Linting =="
-	$(GOLINT) --enable-all --skip=lib ./...
+	$(GOLINT) --enable-all --skip=grammar ./src/...
 
 fmt:
 	@echo "\n== Formatting =="
@@ -54,9 +63,8 @@ docs:
 .PHONY: clean clean-lib
 
 clean:
-	rm -rf $(BUILD)
-	rm -rf gowacc
-	rm -rf *.s
+	rm -rf $(BINARY)
+	rm -rf $(GENERATED)
 
 clean-lib:
 	rm -rf lib

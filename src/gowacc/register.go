@@ -5,28 +5,48 @@ import (
 	"fmt"
 )
 
+/**************** REGISTERS ****************/
+
 // Register is an enum which defines the registers according to the ARM11
 // specification.
 type Register int
 
 const (
+	// R0 General-purpose register
 	R0 Register = iota
+	// R1 General-purpose register
 	R1
+	// R2 General-purpose register
 	R2
+	// R3 General-purpose register
 	R3
+	// R4 General-purpose register
 	R4
+	// R5 General-purpose register
 	R5
+	// R6 General-purpose register
 	R6
+	// R7 General-purpose register
 	R7
+	// R8 General-purpose register
 	R8
+	// R9 General-purpose register
 	R9
+	// R10 General-purpose register
 	R10
+	// R11 General-purpose register
 	R11
+	// R12 General-purpose register
 	R12
+	// SP Stack pointer
 	SP
+	// LR Link register
 	LR
+	// PC Program counter
 	PC
+	// APSR Application program status register
 	APSR
+	// UNDEFINED Not using a register
 	UNDEFINED
 )
 
@@ -83,6 +103,8 @@ func (r Register) String() string {
 		return "UNDEFINED"
 	}
 }
+
+/**************** REGISTER STACK ****************/
 
 // RegisterStack is a struct that represents a stack of regsters.
 // It is used to keep track of which register is used for returning a value.

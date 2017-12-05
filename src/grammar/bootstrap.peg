@@ -37,10 +37,14 @@
 
     // parseBinOps is a helper function to build a binary operations tree
     // given two expressions, which is used in wacc_expression.peg.
-    func parseBinOps(e1 interface{}, e2 interface{}, p Position) (interface{}, error) {
+    func parseBinOps(
+        e1 interface{},
+        e2 interface{},
+        p Position,
+    ) (interface{}, error) {
         if (len(toSlice(e2)) > 0) {
             return ret(BuildBinOpTree(
-                e1,
+                e1.(ExpressionNode),
                 toSlice(e2),
                 p,
             ))

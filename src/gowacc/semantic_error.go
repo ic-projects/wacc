@@ -15,12 +15,22 @@ type GenericError interface {
 	Pos() Position
 }
 
+// ErrorDeclaration is an interface that extends a GenericError to also give
+// a declaration position
+type ErrorDeclaration interface {
+	GenericError
+	PosDeclared() Position
+}
+
+/**************** CUSTOM ERROR ****************/
+
 // CustomError is a struct that stores a particular error message.
 type CustomError struct {
 	pos  Position
 	text string
 }
 
+// NewCustomError builds a CustomError.
 func NewCustomError(pos Position, text string) CustomError {
 	return CustomError{
 		pos:  pos,
@@ -28,6 +38,7 @@ func NewCustomError(pos Position, text string) CustomError {
 	}
 }
 
+// Pos returns the position of this error.
 func (e CustomError) Pos() Position {
 	return e.pos
 }
@@ -36,14 +47,17 @@ func (e CustomError) String() string {
 	return e.text
 }
 
-// TypeError is a struct for a TypeError, storing a list of acceptable TypeNodes,
-// and the actual (wrong) TypeNode the semantic checker saw.
+/**************** TYPE ERROR ****************/
+
+// TypeError is a struct for a TypeError, storing a list of acceptable
+// TypeNodes, and the actual (wrong) TypeNode the semantic checker saw.
 type TypeError struct {
 	pos      Position
 	got      TypeNode
 	expected []TypeNode
 }
 
+// NewTypeError builds a TypeError
 func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
 	return TypeError{
 		got:      got,
@@ -51,6 +65,7 @@ func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
 	}
 }
 
+// Pos returns the position of this error.
 func (e TypeError) Pos() Position {
 	return e.pos
 }
@@ -87,19 +102,16 @@ func (e TypeError) addPos(pos Position) GenericError {
 	return e
 }
 
-type ErrorDeclaration interface {
-	String() string
-	Pos() Position
-	PosDeclared() Position
-}
+/**************** TYPE ERROR DECLARATION ****************/
 
-// TypeErrorDeclaration is a struct that stores a TypeError and where an identifier
-// was declared, for more useful error messages.
+// TypeErrorDeclaration is a struct that stores a TypeError and where an
+// identifier was declared, for more useful error messages.
 type TypeErrorDeclaration struct {
 	typeError   TypeError
 	posDeclared Position
 }
 
+// NewTypeErrorDeclaration builds a TypeErrorDeclaration
 func NewTypeErrorDeclaration(err TypeError, pos Position) TypeErrorDeclaration {
 	return TypeErrorDeclaration{
 		typeError:   err,
@@ -107,10 +119,12 @@ func NewTypeErrorDeclaration(err TypeError, pos Position) TypeErrorDeclaration {
 	}
 }
 
+// Pos returns the position of this error.
 func (e TypeErrorDeclaration) Pos() Position {
 	return e.typeError.pos
 }
 
+// PosDeclared returns the position where this variable was first declared.
 func (e TypeErrorDeclaration) PosDeclared() Position {
 	return e.posDeclared
 }
@@ -119,21 +133,24 @@ func (e TypeErrorDeclaration) String() string {
 	return e.typeError.String()
 }
 
-func (e TypeErrorDeclaration) addPos(pos Position) GenericError {
-	return e.addPos(pos)
-}
+/**************** DECLARATION ERROR ****************/
 
 // DeclarationError is a struct for a declaration error, for example, using an
 // identifier before it is declared. It implements GenericError.
 type DeclarationError struct {
-	pos         Position
-	isFunction  bool
-	isDefined   bool
-	identifier  string
-	posDeclared Position
+	pos        Position
+	isFunction bool
+	isDefined  bool
+	identifier string
 }
 
-func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifier string) DeclarationError {
+// NewDeclarationError builds a DeclarationError
+func NewDeclarationError(
+	pos Position,
+	isFunction bool,
+	isDefined bool,
+	identifier string,
+) DeclarationError {
 	return DeclarationError{
 		pos:        pos,
 		isFunction: isFunction,
@@ -142,6 +159,7 @@ func NewDeclarationError(pos Position, isFunction bool, isDefined bool, identifi
 	}
 }
 
+// Pos returns the position of this error.
 func (e DeclarationError) Pos() Position {
 	return e.pos
 }
@@ -150,44 +168,69 @@ func (e DeclarationError) String() string {
 	var b bytes.Buffer
 	if e.isFunction {
 		if e.isDefined {
-			b.WriteString(fmt.Sprintf("Function \"%s\" is already defined", e.identifier))
+			b.WriteString(fmt.Sprintf(
+				"Function \"%s\" is already defined",
+				e.identifier,
+			))
 		} else {
-			b.WriteString(fmt.Sprintf("Function \"%s\" is not defined", e.identifier))
+			b.WriteString(fmt.Sprintf(
+				"Function \"%s\" is not defined",
+				e.identifier,
+			))
 		}
 	} else {
 		if e.isDefined {
-			b.WriteString(fmt.Sprintf("Variable \"%s\" is already defined in the current Scope", e.identifier))
+			b.WriteString(fmt.Sprintf(
+				"Variable \"%s\" is already defined in the current Scope",
+				e.identifier,
+			))
 		} else {
-			b.WriteString(fmt.Sprintf("Variable \"%s\" is not defined in the current Scope", e.identifier))
+			b.WriteString(fmt.Sprintf(
+				"Variable \"%s\" is not defined in the current Scope",
+				e.identifier,
+			))
 		}
 	}
 	return b.String()
 }
 
-type PreviouslyDelcared struct {
+/**************** PREVIOUSLY DECLARED ****************/
+
+// PreviouslyDeclared is a struct that extends a DeclarationError with a
+// position of where the variable was first declared.
+type PreviouslyDeclared struct {
 	declarationError DeclarationError
 	posDeclared      Position
 }
 
-func NewPreviouslyDeclared(declarationError DeclarationError, posDeclared Position) PreviouslyDelcared {
-	return PreviouslyDelcared{
+// NewPreviouslyDeclared builds a PreviouslyDeclared
+func NewPreviouslyDeclared(
+	declarationError DeclarationError,
+	posDeclared Position,
+) PreviouslyDeclared {
+	return PreviouslyDeclared{
 		declarationError: declarationError,
 		posDeclared:      posDeclared,
 	}
 }
 
-func (e PreviouslyDelcared) String() string {
+func (e PreviouslyDeclared) String() string {
 	return e.declarationError.String()
 }
 
-func (e PreviouslyDelcared) Pos() Position {
+// Pos returns the position of this error.
+func (e PreviouslyDeclared) Pos() Position {
 	return e.declarationError.pos
 }
 
-func (e PreviouslyDelcared) PosDeclared() Position {
+// PosDeclared returns the position where this variable was first declared.
+func (e PreviouslyDeclared) PosDeclared() Position {
 	return e.posDeclared
 }
 
+/**************** ERROR HELPER FUNCTIONS ****************/
+
+// getLine returns a requested line from the WACC source file.
 func getLine(path string, n int) string {
 	// Open the WACC source file
 	f, err := os.Open(path)
@@ -211,6 +254,7 @@ func getLine(path string, n int) string {
 	return line
 }
 
+// PrintErrors pretty prints an error.
 func PrintErrors(errors []GenericError, filepath string) {
 	maxErrors := 4
 	for i, e := range errors {
@@ -239,10 +283,16 @@ func PrintErrors(errors []GenericError, filepath string) {
 		b.WriteString(fmt.Sprintln(e))
 		if typeDeclarationError, ok := e.(ErrorDeclaration); ok {
 			b.WriteString("Declared at ")
-			b.WriteString(fmt.Sprintf("%s\n", typeDeclarationError.PosDeclared()))
+			b.WriteString(fmt.Sprintf(
+				"%s\n",
+				typeDeclarationError.PosDeclared(),
+			))
 
 			// Remove leading spaces and tabs
-			line := getLine(filepath, typeDeclarationError.PosDeclared().LineNumber())
+			line := getLine(
+				filepath,
+				typeDeclarationError.PosDeclared().LineNumber(),
+			)
 			leadingChars := 0
 			for _, c := range line {
 				if c == '\t' || c == ' ' {
@@ -252,7 +302,10 @@ func PrintErrors(errors []GenericError, filepath string) {
 				}
 			}
 			b.WriteString(line[leadingChars:])
-			b.WriteString(strings.Repeat(" ", typeDeclarationError.PosDeclared().ColNumber()-leadingChars))
+			b.WriteString(strings.Repeat(
+				" ",
+				typeDeclarationError.PosDeclared().ColNumber()-leadingChars),
+			)
 			b.WriteString("^")
 		}
 		fmt.Println(b.String())

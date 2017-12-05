@@ -314,10 +314,10 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 	case *AssignNode:
 		// Rhs
-		Walk(v, node.Rhs)
+		Walk(v, node.RHS)
 		rhsRegister := v.returnRegisters.Pop()
 		// Lhs
-		switch lhsNode := node.Lhs.(type) {
+		switch lhsNode := node.LHS.(type) {
 		case *ArrayElementNode:
 			Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
@@ -360,17 +360,17 @@ func (v *CodeGenerator) Visit(programNode ProgramNode) {
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case *ReadNode:
-		if ident, ok := node.Lhs.(*IdentifierNode); ok {
+		if ident, ok := node.LHS.(*IdentifierNode); ok {
 			dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
 			v.addCode(
 				"ADD %s, %s", v.getFreeRegister(),
 				v.PointerTo(dec.Location),
 			)
 		} else {
-			Walk(v, node.Lhs)
+			Walk(v, node.LHS)
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		if SizeOf(Type(node.Lhs, v.symbolTable)) == 1 {
+		if SizeOf(Type(node.LHS, v.symbolTable)) == 1 {
 			v.callLibraryFunction("BL", readChar)
 		} else {
 			v.callLibraryFunction("BL", readInt)

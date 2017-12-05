@@ -13,6 +13,26 @@ var DebugMode bool
 type ProgramNode interface {
 }
 
+/**************** PRINTING ****************/
+
+func writeSimpleString(name string, nodes ...fmt.Stringer) string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- %s\n", name))
+	for _, n := range nodes {
+		buf.WriteString(Indent(n.String(), "  "))
+	}
+	return buf.String()
+}
+
+func writeExpressionsString(name string, exprs []ExpressionNode) string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("- %s\n", name))
+	for _, e := range exprs {
+		buf.WriteString(Indent(e.String(), "  "))
+	}
+	return buf.String()
+}
+
 /**************** PROGRAM ****************/
 
 // Program the struct that encapsulates the entire program and will be the root
@@ -177,7 +197,7 @@ func (node FunctionNode) String() string {
 	}
 	buf.WriteString(fmt.Sprintln(")"))
 	for _, s := range node.Stats {
-		buf.WriteString(Indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(Indent(s.String(), "  "))
 	}
 	return buf.String()
 }

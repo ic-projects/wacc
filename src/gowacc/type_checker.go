@@ -106,69 +106,6 @@ func toValue(typeNode TypeNode) TypeNode {
 	}
 }
 
-// arrayCase handles the multiple options where we have seen an Array.
-/*func arrayCase(check *TypeChecker, validTypes []TypeNode, t *ArrayTypeNode) bool {
-	_, match := validTypes[*t]
-	nilArray := ArrayTypeNode{}
-	expectingAnyArray := false
-	matchOnAnyArray := *t == nilArray
-	var found *ArrayTypeNode
-	for key := range validTypes {
-		if StripType(key) == nilArray {
-			if matchOnAnyArray {
-				found = key.(*ArrayTypeNode)
-			}
-			expectingAnyArray = true
-			break
-		}
-	}
-
-	// ArrayLiteral case, so expect an unknown amount of expressions
-	if matchOnAnyArray {
-		if found.Dim == 1 {
-			check.expectRepeatUntilForce(found.T)
-		} else {
-			check.expectRepeatUntilForce(NewArrayTypeNode(found.T, found.Dim-1))
-		}
-		return true
-	}
-	return expectingAnyArray || match
-}
-
-// pairCase handles the multiple options where we have seen an pair.
-func pairCase(check *TypeChecker, validTypes []TypeNode, basePairMatch bool, t *PairTypeNode) bool {
-	_, match := validTypes[*t]
-	_, matchBase := validTypes[*NewBaseTypeNode(PAIR)]
-	nilPair := PairTypeNode{}
-	matchOnAnyPair := *t == nilPair
-	var nilMatch *PairTypeNode
-	expectingAnyPair := false
-	for key := range validTypes {
-		if StripType(key) == nilPair {
-			if !basePairMatch {
-				nilMatch = key.(*PairTypeNode)
-			}
-			expectingAnyPair = true
-			break
-		}
-	}
-
-	if matchOnAnyPair {
-		if !expectingAnyPair {
-			return false
-		}
-
-		// newpair case, expect first and second types of pair
-		if !basePairMatch {
-			check.expect(nilMatch.T2)
-			check.expect(nilMatch.T1)
-		}
-		return true
-	}
-
-	return match || matchBase || expectingAnyPair
-}*/
-
 // seen is called when we have seen a SetExpectance.
 func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	validTypes := exp.set
@@ -177,36 +114,6 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode TypeNode) TypeError {
 	} else {
 		return NewTypeError(typeNode, validTypes)
 	}
-	// switch t := typeNode.(type) {
-	// case *ArrayTypeNode:
-	// 	found := arrayCase(check, validTypes, t)
-	// 	if !found {
-	// 		return NewTypeError(t, validTypes)
-	// 	}
-	// case *PairTypeNode:
-	// 	found := pairCase(check, validTypes, false, t)
-	// 	if !found {
-	// 		return NewTypeError(t, validTypes)
-	// 	}
-	// case *BaseTypeNode:
-	// 	if t.T == PAIR {
-	// 		_, found := validTypes[*t]
-	// 		if !found {
-	// 			found = pairCase(check, validTypes, true, &PairTypeNode{})
-	// 		}
-	// 		if !found {
-	// 			return NewTypeError(t, validTypes)
-	// 		}
-	// 	} else {
-	// 		_, found := validTypes[*t]
-	// 		if !found {
-	// 			return NewTypeError(t, validTypes)
-	// 		}
-	// 	}
-	// default:
-	// 	fmt.Println("Type checker error, unknown type in seen")
-	// }
-
 }
 
 // TwiceSameExpectance is a struct for when we want the next two types to be

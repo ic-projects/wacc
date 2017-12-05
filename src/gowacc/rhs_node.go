@@ -7,6 +7,7 @@ import (
 
 // RHSNode is an empty interface for Lhs nodes to implement.
 type RHSNode interface {
+	fmt.Stringer
 }
 
 /**************** EXPRESSION NODE ****************/
@@ -25,6 +26,7 @@ type ArrayLiteralNode struct {
 	Exprs []ExpressionNode
 }
 
+// NewArrayLiteralNode builds an ArrayLiteralNode.
 func NewArrayLiteralNode(
 	pos Position,
 	exprs []ExpressionNode,
@@ -36,12 +38,7 @@ func NewArrayLiteralNode(
 }
 
 func (node ArrayLiteralNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
-	for _, e := range node.Exprs {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
-	}
-	return buf.String()
+	return writeExpressionsString("ARRAY LITERAL", node.Exprs)
 }
 
 /**************** NEW PAIR NODE ****************/
@@ -56,6 +53,7 @@ type NewPairNode struct {
 	Snd ExpressionNode
 }
 
+// NewNewPairNode builds a NewPairNode.
 func NewNewPairNode(
 	pos Position,
 	fst ExpressionNode,
@@ -99,6 +97,7 @@ type FunctionCallNode struct {
 	Exprs []ExpressionNode
 }
 
+// NewFunctionCallNode builds a FunctionCallNode.
 func NewFunctionCallNode(
 	pos Position,
 	ident *IdentifierNode,
@@ -113,13 +112,17 @@ func NewFunctionCallNode(
 
 func (node FunctionCallNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
+	buf.WriteString(fmt.Sprintln(node.Ident))
 	for _, e := range node.Exprs {
-		buf.WriteString(fmt.Sprintf("%s\n", e))
+		buf.WriteString(fmt.Sprintln(e))
 	}
 	return buf.String()
 }
 
+/**************** STRUCT NEW NODE ****************/
+
+// StructNewNode stores the position, type, and members of an initialised
+// struct.
 type StructNewNode struct {
 	Pos        Position
 	T          *StructTypeNode
@@ -127,10 +130,12 @@ type StructNewNode struct {
 	structNode *StructNode
 }
 
-func (s *StructNewNode) SetStructType(p *StructNode) {
-	s.structNode = p
+// SetStructType replaces a StructNewNode's StructNode.
+func (node *StructNewNode) SetStructType(t *StructNode) {
+	node.structNode = t
 }
 
+// NewStructNewNode builds a StructNewNode.
 func NewStructNewNode(
 	pos Position,
 	ident *IdentifierNode,
@@ -144,10 +149,5 @@ func NewStructNewNode(
 }
 
 func (node StructNewNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("new %s \n", node.T))
-	for _, e := range node.Exprs {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
-	}
-	return buf.String()
+	return writeExpressionsString(fmt.Sprintf("NEW %s\n", node.T), node.Exprs)
 }
