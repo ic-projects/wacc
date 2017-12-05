@@ -1,9 +1,10 @@
-package main
+package ast
 
 import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"utils"
 )
 
 // ExpressionNode is an empty interface for expression nodes to implement.
@@ -46,14 +47,14 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		return NewStringArrayTypeNode()
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
-		arr := toValue(a.T).(ArrayTypeNode)
+		arr := ToValue(a.T).(ArrayTypeNode)
 		if dimLeft := arr.Dim - len(node.Exprs); dimLeft == 0 {
 			return arr.T
 		}
 	case *DynamicTypeNode:
 		return node.getValue()
 	case *StructElementNode:
-		return node.stuctType.T
+		return node.StructType.T
 	case *IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
 		return v.T
@@ -72,7 +73,7 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 func BuildBinOpTree(
 	first ExpressionNode,
 	list []interface{},
-	position Position,
+	position utils.Position,
 ) ExpressionNode {
 	if len(list) > 1 {
 		// Generate the LHS expression node
@@ -210,12 +211,12 @@ func (binOp BinaryOperator) String() string {
 // E.g.
 //  7
 type IntegerLiteralNode struct {
-	Pos Position
+	Pos utils.Position
 	Val int
 }
 
 // NewIntegerLiteralNode builds an IntegerLiteralNode
-func NewIntegerLiteralNode(pos Position, val int) *IntegerLiteralNode {
+func NewIntegerLiteralNode(pos utils.Position, val int) *IntegerLiteralNode {
 	return &IntegerLiteralNode{
 		Pos: pos,
 		Val: val,
@@ -234,12 +235,12 @@ func (node IntegerLiteralNode) String() string {
 // E.g.
 //  false
 type BooleanLiteralNode struct {
-	Pos Position
+	Pos utils.Position
 	Val bool
 }
 
 // NewBooleanLiteralNode builds an BooleanLiteralNode
-func NewBooleanLiteralNode(pos Position, val bool) *BooleanLiteralNode {
+func NewBooleanLiteralNode(pos utils.Position, val bool) *BooleanLiteralNode {
 	return &BooleanLiteralNode{
 		Pos: pos,
 		Val: val,
@@ -258,12 +259,12 @@ func (node BooleanLiteralNode) String() string {
 // E.g.
 //  'c'
 type CharacterLiteralNode struct {
-	Pos Position
+	Pos utils.Position
 	Val rune
 }
 
 // NewCharacterLiteralNode builds a CharacterLiteralNode
-func NewCharacterLiteralNode(pos Position, val rune) *CharacterLiteralNode {
+func NewCharacterLiteralNode(pos utils.Position, val rune) *CharacterLiteralNode {
 	return &CharacterLiteralNode{
 		Pos: pos,
 		Val: val,
@@ -288,12 +289,12 @@ func (node CharacterLiteralNode) String() string {
 // E.g.
 //  "Hello World!"
 type StringLiteralNode struct {
-	Pos Position
+	Pos utils.Position
 	Val string
 }
 
 // NewStringLiteralNode builds a StringLiteralNode
-func NewStringLiteralNode(pos Position, val string) *StringLiteralNode {
+func NewStringLiteralNode(pos utils.Position, val string) *StringLiteralNode {
 	return &StringLiteralNode{
 		Pos: pos,
 		Val: val,
@@ -310,11 +311,11 @@ func (node StringLiteralNode) String() string {
 // This does not store the value of the pair literal since the value of a pair
 // literal is always null.
 type NullNode struct {
-	Pos Position
+	Pos utils.Position
 }
 
 // NewNullNode builds a NullNode
-func NewNullNode(pos Position) *NullNode {
+func NewNullNode(pos utils.Position) *NullNode {
 	return &NullNode{
 		Pos: pos,
 	}
@@ -341,14 +342,14 @@ func (node NullNode) String() string {
 //
 //  !true
 type UnaryOperatorNode struct {
-	Pos  Position
+	Pos  utils.Position
 	Op   UnaryOperator
 	Expr ExpressionNode
 }
 
 // NewUnaryOperatorNode builds a UnaryOperatorNode
 func NewUnaryOperatorNode(
-	pos Position,
+	pos utils.Position,
 	op UnaryOperator,
 	expr ExpressionNode,
 ) *UnaryOperatorNode {
@@ -363,7 +364,7 @@ func (node UnaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 
 	return buf.String()
 }
@@ -377,7 +378,7 @@ func (node UnaryOperatorNode) String() string {
 //
 //  5 + 2
 type BinaryOperatorNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Op    BinaryOperator
 	Expr1 ExpressionNode
 	Expr2 ExpressionNode
@@ -385,7 +386,7 @@ type BinaryOperatorNode struct {
 
 // NewBinaryOperatorNode builds a BinaryOperatorNode
 func NewBinaryOperatorNode(
-	pos Position,
+	pos utils.Position,
 	op BinaryOperator,
 	expr1 ExpressionNode,
 	expr2 ExpressionNode,
@@ -402,8 +403,8 @@ func (node BinaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr1), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr2), "  "))
 
 	return buf.String()
 }
@@ -415,9 +416,9 @@ func Weight(n ExpressionNode) int {
 	case *UnaryOperatorNode:
 		return Weight(node.Expr)
 	case *BinaryOperatorNode:
-		lhsWeight := Max(Weight(node.Expr1), Weight(node.Expr2)+1)
-		rhsWeight := Max(Weight(node.Expr1)+1, Weight(node.Expr2))
-		return Min(lhsWeight, rhsWeight)
+		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
+		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
+		return utils.Min(lhsWeight, rhsWeight)
 	}
 	return 1
 }

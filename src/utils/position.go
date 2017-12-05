@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -39,19 +39,6 @@ func (p Position) String() string {
 	colNum := p.colNumber
 	if colNum != 0 {
 		colNum--
-	}
-
-	if DebugMode {
-		offsetNum := p.offset
-		if offsetNum != 0 {
-			offsetNum--
-		}
-		return fmt.Sprintf(
-			"line %d, column %d, offset %d",
-			p.lineNumber,
-			colNum,
-			offsetNum,
-		)
 	}
 
 	return fmt.Sprintf("%d:%d", p.lineNumber, colNum)

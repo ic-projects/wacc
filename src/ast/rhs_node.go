@@ -1,8 +1,9 @@
-package main
+package ast
 
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 // RHSNode is an empty interface for Lhs nodes to implement.
@@ -22,13 +23,13 @@ type RHSNode interface {
 //
 //  [2, 4]
 type ArrayLiteralNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Exprs []ExpressionNode
 }
 
 // NewArrayLiteralNode builds an ArrayLiteralNode.
 func NewArrayLiteralNode(
-	pos Position,
+	pos utils.Position,
 	exprs []ExpressionNode,
 ) *ArrayLiteralNode {
 	return &ArrayLiteralNode{
@@ -48,14 +49,14 @@ func (node ArrayLiteralNode) String() string {
 // E.g.
 //  newpair(4, 2)
 type NewPairNode struct {
-	Pos Position
+	Pos utils.Position
 	Fst ExpressionNode
 	Snd ExpressionNode
 }
 
 // NewNewPairNode builds a NewPairNode.
 func NewNewPairNode(
-	pos Position,
+	pos utils.Position,
 	fst ExpressionNode,
 	snd ExpressionNode,
 ) *NewPairNode {
@@ -69,10 +70,10 @@ func NewNewPairNode(
 func (node NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
-	buf.WriteString(Indent(fmt.Sprintln("- FST"), "  "))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Fst), "    "))
-	buf.WriteString(Indent(fmt.Sprintln("- SND"), "  "))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- FST"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Fst), "    "))
+	buf.WriteString(utils.Indent(fmt.Sprintln("- SND"), "  "))
+	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
 }
 
@@ -92,14 +93,14 @@ func (node NewPairNode) String() string {
 // E.g.
 //  call f(true, false)
 type FunctionCallNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Ident *IdentifierNode
 	Exprs []ExpressionNode
 }
 
 // NewFunctionCallNode builds a FunctionCallNode.
 func NewFunctionCallNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 	exprs []ExpressionNode,
 ) *FunctionCallNode {
@@ -124,20 +125,20 @@ func (node FunctionCallNode) String() string {
 // StructNewNode stores the position, type, and members of an initialised
 // struct.
 type StructNewNode struct {
-	Pos        Position
+	Pos        utils.Position
 	T          *StructTypeNode
 	Exprs      []ExpressionNode
-	structNode *StructNode
+	StructNode *StructNode
 }
 
 // SetStructType replaces a StructNewNode's StructNode.
 func (node *StructNewNode) SetStructType(t *StructNode) {
-	node.structNode = t
+	node.StructNode = t
 }
 
 // NewStructNewNode builds a StructNewNode.
 func NewStructNewNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 	exprs []ExpressionNode,
 ) *StructNewNode {
@@ -153,11 +154,11 @@ func (node StructNewNode) String() string {
 }
 
 type PointerNewNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
-func NewPointerNewNode(pos Position, ident *IdentifierNode) *PointerNewNode {
+func NewPointerNewNode(pos utils.Position, ident *IdentifierNode) *PointerNewNode {
 	return &PointerNewNode{
 		Pos:   pos,
 		Ident: ident,
@@ -169,12 +170,12 @@ func (node PointerNewNode) String() string {
 }
 
 type PointerDereferenceNode struct {
-	Pos   Position
+	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
 func NewPointerDereferenceNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 ) *PointerDereferenceNode {
 	return &PointerDereferenceNode{

@@ -1,8 +1,9 @@
-package main
+package ast
 
 import (
 	"bytes"
 	"fmt"
+	"utils"
 )
 
 /**************** SYMBOL TABLE ****************/
@@ -12,8 +13,8 @@ import (
 type SymbolTable struct {
 	Head           *SymbolTableNode
 	CurrentScope   *SymbolTableNode
-	functions      map[string]*FunctionNode
-	structs        map[string]*StructNode
+	Functions      map[string]*FunctionNode
+	Structs        map[string]*StructNode
 	functionsOrder []string
 }
 
@@ -24,8 +25,8 @@ func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		Head:           head,
 		CurrentScope:   head,
-		functions:      make(map[string]*FunctionNode),
-		structs:        make(map[string]*StructNode),
+		Functions:      make(map[string]*FunctionNode),
+		Structs:        make(map[string]*StructNode),
 		functionsOrder: make([]string, 0),
 	}
 }
@@ -36,7 +37,7 @@ func NewSymbolTable() *SymbolTable {
 // Pointer to the Scope above itself.
 type SymbolTableNode struct {
 	Scope       map[string]*IdentifierDeclaration
-	childScopes []*SymbolTableNode
+	ChildScopes []*SymbolTableNode
 	ParentScope *SymbolTableNode
 	lastScope   int
 	ScopeSize   int
@@ -46,7 +47,7 @@ type SymbolTableNode struct {
 func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 	return &SymbolTableNode{
 		Scope:       make(map[string]*IdentifierDeclaration),
-		childScopes: make([]*SymbolTableNode, 0, 10),
+		ChildScopes: make([]*SymbolTableNode, 0, 10),
 		ParentScope: parentScope,
 		lastScope:   -1,
 	}
@@ -56,10 +57,10 @@ func NewSymbolTableNode(parentScope *SymbolTableNode) *SymbolTableNode {
 
 // IdentifierDeclaration stores the type and identifier for a symbol.
 type IdentifierDeclaration struct {
-	Pos        Position
+	Pos        utils.Position
 	T          TypeNode
-	ident      *IdentifierNode
-	Location   *Location
+	Ident      *IdentifierNode
+	Location   *utils.Location
 	IsDeclared bool
 }
 
@@ -70,14 +71,14 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 		return &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
-			ident:      node.Ident,
+			Ident:      node.Ident,
 			IsDeclared: false,
 		}
 	case *DeclareNode:
 		a := &IdentifierDeclaration{
 			Pos:        node.Pos,
 			T:          node.T,
-			ident:      node.Ident,
+			Ident:      node.Ident,
 			IsDeclared: false,
 		}
 		return a
@@ -87,7 +88,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 }
 
 // AddLocation will add a location to a declaration.
-func (dec *IdentifierDeclaration) AddLocation(location *Location) {
+func (dec *IdentifierDeclaration) AddLocation(location *utils.Location) {
 	dec.Location = location
 }
 
@@ -97,8 +98,8 @@ func (dec *IdentifierDeclaration) AddLocation(location *Location) {
 // currentscope, and then sets the CurrentScope to be the new Scope.
 func (table *SymbolTable) MoveDownScope() {
 	newNode := NewSymbolTableNode(table.CurrentScope)
-	table.CurrentScope.childScopes = append(
-		table.CurrentScope.childScopes,
+	table.CurrentScope.ChildScopes = append(
+		table.CurrentScope.ChildScopes,
 		newNode,
 	)
 	table.CurrentScope = newNode
@@ -107,13 +108,13 @@ func (table *SymbolTable) MoveDownScope() {
 // MoveNextScope builds a SymbolTableNode
 func (table *SymbolTable) MoveNextScope() {
 	table.CurrentScope.lastScope++
-	if len(table.CurrentScope.childScopes) > table.CurrentScope.lastScope {
+	if len(table.CurrentScope.ChildScopes) > table.CurrentScope.lastScope {
 		table.CurrentScope =
-			table.CurrentScope.childScopes[table.CurrentScope.lastScope]
+			table.CurrentScope.ChildScopes[table.CurrentScope.lastScope]
 	} else {
 		fmt.Println(
 			"Internal Error: no next Scope, CurrentScope has ",
-			len(table.CurrentScope.childScopes),
+			len(table.CurrentScope.ChildScopes),
 			" childscopes",
 		)
 	}
@@ -176,7 +177,7 @@ func (table *SymbolTable) SearchForIdentInCurrentScope(
 func (table *SymbolTable) SearchForFunction(
 	identifier string,
 ) (*FunctionNode, bool) {
-	node, ok := table.functions[identifier]
+	node, ok := table.Functions[identifier]
 	return node, ok
 }
 
@@ -185,13 +186,13 @@ func (table *SymbolTable) SearchForFunction(
 func (table *SymbolTable) SearchForStruct(
 	identifier string,
 ) (*StructNode, bool) {
-	node, ok := table.structs[identifier]
+	node, ok := table.Structs[identifier]
 	return node, ok
 }
 
 func (table *SymbolTable) SearchForStructByUsage(usage string) []TypeNode {
 	set := make([]TypeNode, 0)
-	for _, s := range table.structs {
+	for _, s := range table.Structs {
 		if t, ok := s.TypesMap[usage]; ok {
 			set = append(set, s.Types[t].T)
 		}
@@ -211,60 +212,12 @@ func (table *SymbolTable) AddToScope(
 
 // AddFunction will add a function to the symbolTable
 func (table *SymbolTable) AddFunction(identifier string, node *FunctionNode) {
-	table.functions[identifier] = node
+	table.Functions[identifier] = node
 }
 
 // AddStruct will add a struct to the symbolTable
 func (table *SymbolTable) AddStruct(identifier string, node *StructNode) {
-	table.structs[identifier] = node
-}
-
-func (table *SymbolTable) checkForDynamicErrors(e *[]GenericError) bool {
-	for _, f := range table.structs {
-		for _, t := range f.Types {
-			err := validType(t.T, t.Ident)
-			if err != nil {
-				*e = append(*e, err)
-			}
-		}
-	}
-
-	for _, f := range table.functions {
-		for _, t := range f.Params {
-			err := validType(t.T, t.Ident)
-			if err != nil {
-				*e = append(*e, err)
-			}
-		}
-	}
-
-	for _, s := range table.Head.childScopes {
-		err := s.checkForValidTypes()
-		if err != nil {
-			*e = append(*e, err...)
-		}
-	}
-
-	return len(*e) > 0
-}
-
-func (node SymbolTableNode) checkForValidTypes() []GenericError {
-	e := make([]GenericError, 0)
-	for _, ident := range node.Scope {
-		err := validType(ident.T, ident.ident)
-		if err != nil {
-			e = append(e, err)
-		}
-	}
-
-	for _, s := range node.childScopes {
-		err := s.checkForValidTypes()
-		if err != nil {
-			e = append(e, err...)
-		}
-	}
-
-	return e
+	table.Structs[identifier] = node
 }
 
 /******************** PRINTING HELPER FUNCTIONS ********************/
@@ -272,7 +225,7 @@ func (node SymbolTableNode) checkForValidTypes() []GenericError {
 // Print will print a Node, and all of its parents
 func (node SymbolTableNode) Print() {
 	for _, ident := range node.Scope {
-		fmt.Printf("%s of type %s\n", ident.ident, ident.T)
+		fmt.Printf("%s of type %s\n", ident.Ident, ident.T)
 	}
 	fmt.Println("Parent Scope ---------------------")
 	if node.ParentScope != nil {
@@ -285,11 +238,11 @@ func (node SymbolTableNode) Print() {
 func (table *SymbolTable) Print() {
 	fmt.Println("------- Begin Symbol table -------")
 	fmt.Println("Structs ------------------------")
-	for _, f := range table.structs {
+	for _, f := range table.Structs {
 		fmt.Printf("%s", f)
 	}
 	fmt.Println("Functions ------------------------")
-	for _, f := range table.functions {
+	for _, f := range table.Functions {
 		fmt.Printf("%s of type %s\n", f.Ident, f.T)
 	}
 	fmt.Println("Scopes ---------------------------")
@@ -302,11 +255,11 @@ func (table *SymbolTable) Print() {
 func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Structs:\n")
-	for _, f := range table.structs {
+	for _, f := range table.Structs {
 		buf.WriteString(fmt.Sprintf("%s", f))
 	}
 	buf.WriteString("- Functions:\n")
-	for _, f := range table.functions {
+	for _, f := range table.Functions {
 		buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))
 		for i, p := range f.Params {
 			if i == 0 {
@@ -318,8 +271,8 @@ func (table *SymbolTable) String() string {
 		buf.WriteString(fmt.Sprintln(")"))
 	}
 	buf.WriteString("- Scopes:\n")
-	for _, s := range table.Head.childScopes {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
+	for _, s := range table.Head.ChildScopes {
+		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 	}
 	return buf.String()
 }
@@ -332,13 +285,13 @@ func (node *SymbolTableNode) String() string {
 	for _, s := range node.Scope {
 		buf.WriteString(fmt.Sprintf(
 			"  - Ident: %s, with type: %s\n",
-			s.ident.Ident, s.T,
+			s.Ident.Ident, s.T,
 		))
 	}
-	if len(node.childScopes) > 0 {
+	if len(node.ChildScopes) > 0 {
 		buf.WriteString(" - With child scopes:\n")
-		for _, s := range node.childScopes {
-			buf.WriteString(Indent(fmt.Sprintf("%s\n", s), "  "))
+		for _, s := range node.ChildScopes {
+			buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", s), "  "))
 		}
 	}
 	return buf.String()

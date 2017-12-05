@@ -1,9 +1,10 @@
-package main
+package ast
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
+	"utils"
 )
 
 // DebugMode is a setting for printing extra debugging information when true.
@@ -19,7 +20,7 @@ func writeSimpleString(name string, nodes ...fmt.Stringer) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", name))
 	for _, n := range nodes {
-		buf.WriteString(Indent(n.String(), "  "))
+		buf.WriteString(utils.Indent(n.String(), "  "))
 	}
 	return buf.String()
 }
@@ -28,7 +29,7 @@ func writeExpressionsString(name string, exprs []ExpressionNode) string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("- %s\n", name))
 	for _, e := range exprs {
-		buf.WriteString(Indent(e.String(), "  "))
+		buf.WriteString(utils.Indent(e.String(), "  "))
 	}
 	return buf.String()
 }
@@ -56,10 +57,10 @@ func (program Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.Structs {
-		tempbuf.WriteString(Indent(f.String(), "  "))
+		tempbuf.WriteString(utils.Indent(f.String(), "  "))
 	}
 	for _, f := range program.Functions {
-		tempbuf.WriteString(Indent(f.String(), "  "))
+		tempbuf.WriteString(utils.Indent(f.String(), "  "))
 	}
 	var buf bytes.Buffer
 	for i, line := range strings.Split(tempbuf.String(), "\n") {
@@ -75,16 +76,16 @@ func (program Program) String() string {
 // StructNode holds information about the name, members and size of a WACC
 // struct.
 type StructNode struct {
-	Pos        Position
+	Pos        utils.Position
 	Ident      *IdentifierNode
 	Types      []*StructInternalNode
 	TypesMap   map[string]int
-	memorySize int
+	MemorySize int
 }
 
 // NewStructNode builds a StructNode.
 func NewStructNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 	types []*StructInternalNode,
 ) *StructNode {
@@ -96,11 +97,11 @@ func NewStructNode(
 	}
 	mem := 0
 	for i, t := range structNode.Types {
-		t.memoryOffset = mem
+		t.MemoryOffset = mem
 		mem += SizeOf(t.T)
 		structNode.TypesMap[t.Ident.Ident] = i
 	}
-	structNode.memorySize = mem
+	structNode.MemorySize = mem
 	return &structNode
 }
 
@@ -109,7 +110,7 @@ func (node StructNode) String() string {
 	buf.WriteString(fmt.Sprintf(
 		"- STRUCT %s (size: %d)\n",
 		node.Ident.String()[2:],
-		node.memorySize,
+		node.MemorySize,
 	))
 	for _, p := range node.Types {
 		buf.WriteString(fmt.Sprintf("%s\n", p))
@@ -121,15 +122,15 @@ func (node StructNode) String() string {
 
 // StructInternalNode holds information about each member of a struct.
 type StructInternalNode struct {
-	Pos          Position
+	Pos          utils.Position
 	Ident        *IdentifierNode
 	T            TypeNode
-	memoryOffset int
+	MemoryOffset int
 }
 
 // NewStructInternalNode builds a StructInternalNode.
 func NewStructInternalNode(
-	pos Position,
+	pos utils.Position,
 	ident *IdentifierNode,
 	t TypeNode,
 ) *StructInternalNode {
@@ -145,7 +146,7 @@ func (node StructInternalNode) String() string {
 		"  %s %s (offset: %d)",
 		node.Ident,
 		node.T,
-		node.memoryOffset,
+		node.MemoryOffset,
 	)
 }
 
@@ -154,7 +155,7 @@ func (node StructInternalNode) String() string {
 // FunctionNode is the struct that holds information about a function, the
 // return type, parameters and internal body.
 type FunctionNode struct {
-	Pos Position
+	Pos utils.Position
 
 	// T is the return type of the function.
 	T TypeNode
@@ -171,7 +172,7 @@ type FunctionNode struct {
 
 // NewFunctionNode builds a FunctionNode.
 func NewFunctionNode(
-	pos Position, t TypeNode,
+	pos utils.Position, t TypeNode,
 	ident *IdentifierNode,
 	params []*ParameterNode,
 	stats []StatementNode,
@@ -197,7 +198,7 @@ func (node FunctionNode) String() string {
 	}
 	buf.WriteString(fmt.Sprintln(")"))
 	for _, s := range node.Stats {
-		buf.WriteString(Indent(s.String(), "  "))
+		buf.WriteString(utils.Indent(s.String(), "  "))
 	}
 	return buf.String()
 }
@@ -207,7 +208,7 @@ func (node FunctionNode) String() string {
 // ParameterNode is the struct that holds information about a parameter for a
 // function, the type and identifier of the single parameter.
 type ParameterNode struct {
-	Pos Position
+	Pos utils.Position
 
 	// T is the type of the parameter.
 	T TypeNode
@@ -218,7 +219,7 @@ type ParameterNode struct {
 
 // NewParameterNode builds a ParameterNode.
 func NewParameterNode(
-	pos Position,
+	pos utils.Position,
 	t TypeNode,
 	ident *IdentifierNode,
 ) *ParameterNode {

@@ -1,37 +1,39 @@
 package main
 
 import (
+	"ast"
 	"bufio"
 	"bytes"
 	"fmt"
 	"os"
 	"strings"
+	"utils"
 )
 
 // GenericError is an interface that errors implement, which allows for elegent
 // printing of errors.
 type GenericError interface {
 	String() string
-	Pos() Position
+	Pos() utils.Position
 }
 
 // ErrorDeclaration is an interface that extends a GenericError to also give
 // a declaration position
 type ErrorDeclaration interface {
 	GenericError
-	PosDeclared() Position
+	PosDeclared() utils.Position
 }
 
 /**************** CUSTOM ERROR ****************/
 
 // CustomError is a struct that stores a particular error message.
 type CustomError struct {
-	pos  Position
+	pos  utils.Position
 	text string
 }
 
 // NewCustomError builds a CustomError.
-func NewCustomError(pos Position, text string) CustomError {
+func NewCustomError(pos utils.Position, text string) CustomError {
 	return CustomError{
 		pos:  pos,
 		text: text,
@@ -39,7 +41,7 @@ func NewCustomError(pos Position, text string) CustomError {
 }
 
 // Pos returns the position of this error.
-func (e CustomError) Pos() Position {
+func (e CustomError) Pos() utils.Position {
 	return e.pos
 }
 
@@ -52,13 +54,13 @@ func (e CustomError) String() string {
 // TypeError is a struct for a TypeError, storing a list of acceptable
 // TypeNodes, and the actual (wrong) TypeNode the semantic checker saw.
 type TypeError struct {
-	pos      Position
-	got      TypeNode
-	expected []TypeNode
+	pos      utils.Position
+	got      ast.TypeNode
+	expected []ast.TypeNode
 }
 
 // NewTypeError builds a TypeError
-func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
+func NewTypeError(got ast.TypeNode, expected []ast.TypeNode) TypeError {
 	return TypeError{
 		got:      got,
 		expected: expected,
@@ -66,7 +68,7 @@ func NewTypeError(got TypeNode, expected []TypeNode) TypeError {
 }
 
 // Pos returns the position of this error.
-func (e TypeError) Pos() Position {
+func (e TypeError) Pos() utils.Position {
 	return e.pos
 }
 
@@ -76,8 +78,8 @@ func (e TypeError) String() string {
 	i := 1
 	for _, t := range e.expected {
 		// If type mismatch on VOID, then trying to return from global Scope
-		if node, ok := t.(*BaseTypeNode); ok {
-			if node.T == VOID {
+		if node, ok := t.(*ast.BaseTypeNode); ok {
+			if node.T == ast.VOID {
 				return "Cannot return from global Scope"
 			}
 		}
@@ -94,7 +96,7 @@ func (e TypeError) String() string {
 	return b.String()
 }
 
-func (e TypeError) addPos(pos Position) GenericError {
+func (e TypeError) addPos(pos utils.Position) GenericError {
 	if e.got == nil {
 		return nil
 	}
@@ -108,11 +110,11 @@ func (e TypeError) addPos(pos Position) GenericError {
 // identifier was declared, for more useful error messages.
 type TypeErrorDeclaration struct {
 	typeError   TypeError
-	posDeclared Position
+	posDeclared utils.Position
 }
 
 // NewTypeErrorDeclaration builds a TypeErrorDeclaration
-func NewTypeErrorDeclaration(err TypeError, pos Position) TypeErrorDeclaration {
+func NewTypeErrorDeclaration(err TypeError, pos utils.Position) TypeErrorDeclaration {
 	return TypeErrorDeclaration{
 		typeError:   err,
 		posDeclared: pos,
@@ -120,12 +122,12 @@ func NewTypeErrorDeclaration(err TypeError, pos Position) TypeErrorDeclaration {
 }
 
 // Pos returns the position of this error.
-func (e TypeErrorDeclaration) Pos() Position {
+func (e TypeErrorDeclaration) Pos() utils.Position {
 	return e.typeError.pos
 }
 
 // PosDeclared returns the position where this variable was first declared.
-func (e TypeErrorDeclaration) PosDeclared() Position {
+func (e TypeErrorDeclaration) PosDeclared() utils.Position {
 	return e.posDeclared
 }
 
@@ -138,7 +140,7 @@ func (e TypeErrorDeclaration) String() string {
 // DeclarationError is a struct for a declaration error, for example, using an
 // identifier before it is declared. It implements GenericError.
 type DeclarationError struct {
-	pos        Position
+	pos        utils.Position
 	isFunction bool
 	isDefined  bool
 	identifier string
@@ -146,7 +148,7 @@ type DeclarationError struct {
 
 // NewDeclarationError builds a DeclarationError
 func NewDeclarationError(
-	pos Position,
+	pos utils.Position,
 	isFunction bool,
 	isDefined bool,
 	identifier string,
@@ -160,7 +162,7 @@ func NewDeclarationError(
 }
 
 // Pos returns the position of this error.
-func (e DeclarationError) Pos() Position {
+func (e DeclarationError) Pos() utils.Position {
 	return e.pos
 }
 
@@ -200,13 +202,13 @@ func (e DeclarationError) String() string {
 // position of where the variable was first declared.
 type PreviouslyDeclared struct {
 	declarationError DeclarationError
-	posDeclared      Position
+	posDeclared      utils.Position
 }
 
 // NewPreviouslyDeclared builds a PreviouslyDeclared
 func NewPreviouslyDeclared(
 	declarationError DeclarationError,
-	posDeclared Position,
+	posDeclared utils.Position,
 ) PreviouslyDeclared {
 	return PreviouslyDeclared{
 		declarationError: declarationError,
@@ -219,12 +221,12 @@ func (e PreviouslyDeclared) String() string {
 }
 
 // Pos returns the position of this error.
-func (e PreviouslyDeclared) Pos() Position {
+func (e PreviouslyDeclared) Pos() utils.Position {
 	return e.declarationError.pos
 }
 
 // PosDeclared returns the position where this variable was first declared.
-func (e PreviouslyDeclared) PosDeclared() Position {
+func (e PreviouslyDeclared) PosDeclared() utils.Position {
 	return e.posDeclared
 }
 

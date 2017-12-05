@@ -5,60 +5,60 @@ START ←_ p:PROGRAM {
 
 PROGRAM ← ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ stat:STATS _ "end" _ !. {
 
-	main := NewFunctionNode(
+	main := ast.NewFunctionNode(
 		c.getPosition(),
-		NewBaseTypeNode(VOID),
-		NewIdentifierNode(c.getPosition(), ""),
-		[]*ParameterNode{},
-		stat.([]StatementNode),
+		ast.NewBaseTypeNode(ast.VOID),
+		ast.NewIdentifierNode(c.getPosition(), ""),
+		[]*ast.ParameterNode{},
+		stat.([]ast.StatementNode),
 	)
 
-	functions := []*FunctionNode{}
+	functions := []*ast.FunctionNode{}
 	for _, f := range toSlice(fs) {
-		functions = append(functions, getItem(f, 1).(*FunctionNode))
+		functions = append(functions, getItem(f, 1).(*ast.FunctionNode))
 	}
 	functions = append(functions, main)
 
-	structs := []*StructNode{}
+	structs := []*ast.StructNode{}
 	for _, s := range toSlice(ss) {
-		structs = append(structs, getItem(s, 1).(*StructNode))
+		structs = append(structs, getItem(s, 1).(*ast.StructNode))
 	}
 
-	return ret(NewProgram(structs, functions))
+	return ret(ast.NewProgram(structs, functions))
 
 } / ss:(_ STRUCT)* _ "begin" fs:(__ FUNC)* _ "end" _ !. {
 
-	functions := []*FunctionNode{}
+	functions := []*ast.FunctionNode{}
 	for _, f := range toSlice(fs) {
-		functions = append(functions, getItem(f, 1).(*FunctionNode))
+		functions = append(functions, getItem(f, 1).(*ast.FunctionNode))
 	}
 
-	structs := []*StructNode{}
+	structs := []*ast.StructNode{}
 	for _, s := range toSlice(ss) {
-		structs = append(structs, getItem(s, 1).(*StructNode))
+		structs = append(structs, getItem(s, 1).(*ast.StructNode))
 	}
 
 	err := errors.New("Program body empty")
 
-	return NewProgram(structs, functions), err
+	return ast.NewProgram(structs, functions), err
 }
 
 STRUCT ← "struct" __ i:IDENT __ "is" __ ts:STRUCTINTERNALLIST? __ "end" {
 
 	if ts != nil {
 
-		return ret(NewStructNode(
+		return ret(ast.NewStructNode(
 			c.getPosition(),
-			i.(*IdentifierNode),
-			ts.([]*StructInternalNode),
+			i.(*ast.IdentifierNode),
+			ts.([]*ast.StructInternalNode),
 		))
 
 	} else {
 
-		return ret(NewStructNode(
+		return ret(ast.NewStructNode(
 			c.getPosition(),
-			i.(*IdentifierNode),
-			[]*StructInternalNode{},
+			i.(*ast.IdentifierNode),
+			[]*ast.StructInternalNode{},
 		))
 
 	}
@@ -66,9 +66,9 @@ STRUCT ← "struct" __ i:IDENT __ "is" __ ts:STRUCTINTERNALLIST? __ "end" {
 
 STRUCTINTERNALLIST ← s:STRUCTINTERNAL ss:(_ STRUCTINTERNAL)* {
 
-	structList := []*StructInternalNode{s.(*StructInternalNode)}
+	structList := []*ast.StructInternalNode{s.(*ast.StructInternalNode)}
 	for _, p := range toSlice(ss) {
-		structList = append(structList, getItem(p, 1).(*StructInternalNode))
+		structList = append(structList, getItem(p, 1).(*ast.StructInternalNode))
 	}
 
 	return ret(structList)
@@ -76,22 +76,22 @@ STRUCTINTERNALLIST ← s:STRUCTINTERNAL ss:(_ STRUCTINTERNAL)* {
 }
 
 STRUCTINTERNAL ← t:TYPE _ i:IDENT _ ';' {
-	return ret(NewStructInternalNode(
+	return ret(ast.NewStructInternalNode(
 		c.getPosition(),
-		i.(*IdentifierNode),
-		t.(TypeNode)))
+		i.(*ast.IdentifierNode),
+		t.(ast.TypeNode)))
 }
 
 // FunctionNode
 FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
        _ "end" {
 
-	stats := s.([]StatementNode)
+	stats := s.([]ast.StatementNode)
 	finalStat := stats[len(stats)-1]
 
 	var err error
-	if (!FinalStatIsValid(finalStat)) {
-		name := strings.TrimPrefix(i.(*IdentifierNode).String(), "- ")
+	if (!ast.FinalStatIsValid(finalStat)) {
+		name := strings.TrimPrefix(i.(*ast.IdentifierNode).String(), "- ")
 		errmsg := fmt.Sprintf(
 			"Function \"%s\" is not ended with a return or an exit statement",
 			name,
@@ -100,20 +100,20 @@ FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 	}
 
 	if (params != nil) {
-		return NewFunctionNode(
+		return ast.NewFunctionNode(
 			c.getPosition(),
-			t.(TypeNode),
-			i.(*IdentifierNode),
-			params.([]*ParameterNode),
+			t.(ast.TypeNode),
+			i.(*ast.IdentifierNode),
+			params.([]*ast.ParameterNode),
 			stats,
 		), err
 	}
 
-	return NewFunctionNode(
+	return ast.NewFunctionNode(
 		c.getPosition(),
-		t.(TypeNode),
-		i.(*IdentifierNode),
-		[]*ParameterNode{},
+		t.(ast.TypeNode),
+		i.(*ast.IdentifierNode),
+		[]*ast.ParameterNode{},
 		stats,
 	), err
 
@@ -124,21 +124,21 @@ FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
 	err := errors.New(errmsg)
 
-	return NewFunctionNode(
+	return ast.NewFunctionNode(
 		c.getPosition(),
-		t.(TypeNode),
-		NewIdentifierNode(c.getPosition(), name),
-		[]*ParameterNode{},
-		[]StatementNode{},
+		t.(ast.TypeNode),
+		ast.NewIdentifierNode(c.getPosition(), name),
+		[]*ast.ParameterNode{},
+		[]ast.StatementNode{},
 	), err
 
 }
 
 PARAMLIST ← param:PARAM params:(_ ',' _ PARAM)* {
 
-	paramList := []*ParameterNode{param.(*ParameterNode)}
+	paramList := []*ast.ParameterNode{param.(*ast.ParameterNode)}
 	for _, p := range toSlice(params) {
-		paramList = append(paramList, getItem(p, 3).(*ParameterNode))
+		paramList = append(paramList, getItem(p, 3).(*ast.ParameterNode))
 	}
 
 	return ret(paramList)
@@ -148,10 +148,10 @@ PARAMLIST ← param:PARAM params:(_ ',' _ PARAM)* {
 // Parameter Node
 PARAM ← t:TYPE _ i:IDENT {
 
-	return ret(NewParameterNode(
+	return ret(ast.NewParameterNode(
 		c.getPosition(),
-		t.(TypeNode),
-		i.(*IdentifierNode),
+		t.(ast.TypeNode),
+		i.(*ast.IdentifierNode),
 	))
 
 }
