@@ -9,13 +9,14 @@
 # Program:
 
 begin
-  a = null ;
-  b = null ;
+  a := null ;
+  b := null ;
   a = 'a' ;
+  a = 1 ;
   b = a ;
   int c = 7 ;
   int d = 9 ;
-  e = c + d + d ;
+  e := c + d + d ;
   println e ;
   println a ;
   println b ;

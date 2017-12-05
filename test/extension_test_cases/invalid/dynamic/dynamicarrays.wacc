@@ -9,13 +9,13 @@
 # Program:
 
 begin
-  a = 1 ;
-  b = 2 ;
-  c = [a, b] ;
-  d = [0 , 1] ;
+  a := 1 ;
+  b := 2 ;
+  c := [a, b] ;
+  d := [0 , 1] ;
   println c[0] == 'a' ;
   println c[d['a']] ;
   println e[d['a']] ;
-  e = [a, c] ;
+  e := [a, c] ;
   exit 0
 end

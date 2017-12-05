@@ -14,11 +14,11 @@ struct Node is
 end
 
 begin
-  i = new Node(null, 1) ;
-  i2 = new Node(i, 2) ;
-  i3 = new Node(i2, 3) ;
+  i := new Node(null, 1) ;
+  i2 := new Node(i, 2) ;
+  i3 := new Node(i2, 3) ;
   println i.value ;
-  i9 = i3.next ;
+  i9 := i3.next ;
   println i9.value ;
   i3.next = i ;
   i9 = i3.next ;

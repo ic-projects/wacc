@@ -12,7 +12,7 @@ begin
   doNothing(a) is
     return a
   end
-  i = call doNothing(1) ;
+  i := call doNothing(1) ;
   print "answer is " ;
   println i ;
   exit 0

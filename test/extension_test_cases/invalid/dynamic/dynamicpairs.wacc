@@ -9,28 +9,28 @@
 # Program:
 
 begin
-  a = 1 ;
+  a := 1 ;
   println a ;
-  b = 2 ;
+  b := 2 ;
   println b ;
-  c = newpair(a, b) ;
-  d = fst c ;
-  e = snd c ;
+  c := newpair(a, b) ;
+  d := fst c ;
+  e := snd c ;
   println c ;
   println d ;
   println e ;
-  p = newpair(c , b) ;
+  p := newpair(c , b) ;
   println p ;
-  p1 = fst p ;
-  p2 = snd p ;
+  p1 := fst p ;
+  p2 := snd p ;
   println p1 ;
   println p2 ;
-  p6 = fst p1 ;
-  p7 = snd p1 ;
+  p6 := fst p1 ;
+  p7 := snd p1 ;
   println p6 ;
   println p7 ;
   fst p = 7 ;
-  p3 = fst p ;
+  p3 := fst p ;
   println p ;
   println p3 ;
   exit 0

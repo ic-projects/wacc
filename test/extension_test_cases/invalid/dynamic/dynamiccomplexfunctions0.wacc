@@ -12,9 +12,9 @@ begin
   doNothing(a) is
     return a
   end
-  i = null ;
-  i = call doNothing() ;
-  i = call doNothing('a') ;
+  i := null ;
+  i := call doNothing() ;
+  i := call doNothing('a') ;
   print "answer is " ;
   println i ;
   exit 0

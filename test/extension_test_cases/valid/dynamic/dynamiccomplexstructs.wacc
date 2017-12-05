@@ -21,7 +21,7 @@ begin
       print "[" ;
       print n.value ;
       print " -> " ;
-      x = call printTree(n.lhs) ;
+      x := call printTree(n.lhs) ;
       x = call printTree(n.rhs) ;
       print "]"
     else
@@ -31,23 +31,23 @@ begin
   end
 
   swap(n) is
-    temp = n.lhs ;
+    temp := n.lhs ;
     n.lhs = n.rhs ;
     n.rhs = temp ;
     return 0
   end
 
-  i = new Node(null, null, 1) ;
-  i2 = new Node(null, null, 2) ;
-  i3 = new Node(i, i2, 3) ;
-  i4 = new Node(i3, null, 4) ;
-  i5 = new Node(null, null, 5) ;
-  i6 = new Node(null, null, 6) ;
-  i7 = new Node(i6, i5, 7) ;
-  i8 = new Node(i7, i4, 8) ;
-  x = call printTree(i8) ;
+  i := new Node(null, null, 1) ;
+  i2 := new Node(null, null, 2) ;
+  i3 := new Node(i, i2, 3) ;
+  i4 := new Node(i3, null, 4) ;
+  i5 := new Node(null, null, 5) ;
+  i6 := new Node(null, null, 6) ;
+  i7 := new Node(i6, i5, 7) ;
+  i8 := new Node(i7, i4, 8) ;
+  x := call printTree(i8) ;
   println x ;
-  i9 = call swap(i8) ;
+  i9 := call swap(i8) ;
   println "=========" ;
   x = call printTree(i8) ;
   println x ;

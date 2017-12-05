@@ -9,10 +9,10 @@
 # Program:
 
 begin
-  a = 1 ;
-  b = 2 ;
-  c = [a, b] ;
-  d = [0 , 1] ;
+  a := 1 ;
+  b := 2 ;
+  c := [a, b] ;
+  d := [0 , 1] ;
   println c[0] ;
   println c[d[1]] ;
   exit 0

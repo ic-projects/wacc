@@ -12,6 +12,7 @@ STATS ← stat:STAT stats:(_ ';' _ STAT)* {
 
 STAT ←
 	SKIP /
+	ASSIGN /
 	NEWASSIGN /
 	READ /
 	FREE /
@@ -23,8 +24,8 @@ STAT ←
 	WHILE /
 	SCOPE /
   SWITCH /
-  FOR /
-	ASSIGN
+  FOR
+
 
 // SkipNode
 SKIP ← "skip" {
@@ -35,33 +36,8 @@ SKIP ← "skip" {
 
 }
 
-// DeclareNode
-NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
-
-	return ret(NewDeclareNode(
-		c.getPosition(),
-		t.(TypeNode),
-		ident.(*IdentifierNode),
-		rhs.(RHSNode),
-	))
-
-} / t:TYPE ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
-
-	name := string(getItem(ident, 0).([]byte))
-	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
-	err := errors.New(errmsg)
-
-	return NewDeclareNode(
-		c.getPosition(),
-		t.(TypeNode),
-		NewIdentifierNode(c.getPosition(), name),
-		rhs.(RHSNode),
-	), err
-
-}
-
 // AssignNode
-ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
+ASSIGN ← lhs:ASSIGNLHS _ '=' _ rhs:ASSIGNRHS {
 
 	if arr, ok := lhs.(*ArrayElementNode); ok {
 		arr.SetPointer(true)
@@ -101,6 +77,65 @@ ASSIGN ← lhs:ASSIGNLHS _ "=" _ rhs:ASSIGNRHS {
 		lhs.(LHSNode),
 		rhs.(LHSNode),
 	))
+
+}
+
+// DeclareNode
+NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
+
+	if _, ok := t.(*DynamicTypeNode); ok {
+		errmsg := fmt.Sprintf("Type required in non-dynamic declaration, use ':=' or specify a type")
+		err := errors.New(errmsg)
+
+		return NewDeclareNode(
+			c.getPosition(),
+			t.(TypeNode),
+			ident.(*IdentifierNode),
+			rhs.(RHSNode),
+		), err
+	}
+
+	return ret(NewDeclareNode(
+		c.getPosition(),
+		t.(TypeNode),
+		ident.(*IdentifierNode),
+		rhs.(RHSNode),
+	))
+
+} /  t:TYPE ident:IDENT _ ":=" _ rhs:ASSIGNRHS {
+
+	return ret(NewDeclareNode(
+		c.getPosition(),
+		t.(TypeNode),
+		ident.(*IdentifierNode),
+		rhs.(RHSNode),
+	))
+
+} /  t:TYPE ident:RESERVED _ ":=" _ rhs:ASSIGNRHS {
+
+	name := string(getItem(ident, 0).([]byte))
+	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
+	err := errors.New(errmsg)
+
+	return NewDeclareNode(
+		c.getPosition(),
+		t.(TypeNode),
+		ident.(*IdentifierNode),
+		rhs.(RHSNode),
+	), err
+
+} / t:TYPE ident:RESERVED _ '=' _ rhs:ASSIGNRHS {
+
+	name := string(getItem(ident, 0).([]byte))
+	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)
+	err := errors.New(errmsg)
+
+	return NewDeclareNode(
+		c.getPosition(),
+		t.(TypeNode),
+		NewIdentifierNode(c.getPosition(), name),
+		rhs.(RHSNode),
+	), err
 
 }
 

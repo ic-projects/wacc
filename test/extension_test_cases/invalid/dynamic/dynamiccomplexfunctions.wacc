@@ -12,9 +12,9 @@ begin
   doSomething(a, b) is
     return a[b]
   end
-  bools = [ false, true ] ;
-  i = 'i' ;
-  answer = call doSomething(bools, i) ;
+  bools := [ false, true ] ;
+  i := 'i' ;
+  answer := call doSomething(bools, i) ;
   print "answer is " ;
   println answer ;
   exit 0
