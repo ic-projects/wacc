@@ -26,6 +26,7 @@ type ArrayLiteralNode struct {
 	Exprs []ExpressionNode
 }
 
+// NewArrayLiteralNode builds an ArrayLiteralNode.
 func NewArrayLiteralNode(
 	pos Position,
 	exprs []ExpressionNode,
@@ -52,6 +53,7 @@ type NewPairNode struct {
 	Snd ExpressionNode
 }
 
+// NewNewPairNode builds a NewPairNode.
 func NewNewPairNode(
 	pos Position,
 	fst ExpressionNode,
@@ -95,6 +97,7 @@ type FunctionCallNode struct {
 	Exprs []ExpressionNode
 }
 
+// NewFunctionCallNode builds a FunctionCallNode.
 func NewFunctionCallNode(
 	pos Position,
 	ident *IdentifierNode,
@@ -127,10 +130,12 @@ type StructNewNode struct {
 	structNode *StructNode
 }
 
-func (s *StructNewNode) SetStructType(p *StructNode) {
-	s.structNode = p
+// SetStructType replaces a StructNewNode's StructNode.
+func (node *StructNewNode) SetStructType(t *StructNode) {
+	node.structNode = t
 }
 
+// NewStructNewNode builds a StructNewNode.
 func NewStructNewNode(
 	pos Position,
 	ident *IdentifierNode,

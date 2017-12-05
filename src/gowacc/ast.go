@@ -197,7 +197,7 @@ func (node FunctionNode) String() string {
 	}
 	buf.WriteString(fmt.Sprintln(")"))
 	for _, s := range node.Stats {
-		buf.WriteString(Indent(fmt.Sprintf("%s", s), "  "))
+		buf.WriteString(Indent(s.String(), "  "))
 	}
 	return buf.String()
 }

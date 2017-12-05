@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-// Position stores the position of a node within the original code. The linenumber,
-// column number and offset from the beginning of the file.
+// Position stores the position of a node within the original code. The
+// linenumber, column number and offset from the beginning of the file.
 type Position struct {
 	lineNumber int
 	colNumber  int

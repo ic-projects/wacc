@@ -48,11 +48,12 @@ type PairFirstElementNode struct {
 	Pointer bool
 }
 
-func (fst *PairFirstElementNode) SetPointer(p bool) {
-	fst.Pointer = p
+// SetPointer sets whether this is accessed using a pointer.
+func (node *PairFirstElementNode) SetPointer(p bool) {
+	node.Pointer = p
 }
 
-// NewPairFirstElemNode builds a PairFirstElemNode
+// NewPairFirstElementNode builds a PairFirstElementNode
 func NewPairFirstElementNode(
 	pos Position,
 	expr ExpressionNode,
@@ -65,10 +66,7 @@ func NewPairFirstElementNode(
 }
 
 func (node PairFirstElementNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- FST"))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
-	return buf.String()
+	return writeSimpleString("FST", node.Expr)
 }
 
 /**************** PAIR SECOND ELEMENT NODE ****************/
@@ -85,11 +83,12 @@ type PairSecondElementNode struct {
 	Pointer bool
 }
 
-func (snd *PairSecondElementNode) SetPointer(p bool) {
-	snd.Pointer = p
+// SetPointer sets whether this is accessed using a pointer.
+func (node *PairSecondElementNode) SetPointer(p bool) {
+	node.Pointer = p
 }
 
-// NewPairSecondElemNode builds a PairSecondElemNode
+// NewPairSecondElementNode builds a PairSecondElementNode
 func NewPairSecondElementNode(
 	pos Position,
 	expr ExpressionNode,
@@ -102,10 +101,7 @@ func NewPairSecondElementNode(
 }
 
 func (node PairSecondElementNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- SND"))
-	buf.WriteString(Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
-	return buf.String()
+	return writeSimpleString("SND", node.Expr)
 }
 
 /**************** ARRAY ELEMENT NODE ****************/
@@ -122,8 +118,9 @@ type ArrayElementNode struct {
 	Pointer bool
 }
 
-func (arr *ArrayElementNode) SetPointer(p bool) {
-	arr.Pointer = p
+// SetPointer sets whether this is accessed using a pointer.
+func (node *ArrayElementNode) SetPointer(p bool) {
+	node.Pointer = p
 }
 
 // NewArrayElementNode builds an ArrayElementNode
@@ -165,12 +162,14 @@ type StructElementNode struct {
 	Pointer   bool
 }
 
-func (s *StructElementNode) SetStructType(p *StructInternalNode) {
-	s.stuctType = p
+// SetStructType sets the type of a struct element.
+func (node *StructElementNode) SetStructType(p *StructInternalNode) {
+	node.stuctType = p
 }
 
-func (s *StructElementNode) SetPointer(p bool) {
-	s.Pointer = p
+// SetPointer sets whether this is accessed using a pointer.
+func (node *StructElementNode) SetPointer(p bool) {
+	node.Pointer = p
 }
 
 // NewStructElementNode builds an StructElementNode
