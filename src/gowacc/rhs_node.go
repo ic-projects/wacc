@@ -151,3 +151,38 @@ func NewStructNewNode(
 func (node StructNewNode) String() string {
 	return writeExpressionsString(fmt.Sprintf("NEW %s\n", node.T), node.Exprs)
 }
+
+type PointerNewNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerNewNode(pos Position, ident *IdentifierNode) *PointerNewNode {
+	return &PointerNewNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}
+
+func (node PointerNewNode) String() string {
+	return fmt.Sprintf("- &%s\n", node.Ident.Ident)
+}
+
+type PointerDereferenceNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerDereferenceNode(
+	pos Position,
+	ident *IdentifierNode,
+) *PointerDereferenceNode {
+	return &PointerDereferenceNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}
+
+func (node PointerDereferenceNode) String() string {
+	return fmt.Sprintf("- *%s\n", node.Ident.Ident)
+}

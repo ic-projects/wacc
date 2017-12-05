@@ -1,5 +1,13 @@
 // RHSNode
-ASSIGNRHS ← ARRAYLITER / NEWPAIR / NEWSTRUCT / PAIRELEM / CALL / EXPR
+ASSIGNRHS ←
+	ARRAYLITER /
+	NEWPAIR /
+	NEWSTRUCT /
+	POINTERNEW /
+	POINTERDEREFERENCE /
+	PAIRELEM /
+	CALL /
+	EXPR
 
 // ExpressionNode - defined in wacc_expression.peg
 
@@ -54,6 +62,26 @@ NEWSTRUCT ← "new" __ i:IDENT _ '(' _  args:ARGLIST? _ ')' {
 			args.([]ExpressionNode),
 		))
 	}
+
+}
+
+// PointerNewNode
+POINTERNEW ← '&' ident:IDENT {
+
+	return ret(NewPointerNewNode(
+		c.getPosition(),
+		ident.(*IdentifierNode),
+	))
+
+}
+
+// PointerDereferenceNode
+POINTERDEREFERENCE ← '*' ident:IDENT {
+
+	return ret(NewPointerDereferenceNode(
+		c.getPosition(),
+		ident.(*IdentifierNode),
+	))
 
 }
 

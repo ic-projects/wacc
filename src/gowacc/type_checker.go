@@ -77,6 +77,8 @@ func checkEquals(check *TypeChecker, expecting TypeNode, seen TypeNode) bool {
 		return expectingValue.equals(seenValue)
 	case StructTypeNode:
 		return expectingValue.equals(seenValue)
+	case PointerTypeNode:
+		return expectingValue.equals(seenValue)
 	case NullTypeNode:
 		return true
 	default:
@@ -98,6 +100,8 @@ func toValue(typeNode TypeNode) TypeNode {
 	case *BaseTypeNode:
 		return *t
 	case *StructTypeNode:
+		return *t
+	case *PointerTypeNode:
 		return *t
 	case *NullTypeNode:
 		return *t

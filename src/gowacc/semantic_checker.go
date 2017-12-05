@@ -119,6 +119,17 @@ func (v *SemanticCheck) Visit(programNode ProgramNode) {
 		} else {
 			v.typeChecker.expect(node.T)
 		}
+	case *PointerNewNode:
+		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
+			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
+		} else {
+			foundError = v.typeChecker.seen(NewPointerTypeNode(identDec.T)).addPos(node.Pos)
+			if foundError != nil {
+				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
+			}
+		}
 	case *AssignNode:
 		v.typeChecker.expectTwiceSame(NewAnyExpectance())
 	case *ReadNode:

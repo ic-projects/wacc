@@ -194,3 +194,15 @@ func (node StructElementNode) String() string {
 		node.Pointer,
 	)
 }
+
+type PointerNode struct {
+	Pos   Position
+	Ident *IdentifierNode
+}
+
+func NewPointerNode(pos Position, ident *IdentifierNode) *PointerNode {
+	return &PointerNode{
+		Pos:   pos,
+		Ident: ident,
+	}
+}

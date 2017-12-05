@@ -9,6 +9,7 @@ import (
 type TypeNode interface {
 	fmt.Stringer
 	equals(TypeNode) bool
+	String() string
 }
 
 /**************** TYPE NODE HELPER FUNCTIONS ****************/
@@ -229,6 +230,27 @@ func (node StructTypeNode) String() string {
 func (node StructTypeNode) equals(t TypeNode) bool {
 	if arr, ok := toValue(t).(StructTypeNode); ok {
 		return arr.Ident == node.Ident
+	}
+	return false
+}
+
+type PointerTypeNode struct {
+	T TypeNode
+}
+
+func NewPointerTypeNode(t TypeNode) *PointerTypeNode {
+	return &PointerTypeNode{
+		T: t,
+	}
+}
+
+func (node PointerTypeNode) String() string {
+	return fmt.Sprintf("%s *", node.T.String())
+}
+
+func (node PointerTypeNode) equals(t TypeNode) bool {
+	if arr, ok := toValue(t).(PointerTypeNode); ok {
+		return arr.T.equals(node.T)
 	}
 	return false
 }
