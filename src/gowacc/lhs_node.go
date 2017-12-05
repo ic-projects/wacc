@@ -7,6 +7,7 @@ import (
 
 // LHSNode is an empty interface for Lhs nodes to implement.
 type LHSNode interface {
+	fmt.Stringer
 }
 
 /**************** IDENTIFIER NODE ****************/

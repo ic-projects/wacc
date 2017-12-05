@@ -51,12 +51,12 @@ func Walk(visitor Visitor, programNode ProgramNode) {
 				Walk(visitor, p)
 			}
 		case *DeclareNode:
-			Walk(visitor, node.Rhs)
+			Walk(visitor, node.RHS)
 		case *AssignNode:
-			Walk(visitor, node.Lhs)
-			Walk(visitor, node.Rhs)
+			Walk(visitor, node.LHS)
+			Walk(visitor, node.RHS)
 		case *ReadNode:
-			Walk(visitor, node.Lhs)
+			Walk(visitor, node.LHS)
 		case *FreeNode:
 			Walk(visitor, node.Expr)
 		case *ReturnNode:

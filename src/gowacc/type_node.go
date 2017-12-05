@@ -7,6 +7,7 @@ import (
 
 // TypeNode is an empty interface for all types to implement.
 type TypeNode interface {
+	fmt.Stringer
 	equals(TypeNode) bool
 }
 

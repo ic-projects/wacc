@@ -8,6 +8,7 @@ import (
 
 // ExpressionNode is an empty interface for expression nodes to implement.
 type ExpressionNode interface {
+	fmt.Stringer
 }
 
 /**************** EXPRESSION HELPER FUNCTIONS ****************/
@@ -90,14 +91,14 @@ func BuildBinOpTree(
 			position,
 			last[1].(BinaryOperator),
 			lhs,
-			last[3],
+			last[3].(ExpressionNode),
 		)
 	}
 	return NewBinaryOperatorNode(
 		position,
 		list[0].([]interface{})[1].(BinaryOperator),
 		first,
-		list[0].([]interface{})[3],
+		list[0].([]interface{})[3].(ExpressionNode),
 	)
 }
 

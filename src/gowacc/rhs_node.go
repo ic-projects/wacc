@@ -7,6 +7,7 @@ import (
 
 // RHSNode is an empty interface for Lhs nodes to implement.
 type RHSNode interface {
+	fmt.Stringer
 }
 
 /**************** EXPRESSION NODE ****************/
@@ -36,12 +37,7 @@ func NewArrayLiteralNode(
 }
 
 func (node ArrayLiteralNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintln("- ARRAY LITERAL"))
-	for _, e := range node.Exprs {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
-	}
-	return buf.String()
+	return writeExpressionsString("ARRAY LITERAL", node.Exprs)
 }
 
 /**************** NEW PAIR NODE ****************/
@@ -112,12 +108,7 @@ func NewFunctionCallNode(
 }
 
 func (node FunctionCallNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
-	for _, e := range node.Exprs {
-		buf.WriteString(fmt.Sprintf("%s\n", e))
-	}
-	return buf.String()
+	return writeExpressionsString(fmt.Sprintf("%s\n", node.Ident), node.Exprs)
 }
 
 type StructNewNode struct {
@@ -144,10 +135,5 @@ func NewStructNewNode(
 }
 
 func (node StructNewNode) String() string {
-	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("new %s \n", node.T))
-	for _, e := range node.Exprs {
-		buf.WriteString(Indent(fmt.Sprintf("%s\n", e), "  "))
-	}
-	return buf.String()
+	return writeExpressionsString(fmt.Sprintf("NEW %s\n", node.T), node.Exprs)
 }
