@@ -10,7 +10,7 @@ TYPE ← t:POINTERTYPE {
 NONPOINTERTYPE ← t:(BASETYPE / PAIRTYPE / STRUCTTYPE) array:(_ ARRAYTYPE)* __ {
 
 	if (len(toSlice(array)) > 0) {
-		return ret(ast.NewArrayTypeNode(
+		return ret(ast.NewArrayTypeDimNode(
 			t.(ast.TypeNode),
 			len(toSlice(array)),
 		))
@@ -71,7 +71,7 @@ PAIRTYPE ← "pair" _ '(' _ t1:PAIRELEMTYPE _ ',' _ t2:PAIRELEMTYPE _ ')' {
 PAIRELEMTYPE ← (t:BASETYPE array:(_ ARRAYTYPE)*) {
 
 	if (len(array.([]interface{})) > 0) {
-		return ret(ast.NewArrayTypeNode(
+		return ret(ast.NewArrayTypeDimNode(
 			t.(ast.TypeNode),
 			len(toSlice(array)),
 		))
@@ -81,7 +81,7 @@ PAIRELEMTYPE ← (t:BASETYPE array:(_ ARRAYTYPE)*) {
 
 } / (t:PAIRTYPE array:(_ ARRAYTYPE)+) {
 
-	return ret(ast.NewArrayTypeNode(
+	return ret(ast.NewArrayTypeDimNode(
 		t.(ast.TypeNode),
 		len(toSlice(array)),
 	))

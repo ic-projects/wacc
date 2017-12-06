@@ -350,7 +350,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			v.typeChecker.freeze(node)
 		} else {
 			if dyn, ok := ast.ToValue(identDec.T).(*ast.DynamicTypeNode); ok {
-				dyn.ReduceSet([]ast.TypeNode{ast.NewArrayTypeNode(ast.NewDynamicTypeNode(), len(node.Exprs))})
+				dyn.ReduceSet([]ast.TypeNode{ast.NewArrayTypeDimNode(ast.NewDynamicTypeNode(), len(node.Exprs))})
 			}
 
 			if arrayNode, ok := ast.ToValue(identDec.T).(ast.ArrayTypeNode); !ok {
@@ -359,11 +359,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 				v.typeChecker.freeze(node)
 			} else {
 				// If we have an array or a single element (for use in newsted arrays).
-				if dimLeft := arrayNode.Dim - len(node.Exprs); dimLeft == 0 {
-					foundError = v.typeChecker.seen(arrayNode.T).addPos(node.Pos)
-				} else {
-					foundError = v.typeChecker.seen(ast.NewArrayTypeNode(arrayNode.T, dimLeft)).addPos(node.Pos)
-				}
+				foundError = v.typeChecker.seen(arrayNode.GetDimElement(len(node.Exprs))).addPos(node.Pos)
 			}
 		}
 		for i := 0; i < len(node.Exprs); i++ {

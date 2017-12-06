@@ -29,10 +29,6 @@ func SizeOf(t TypeNode) int {
 func ToValue(typeNode TypeNode) TypeNode {
 	switch t := typeNode.(type) {
 	case *ArrayTypeNode:
-		if inside, ok := ToValue(t.T).(ArrayTypeNode); ok {
-			t.Dim += inside.Dim
-			t.T = inside.T
-		}
 		return *t
 	case *PairTypeNode:
 		return *t
@@ -51,10 +47,6 @@ func ToValue(typeNode TypeNode) TypeNode {
 		}
 		return ToValue(t2)
 	case ArrayTypeNode:
-		if inside, ok := ToValue(t.T).(ArrayTypeNode); ok {
-			t.Dim += inside.Dim
-			t.T = inside.T
-		}
 		return t
 	default:
 		return t
@@ -136,32 +128,52 @@ func (node BaseTypeNode) Equals(t TypeNode) bool {
 // a string additionally to distinguish between a char array and a string.
 type ArrayTypeNode struct {
 	T        TypeNode
-	Dim      int
 	IsString bool
 }
 
 // NewArrayTypeNode returns an initialised ArrayTypeNode. If the type provided
 // is an array, it will increase the dimensions of the given array, and return
 // it.
-func NewArrayTypeNode(t TypeNode, dim int) *ArrayTypeNode {
-	if array, ok := t.(*ArrayTypeNode); ok {
-		array.Dim += dim
-		return array
-	}
+func NewArrayTypeNode(t TypeNode) *ArrayTypeNode {
 	return &ArrayTypeNode{
 		T:        t,
-		Dim:      dim,
 		IsString: false,
 	}
+}
+
+func NewArrayTypeDimNode(t TypeNode, dim int) *ArrayTypeNode {
+	var arr *ArrayTypeNode
+	arr = &ArrayTypeNode{
+		T:        t,
+		IsString: false,
+	}
+	for i := 1; i < dim; i++ {
+		arr = &ArrayTypeNode{
+			T:        arr,
+			IsString: false,
+		}
+	}
+	return arr
 }
 
 // NewStringArrayTypeNode returns an initialised ArrayTypeNode for a string.
 func NewStringArrayTypeNode() *ArrayTypeNode {
 	return &ArrayTypeNode{
 		T:        NewBaseTypeNode(CHAR),
-		Dim:      1,
 		IsString: true,
 	}
+}
+
+// GetDimElement will return the type of the element in the array at depth dim,
+// e.g. an array of char[][] has char[][] at depth 0, char[] at depth 1 and
+// char at depth 2
+func (node ArrayTypeNode) GetDimElement(dim int) TypeNode {
+	var t TypeNode
+	t = node
+	for i := 0; i < dim; i++ {
+		t = t.(ArrayTypeNode).T
+	}
+	return t
 }
 
 func (node ArrayTypeNode) String() string {
@@ -169,16 +181,12 @@ func (node ArrayTypeNode) String() string {
 		return fmt.Sprintf("array")
 	}
 	var buf bytes.Buffer
-	if node.IsString {
-		buf.WriteString(fmt.Sprintf("string"))
-		for i := 0; i < node.Dim-1; i++ {
-			buf.WriteString("[]")
-		}
+	if t, ok := ToValue(node.T).(BaseTypeNode); ok &&
+		t.T == CHAR && node.IsString {
+		buf.WriteString("string[]")
 	} else {
 		buf.WriteString(node.T.String())
-		for i := 0; i < node.Dim; i++ {
-			buf.WriteString("[]")
-		}
+		buf.WriteString("[]")
 	}
 	return buf.String()
 }
@@ -186,7 +194,7 @@ func (node ArrayTypeNode) String() string {
 func (node ArrayTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(ArrayTypeNode); ok {
 		if arr2, ok := ToValue(node).(ArrayTypeNode); ok {
-			return (arr == ArrayTypeNode{}) || (arr2 == ArrayTypeNode{}) || (arr.Dim == arr2.Dim && arr2.T.Equals(arr.T))
+			return (arr == ArrayTypeNode{}) || (arr2 == ArrayTypeNode{}) || arr2.T.Equals(arr.T)
 		}
 	}
 	return false
@@ -410,7 +418,7 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 		t := node.T.Poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
 			if arr.T == nil {
-				arr := NewArrayTypeNode(NewDynamicTypeNode(), 1)
+				arr := NewArrayTypeNode(NewDynamicTypeNode())
 				arr.T.(*DynamicTypeNode).arrayPointer = arr
 				node.T.Poss[0] = arr
 				t = node.T.Poss[0]

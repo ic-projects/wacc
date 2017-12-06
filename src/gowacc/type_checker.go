@@ -39,11 +39,7 @@ func checkEquals(check *TypeChecker, expecting ast.TypeNode, seen ast.TypeNode) 
 	case ast.ArrayTypeNode:
 		if found, ok := expectingValue.(ast.ArrayTypeNode); ok {
 			if seenValue == (ast.ArrayTypeNode{}) {
-				if found.Dim == 1 {
-					check.expectRepeatUntilForce(found.T)
-				} else {
-					check.expectRepeatUntilForce(ast.NewArrayTypeNode(found.T, found.Dim-1))
-				}
+				check.expectRepeatUntilForce(found.T)
 				return true
 			}
 			return expectingValue == (ast.ArrayTypeNode{}) || expectingValue.Equals(seenValue)
