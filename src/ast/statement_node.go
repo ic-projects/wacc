@@ -307,24 +307,38 @@ func (node SwitchNode) String() string {
 }
 
 type CaseNode struct {
-	Pos   utils.Position
-	Expr  ExpressionNode
-	Stats []StatementNode
+	Pos       utils.Position
+	Expr      ExpressionNode
+	Stats     []StatementNode
+	IsDefault bool
+}
+
+func NewDefaultCaseNode(pos utils.Position, stats []StatementNode) CaseNode {
+	return CaseNode{
+		Pos:       pos,
+		Stats:     stats,
+		IsDefault: true,
+	}
 }
 
 func NewCaseNode(pos utils.Position, expr ExpressionNode, stats []StatementNode) CaseNode {
 	return CaseNode{
-		Pos:   pos,
-		Expr:  expr,
-		Stats: stats,
+		Pos:       pos,
+		Expr:      expr,
+		Stats:     stats,
+		IsDefault: false,
 	}
 }
 
 func (node CaseNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- CASE"))
-	buf.WriteString(utils.Indent(fmt.Sprintln("- EXPRESSION"), "  "))
-	buf.WriteString(utils.Indent(node.Expr.String(), "    "))
+	if node.IsDefault {
+		buf.WriteString(utils.Indent(fmt.Sprintln("- DEFAULT"), "  "))
+	} else {
+		buf.WriteString(utils.Indent(fmt.Sprintln("- EXPRESSION"), "  "))
+		buf.WriteString(utils.Indent(node.Expr.String(), "    "))
+	}
 	buf.WriteString(utils.Indent(fmt.Sprintln("- THEN"), "  "))
 	for _, s := range node.Stats {
 		buf.WriteString(utils.Indent(s.String(), "    "))
