@@ -6,6 +6,9 @@
 .atomenv.json
 /.idea/
 
+/doc/report.tex
+*.lyx#
+*.lyx~
 *.aux
 *.log
 *.out
