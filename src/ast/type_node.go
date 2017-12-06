@@ -178,16 +178,15 @@ func (node ArrayTypeNode) GetDimElement(dim int) TypeNode {
 
 func (node ArrayTypeNode) String() string {
 	if node == (ArrayTypeNode{}) {
-		return fmt.Sprintf("array")
+		return "array"
 	}
-	var buf bytes.Buffer
 	if t, ok := ToValue(node.T).(BaseTypeNode); ok &&
 		t.T == CHAR && node.IsString {
-		buf.WriteString("string[]")
-	} else {
-		buf.WriteString(node.T.String())
-		buf.WriteString("[]")
+		return "string"
 	}
+	var buf bytes.Buffer
+	buf.WriteString(node.T.String())
+	buf.WriteString("[]")
 	return buf.String()
 }
 
