@@ -101,19 +101,17 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	return file.Close()
 }
 
-// LocationOf will return the location of a
+// LocationOf will return the string representation of a Location.
+//
+// If the Location is an address (that is stored on the heap), it will return
+// the stack offset.
 func (v *CodeGenerator) LocationOf(loc *utils.Location) string {
 	// Location is a register
-	if loc.Register != utils.UNDEFINED {
+	if loc.IsRegister() {
 		return loc.Register.String()
 	}
 
-	// Location is an address on the heap
-	if loc.Address != 0 {
-		return "#" + strconv.Itoa(loc.Address)
-	}
-
-	// Location is a stack offset
+	// Location is either a stack offset or an address stored on the stack.
 	return "[sp, #" +
 		strconv.Itoa(v.currentStackPos-loc.CurrentPos) +
 		"]"
@@ -257,6 +255,7 @@ func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 		*ast.ForLoopNode,
 		*ast.NewPairNode,
 		*ast.StructNewNode,
+		*ast.PointerNewNode,
 		*ast.ReadNode,
 		*ast.FunctionCallNode,
 		*ast.BinaryOperatorNode:
