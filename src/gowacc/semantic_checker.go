@@ -9,20 +9,20 @@ func validType(T ast.TypeNode, i *ast.IdentifierNode) GenericError {
 	switch t := ast.ToValue(T).(type) {
 	case ast.ArrayTypeNode:
 		if validType(t.T, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprintf("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
-	case ast.DynamicTypeNode:
+	case *ast.DynamicTypeNode:
 		if len(t.T.Poss) > 1 {
-			return NewCustomError(i.Pos, fmt.Sprint("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.Poss))
+			return NewCustomError(i.Pos, fmt.Sprintf("Ambiguous dynamic type for ident %s, could be of types %s", i.Ident, t.T.Poss))
 		}
 		if len(t.T.Poss) != 1 || validType(t.T.Poss[0], i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprintf("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
 	case ast.PairTypeNode:
 		if validType(t.T1, i) != nil || validType(t.T2, i) != nil {
-			return NewCustomError(i.Pos, fmt.Sprint("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
+			return NewCustomError(i.Pos, fmt.Sprintf("Unknown dynamic type for ident %s, has type %s", i.Ident, t))
 		}
 		return nil
 	default:
