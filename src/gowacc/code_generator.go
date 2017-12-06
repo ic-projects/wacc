@@ -554,45 +554,44 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case *ast.PointerNewNode:
 		register := v.getFreeRegister()
 
-		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); ok {
-			ast.Walk(v, node.Ident)
-			valueReg := v.getReturnRegister()
+		dec, _ := v.symbolTable.SearchForIdent(node.Ident.Ident)
+		ast.Walk(v, node.Ident)
+		valueReg := v.getReturnRegister()
 
-			if !identDec.Location.IsAddress() {
-				// Make space for the variable
-				v.addCode("LDR r0, =%d", ast.SizeOf(ast.ToValue(identDec.T)))
-				v.addCode("BL malloc")
-				v.addCode("MOV %s, r0", register)
+		if !dec.Location.IsAddress() {
+			// Make space for the variable
+			v.addCode("LDR r0, =%d", ast.SizeOf(ast.ToValue(dec.T)))
+			v.addCode("BL malloc")
+			v.addCode("MOV %s, r0", register)
 
-				// Move the variable value onto the heap space
-				v.addCode("%s %s, [%s]",
-					store(ast.SizeOf(ast.ToValue(identDec.T))),
-					valueReg,
+			// Move the variable value onto the heap space
+			v.addCode("%s %s, [%s]",
+				store(ast.SizeOf(ast.ToValue(dec.T))),
+				valueReg,
+				register,
+			)
+
+			if dec.Location.IsStackOffset() {
+				// Replace variable stored on stack with address to variable stored on
+				// heap.
+				v.addCode("STR %s, %s",
 					register,
-				)
+					v.LocationOf(dec.Location))
 
-				if identDec.Location.IsStackOffset() {
-					// Replace variable stored on stack with address to variable stored on
-					// heap.
-					v.addCode("STR %s, %s",
-						register,
-						v.LocationOf(identDec.Location))
+				// Change the Location type to be an address on the heap
+				dec.Location.IsOnHeap = true
+			} else if dec.Location.IsRegister() {
+				// Store the address on stack
+				v.addCode("PUSH {%s}", register)
+				v.currentStackPos += 4
 
-					// Change the Location type to be an address on the heap
-					identDec.Location.IsOnHeap = true
-				} else if identDec.Location.IsRegister() {
-					// Store the address on stack
-					v.addCode("PUSH {%s}", register)
-					v.currentStackPos += 4
-
-					// Change the Location type to be an address on the heap
-					identDec.Location.Register = utils.UNDEFINED
-					identDec.Location.IsOnHeap = true
-					identDec.Location.CurrentPos = v.currentStackPos
-				}
+				// Change the Location type to be an address on the heap
+				dec.Location.Register = utils.UNDEFINED
+				dec.Location.IsOnHeap = true
+				dec.Location.CurrentPos = v.currentStackPos
 			}
-			v.freeRegisters.Push(valueReg)
 		}
+		v.freeRegisters.Push(valueReg)
 		v.returnRegisters.Push(register)
 	case *ast.NewPairNode:
 		register := v.getFreeRegister()
