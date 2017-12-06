@@ -1,0 +1,5 @@
+begin
+  for exit 5; true; skip do
+    skip
+  done
+end

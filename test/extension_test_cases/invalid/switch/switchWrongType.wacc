@@ -1,0 +1,11 @@
+begin
+  int i = 0;
+  case i
+  when true:
+    skip
+    end
+  when false:
+    skip
+    end
+  fi
+end

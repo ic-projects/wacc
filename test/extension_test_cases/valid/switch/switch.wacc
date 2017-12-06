@@ -1,0 +1,14 @@
+begin
+  int i = 0;
+  case i
+  when 0:
+    println "correct"
+    end
+  when 1:
+    println "incorrect"
+    end
+  when 2:
+    println "not correct"
+    end
+  fi
+end

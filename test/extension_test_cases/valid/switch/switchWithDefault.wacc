@@ -1,0 +1,11 @@
+begin
+  int i = 0;
+  case i
+  when 1:
+    println "not here"
+    end
+  else:
+    println "here"
+    end
+  fi
+end
