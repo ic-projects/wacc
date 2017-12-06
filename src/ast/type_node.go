@@ -324,6 +324,8 @@ func (node StructTypeNode) Equals(t TypeNode) bool {
 	return false
 }
 
+/**************** POINTER TYPE NODE ****************/
+
 type PointerTypeNode struct {
 	T TypeNode
 }
@@ -345,18 +347,38 @@ func (node PointerTypeNode) Equals(t TypeNode) bool {
 	return false
 }
 
+/**************** DYNAMIC TYPE NODE ****************/
+
+// DynamicTypeNode is a TypeNode used to represent an unknown
+// type that will later be reduced to the correct type. It stores
+// a pointer to its InternalDynamicType and the boolean flag
+// insidePair.
 type DynamicTypeNode struct {
-	T            *InternalDynamicType
-	insidePair   bool
-	arrayPointer *ArrayTypeNode
+	T          *InternalDynamicType
+	insidePair bool
 }
 
+// InternalDynamicType is the struct that holds the actual type
+// information about a dynamic type.
 type InternalDynamicType struct {
-	init     bool
-	Poss     []TypeNode
+	// init is used to determine whether the dynamic type has
+	// been initialised and therefore can be reduced further,
+	init bool
+
+	// Poss is an array of TypeNodes, it stores the possible
+	// different types this type could be.
+	Poss []TypeNode
+
+	// wacthers is a pointer to a list of pointers to DynamicTypeNode,
+	// it stores the list of DynamicTypeNodes that have this
+	// InternalDynamicType as their type. It is used when
+	// an InternalDynamicType is reduced to be identical to another
+	// and so the watchers are migrated to the new InternalDynamicType.
 	watchers *[]*DynamicTypeNode
 }
 
+// NewDynamicTypeNode returns a default DynamicTypeNode, with
+// an empty watch list and a default InternalDynamicType.
 func NewDynamicTypeNode() *DynamicTypeNode {
 	watchers := make([]*DynamicTypeNode, 0)
 	node := &DynamicTypeNode{
@@ -371,6 +393,9 @@ func NewDynamicTypeNode() *DynamicTypeNode {
 	return node
 }
 
+// NewDynamicTypeInsidePairNode returns a insidePair DynamicTypeNode,
+// with an empty watch list and a default InternalDynamicType and
+// the flag insidePair set to true.
 func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
 	watchers := make([]*DynamicTypeNode, 0)
 	node := &DynamicTypeNode{
@@ -385,6 +410,9 @@ func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
 	return node
 }
 
+// changeToWatch links two DynamicTypeNodes together,
+// it merges the watchlist together and changes the type both
+// DynamicTypeNodes refer to be the same pointer.
 func (node *DynamicTypeNode) changeToWatch(other *DynamicTypeNode) {
 	*other.T.watchers = append(*other.T.watchers, *node.T.watchers...)
 	for _, watcher := range *node.T.watchers {
@@ -412,17 +440,19 @@ func (node DynamicTypeNode) Equals(t TypeNode) bool {
 	return ok
 }
 
+// getValue returns the TypeNode of the DynamicTypeNode,
+// i.e. the actual type the DynamicTypeNode has been
+// reduced to. It also the expands the inner types to
+// also be DynamicTypeNodes.
 func (node *DynamicTypeNode) getValue() TypeNode {
 	if len(node.T.Poss) == 1 {
 		t := node.T.Poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
 			if arr.T == nil {
 				arr := NewArrayTypeNode(NewDynamicTypeNode())
-				arr.T.(*DynamicTypeNode).arrayPointer = arr
 				node.T.Poss[0] = arr
 				t = node.T.Poss[0]
 			}
-			//}
 		} else if pair, ok := t.(*PairTypeNode); ok {
 			if !node.insidePair {
 				if pair.T2 == nil && pair.T1 == nil {
@@ -445,8 +475,13 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 	return node
 }
 
+// reduce is used when the typechecker sees and also expects
+// a DynamicTypeNode, if both DynamicTypeNodes are initialised
+// then they will reduce their possibilities and then link if
+// valid, otherwise they will just link. It returns
+// the type the TypeChecker should use to check and a boolean
+// indicating if an error occured.
 func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
-	//fmt.Println(fmt.Sprintf("Special double dynamic reduction"))
 	if node.T.init && dyn.T.init {
 		if len(node.T.Poss) == 1 && len(dyn.T.Poss) == 1 {
 			if node.T.Poss[0].Equals(dyn.T.Poss[0]) {
@@ -473,8 +508,11 @@ func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 	return node.getValue(), true
 }
 
+// ReduceSet reduces the possibilities of a DynamicTypeNode
+// down using the given list of possible TypeNode. It returns
+// the type the TypeChecker should use to check and a boolean
+// indicating if an error occured.
 func (node *DynamicTypeNode) ReduceSet(ts []TypeNode) (TypeNode, bool) {
-	//fmt.Println(fmt.Sprintf("Reducing %s with %s", node, ts))
 	// Dynamic type saw another dynamic type
 	if dyn, ok := ts[0].(*DynamicTypeNode); len(ts) == 1 && ok {
 		return node.reduce(dyn)
@@ -491,13 +529,10 @@ func (node *DynamicTypeNode) ReduceSet(ts []TypeNode) (TypeNode, bool) {
 
 		// Reduce leaves no possibilities
 		if len(newSet) == 0 {
-			//fmt.Println(fmt.Sprintf("Reducing failed"))
 			return nil, false
 		}
-		//fmt.Println(fmt.Sprintf("Reducing success"))
 		node.T.Poss = newSet
 	} else {
-		//fmt.Println(fmt.Sprintf("Reducing caused init"))
 		node.T.init = true
 		node.T.Poss = ts
 	}
