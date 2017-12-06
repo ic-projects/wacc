@@ -185,7 +185,7 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 		}
 	case ast.ArrayTypeNode:
 		if arr, ok := ast.ToValue(node.T).(ast.BaseTypeNode); ok {
-			if arr.T == ast.CHAR && node.Dim == 1 {
+			if arr.T == ast.CHAR {
 				v.callLibraryFunction("BL", printString)
 				return
 			}
@@ -325,7 +325,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			lhsRegister := v.getReturnRegister()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
 			arr := ast.ToValue(dec.T).(ast.ArrayTypeNode)
-			if ast.SizeOf(arr.T) == 1 && len(lhsNode.Exprs) == arr.Dim {
+			if ast.SizeOf(arr.GetDimElement(len(lhsNode.Exprs))) == 1 {
 				v.addCode("STRB %s, [%s]", rhsRegister, lhsRegister)
 			} else {
 				v.addCode("STR %s, [%s]", rhsRegister, lhsRegister)
@@ -454,8 +454,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		length := len(node.Exprs)
 		symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-		lastIsCharOrBool := ast.SizeOf(ast.ToValue(symbol.T).(ast.ArrayTypeNode).T) == 1 &&
-			ast.ToValue(symbol.T).(ast.ArrayTypeNode).Dim == length
+		lastIsCharOrBool := ast.SizeOf(ast.ToValue(symbol.T).(ast.ArrayTypeNode).GetDimElement(length)) == 1
 
 		for i := 0; i < length; i++ {
 			expr := node.Exprs[i]
