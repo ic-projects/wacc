@@ -229,10 +229,13 @@ PRINTLN ← "println" __ expr:EXPR {
 }
 
 // SwitchNode
-SWITCH ← "case" __ expr:EXPR __ cases:(_ CASE)+ __ "fi" {
+SWITCH ← "case" __ expr:EXPR __ cases:(_ CASE)+ _ defaultCase:(DEFAULT)? _ "fi" {
   var caseNodes []ast.CaseNode
   for _, e := range toSlice(cases) {
     caseNodes = append(caseNodes, getItem(e, 1).(ast.CaseNode))
+  }
+  if (defaultCase != nil) {
+    caseNodes = append(caseNodes, defaultCase.(ast.CaseNode))
   }
   return ret(ast.NewSwitchNode(
     c.getPosition(),
@@ -245,6 +248,13 @@ CASE ← "when" __ expr:EXPR _ ':' _ stats:STATS _ "end" {
   return ret(ast.NewCaseNode(
     c.getPosition(),
     expr.(ast.ExpressionNode),
+    stats.([]ast.StatementNode),
+  ))
+}
+
+DEFAULT ← "else" _ ':' _ stats:STATS _ "end" {
+  return ret(ast.NewDefaultCaseNode(
+    c.getPosition(),
     stats.([]ast.StatementNode),
   ))
 }
