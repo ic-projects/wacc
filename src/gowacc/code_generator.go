@@ -397,14 +397,19 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case *ast.SwitchNode:
 		// Labels
 		endLabel := v.labelCount + 1
-		v.labelCount += 1
+		v.labelCount++
 		ast.Walk(v, node.Expr)
 		r := v.returnRegisters.Pop()
 		for i, c := range node.Cases {
-			ast.Walk(v, c.Expr)
-			v.addCode("CMP %s, %s", v.getReturnRegister(), r)
-			v.addCode("BEQ CASE%d_%d", endLabel, i)
+			if !c.IsDefault {
+				ast.Walk(v, c.Expr)
+				v.addCode("CMP %s, %s", v.getReturnRegister(), r)
+				v.addCode("BEQ CASE%d_%d", endLabel, i)
+			} else {
+				v.addCode("B CASE%d_%d", endLabel, i)
+			}
 		}
+		v.addCode("B END%d", endLabel)
 		v.freeRegisters.Push(r)
 		for i, c := range node.Cases {
 			v.addCode("CASE%d_%d:", endLabel, i)
