@@ -1,0 +1,37 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  doSomething(a, b) is
+    return a[b]
+  end
+  doSomething2(a, b) is
+    return a[b]
+  end
+  bools := [ false, true ] ;
+  bb := [bools, bools] ;
+  bbbb := [bb, bb] ;
+  i := 1 ;
+  answer := call doSomething(bb, i) ;
+  print "answer is " ;
+  println answer ;
+  println answer[0] ;
+  println answer[1] ;
+  answer2 := call doSomething2(bbbb, 0) ;
+  print "answer2 is " ;
+  println answer2 ;
+  println answer2[0] ;
+  println answer2[1] ;
+  println answer2[0][0] ;
+  println answer2[0][1] ;
+  println answer2[1][0] ;
+  println answer2[1][1] ;
+  exit 0
+end
