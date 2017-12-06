@@ -171,7 +171,7 @@ func (node ArrayTypeNode) GetDimElement(dim int) TypeNode {
 	var t TypeNode
 	t = node
 	for i := 0; i < dim; i++ {
-		t = t.(ArrayTypeNode).T
+		t = ToValue(t).(ArrayTypeNode).T
 	}
 	return t
 }
