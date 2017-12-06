@@ -34,7 +34,6 @@ func contains(check *TypeChecker, arr []ast.TypeNode, t ast.TypeNode) bool {
 func checkEquals(check *TypeChecker, expecting ast.TypeNode, seen ast.TypeNode) bool {
 	expectingValue := ast.ToValue(expecting)
 	seenValue := ast.ToValue(seen)
-	//fmt.Println(fmt.Sprintf("checkEquals expect %s and seen %s", expectingValue, seenValue))
 	switch seenValue.(type) {
 	case ast.ArrayTypeNode:
 		if found, ok := expectingValue.(ast.ArrayTypeNode); ok {
@@ -78,12 +77,6 @@ func checkEquals(check *TypeChecker, expecting ast.TypeNode, seen ast.TypeNode) 
 		return expectingValue.Equals(seenValue)
 	case ast.NullTypeNode:
 		return true
-	default:
-		// fmt.Println(reflect.TypeOf(seen))
-		// fmt.Println(reflect.TypeOf(seenValue))
-		// fmt.Println(reflect.TypeOf(expecting))
-		// fmt.Println(reflect.TypeOf(expectingValue))
-		// fmt.Println("Unknown type for checkEquals")
 	}
 	return false
 }
@@ -92,27 +85,22 @@ func checkEquals(check *TypeChecker, expecting ast.TypeNode, seen ast.TypeNode) 
 func (exp SetExpectance) seen(check *TypeChecker, typeNode ast.TypeNode) TypeError {
 	validTypes := exp.set
 	redoSeen := false
-	//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
 	if dyn, ok := typeNode.(*ast.DynamicTypeNode); ok {
 		if _, ok := validTypes[0].(*ast.NullTypeNode); !ok && typeNode != nil {
 			if newType, ok := dyn.ReduceSet(validTypes); ok {
-				//fmt.Println(fmt.Sprintf("Reduced seen to %s", newType))
-				redoSeen = true
+				redoSeen = (newType != typeNode)
 				typeNode = newType
 			} else {
 				return NewTypeError(typeNode, validTypes)
 			}
 		}
 	}
-	//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+
 	if dyn, ok := validTypes[0].(*ast.DynamicTypeNode); len(validTypes) == 1 && ok {
 		if _, ok := typeNode.(*ast.NullTypeNode); !ok && typeNode != nil {
-			//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
 			if newType, ok := dyn.ReduceSet([]ast.TypeNode{typeNode}); ok {
-				//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
-				redoSeen = true
+				redoSeen = (newType != validTypes[0])
 				validTypes[0] = newType
-				//fmt.Println(fmt.Sprintf("Reduced expect to %s", validTypes[0]))
 			} else {
 				return NewTypeError(typeNode, validTypes)
 			}
@@ -122,8 +110,9 @@ func (exp SetExpectance) seen(check *TypeChecker, typeNode ast.TypeNode) TypeErr
 		return NewSetExpectance(validTypes).seen(check, typeNode)
 	}
 
-	//fmt.Println(fmt.Sprintf("Final seen is: %s   Final expect is: %s", typeNode, validTypes))
-	//fmt.Println(fmt.Sprintf("Seen is now %s", typeNode))
+	if _, ok := typeNode.(*ast.DynamicTypeNode); ok {
+		return TypeError{}
+	}
 	if contains(check, validTypes, typeNode) {
 		return TypeError{}
 	}
@@ -223,9 +212,7 @@ func (check *TypeChecker) seen(t ast.TypeNode) TypeError {
 	expectance := check.stack[len(check.stack)-1]
 	check.stack = check.stack[:len(check.stack)-1]
 
-	e := expectance.seen(check, t)
-	//fmt.Printf("Seen done %s  -- p %T: &p=%p p=&i=%p \n", t, t, &t, t)
-	return e
+	return expectance.seen(check, t)
 }
 
 // StripType is used to remove the type of Arrays and Pairs, which is useful
@@ -328,28 +315,9 @@ func (check *TypeChecker) freeze(node ast.ProgramNode) {
 	check.frozenNode = node
 }
 
-// isSameNode Compares equality of ProgramNodes. As FunctionCallNode and ArrayElementNode
-// are not comparable with the == operator, we define our own function that compares types first.
-func isSameNode(n1 ast.ProgramNode, n2 ast.ProgramNode) bool {
-	_, n1FunctionCall := n1.(*ast.FunctionCallNode)
-	_, n2FunctionCall := n2.(*ast.FunctionCallNode)
-	_, n1ArrayElement := n1.(*ast.ArrayElementNode)
-	_, n2ArrayElement := n2.(*ast.ArrayElementNode)
-
-	if (n1FunctionCall && n2FunctionCall) ||
-		(n1ArrayElement && n2ArrayElement) {
-		return true
-	} else if !n1FunctionCall && !n2FunctionCall &&
-		!n1ArrayElement && !n2ArrayElement {
-		return n1 == n2
-	} else {
-		return false
-	}
-}
-
 // unfreeze will unfreeze the checker, if the given node is the same as the frozen node.
 func (check *TypeChecker) unfreeze(node ast.ProgramNode) {
-	if node == check.frozenNode { // isSameNode(node, check.frozenNode) {
+	if node == check.frozenNode {
 		if ast.DebugMode {
 			fmt.Printf("Unfrozen on %s\n", node)
 		}
