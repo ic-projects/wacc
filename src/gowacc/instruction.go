@@ -1,6 +1,12 @@
 package main
 
-import "utils"
+import (
+	"bytes"
+	"fmt"
+	"utils"
+)
+
+const ERROR = "ERROR"
 
 // Instruction is an interface for assembly instructions to implement.
 type Instruction interface {
@@ -30,6 +36,34 @@ const (
 	LT
 )
 
+func (cond Condition) armCondition() string {
+	switch cond {
+	case EQ:
+		return "EQ"
+	case NE:
+		return "NE"
+	case GE:
+		return "GE"
+	case GT:
+		return "GT"
+	case LE:
+		return "LE"
+	case LT:
+		return "LT"
+	default:
+		return ""
+	}
+}
+
+/**************** SET ****************/
+
+func armSet(set bool) string {
+	if set {
+		return "S"
+	}
+	return ""
+}
+
 /**************** OPERAND ****************/
 
 // Shift is an enum of supported logical / arithmetic / rotate shifts.
@@ -44,6 +78,17 @@ const (
 	ASR
 )
 
+func (shift Shift) armShift() string {
+	switch shift {
+	case LSL:
+		return "LSL"
+	case ASR:
+		return "ASR"
+	default:
+		return ""
+	}
+}
+
 // Operand is a shifted register or an immediate operand.
 type Operand interface {
 	// armOperand returns an ARM assembly operand2
@@ -57,8 +102,34 @@ type RegisterOperand struct {
 	ShiftVal  int
 }
 
-// ImmediateOperand is an immediate value.
+// Reg{, ShiftType #ShiftVal}
+func (op RegisterOperand) armOperand() string {
+	if op.ShiftType == NONE || op.ShiftVal == 0 {
+		return op.Reg.String()
+	}
+	return fmt.Sprintf(
+		"%s, %s %d",
+		op.Reg.String(),
+		op.ShiftType.armShift(),
+		op.ShiftVal,
+	)
+}
+
+// ImmediateOperand is an immediate integer value.
 type ImmediateOperand int
+
+// #ImmediateOperand
+func (op ImmediateOperand) armOperand() string {
+	return fmt.Sprintf("#%d", int(op))
+}
+
+// ImmediateCharOperand is an immediate character value.
+type ImmediateCharOperand string
+
+// #'ImmediateCharOperand'
+func (op ImmediateCharOperand) armOperand() string {
+	return fmt.Sprintf("#'%s'", string(op))
+}
 
 /**************** ADDRESS ****************/
 
@@ -71,13 +142,31 @@ type Address interface {
 // LabelAddress is a label.
 type LabelAddress string
 
+// =LabelAddress
+func (label LabelAddress) armAddress() string {
+	return fmt.Sprintf("=%s", string(label))
+}
+
 // ConstantAddress is an integer address.
 type ConstantAddress int
+
+// =ConstantAddress
+func (addr ConstantAddress) armAddress() string {
+	return fmt.Sprintf("=%d", int(addr))
+}
 
 // PreIndexedAddress is a register value + an offset.
 type PreIndexedAddress struct {
 	Reg    utils.Register
 	Offset int
+}
+
+// [Reg{, Offset}]
+func (addr PreIndexedAddress) armAddress() string {
+	if addr.Offset == 0 {
+		return fmt.Sprintf("[%s]", addr.Reg.String())
+	}
+	return fmt.Sprintf("[%s, #%d]", addr.Reg.String(), addr.Offset)
 }
 
 /**************** MOVEMENT ****************/
@@ -93,6 +182,15 @@ type Move struct {
 }
 
 // MOV{Cond}{S} Rd, Op2
+func (instr Move) armAssembly() string {
+	return fmt.Sprintf(
+		"MOV%s%s %s, %s",
+		instr.Cond.armCondition(),
+		armSet(instr.Set),
+		instr.Rd.String(),
+		instr.Op2.armOperand(),
+	)
+}
 
 /**************** ARITHMETIC INSTRUCTIONS ****************/
 
@@ -101,12 +199,24 @@ type ArithmeticInstructionType int
 
 const (
 	// ADD Add
-	ADD Condition = iota
+	ADD ArithmeticInstructionType = iota
 	// SUB Subtract
 	SUB
 	// RSB Reverse subtract
 	RSB
 )
+
+func (instr ArithmeticInstructionType) armInstruction() string {
+	switch instr {
+	case ADD:
+		return "ADD"
+	case SUB:
+		return "SUB"
+	case RSB:
+		return "RSB"
+	}
+	return ERROR
+}
 
 // ArithmeticInstruction is the base struct for all arithmetic instructions.
 //
@@ -123,6 +233,17 @@ type ArithmeticInstruction struct {
 }
 
 // Instr{Cond}{S} Rd, Rs, Op2
+func (instr ArithmeticInstruction) armAssembly() string {
+	return fmt.Sprintf(
+		"%s%s%s %s, %s, %s",
+		instr.Instr.armInstruction(),
+		instr.Cond.armCondition(),
+		armSet(instr.Set),
+		instr.Rd.String(),
+		instr.Rs.String(),
+		instr.Op2.armOperand(),
+	)
+}
 
 /**************** COMPARE INSTRUCTIONS ****************/
 
@@ -131,11 +252,19 @@ type ArithmeticInstruction struct {
 // E.g. CMP: if Cond then update flags using Rn - Op2
 type Compare struct {
 	Cond Condition
-	Rs   utils.Register
+	Rn   utils.Register
 	Op2  Operand
 }
 
 // CMP{Cond} Rn, Op2
+func (instr Compare) armAssembly() string {
+	return fmt.Sprintf(
+		"CMP%s %s, %s",
+		instr.Cond.armCondition(),
+		instr.Rn.String(),
+		instr.Op2.armOperand(),
+	)
+}
 
 /**************** LOGICAL INSTRUCTIONS ****************/
 
@@ -144,12 +273,24 @@ type LogicalInstructionType int
 
 const (
 	// AND Logical and
-	AND Condition = iota
+	AND LogicalInstructionType = iota
 	// EOR Exclusive or
 	EOR
 	// ORR Logical or
 	ORR
 )
+
+func (instr LogicalInstructionType) armInstruction() string {
+	switch instr {
+	case AND:
+		return "AND"
+	case EOR:
+		return "EOR"
+	case ORR:
+		return "ORR"
+	}
+	return ERROR
+}
 
 // LogicalInstruction is the base struct for all logical instructions.
 //
@@ -157,14 +298,26 @@ const (
 // E.g. EOR: if Cond then Rd := Rs EOR Op2; if Set then update flags
 // E.g. ORR: if Cond then Rd := Rs OR Op2; if Set then update flags
 type LogicalInstruction struct {
-	Cond Condition
-	Set  bool
-	Rd   utils.Register
-	Rs   utils.Register
-	Op2  Operand
+	Instr LogicalInstructionType
+	Cond  Condition
+	Set   bool
+	Rd    utils.Register
+	Rs    utils.Register
+	Op2   Operand
 }
 
 // Instr{Cond}{S} Rd, Rs, Op2
+func (instr LogicalInstruction) armAssembly() string {
+	return fmt.Sprintf(
+		"%s%s%s %s, %s, %s",
+		instr.Instr.armInstruction(),
+		instr.Cond.armCondition(),
+		armSet(instr.Set),
+		instr.Rd.String(),
+		instr.Rs.String(),
+		instr.Op2.armOperand(),
+	)
+}
 
 /**************** MULTIPLY INSTRUCTIONS ****************/
 
@@ -179,7 +332,22 @@ type SignedMultiply struct {
 	Rs   utils.Register
 }
 
-// SMULL{Cond}{S} RdLo, RdHi, Rm {, Rs}
+// SMULL{Cond}{S} RdLo, RdHi, Rm{, Rs}
+func (instr SignedMultiply) armAssembly() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf(
+		"SMULL%s%s %s, %s, %s",
+		instr.Cond.armCondition(),
+		armSet(instr.Set),
+		instr.RdLo.String(),
+		instr.RdHi.String(),
+		instr.Rm.String(),
+	))
+	if instr.Rs != utils.UNDEFINED {
+		buf.WriteString(fmt.Sprintf(", %s", instr.Rs.String()))
+	}
+	return buf.String()
+}
 
 /**************** BRANCHING ****************/
 
@@ -193,7 +361,22 @@ type Branch struct {
 	Addr Address
 }
 
+func armLink(link bool) string {
+	if link {
+		return "L"
+	}
+	return ""
+}
+
 // B{Link}{Cond} Addr
+func (instr Branch) armAssembly() string {
+	return fmt.Sprintf(
+		"B%s%s %s",
+		armLink(instr.Link),
+		instr.Cond.armCondition(),
+		instr.Addr.armAddress(),
+	)
+}
 
 /**************** SINGLE REGISTER DATA TRANSFER ****************/
 
@@ -207,6 +390,16 @@ const (
 	STR
 )
 
+func (instr DataTransferInstructionType) armInstruction() string {
+	switch instr {
+	case LDR:
+		return "LDR"
+	case STR:
+		return "STR"
+	}
+	return ERROR
+}
+
 // Size is an enum of load / store sizes.
 type Size int
 
@@ -218,6 +411,17 @@ const (
 	// SB Signed Byte
 	SB
 )
+
+func (size Size) armSize() string {
+	switch size {
+	case B:
+		return "B"
+	case SB:
+		return "SB"
+	default:
+		return ""
+	}
+}
 
 // DataTransferInstruction is the base struct for all data transfer
 // instructions.
@@ -233,6 +437,16 @@ type DataTransferInstruction struct {
 }
 
 // Instr{Cond}{Size} Rd, Addr
+func (instr DataTransferInstruction) armAssembly() string {
+	return fmt.Sprintf(
+		"%s%s%s %s, %s",
+		instr.Instr.armInstruction(),
+		instr.Cond.armCondition(),
+		instr.Size.armSize(),
+		instr.Rd.String(),
+		instr.Addr.armAddress(),
+	)
+}
 
 /**************** STACK ****************/
 
@@ -241,18 +455,46 @@ type StackInstructionType int
 
 const (
 	// PUSH Push
-	PUSH DataTransferInstructionType = iota
+	PUSH StackInstructionType = iota
 	// POP Pop
 	POP
 )
+
+func (instr StackInstructionType) armInstruction() string {
+	switch instr {
+	case PUSH:
+		return "PUSH"
+	case POP:
+		return "POP"
+	}
+	return ERROR
+}
 
 // StackInstruction is the base struct for all stack instructions.
 //
 // E.g. PUSH: if Cond then PUSH Reglist
 // E.g. POP: if Cond then POP Reglist
 type StackInstruction struct {
+	Instr   StackInstructionType
 	Cond    Condition
 	Reglist []utils.Register
 }
 
 // Instr{Cond} Reglist
+func (instr StackInstruction) armAssembly() string {
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf(
+		"%s%s {",
+		instr.Instr.armInstruction(),
+		instr.Cond.armCondition(),
+	))
+	for i, r := range instr.Reglist {
+		if i == 0 {
+			buf.WriteString(r.String())
+		} else {
+			buf.WriteString(fmt.Sprintf(", %s", r.String()))
+		}
+	}
+	buf.WriteString("}")
+	return buf.String()
+}
