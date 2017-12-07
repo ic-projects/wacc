@@ -14,7 +14,7 @@ GRAMMAR = src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
 
 # Generated Files / Binaries
 BINARY = bin/gowacc
-GENERATED = src/grammar/wacc.go
+GENERATED = src/grammar/wacc.go *.s
 
 # ***************** BUILDING ****************
 
