@@ -12,6 +12,13 @@ type ExpressionNode interface {
 	ProgramNode
 }
 
+type ExpressionHolderNode interface {
+	ProgramNode
+	MapExpressions(Mapper)
+}
+
+type Mapper func(ProgramNode) ExpressionNode
+
 /**************** EXPRESSION HELPER FUNCTIONS ****************/
 
 // Type returns the correct TypeNode for a given ExpressionNode

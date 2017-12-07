@@ -42,6 +42,12 @@ func (node *ArrayLiteralNode) String() string {
 	return writeExpressionsString("ARRAY LITERAL", node.Exprs)
 }
 
+func (node *ArrayLiteralNode) MapExpressions(m Mapper) {
+	for i, e := range node.Exprs {
+		node.Exprs[i] = m(e)
+	}
+}
+
 func (node *ArrayLiteralNode) walkNode(visitor Visitor) {
 	for _, e := range node.Exprs {
 		Walk(visitor, e)
@@ -81,6 +87,11 @@ func (node *NewPairNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintln("- SND"), "  "))
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
+}
+
+func (node *NewPairNode) MapExpressions(m Mapper) {
+	node.Fst = m(node.Fst)
+	node.Snd = m(node.Snd)
 }
 
 func (node *NewPairNode) walkNode(visitor Visitor) {
@@ -131,6 +142,12 @@ func (node *FunctionCallNode) String() string {
 	return buf.String()
 }
 
+func (node *FunctionCallNode) MapExpressions(m Mapper) {
+	for i, e := range node.Exprs {
+		node.Exprs[i] = m(e)
+	}
+}
+
 func (node *FunctionCallNode) walkNode(visitor Visitor) {
 	for _, e := range node.Exprs {
 		Walk(visitor, e)
@@ -168,6 +185,12 @@ func NewStructNewNode(
 
 func (node *StructNewNode) String() string {
 	return writeExpressionsString(fmt.Sprintf("NEW struct %s\n", node.Ident), node.Exprs)
+}
+
+func (node *StructNewNode) MapExpressions(m Mapper) {
+	for i, e := range node.Exprs {
+		node.Exprs[i] = m(e)
+	}
 }
 
 func (node *StructNewNode) walkNode(visitor Visitor) {
