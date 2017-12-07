@@ -14,7 +14,7 @@ GRAMMAR = src/grammar/bootstrap.peg src/grammar/wacc.peg src/grammar/*.peg
 
 # Generated Files / Binaries
 BINARY = bin/gowacc
-GENERATED = src/grammar/wacc.go *.s
+GENERATED = src/grammar/wacc.go
 
 # ***************** BUILDING ****************
 
@@ -65,6 +65,7 @@ docs:
 clean:
 	rm -rf $(BINARY)
 	rm -rf $(GENERATED)
+	rm -rf *.s
 
 clean-lib:
 	rm -rf lib
