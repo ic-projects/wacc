@@ -1,0 +1,109 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct Node is
+  lhs ;
+  rhs ;
+  value ;
+end
+
+begin
+  addNumber(cur, n) is
+  if cur == null
+  then
+    x := new Node(null, null, n) ;
+    return x
+  else
+    if n == cur.value
+    then
+      return cur
+    else
+      if n > cur.value
+      then
+        cur.rhs = call addNumber(cur.rhs, n)
+      else
+        cur.lhs = call addNumber(cur.lhs, n)
+      fi
+    fi
+  fi ;
+  return cur
+  end
+
+  printTree(n) is
+    if n != null
+    then
+      println "=============" ;
+      x := call Tree(n) ;
+      println "" ;
+      x = call printorder(n) ;
+      println "" 
+    else
+      skip
+    fi ;
+    return 0
+  end
+
+  Tree(n) is
+    if n != null
+    then
+      print "[" ;
+      print n.value ;
+      print " -> " ;
+      x := call Tree(n.lhs) ;
+      x = call Tree(n.rhs) ;
+      print "]"
+    else
+      skip
+    fi ;
+    return 0
+  end
+
+  printorder(n) is
+  if n != null
+  then
+    lhs := call printorder(n.lhs) ;
+    print "[" ;
+    print n.value ;
+    print "]" ;
+    rhs := call printorder(n.rhs)
+  else
+    skip
+  fi ;
+  return 0
+  end
+
+  t := new Node(null, null, 10) ;
+  x := call printTree(t) ;
+
+  t = call addNumber(t, 13) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 1) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 2) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 6) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 5) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 100) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 101) ;
+  x = call printTree(t) ;
+
+  t = call addNumber(t, 12) ;
+  x = call printTree(t) ;
+  exit 0
+end

@@ -143,9 +143,9 @@ func (node *FunctionCallNode) walkNode(visitor Visitor) {
 // struct.
 type StructNewNode struct {
 	Pos        utils.Position
-	T          *StructTypeNode
 	Exprs      []ExpressionNode
 	StructNode *StructNode
+	Ident      *IdentifierNode
 }
 
 // SetStructType replaces a StructNewNode's StructNode.
@@ -161,13 +161,13 @@ func NewStructNewNode(
 ) *StructNewNode {
 	return &StructNewNode{
 		Pos:   pos,
-		T:     NewStructTypeNode(ident),
 		Exprs: exprs,
+		Ident: ident,
 	}
 }
 
 func (node *StructNewNode) String() string {
-	return writeExpressionsString(fmt.Sprintf("NEW %s\n", node.T), node.Exprs)
+	return writeExpressionsString(fmt.Sprintf("NEW struct %s\n", node.Ident), node.Exprs)
 }
 
 func (node *StructNewNode) walkNode(visitor Visitor) {

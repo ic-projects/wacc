@@ -501,8 +501,10 @@ func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 // indicating if an error occurred.
 func (node *DynamicTypeNode) ReduceSet(ts []TypeNode) (TypeNode, bool) {
 	// Dynamic type saw another dynamic type
-	if dyn, ok := ts[0].(*DynamicTypeNode); len(ts) == 1 && ok {
-		return node.reduce(dyn)
+	if len(ts) == 1 {
+		if dyn, ok := ts[0].(*DynamicTypeNode); ok {
+			return node.reduce(dyn)
+		}
 	}
 	if node.T.init {
 		newSet := make([]TypeNode, 0)
