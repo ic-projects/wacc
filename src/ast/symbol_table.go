@@ -114,6 +114,9 @@ func (table *SymbolTable) Reset() {
 
 func (node *SymbolTableNode) Reset() {
 	node.lastScope = -1
+	for _, n := range node.Scope {
+		n.IsDeclared = false
+	}
 	for _, n := range node.ChildScopes {
 		n.Reset()
 	}
