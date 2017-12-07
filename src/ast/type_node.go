@@ -9,6 +9,7 @@ import (
 type TypeNode interface {
 	fmt.Stringer
 	Equals(TypeNode) bool
+	Hash() string
 }
 
 /**************** TYPE NODE HELPER FUNCTIONS ****************/
@@ -94,6 +95,24 @@ func (t BaseType) String() string {
 	return ""
 }
 
+func (t BaseType) Hash() string {
+	switch t {
+	case INT:
+		return "0"
+	case BOOL:
+		return "1"
+	case CHAR:
+		return "2"
+	case STRING:
+		return "2_"
+	case PAIR:
+		return "4"
+	case VOID:
+		return "5"
+	}
+	return ""
+}
+
 /**************** BASE TYPE NODE ****************/
 
 // BaseTypeNode is a struct that stores a BaseType.
@@ -122,6 +141,10 @@ func (node BaseTypeNode) Equals(t TypeNode) bool {
 		return true
 	}
 	return false
+}
+
+func (node BaseTypeNode) Hash() string {
+	return node.T.Hash()
 }
 
 /**************** ARRAY TYPE NODE ****************/
@@ -204,6 +227,10 @@ func (node ArrayTypeNode) Equals(t TypeNode) bool {
 	return false
 }
 
+func (node ArrayTypeNode) Hash() string {
+	return node.T.Hash() + "_"
+}
+
 /**************** PAIR TYPE NODE ****************/
 
 // PairTypeNode is a struct that stores the types of the first and second
@@ -244,6 +271,10 @@ func (node PairTypeNode) Equals(t TypeNode) bool {
 	return false
 }
 
+func (node PairTypeNode) Hash() string {
+	return "4"
+}
+
 /**************** NULL TYPE NODE ****************/
 
 // NullTypeNode is an empty struct used to represent a null type.
@@ -266,6 +297,10 @@ func (node *NullTypeNode) walkNode(visitor Visitor) {
 func (node NullTypeNode) Equals(t TypeNode) bool {
 	_, ok := ToValue(t).(NullTypeNode)
 	return ok
+}
+
+func (node NullTypeNode) Hash() string {
+	return "4"
 }
 
 /**************** STRUCT TYPE NODE ****************/
@@ -305,6 +340,10 @@ func (node StructTypeNode) Equals(t TypeNode) bool {
 	return false
 }
 
+func (node StructTypeNode) Hash() string {
+	return "6"
+}
+
 /**************** POINTER TYPE NODE ****************/
 
 type PointerTypeNode struct {
@@ -329,6 +368,10 @@ func (node PointerTypeNode) Equals(t TypeNode) bool {
 		return arr.T.Equals(node.T)
 	}
 	return false
+}
+
+func (node PointerTypeNode) Hash() string {
+	return node.T.Hash()
 }
 
 /**************** DYNAMIC TYPE NODE ****************/
@@ -415,6 +458,10 @@ func (node *DynamicTypeNode) changeToWatch(other *DynamicTypeNode) {
 		watcher.T = node.T
 	}
 	node.T = other.T
+}
+
+func (node DynamicTypeNode) Hash() string {
+	return node.getValue().Hash()
 }
 
 func (node InternalDynamicType) String() string {
