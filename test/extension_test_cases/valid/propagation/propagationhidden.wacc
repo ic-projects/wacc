@@ -1,0 +1,26 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  println ord chr 6 ;
+  println 17 + 18 * 2 ;
+  p := newpair(17 + 18, false || -7 <= -6) ;
+  fst p = 8 * 8 - 2 ;
+  if true || false
+  then
+    skip
+  else
+      skip
+  fi ;
+  a := [0 , 1 , 2, 3 + 3 * 9] ;
+  println a ;
+  println a[0 + 0 + 1 + 1 + 1 - 1] ;
+  exit 0
+end

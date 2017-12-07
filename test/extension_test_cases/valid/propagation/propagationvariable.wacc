@@ -1,0 +1,23 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  a := 1 + 1 + 2 ;
+  a2 := a + 1;
+  a3 := a2 + a * 6 * a ;
+  array := [0,1,2,3,40,5] ;
+  if a + 9 == 13
+  then
+    println array[a]
+  else
+    skip
+  fi ;
+  exit 0
+end

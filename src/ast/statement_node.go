@@ -120,6 +120,10 @@ func (node *DeclareNode) String() string {
 	return buf.String()
 }
 
+func (node *DeclareNode) MapExpressions(m Mapper) {
+	node.RHS = m(node.RHS)
+}
+
 func (node *DeclareNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.RHS)
 }
@@ -156,6 +160,10 @@ func (node *AssignNode) String() string {
 	return buf.String()
 }
 
+func (node *AssignNode) MapExpressions(m Mapper) {
+	node.RHS = m(node.RHS)
+}
+
 func (node *AssignNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.LHS)
 	Walk(visitor, node.RHS)
@@ -183,6 +191,9 @@ func NewReadNode(pos utils.Position, lhs LHSNode) *ReadNode {
 
 func (node *ReadNode) String() string {
 	return writeSimpleString("READ", node.LHS)
+}
+
+func (node *ReadNode) MapExpressions(m Mapper) {
 }
 
 func (node *ReadNode) walkNode(visitor Visitor) {
@@ -213,6 +224,10 @@ func (node *FreeNode) String() string {
 	return writeSimpleString("FREE", node.Expr)
 }
 
+func (node *FreeNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *FreeNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 }
@@ -239,6 +254,10 @@ func NewReturnNode(pos utils.Position, expr ExpressionNode) *ReturnNode {
 
 func (node *ReturnNode) String() string {
 	return writeSimpleString("RETURN", node.Expr)
+}
+
+func (node *ReturnNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
 }
 
 func (node *ReturnNode) walkNode(visitor Visitor) {
@@ -269,6 +288,10 @@ func (node *ExitNode) String() string {
 	return writeSimpleString("EXIT", node.Expr)
 }
 
+func (node *ExitNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *ExitNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 }
@@ -297,6 +320,10 @@ func (node *PrintNode) String() string {
 	return writeSimpleString("PRINT", node.Expr)
 }
 
+func (node *PrintNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *PrintNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 }
@@ -323,6 +350,10 @@ func NewPrintlnNode(pos utils.Position, expr ExpressionNode) *PrintlnNode {
 
 func (node *PrintlnNode) String() string {
 	return writeSimpleString("PRINTLN", node.Expr)
+}
+
+func (node *PrintlnNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
 }
 
 func (node *PrintlnNode) walkNode(visitor Visitor) {
@@ -365,6 +396,10 @@ func (node *SwitchNode) String() string {
 		buf.WriteString(utils.Indent(s.String(), "    "))
 	}
 	return buf.String()
+}
+
+func (node *SwitchNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
 }
 
 func (node *SwitchNode) walkNode(visitor Visitor) {
@@ -427,6 +462,10 @@ func (node *CaseNode) String() string {
 	return buf.String()
 }
 
+func (node *CaseNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *CaseNode) walkNode(visitor Visitor) {
 }
 
@@ -476,6 +515,10 @@ func (node *IfNode) String() string {
 	return buf.String()
 }
 
+func (node *IfNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *IfNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 	Walk(visitor, node.IfStats)
@@ -519,6 +562,10 @@ func (node *LoopNode) String() string {
 		buf.WriteString(utils.Indent(s.String(), "    "))
 	}
 	return buf.String()
+}
+
+func (node *LoopNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
 }
 
 func (node *LoopNode) walkNode(visitor Visitor) {
@@ -575,6 +622,10 @@ func (node *ForLoopNode) String() string {
 	return buf.String()
 }
 
+func (node *ForLoopNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *ForLoopNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Initial)
 	Walk(visitor, node.Expr)
@@ -609,6 +660,9 @@ func (node *ScopeNode) String() string {
 		buf.WriteString(utils.Indent(s.String(), "  "))
 	}
 	return buf.String()
+}
+
+func (node *ScopeNode) MapExpressions(m Mapper) {
 }
 
 func (node *ScopeNode) walkNode(visitor Visitor) {

@@ -73,6 +73,10 @@ func (node *PairFirstElementNode) String() string {
 	return writeSimpleString("FST", node.Expr)
 }
 
+func (node *PairFirstElementNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
+}
+
 func (node *PairFirstElementNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 }
@@ -110,6 +114,10 @@ func NewPairSecondElementNode(
 
 func (node *PairSecondElementNode) String() string {
 	return writeSimpleString("SND", node.Expr)
+}
+
+func (node *PairSecondElementNode) MapExpressions(m Mapper) {
+	node.Expr = m(node.Expr)
 }
 
 func (node *PairSecondElementNode) walkNode(visitor Visitor) {
@@ -157,6 +165,12 @@ func (node *ArrayElementNode) String() string {
 		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
+}
+
+func (node *ArrayElementNode) MapExpressions(m Mapper) {
+	for i, e := range node.Exprs {
+		node.Exprs[i] = m(e)
+	}
 }
 
 func (node *ArrayElementNode) walkNode(visitor Visitor) {

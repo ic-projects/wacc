@@ -12,6 +12,13 @@ type ExpressionNode interface {
 	ProgramNode
 }
 
+type ExpressionHolderNode interface {
+	ProgramNode
+	MapExpressions(Mapper)
+}
+
+type Mapper func(ProgramNode) ExpressionNode
+
 /**************** EXPRESSION HELPER FUNCTIONS ****************/
 
 // Type returns the correct TypeNode for a given ExpressionNode
@@ -35,8 +42,6 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 		}
 	case *NullNode:
 		return NewNullTypeNode()
-	case *PairTypeNode:
-		return NewBaseTypeNode(PAIR)
 	case *IntegerLiteralNode:
 		return NewBaseTypeNode(INT)
 	case *BooleanLiteralNode:
@@ -48,8 +53,6 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	case *ArrayElementNode:
 		a, _ := s.SearchForIdent(node.Ident.Ident)
 		return ToValue(a.T).(ArrayTypeNode).GetDimElement(len(node.Exprs))
-	case *DynamicTypeNode:
-		return node.getValue()
 	case *StructElementNode:
 		return node.StructType.T
 	case *IdentifierNode:
@@ -223,11 +226,11 @@ func (binOp BinaryOperator) String() string {
 //  7
 type IntegerLiteralNode struct {
 	Pos utils.Position
-	Val int
+	Val int64
 }
 
 // NewIntegerLiteralNode builds an IntegerLiteralNode
-func NewIntegerLiteralNode(pos utils.Position, val int) *IntegerLiteralNode {
+func NewIntegerLiteralNode(pos utils.Position, val int64) *IntegerLiteralNode {
 	return &IntegerLiteralNode{
 		Pos: pos,
 		Val: val,

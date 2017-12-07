@@ -1,0 +1,23 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  a := 1 + 1 + 2 ;
+  b := 7 >= 5 ;
+  c := ((7 >= 5) && (!true)) || true ;
+  d := ord chr 6 ;
+  e := ((8 * 6) % 4) / 3;
+  println a ;
+  println b ;
+  println c ;
+  println ord chr 6 ;
+  println d ;
+  exit 0
+end

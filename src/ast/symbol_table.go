@@ -62,6 +62,8 @@ type IdentifierDeclaration struct {
 	Ident      *IdentifierNode
 	Location   *utils.Location
 	IsDeclared bool
+	Value      ExpressionNode
+	HasValue   bool
 }
 
 // NewIdentifierDeclaration builds an Identifier Declaration.
@@ -73,6 +75,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 			T:          node.T,
 			Ident:      node.Ident,
 			IsDeclared: false,
+			HasValue:   false,
 		}
 	case *DeclareNode:
 		a := &IdentifierDeclaration{
@@ -80,6 +83,7 @@ func NewIdentifierDeclaration(programNode ProgramNode) *IdentifierDeclaration {
 			T:          node.T,
 			Ident:      node.Ident,
 			IsDeclared: false,
+			HasValue:   false,
 		}
 		return a
 	default:
@@ -92,7 +96,50 @@ func (dec *IdentifierDeclaration) AddLocation(location *utils.Location) {
 	dec.Location = location
 }
 
+func (dec *IdentifierDeclaration) SetValue(value ExpressionNode) {
+	dec.Value = value
+	dec.HasValue = true
+}
+
+func (dec *IdentifierDeclaration) RemoveValue() {
+	dec.HasValue = false
+}
+
+func (table *SymbolTable) DestroyAllConstants() {
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		for _, i := range node.Scope {
+			table.DestroyConstant(i.Ident.Ident)
+		}
+	}
+}
+
+func (table *SymbolTable) DestroyConstant(identifier string) {
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		node, ok := node.Scope[identifier]
+		if ok {
+			if node.IsDeclared {
+				node.RemoveValue()
+			}
+		}
+	}
+}
+
 /**************** MOVING SCOPE HELPER FUNCTIONS ****************/
+
+func (table *SymbolTable) Reset() {
+	table.CurrentScope = table.Head
+	table.Head.Reset()
+}
+
+func (node *SymbolTableNode) Reset() {
+	node.lastScope = -1
+	for _, n := range node.Scope {
+		n.IsDeclared = false
+	}
+	for _, n := range node.ChildScopes {
+		n.Reset()
+	}
+}
 
 // MoveDownScope creates a new Scope such that it is a chile of the
 // currentscope, and then sets the CurrentScope to be the new Scope.
