@@ -135,30 +135,6 @@ const (
 	CHR
 )
 
-func (unOp UnaryOperator) Apply(e ExpressionNode) (ExpressionNode, bool) {
-	switch unOp {
-	case NOT:
-		if b, ok := e.(*BooleanLiteralNode); ok {
-			return NewBooleanLiteralNode(b.Pos, !b.Val), true
-		}
-	case NEG:
-		if b, ok := e.(*IntegerLiteralNode); ok {
-			return NewIntegerLiteralNode(b.Pos, -b.Val), true
-		}
-	case LEN:
-		// TODO
-	case ORD:
-		if b, ok := e.(*CharacterLiteralNode); ok {
-			return NewIntegerLiteralNode(b.Pos, int(b.Val)), true
-		}
-	case CHR:
-		if b, ok := e.(*IntegerLiteralNode); ok {
-			return NewCharacterLiteralNode(b.Pos, rune(b.Val)), true
-		}
-	}
-	return nil, false
-}
-
 func (unOp UnaryOperator) String() string {
 	switch unOp {
 	case NOT:
@@ -208,90 +184,6 @@ const (
 	// OR Or (||)
 	OR
 )
-
-func (binOp BinaryOperator) Apply(e1 ExpressionNode, e2 ExpressionNode) (ExpressionNode, bool) {
-	switch binOp {
-	case OR:
-		b1, ok1 := e1.(*BooleanLiteralNode)
-		b2, ok2 := e2.(*BooleanLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val || b2.Val), true
-		}
-	case AND:
-		b1, ok1 := e1.(*BooleanLiteralNode)
-		b2, ok2 := e2.(*BooleanLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val && b2.Val), true
-		}
-	case MUL:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewIntegerLiteralNode(b1.Pos, b1.Val*b2.Val), true
-		}
-	case DIV:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewIntegerLiteralNode(b1.Pos, b1.Val/b2.Val), true
-		}
-	case MOD:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewIntegerLiteralNode(b1.Pos, b1.Val%b2.Val), true
-		}
-	case SUB:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewIntegerLiteralNode(b1.Pos, b1.Val-b2.Val), true
-		}
-	case ADD:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewIntegerLiteralNode(b1.Pos, b1.Val+b2.Val), true
-		}
-	case GEQ:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val >= b2.Val), true
-		}
-	case GT:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val > b2.Val), true
-		}
-	case LEQ:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val <= b2.Val), true
-		}
-	case LT:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val < b2.Val), true
-		}
-	case EQ:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val == b2.Val), true
-		}
-	case NEQ:
-		b1, ok1 := e1.(*IntegerLiteralNode)
-		b2, ok2 := e2.(*IntegerLiteralNode)
-		if ok1 && ok2 {
-			return NewBooleanLiteralNode(b1.Pos, b1.Val != b2.Val), true
-		}
-	}
-	return nil, false
-}
 
 func (binOp BinaryOperator) String() string {
 	switch binOp {

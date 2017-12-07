@@ -160,12 +160,147 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 		expr1, ok1 := v.simulateFull(t.Expr1)
 		expr2, ok2 := v.simulateFull(t.Expr2)
 		if ok1 && ok2 {
-			return t.Op.Apply(expr1, expr2)
+			return v.ApplyBinary(t, expr1, expr2)
 		}
 	case *ast.UnaryOperatorNode:
 		if expr, ok := v.simulateFull(t.Expr); ok {
-			return t.Op.Apply(expr)
+			return v.ApplyUnary(t, expr)
 		}
 	}
 	return node, false
+}
+
+func (v *Propagator) ApplyUnary(
+	un *ast.UnaryOperatorNode,
+	e ast.ExpressionNode,
+) (ast.ExpressionNode, bool) {
+	switch un.Op {
+	case ast.NOT:
+		if b, ok := e.(*ast.BooleanLiteralNode); ok {
+			return ast.NewBooleanLiteralNode(b.Pos, !b.Val), true
+		}
+	case ast.NEG:
+		if b, ok := e.(*ast.IntegerLiteralNode); ok {
+			//if err, ok := CheckOverflow(-b1.Val); ok {
+			// TODO OverflowError
+			//}
+			return ast.NewIntegerLiteralNode(b.Pos, -b.Val), true
+		}
+	case ast.LEN:
+		// TODO
+	case ast.ORD:
+		if b, ok := e.(*ast.CharacterLiteralNode); ok {
+			return ast.NewIntegerLiteralNode(b.Pos, int(b.Val)), true
+		}
+	case ast.CHR:
+		if b, ok := e.(*ast.IntegerLiteralNode); ok {
+			return ast.NewCharacterLiteralNode(b.Pos, rune(b.Val)), true
+		}
+	}
+	return nil, false
+}
+
+func (v *Propagator) ApplyBinary(
+	binOp *ast.BinaryOperatorNode,
+	e1 ast.ExpressionNode,
+	e2 ast.ExpressionNode,
+) (ast.ExpressionNode, bool) {
+	switch binOp.Op {
+	case ast.OR:
+		b1, ok1 := e1.(*ast.BooleanLiteralNode)
+		b2, ok2 := e2.(*ast.BooleanLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val || b2.Val), true
+		}
+	case ast.AND:
+		b1, ok1 := e1.(*ast.BooleanLiteralNode)
+		b2, ok2 := e2.(*ast.BooleanLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val && b2.Val), true
+		}
+	case ast.MUL:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			//if err, ok := CheckOverflow(b1.Val*b2.Val); ok {
+			// TODO OverflowError
+			//}
+			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val*b2.Val), true
+		}
+	case ast.DIV:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			if b2.Val == 0 {
+				// TODO divide by zero error
+			}
+			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val/b2.Val), true
+		}
+	case ast.MOD:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			if b2.Val == 0 {
+				// TODO mod by zero error
+			}
+			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val%b2.Val), true
+		}
+	case ast.SUB:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			//if err, ok := CheckOverflow(b1.Val-b2.Val); ok {
+			// TODO OverflowError
+			//}
+			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val-b2.Val), true
+		}
+	case ast.ADD:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			//if err, ok := CheckOverflow(b1.Val+b2.Val); ok {
+			// TODO OverflowError
+			//}
+			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val+b2.Val), true
+		}
+	case ast.GEQ:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val >= b2.Val), true
+		}
+	case ast.GT:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val > b2.Val), true
+		}
+	case ast.LEQ:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val <= b2.Val), true
+		}
+	case ast.LT:
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val < b2.Val), true
+		}
+	case ast.EQ:
+		//TODO make for all types
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val == b2.Val), true
+		}
+	case ast.NEQ:
+		//TODO make for all types
+		b1, ok1 := e1.(*ast.IntegerLiteralNode)
+		b2, ok2 := e2.(*ast.IntegerLiteralNode)
+		if ok1 && ok2 {
+			return ast.NewBooleanLiteralNode(b1.Pos, b1.Val != b2.Val), true
+		}
+	}
+	return nil, false
 }
