@@ -105,6 +105,23 @@ func (dec *IdentifierDeclaration) RemoveValue() {
 	dec.HasValue = false
 }
 
+func (table *SymbolTable) DestroyAllConstants() {
+	for _, i := range table.CurrentScope.Scope {
+		table.DestroyConstant(i.Ident.Ident)
+	}
+}
+
+func (table *SymbolTable) DestroyConstant(identifier string) {
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		node, ok := node.Scope[identifier]
+		if ok {
+			if node.IsDeclared {
+				node.RemoveValue()
+			}
+		}
+	}
+}
+
 /**************** MOVING SCOPE HELPER FUNCTIONS ****************/
 
 func (table *SymbolTable) Reset() {

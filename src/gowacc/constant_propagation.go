@@ -36,7 +36,10 @@ func NewPropagator(checker *SemanticCheck) *Propagator {
 func (v *Propagator) Visit(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case *ast.FunctionNode:
+		v.symbolTable.DestroyAllConstants()
 		v.symbolTable.MoveNextScope()
+	case *ast.ReadNode:
+		v.symbolTable.DestroyConstant(node.LHS.(*ast.IdentifierNode).Ident)
 	case ast.Parameters:
 		for _, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
@@ -79,8 +82,10 @@ func (v *Propagator) SetValue(node ast.RHSNode, identDec *ast.IdentifierDeclarat
 func (v *Propagator) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case ast.Statements:
+		v.symbolTable.DestroyAllConstants()
 		v.symbolTable.MoveUpScope()
 	case *ast.FunctionNode:
+		v.symbolTable.DestroyAllConstants()
 		v.symbolTable.MoveUpScope()
 	case *ast.DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
