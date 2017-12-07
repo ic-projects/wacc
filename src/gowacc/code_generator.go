@@ -590,6 +590,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				dec.Location.IsOnHeap = true
 				dec.Location.CurrentPos = v.currentStackPos
 			}
+		} else {
+			// Store the address in the return register
+			v.addCode("LDR %s, %s", register, dec.Location)
 		}
 		v.freeRegisters.Push(valueReg)
 		v.returnRegisters.Push(register)
