@@ -30,21 +30,7 @@ const (
 	LT
 )
 
-/**************** SIZES ****************/
-
-// Size is an enum of load / store sizes.
-type Size int
-
-const (
-	// W Default (Word)
-	W Size = iota
-	// B Unsigned Byte
-	B
-	// SB Signed Byte
-	SB
-)
-
-/**************** SHIFTS ****************/
+/**************** OPERAND ****************/
 
 // Shift is an enum of supported logical / arithmetic / rotate shifts.
 type Shift int
@@ -57,8 +43,6 @@ const (
 	// ASR Arithmetic Shift Right
 	ASR
 )
-
-/**************** OPERAND ****************/
 
 // Operand is a shifted register or an immediate operand.
 type Operand interface {
@@ -98,91 +82,177 @@ type PreIndexedAddress struct {
 
 /**************** MOVEMENT ****************/
 
-// Move
+// Move is a struct for the MOV instruction.
+//
 // E.g. MOV: if Cond then Rd := Op2; if Set then update flags
+type Move struct {
+	Cond Condition
+	Set  bool
+	Rd   utils.Register
+	Op2  Operand
+}
 
 // MOV{Cond}{S} Rd, Op2
 
 /**************** ARITHMETIC INSTRUCTIONS ****************/
 
-// Add
+// ArithmeticInstructionType represents a single arithmetic instruction.
+type ArithmeticInstructionType int
+
+const (
+	// ADD Add
+	ADD Condition = iota
+	// SUB Subtract
+	SUB
+	// RSB Reverse subtract
+	RSB
+)
+
+// ArithmeticInstruction is the base struct for all arithmetic instructions.
+//
 // E.g. ADD: if Cond then Rd := Rs + Op2; if Set then update flags
-
-// ADD{Cond}{S} Rd, Rn, Op2
-
-// Subtract
 // E.g. SUB: if Cond then Rd := Rs - Op2; if Set then update flags
-
-// SUB{Cond}{S} Rd, Rn, Op2
-
-// ReverseSubtract
 // E.g. RSB: if Cond then Rd := Op2 - Rs; if Set then update flags
+type ArithmeticInstruction struct {
+	Instr ArithmeticInstructionType
+	Cond  Condition
+	Set   bool
+	Rd    utils.Register
+	Rs    utils.Register
+	Op2   Operand
+}
 
-// RSB{Cond}{S} Rd, Rn, Op2
+// Instr{Cond}{S} Rd, Rs, Op2
 
 /**************** COMPARE INSTRUCTIONS ****************/
 
-// Compare
+// Compare is a struct for the CMP instruction.
+//
 // E.g. CMP: if Cond then update flags using Rn - Op2
+type Compare struct {
+	Cond Condition
+	Rs   utils.Register
+	Op2  Operand
+}
 
-// AND{Cond} Rn, Op2
+// CMP{Cond} Rn, Op2
 
 /**************** LOGICAL INSTRUCTIONS ****************/
 
-// LogicalAnd
+// LogicalInstructionType represents a single logical instruction.
+type LogicalInstructionType int
+
+const (
+	// AND Logical and
+	AND Condition = iota
+	// EOR Exclusive or
+	EOR
+	// ORR Logical or
+	ORR
+)
+
+// LogicalInstruction is the base struct for all logical instructions.
+//
 // E.g. AND: if Cond then Rd := Rs AND Op2; if Set then update flags
-
-// AND{Cond}{S} Rd, Rn, Op2
-
-// ExclusiveOr
 // E.g. EOR: if Cond then Rd := Rs EOR Op2; if Set then update flags
-
-// EOR{Cond}{S} Rd, Rn, Op2
-
-// LogicalOr
 // E.g. ORR: if Cond then Rd := Rs OR Op2; if Set then update flags
+type LogicalInstruction struct {
+	Cond Condition
+	Set  bool
+	Rd   utils.Register
+	Rs   utils.Register
+	Op2  Operand
+}
 
-// ORR{Cond}{S} Rd, Rn, Op2
+// Instr{Cond}{S} Rd, Rs, Op2
 
 /**************** MULTIPLY INSTRUCTIONS ****************/
 
-// SignedMultiply
+// SignedMultiply is a struct for the SMULL instruction.
 // E.g. SMULL: if Cond then RdHi,RdLo := Rm * Rs; if Set then update flags
+type SignedMultiply struct {
+	Cond Condition
+	Set  bool
+	RdLo utils.Register
+	RdHi utils.Register
+	Rm   utils.Register
+	Rs   utils.Register
+}
 
-// SMULL{Cond}{S} Rd, Rm, Rs {, Rn}
+// SMULL{Cond}{S} RdLo, RdHi, Rm {, Rs}
 
 /**************** BRANCHING ****************/
 
-// Branch
+// Branch is a struct for the B instruction.
+//
 // E.g. B: if Cond then PC := Addr
+// E.g. BL: if Cond then R14 := address of next instruction, PC := Addr
+type Branch struct {
+	Cond Condition
+	Link bool
+	Addr Address
+}
 
-// B{Cond} Addr
-
-// BranchWithLink
-// E.g BL: if Cond then R14 := address of next instruction, PC := Addr
-
-// BL{Cond} Addr
+// B{Link}{Cond} Addr
 
 /**************** SINGLE REGISTER DATA TRANSFER ****************/
 
-// Load
+// DataTransferInstructionType represents a single data transfer instruction.
+type DataTransferInstructionType int
+
+const (
+	// LDR Load
+	LDR DataTransferInstructionType = iota
+	// STR Store
+	STR
+)
+
+// Size is an enum of load / store sizes.
+type Size int
+
+const (
+	// W Default (Word)
+	W Size = iota
+	// B Unsigned Byte
+	B
+	// SB Signed Byte
+	SB
+)
+
+// DataTransferInstruction is the base struct for all data transfer
+// instructions.
+//
 // E.g. LDR: if Cond then Rd := [Addr]
-
-// LDR{Cond}{Size} Rd, Addr
-
-// Store
 // E.g. STR: if Cond then [Addr] := Rd
+type DataTransferInstruction struct {
+	Instr DataTransferInstructionType
+	Cond  Condition
+	Size  Size
+	Rd    utils.Register
+	Addr  Address
+}
 
-// STR{Cond}{Size} Rd, Addr
+// Instr{Cond}{Size} Rd, Addr
 
 /**************** STACK ****************/
 
-// Push
-// E.g. PUSH: if cond then PUSH Reglist
+// StackInstructionType represents a single stack instruction.
+type StackInstructionType int
 
-// PUSH{Cond} Reglist
+const (
+	// PUSH Push
+	PUSH DataTransferInstructionType = iota
+	// POP Pop
+	POP
+)
 
-// Pop
-// E.g. POP: if cond then POP Reglist
+// StackInstruction is the base struct for all stack instructions.
+//
+// E.g. PUSH: if Cond then PUSH Reglist
+// E.g. POP: if Cond then POP Reglist
+type StackInstruction struct {
+	Cond    Condition
+	Reglist []utils.Register
+}
 
-// POP{Cond} Reglist
+// Instr{Cond} Reglist
