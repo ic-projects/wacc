@@ -37,6 +37,11 @@ func main() {
 		false,
 		"Parse the file for syntax and semantic errors and generate an AST.",
 	)
+	optimiseTree := flag.Bool(
+		"optimise",
+		false,
+		"Remove and simplify redudant lines and expressions on the AST.",
+	)
 	printAssembly := flag.Bool(
 		"asm",
 		false,
@@ -74,7 +79,8 @@ func main() {
 		checker := PerformSemanticCheck(tree)
 
 		// Print out all semantic errors that occur
-		if checker.hasErrors() || SimplifyTree(tree, checker).hasErrors() {
+		if checker.hasErrors() ||
+			(*optimiseTree && SimplifyTree(tree, checker).hasErrors()) {
 			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
 			checker.PrintErrors(filepath)
 			os.Exit(200)
