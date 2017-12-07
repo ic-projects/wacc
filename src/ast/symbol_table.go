@@ -106,8 +106,10 @@ func (dec *IdentifierDeclaration) RemoveValue() {
 }
 
 func (table *SymbolTable) DestroyAllConstants() {
-	for _, i := range table.CurrentScope.Scope {
-		table.DestroyConstant(i.Ident.Ident)
+	for node := table.CurrentScope; node != nil; node = node.ParentScope {
+		for _, i := range node.Scope {
+			table.DestroyConstant(i.Ident.Ident)
+		}
 	}
 }
 
