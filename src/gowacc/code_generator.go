@@ -277,7 +277,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		if node.Ident.Ident == "" {
 			v.addFunction("main")
 		} else {
-			v.addFunction("f_" + node.Ident.Ident)
+			var buff bytes.Buffer
+			for _, p := range node.Params {
+				buff.WriteString(p.T.Hash())
+			}
+			v.addFunction("f" + buff.String() + "_" + node.Ident.Ident)
 		}
 		v.addCode("PUSH {lr}")
 	case ast.Parameters:
@@ -587,13 +591,17 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			if i < len(registers) {
 				v.addCode("MOV %s, %s", registers[i], register)
 			} else {
-				f, _ := v.symbolTable.SearchForFunction(node.Ident.Ident)
+				f, _ := v.symbolTable.SearchForFunction(node.Ident.Ident, node.Exprs)
 				v.subtractFromStackPointer(ast.SizeOf(f.Params[i].T))
 				v.addCode("%s %s, [sp]", store(ast.SizeOf(f.Params[i].T)), register)
 				size += ast.SizeOf(f.Params[i].T)
 			}
 		}
-		v.addCode("BL f_%s", node.Ident.Ident)
+		var buff bytes.Buffer
+		for _, e := range node.Exprs {
+			buff.WriteString(ast.Type(e, v.symbolTable).Hash())
+		}
+		v.addCode("BL f%s_%s", buff.String(), node.Ident.Ident)
 		if size > 0 {
 			v.addToStackPointer(size)
 		}

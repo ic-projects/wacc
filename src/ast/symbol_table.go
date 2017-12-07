@@ -176,8 +176,27 @@ func (table *SymbolTable) SearchForIdentInCurrentScope(
 // return if it is not found.
 func (table *SymbolTable) SearchForFunction(
 	identifier string,
+	exprs []ExpressionNode,
 ) (*FunctionNode, bool) {
-	node, ok := table.Functions[identifier]
+	var buff bytes.Buffer
+	buff.WriteString(identifier)
+	for _, e := range exprs {
+		buff.WriteString(Type(e, table).Hash())
+	}
+	node, ok := table.Functions[buff.String()]
+	return node, ok
+}
+
+func (table *SymbolTable) SearchForFunctionParams(
+	identifier string,
+	params Parameters,
+) (*FunctionNode, bool) {
+	var buff bytes.Buffer
+	buff.WriteString(identifier)
+	for _, p := range params {
+		buff.WriteString(p.T.Hash())
+	}
+	node, ok := table.Functions[buff.String()]
 	return node, ok
 }
 
@@ -219,7 +238,12 @@ func (table *SymbolTable) AddToScope(
 
 // AddFunction will add a function to the symbolTable
 func (table *SymbolTable) AddFunction(identifier string, node *FunctionNode) {
-	table.Functions[identifier] = node
+	var buff bytes.Buffer
+	buff.WriteString(identifier)
+	for _, p := range node.Params {
+		buff.WriteString(p.T.Hash())
+	}
+	table.Functions[buff.String()] = node
 }
 
 // AddStruct will add a struct to the symbolTable
