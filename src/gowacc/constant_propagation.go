@@ -39,7 +39,11 @@ func (v *Propagator) Visit(programNode ast.ProgramNode) {
 		v.symbolTable.DestroyAllConstants()
 		v.symbolTable.MoveNextScope()
 	case *ast.ReadNode:
-		v.symbolTable.DestroyConstant(node.LHS.(*ast.IdentifierNode).Ident)
+		if i, ok := node.LHS.(*ast.IdentifierNode); ok {
+			v.symbolTable.DestroyConstant(i.Ident)
+		} else if i, ok := node.LHS.(*ast.ArrayElementNode); ok {
+			v.symbolTable.DestroyConstant(i.Ident.Ident)
+		}
 	case ast.Parameters:
 		for _, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
