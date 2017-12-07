@@ -189,7 +189,7 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 			}
 		}
 		v.callLibraryFunction("BL", printReference)
-	case ast.PairTypeNode, ast.StructTypeNode, ast.NullTypeNode:
+	case ast.PairTypeNode, ast.StructTypeNode, ast.NullTypeNode, ast.PointerTypeNode:
 		v.callLibraryFunction("BL", printReference)
 	}
 }
