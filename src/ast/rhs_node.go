@@ -38,7 +38,7 @@ func NewArrayLiteralNode(
 	}
 }
 
-func (node *ArrayLiteralNode) String() string {
+func (node ArrayLiteralNode) String() string {
 	return writeExpressionsString("ARRAY LITERAL", node.Exprs)
 }
 
@@ -48,7 +48,7 @@ func (node *ArrayLiteralNode) MapExpressions(m Mapper) {
 	}
 }
 
-func (node *ArrayLiteralNode) walkNode(visitor Visitor) {
+func (node ArrayLiteralNode) walkNode(visitor Visitor) {
 	for _, e := range node.Exprs {
 		Walk(visitor, e)
 	}
