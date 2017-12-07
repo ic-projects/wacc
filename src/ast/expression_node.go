@@ -7,9 +7,9 @@ import (
 	"utils"
 )
 
-// ExpressionNode is an empty interface for expression nodes to implement.
+// ExpressionNode is an interface for expression nodes to implement.
 type ExpressionNode interface {
-	fmt.Stringer
+	ProgramNode
 }
 
 /**************** EXPRESSION HELPER FUNCTIONS ****************/
@@ -98,6 +98,20 @@ func BuildBinOpTree(
 		first,
 		list[0].([]interface{})[3].(ExpressionNode),
 	)
+}
+
+// Weight returns the number of registers used to evaluate the given
+// ExpressionNode.
+func Weight(n ExpressionNode) int {
+	switch node := n.(type) {
+	case *UnaryOperatorNode:
+		return Weight(node.Expr)
+	case *BinaryOperatorNode:
+		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
+		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
+		return utils.Min(lhsWeight, rhsWeight)
+	}
+	return 1
 }
 
 /**************** UNARY OPERATOR ****************/
@@ -220,8 +234,11 @@ func NewIntegerLiteralNode(pos utils.Position, val int) *IntegerLiteralNode {
 	}
 }
 
-func (node IntegerLiteralNode) String() string {
+func (node *IntegerLiteralNode) String() string {
 	return fmt.Sprintf("- %d", node.Val)
+}
+
+func (node *IntegerLiteralNode) walkNode(visitor Visitor) {
 }
 
 /**************** BOOLEAN LITERAL NODE ****************/
@@ -244,8 +261,11 @@ func NewBooleanLiteralNode(pos utils.Position, val bool) *BooleanLiteralNode {
 	}
 }
 
-func (node BooleanLiteralNode) String() string {
+func (node *BooleanLiteralNode) String() string {
 	return fmt.Sprintf("- %s", strconv.FormatBool(node.Val))
+}
+
+func (node *BooleanLiteralNode) walkNode(visitor Visitor) {
 }
 
 /**************** CHARACTER LITERAL NODE ****************/
@@ -261,14 +281,17 @@ type CharacterLiteralNode struct {
 }
 
 // NewCharacterLiteralNode builds a CharacterLiteralNode
-func NewCharacterLiteralNode(pos utils.Position, val rune) *CharacterLiteralNode {
+func NewCharacterLiteralNode(
+	pos utils.Position,
+	val rune,
+) *CharacterLiteralNode {
 	return &CharacterLiteralNode{
 		Pos: pos,
 		Val: val,
 	}
 }
 
-func (node CharacterLiteralNode) String() string {
+func (node *CharacterLiteralNode) String() string {
 	if node.Val == '\000' {
 		return "- '\\0'"
 	}
@@ -276,6 +299,9 @@ func (node CharacterLiteralNode) String() string {
 		return "- '\\\"'"
 	}
 	return fmt.Sprintf("- %q", node.Val)
+}
+
+func (node *CharacterLiteralNode) walkNode(visitor Visitor) {
 }
 
 /**************** STRING LITERAL NODE ****************/
@@ -298,8 +324,11 @@ func NewStringLiteralNode(pos utils.Position, val string) *StringLiteralNode {
 	}
 }
 
-func (node StringLiteralNode) String() string {
+func (node *StringLiteralNode) String() string {
 	return fmt.Sprintf("- \"%s\"", node.Val)
+}
+
+func (node *StringLiteralNode) walkNode(visitor Visitor) {
 }
 
 /**************** NULL NODE ****************/
@@ -318,8 +347,11 @@ func NewNullNode(pos utils.Position) *NullNode {
 	}
 }
 
-func (node NullNode) String() string {
+func (node *NullNode) String() string {
 	return "- null\n"
+}
+
+func (node *NullNode) walkNode(visitor Visitor) {
 }
 
 /**************** IDENTIFIER NODE ****************/
@@ -357,13 +389,17 @@ func NewUnaryOperatorNode(
 	}
 }
 
-func (node UnaryOperatorNode) String() string {
+func (node *UnaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Expr), "  "))
 
 	return buf.String()
+}
+
+func (node *UnaryOperatorNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** BINARY OPERATOR NODE ****************/
@@ -396,7 +432,7 @@ func NewBinaryOperatorNode(
 	}
 }
 
-func (node BinaryOperatorNode) String() string {
+func (node *BinaryOperatorNode) String() string {
 	var buf bytes.Buffer
 
 	buf.WriteString(fmt.Sprintf("%s\n", node.Op))
@@ -406,16 +442,7 @@ func (node BinaryOperatorNode) String() string {
 	return buf.String()
 }
 
-// Weight returns the number of registers used to evaluate the given
-// ExpressionNode.
-func Weight(n ExpressionNode) int {
-	switch node := n.(type) {
-	case *UnaryOperatorNode:
-		return Weight(node.Expr)
-	case *BinaryOperatorNode:
-		lhsWeight := utils.Max(Weight(node.Expr1), Weight(node.Expr2)+1)
-		rhsWeight := utils.Max(Weight(node.Expr1)+1, Weight(node.Expr2))
-		return utils.Min(lhsWeight, rhsWeight)
-	}
-	return 1
+func (node *BinaryOperatorNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr1)
+	Walk(visitor, node.Expr2)
 }

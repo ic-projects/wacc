@@ -6,9 +6,9 @@ import (
 	"utils"
 )
 
-// LHSNode is an empty interface for Lhs nodes to implement.
+// LHSNode is an interface for LHS nodes to implement.
 type LHSNode interface {
-	fmt.Stringer
+	ProgramNode
 }
 
 /**************** IDENTIFIER NODE ****************/
@@ -28,11 +28,14 @@ func NewIdentifierNode(pos utils.Position, ident string) *IdentifierNode {
 	}
 }
 
-func (node IdentifierNode) String() string {
+func (node *IdentifierNode) String() string {
 	if node.Ident == "" {
 		return "- main"
 	}
 	return fmt.Sprintf("- %s", node.Ident)
+}
+
+func (node *IdentifierNode) walkNode(visitor Visitor) {
 }
 
 /**************** PAIR FIRST ELEMENT NODE ****************/
@@ -66,8 +69,12 @@ func NewPairFirstElementNode(
 	}
 }
 
-func (node PairFirstElementNode) String() string {
+func (node *PairFirstElementNode) String() string {
 	return writeSimpleString("FST", node.Expr)
+}
+
+func (node *PairFirstElementNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** PAIR SECOND ELEMENT NODE ****************/
@@ -101,8 +108,12 @@ func NewPairSecondElementNode(
 	}
 }
 
-func (node PairSecondElementNode) String() string {
+func (node *PairSecondElementNode) String() string {
 	return writeSimpleString("SND", node.Expr)
+}
+
+func (node *PairSecondElementNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** ARRAY ELEMENT NODE ****************/
@@ -138,7 +149,7 @@ func NewArrayElementNode(
 	}
 }
 
-func (node ArrayElementNode) String() string {
+func (node *ArrayElementNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf("%s\n", node.Ident))
 	for _, e := range node.Exprs {
@@ -146,6 +157,12 @@ func (node ArrayElementNode) String() string {
 		buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", e), "    "))
 	}
 	return buf.String()
+}
+
+func (node *ArrayElementNode) walkNode(visitor Visitor) {
+	for _, e := range node.Exprs {
+		Walk(visitor, e)
+	}
 }
 
 /**************** STRUCT ELEMENT NODE ****************/
@@ -187,7 +204,7 @@ func NewStructElementNode(
 	}
 }
 
-func (node StructElementNode) String() string {
+func (node *StructElementNode) String() string {
 	return fmt.Sprintf(
 		"structelem %s.%s (pointer: %t)\n",
 		node.Struct,
@@ -196,14 +213,31 @@ func (node StructElementNode) String() string {
 	)
 }
 
+func (node *StructElementNode) walkNode(visitor Visitor) {
+}
+
+/**************** POINTER NODE ****************/
+
+// PointerNode is a struct that stores the identifier of a pointer.
 type PointerNode struct {
 	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
+// NewPointerNode builds a PointerNode.
 func NewPointerNode(pos utils.Position, ident *IdentifierNode) *PointerNode {
 	return &PointerNode{
 		Pos:   pos,
 		Ident: ident,
 	}
+}
+
+func (node *PointerNode) String() string {
+	return fmt.Sprintf(
+		"POINTER %s\n",
+		node.Ident.String()[2:],
+	)
+}
+
+func (node *PointerNode) walkNode(visitor Visitor) {
 }

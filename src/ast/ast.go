@@ -12,6 +12,8 @@ var DebugMode bool
 
 // ProgramNode is an interface for AST nodes to implement.
 type ProgramNode interface {
+	fmt.Stringer
+	walkNode(Visitor)
 }
 
 /**************** PRINTING ****************/
@@ -53,7 +55,7 @@ func NewProgram(structs []*StructNode, functions []*FunctionNode) *Program {
 	}
 }
 
-func (program Program) String() string {
+func (program *Program) String() string {
 	var tempbuf bytes.Buffer
 	tempbuf.WriteString(fmt.Sprintln("Program"))
 	for _, f := range program.Structs {
@@ -69,6 +71,15 @@ func (program Program) String() string {
 		}
 	}
 	return buf.String()
+}
+
+func (program *Program) walkNode(visitor Visitor) {
+	for _, f := range program.Structs {
+		Walk(visitor, f)
+	}
+	for _, f := range program.Functions {
+		Walk(visitor, f)
+	}
 }
 
 /**************** STRUCT NODE ****************/
@@ -105,7 +116,7 @@ func NewStructNode(
 	return &structNode
 }
 
-func (node StructNode) String() string {
+func (node *StructNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf(
 		"- STRUCT %s (size: %d)\n",
@@ -116,6 +127,12 @@ func (node StructNode) String() string {
 		buf.WriteString(fmt.Sprintf("%s\n", p))
 	}
 	return buf.String()
+}
+
+func (node *StructNode) walkNode(visitor Visitor) {
+	for _, f := range node.Types {
+		Walk(visitor, f)
+	}
 }
 
 /**************** STRUCT INTERNAL NODE ****************/
@@ -141,13 +158,16 @@ func NewStructInternalNode(
 	}
 }
 
-func (node StructInternalNode) String() string {
+func (node *StructInternalNode) String() string {
 	return fmt.Sprintf(
 		"  %s %s (offset: %d)",
 		node.Ident,
 		node.T,
 		node.MemoryOffset,
 	)
+}
+
+func (node *StructInternalNode) walkNode(visitor Visitor) {
 }
 
 /**************** FUNCTION NODE ****************/
@@ -164,10 +184,10 @@ type FunctionNode struct {
 	Ident *IdentifierNode
 
 	// Params is the list of parameters required to call the function.
-	Params []*ParameterNode
+	Params Parameters
 
 	// Stats is the list of statements contained within the function body.
-	Stats []StatementNode
+	Stats Statements
 }
 
 // NewFunctionNode builds a FunctionNode.
@@ -186,21 +206,21 @@ func NewFunctionNode(
 	}
 }
 
-func (node FunctionNode) String() string {
+func (node *FunctionNode) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(fmt.Sprintf("- %s %s(", node.T, node.Ident.String()[2:]))
-	for i, p := range node.Params {
-		if i == 0 {
-			buf.WriteString(p.String())
-		} else {
-			buf.WriteString(fmt.Sprintf(", %s", p))
-		}
-	}
-	buf.WriteString(fmt.Sprintln(")"))
-	for _, s := range node.Stats {
-		buf.WriteString(utils.Indent(s.String(), "  "))
-	}
+	buf.WriteString(fmt.Sprintf(
+		"- %s %s%s",
+		node.T,
+		node.Ident.String()[2:],
+		node.Params.String(),
+	))
+	buf.WriteString(utils.Indent(node.Stats.String(), "  "))
 	return buf.String()
+}
+
+func (node *FunctionNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Params)
+	Walk(visitor, node.Stats)
 }
 
 /**************** PARAMETER NODE ****************/
@@ -230,6 +250,35 @@ func NewParameterNode(
 	}
 }
 
-func (node ParameterNode) String() string {
+func (node *ParameterNode) String() string {
 	return fmt.Sprintf("%s %s", node.T, node.Ident.String()[2:])
+}
+
+func (node *ParameterNode) walkNode(visitor Visitor) {
+}
+
+/**************** PARAMETER NODE SLICE ****************/
+
+// Parameters is a slice of ParameterNodes. We need this type so that visitors
+// can easily tell when to change scope.
+type Parameters []*ParameterNode
+
+func (params Parameters) String() string {
+	var buf bytes.Buffer
+	buf.WriteString("(")
+	for i, p := range params {
+		if i == 0 {
+			buf.WriteString(p.String())
+		} else {
+			buf.WriteString(fmt.Sprintf(", %s", p))
+		}
+	}
+	buf.WriteString(fmt.Sprintln(")"))
+	return buf.String()
+}
+
+func (params Parameters) walkNode(visitor Visitor) {
+	for _, p := range params {
+		Walk(visitor, p)
+	}
 }

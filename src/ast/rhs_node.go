@@ -6,9 +6,9 @@ import (
 	"utils"
 )
 
-// RHSNode is an empty interface for Lhs nodes to implement.
+// RHSNode is an interface for RHS nodes to implement.
 type RHSNode interface {
-	fmt.Stringer
+	ProgramNode
 }
 
 /**************** EXPRESSION NODE ****************/
@@ -38,8 +38,14 @@ func NewArrayLiteralNode(
 	}
 }
 
-func (node ArrayLiteralNode) String() string {
+func (node *ArrayLiteralNode) String() string {
 	return writeExpressionsString("ARRAY LITERAL", node.Exprs)
+}
+
+func (node *ArrayLiteralNode) walkNode(visitor Visitor) {
+	for _, e := range node.Exprs {
+		Walk(visitor, e)
+	}
 }
 
 /**************** NEW PAIR NODE ****************/
@@ -67,7 +73,7 @@ func NewNewPairNode(
 	}
 }
 
-func (node NewPairNode) String() string {
+func (node *NewPairNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- NEW_PAIR"))
 	buf.WriteString(utils.Indent(fmt.Sprintln("- FST"), "  "))
@@ -75,6 +81,11 @@ func (node NewPairNode) String() string {
 	buf.WriteString(utils.Indent(fmt.Sprintln("- SND"), "  "))
 	buf.WriteString(utils.Indent(fmt.Sprintf("%s\n", node.Snd), "    "))
 	return buf.String()
+}
+
+func (node *NewPairNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Fst)
+	Walk(visitor, node.Snd)
 }
 
 /**************** PAIR FIRST ELEMENT NODE ****************/
@@ -111,13 +122,19 @@ func NewFunctionCallNode(
 	}
 }
 
-func (node FunctionCallNode) String() string {
+func (node *FunctionCallNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln(node.Ident))
 	for _, e := range node.Exprs {
 		buf.WriteString(fmt.Sprintln(e))
 	}
 	return buf.String()
+}
+
+func (node *FunctionCallNode) walkNode(visitor Visitor) {
+	for _, e := range node.Exprs {
+		Walk(visitor, e)
+	}
 }
 
 /**************** STRUCT NEW NODE ****************/
@@ -149,31 +166,52 @@ func NewStructNewNode(
 	}
 }
 
-func (node StructNewNode) String() string {
+func (node *StructNewNode) String() string {
 	return writeExpressionsString(fmt.Sprintf("NEW %s\n", node.T), node.Exprs)
 }
 
+func (node *StructNewNode) walkNode(visitor Visitor) {
+	for _, e := range node.Exprs {
+		Walk(visitor, e)
+	}
+}
+
+/**************** POINTER NEW NODE ****************/
+
+// PointerNewNode is a struct with the identifier for a new pointer.
 type PointerNewNode struct {
 	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
-func NewPointerNewNode(pos utils.Position, ident *IdentifierNode) *PointerNewNode {
+// NewPointerNewNode builds a PointerNewNode.
+func NewPointerNewNode(
+	pos utils.Position,
+	ident *IdentifierNode,
+) *PointerNewNode {
 	return &PointerNewNode{
 		Pos:   pos,
 		Ident: ident,
 	}
 }
 
-func (node PointerNewNode) String() string {
+func (node *PointerNewNode) String() string {
 	return fmt.Sprintf("- &%s\n", node.Ident.Ident)
 }
 
+func (node *PointerNewNode) walkNode(visitor Visitor) {
+}
+
+/**************** POINTER DEREFERENCE NODE ****************/
+
+// PointerDereferenceNode is a struct with the identifier of a pointer to be
+// dereferenced.
 type PointerDereferenceNode struct {
 	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
+// NewPointerDereferenceNode builds a PointerDereferenceNode.
 func NewPointerDereferenceNode(
 	pos utils.Position,
 	ident *IdentifierNode,
@@ -184,6 +222,9 @@ func NewPointerDereferenceNode(
 	}
 }
 
-func (node PointerDereferenceNode) String() string {
+func (node *PointerDereferenceNode) String() string {
 	return fmt.Sprintf("- *%s\n", node.Ident.Ident)
+}
+
+func (node *PointerDereferenceNode) walkNode(visitor Visitor) {
 }

@@ -182,7 +182,7 @@ func (table *SymbolTable) SearchForFunction(
 }
 
 // SearchForStruct will search for a struct, returning false as its second
-// return if not found
+// return if not found.
 func (table *SymbolTable) SearchForStruct(
 	identifier string,
 ) (*StructNode, bool) {
@@ -190,6 +190,8 @@ func (table *SymbolTable) SearchForStruct(
 	return node, ok
 }
 
+// SearchForStructByUsage will search for a struct, returning false as its
+// second return if not found. This version finds a struct from a member.
 func (table *SymbolTable) SearchForStructByUsage(usage string) []TypeNode {
 	set := make([]TypeNode, 0)
 	for _, s := range table.Structs {
@@ -256,14 +258,14 @@ func (table *SymbolTable) String() string {
 	var buf bytes.Buffer
 	buf.WriteString("- Structs:\n")
 	for _, f := range table.Structs {
-		buf.WriteString(fmt.Sprintf("%s", f))
+		buf.WriteString(f.String())
 	}
 	buf.WriteString("- Functions:\n")
 	for _, f := range table.Functions {
 		buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))
 		for i, p := range f.Params {
 			if i == 0 {
-				buf.WriteString(fmt.Sprintf("%s", p))
+				buf.WriteString(p.String())
 			} else {
 				buf.WriteString(fmt.Sprintf(", %s", p))
 			}
