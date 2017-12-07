@@ -1,5 +1,7 @@
 package main
 
+import "utils"
+
 // Instruction is an interface for assembly instructions to implement.
 type Instruction interface {
 	// armAssembly returns an ARM assembly instruction
@@ -56,13 +58,43 @@ const (
 	ASR
 )
 
-/**************** OPERAND 2 ****************/
+/**************** OPERAND ****************/
 
-// Operand2
+// Operand is a shifted register or an immediate operand.
+type Operand interface {
+	// armOperand returns an ARM assembly operand2
+	armOperand() string
+}
+
+// RegisterOperand is a struct holding a register and shift information.
+type RegisterOperand struct {
+	Reg       utils.Register
+	ShiftType Shift
+	ShiftVal  int
+}
+
+// ImmediateOperand is an immediate value.
+type ImmediateOperand int
 
 /**************** ADDRESS ****************/
 
-// Address
+// Address is a memory address.
+type Address interface {
+	// armOperand returns an ARM assembly address
+	armAddress() string
+}
+
+// LabelAddress is a label.
+type LabelAddress string
+
+// ConstantAddress is an integer address.
+type ConstantAddress int
+
+// PreIndexedAddress is a register value + an offset.
+type PreIndexedAddress struct {
+	Reg    utils.Register
+	Offset int
+}
 
 /**************** MOVEMENT ****************/
 
