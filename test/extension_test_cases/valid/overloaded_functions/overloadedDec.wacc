@@ -1,0 +1,15 @@
+begin
+  int f(int i) is
+    return i
+  end
+
+  bool f(bool b) is
+    return b
+  end
+
+  b := call f(true);
+  println b;
+  i := call f(2);
+  println i;
+  exit 0
+end
