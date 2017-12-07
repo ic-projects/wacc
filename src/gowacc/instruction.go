@@ -6,6 +6,7 @@ import (
 	"utils"
 )
 
+// ERROR is the string to be printed when no instruction exists.
 const ERROR = "ERROR"
 
 // Instruction is an interface for assembly instructions to implement.
@@ -155,14 +156,14 @@ func (addr ConstantAddress) armAddress() string {
 	return fmt.Sprintf("=%d", int(addr))
 }
 
-// PreIndexedAddress is a register value + an offset.
-type PreIndexedAddress struct {
+// RegisterAddress is a register value + an offset.
+type RegisterAddress struct {
 	Reg    utils.Register
 	Offset int
 }
 
 // [Reg{, Offset}]
-func (addr PreIndexedAddress) armAddress() string {
+func (addr RegisterAddress) armAddress() string {
 	if addr.Offset == 0 {
 		return fmt.Sprintf("[%s]", addr.Reg.String())
 	}
@@ -434,6 +435,64 @@ type DataTransferInstruction struct {
 	Size  Size
 	Rd    utils.Register
 	Addr  Address
+}
+
+// NewLoad builds a LDR instruction.
+func NewLoad(
+	size Size,
+	reg utils.Register,
+	addr Address,
+) DataTransferInstruction {
+	return DataTransferInstruction{
+		LDR,
+		ALWAYS,
+		size,
+		reg,
+		addr,
+	}
+}
+
+// NewLoadReg builds a LDR instruction from an address held by a register.
+func NewLoadReg(
+	size Size,
+	r1 utils.Register,
+	r2 utils.Register,
+) DataTransferInstruction {
+	return NewLoad(size, r1, RegisterAddress{r1, 0})
+}
+
+// NewStore builds a STR instruction.
+func NewStore(
+	size Size,
+	reg utils.Register,
+	addr Address,
+) DataTransferInstruction {
+	return DataTransferInstruction{
+		STR,
+		ALWAYS,
+		size,
+		reg,
+		addr,
+	}
+}
+
+// NewStoreReg builds a STR instruction to an address held by a register.
+func NewStoreReg(
+	size Size,
+	r1 utils.Register,
+	r2 utils.Register,
+) DataTransferInstruction {
+	return NewStore(size, r1, RegisterAddress{r2, 0})
+}
+
+// NewStoreRegOffset builds a STR instruction to an address held by a register.
+func NewStoreRegOffset(
+	size Size,
+	r1 utils.Register,
+	r2 utils.Register,
+	offset int,
+) DataTransferInstruction {
+	return NewStore(size, r1, RegisterAddress{r2, offset})
 }
 
 // Instr{Cond}{Size} Rd, Addr

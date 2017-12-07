@@ -101,22 +101,20 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	return file.Close()
 }
 
-// LocationOf will return the location of a
-func (v *CodeGenerator) LocationOf(loc *utils.Location) string {
+// LocationOf will return the correct Operand of a Location object
+func (v *CodeGenerator) LocationOf(loc *utils.Location) Address {
 	// Location is a register
 	if loc.Register != utils.UNDEFINED {
-		return loc.Register.String()
+		return RegisterAddress{loc.Register, 0}
 	}
 
 	// Location is an address on the heap
 	if loc.Address != 0 {
-		return "#" + strconv.Itoa(loc.Address)
+		return ConstantAddress(loc.Address)
 	}
 
 	// Location is a stack offset
-	return "[sp, #" +
-		strconv.Itoa(v.currentStackPos-loc.CurrentPos) +
-		"]"
+	return RegisterAddress{utils.SP, v.currentStackPos - loc.CurrentPos}
 }
 
 // PointerTo returns a string, that when added gives the object's location in
@@ -312,10 +310,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
-				v.addCode("%s %s, %s",
+				v.addCode(NewStore(
 					store(ast.SizeOf(e.T)),
 					registers[n],
-					v.LocationOf(dec.Location))
+					v.LocationOf(dec.Location),
+				).armAssembly())
 			}
 		}
 	case *ast.AssignNode:
@@ -329,39 +328,43 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			lhsRegister := v.getReturnRegister()
 			dec := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident.Ident)
 			arr := ast.ToValue(dec.T).(ast.ArrayTypeNode)
-			if ast.SizeOf(arr.GetDimElement(len(lhsNode.Exprs))) == 1 {
-				v.addCode("STRB %s, [%s]", rhsRegister, lhsRegister)
-			} else {
-				v.addCode("STR %s, [%s]", rhsRegister, lhsRegister)
-			}
+			v.addCode(NewStoreReg(
+				store(ast.SizeOf(arr.GetDimElement(len(lhsNode.Exprs)))),
+				rhsRegister,
+				lhsRegister,
+			).armAssembly())
 		case *ast.StructElementNode:
 			ast.Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s]",
+			v.addCode(NewStoreReg(
 				store(ast.SizeOf(lhsNode.StructType.T)),
 				rhsRegister,
-				lhsRegister)
+				lhsRegister,
+			).armAssembly())
 		case *ast.PairFirstElementNode:
 			ast.Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s]",
+			v.addCode(NewStoreReg(
 				store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))),
 				rhsRegister,
-				lhsRegister)
+				lhsRegister,
+			).armAssembly())
 		case *ast.PairSecondElementNode:
 			ast.Walk(v, lhsNode)
 			lhsRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s]",
+			v.addCode(NewStoreReg(
 				store(ast.SizeOf(ast.Type(lhsNode.Expr, v.symbolTable))),
 				rhsRegister,
-				lhsRegister)
+				lhsRegister,
+			).armAssembly())
 		case *ast.IdentifierNode:
 			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident)
 			if ident.Location != nil {
-				v.addCode("%s %s, %s",
+				v.addCode(NewStore(
 					store(ast.SizeOf(ident.T)),
 					rhsRegister,
-					v.LocationOf(ident.Location))
+					v.LocationOf(ident.Location),
+				).armAssembly())
 			}
 		}
 		v.freeRegisters.Push(rhsRegister)
@@ -453,10 +456,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("BEQ DO%d", doLabel)
 	case *ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
-		v.addCode("%s %s, %s",
+		v.addCode(NewLoad(
 			load(ast.SizeOf(dec.T)),
 			v.getFreeRegister(),
-			v.LocationOf(dec.Location))
+			v.LocationOf(dec.Location),
+		).armAssembly())
 	case *ast.ArrayElementNode:
 		ast.Walk(v, node.Ident)
 		identRegister := v.returnRegisters.Pop()
@@ -513,10 +517,12 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		)
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			v.addCode("%s %s, [%s]",
-				load(ast.SizeOf(node.StructType.T)),
-				register,
-				register)
+			v.addCode(
+				NewLoadReg(
+					load(ast.SizeOf(node.StructType.T)),
+					register,
+					register,
+				).armAssembly())
 		}
 	case *ast.ArrayLiteralNode:
 		register := v.getFreeRegister()
@@ -531,15 +537,16 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for i := 0; i < length; i++ {
 			ast.Walk(v, node.Exprs[i])
 			exprRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s, #%d]",
+			v.addCode(NewStoreRegOffset(
 				store(size),
 				exprRegister,
 				register,
-				4+i*size)
+				4+i*size,
+			).armAssembly())
 		}
 		lengthRegister := v.freeRegisters.Peek()
 		v.addCode("LDR %s, =%d", lengthRegister, length)
-		v.addCode("STR %s, [%s]", lengthRegister, register)
+		v.addCode(NewStoreReg(W, lengthRegister, register).armAssembly())
 	case *ast.StructNewNode:
 		register := v.getFreeRegister()
 
@@ -549,12 +556,12 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for index, n := range node.StructNode.Types {
 			ast.Walk(v, node.Exprs[index])
 			exprRegister := v.getReturnRegister()
-			v.addCode("%s %s, [%s, #%d]",
+			v.addCode(NewStoreRegOffset(
 				store(ast.SizeOf(n.T)),
 				exprRegister,
 				register,
 				n.MemoryOffset,
-			)
+			).armAssembly())
 		}
 	case *ast.NewPairNode:
 		register := v.getFreeRegister()
@@ -570,8 +577,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
 		v.addCode("LDR r0, =%d", fstSize)
 		v.addCode("BL malloc")
-		v.addCode("STR r0, [%s]", register)
-		v.addCode("%s %s, [r0]", store(fstSize), fst)
+		v.addCode(NewStoreReg(W, utils.R0, register).armAssembly())
+		v.addCode(NewStoreReg(store(fstSize), fst, utils.R0).armAssembly())
 
 		// Store second element
 		ast.Walk(v, node.Snd)
@@ -579,8 +586,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
 		v.addCode("LDR r0, =%d", sndSize)
 		v.addCode("BL malloc")
-		v.addCode("STR r0, [%s, #4]", register)
-		v.addCode("%s %s, [r0]", store(sndSize), snd)
+		v.addCode(NewStoreRegOffset(W, utils.R0, register, 4).armAssembly())
+		v.addCode(NewStoreReg(store(sndSize), snd, utils.R0).armAssembly())
 
 	case *ast.FunctionCallNode:
 		registers := utils.ReturnRegisters()
@@ -593,7 +600,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			} else {
 				f, _ := v.symbolTable.SearchForFunction(node.Ident.Ident, node.Exprs)
 				v.subtractFromStackPointer(ast.SizeOf(f.Params[i].T))
-				v.addCode("%s %s, [sp]", store(ast.SizeOf(f.Params[i].T)), register)
+				v.addCode(NewStoreReg(
+					store(ast.SizeOf(f.Params[i].T)),
+					register,
+					utils.SP,
+				).armAssembly())
 				size += ast.SizeOf(f.Params[i].T)
 			}
 		}
@@ -770,10 +781,11 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
 		if dec.Location != nil {
-			v.addCode("%s %s, %s",
+			v.addCode(NewStore(
 				store(ast.SizeOf(dec.T)),
 				v.getReturnRegister(),
-				v.LocationOf(dec.Location))
+				v.LocationOf(dec.Location),
+			).armAssembly())
 		}
 	case *ast.PrintNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
@@ -812,10 +824,11 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.addCode("LDR %s, [%s]", register, register)
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			v.addCode("%s %s, [%s]",
+			v.addCode(NewLoadReg(
 				load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))),
 				register,
-				register)
+				register,
+			).armAssembly())
 		}
 	case *ast.PairSecondElementNode:
 		register := v.returnRegisters.Peek()
@@ -825,10 +838,11 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
-			v.addCode("%s %s, [%s]",
+			v.addCode(NewLoadReg(
 				load(ast.SizeOf(ast.Type(node.Expr, v.symbolTable))),
 				register,
-				register)
+				register,
+			).armAssembly())
 		}
 	case *ast.UnaryOperatorNode:
 		register := v.returnRegisters.Peek()
@@ -891,17 +905,17 @@ func (v *CodeGenerator) getReturnRegister() utils.Register {
 }
 
 // store will return "STRB" if the passed paramater is one, "STR" otherwise.
-func store(size int) string {
+func store(size int) Size {
 	if size == 1 {
-		return "STRB"
+		return B
 	}
-	return "STR"
+	return W
 }
 
 // load will return "LDRB" if the passed paramater is one, "LDR" otherwise.
-func load(size int) string {
+func load(size int) Size {
 	if size == 1 {
-		return "LDRSB"
+		return SB
 	}
-	return "LDR"
+	return W
 }
