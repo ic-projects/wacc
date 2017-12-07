@@ -562,7 +562,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case *ast.PointerNewNode:
 		register := v.getFreeRegister()
 
-		dec, _ := v.symbolTable.SearchForIdent(node.Ident.Ident)
+		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
 		ast.Walk(v, node.Ident)
 		valueReg := v.getReturnRegister()
 
