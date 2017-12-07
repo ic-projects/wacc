@@ -83,7 +83,7 @@ STRUCTINTERNAL ← t:TYPE _ i:IDENT _ ';' {
 }
 
 // FunctionNode
-FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
+FUNC ← t:TYPE _ structIdent:(IDENT'.')?i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
        _ "end" {
 
 	stats := s.([]ast.StatementNode)
@@ -98,22 +98,29 @@ FUNC ← t:TYPE _ i:IDENT _ '(' _ params:PARAMLIST? _ ')' _ "is" __ s:STATS
 		)
 		err = errors.New(errmsg)
 	}
+  var paramaters []*ast.ParameterNode
+  if params != nil {
+    paramaters = params.([]*ast.ParameterNode)
+  } else {
+    paramaters = make([]*ast.ParameterNode, 0)
+  }
 
-	if (params != nil) {
-		return ast.NewFunctionNode(
-			c.getPosition(),
-			t.(ast.TypeNode),
-			i.(*ast.IdentifierNode),
-			params.([]*ast.ParameterNode),
-			stats,
-		), err
-	}
+  if structIdent != nil {
+    paramaters = append(
+      paramaters,
+      ast.NewParameterNode(
+        c.getPosition(),
+        ast.NewStructTypeNode((getItem(structIdent, 0)).(*ast.IdentifierNode)),
+        ast.NewIdentifierNode(c.getPosition(), "this"),
+      ),
+    )
+  }
 
 	return ast.NewFunctionNode(
 		c.getPosition(),
 		t.(ast.TypeNode),
 		i.(*ast.IdentifierNode),
-		[]*ast.ParameterNode{},
+		paramaters,
 		stats,
 	), err
 
