@@ -280,7 +280,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			v.addFunction("f_" + node.Ident.Ident)
 		}
 		v.addCode("PUSH {lr}")
-	case []*ast.ParameterNode:
+	case ast.Parameters:
 		registers := utils.ReturnRegisters()
 		parametersFromRegsSize := 0
 		parametersFromStackSize := 0
@@ -713,7 +713,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.freeRegisters.Push(operand2)
 		v.returnRegisters.Push(operand1)
-	case []ast.StatementNode:
+	case ast.Statements:
 		v.symbolTable.MoveNextScope()
 		size := 0
 		for _, dec := range v.symbolTable.CurrentScope.Scope {
@@ -730,7 +730,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 // Leave will be called to leave the current node.
 func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
-	case []ast.StatementNode:
+	case ast.Statements:
 		if v.symbolTable.CurrentScope.ScopeSize != 0 {
 			v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 		}

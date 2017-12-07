@@ -184,7 +184,6 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 				node.Ident.Ident,
 			), declareNode.Pos)
 		}
-	case *ast.SkipNode:
 	case *ast.DeclareNode:
 		if declareNode, ok := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident); ok {
 			if _, ok := node.T.(*ast.DynamicTypeNode); !ok {
@@ -218,7 +217,6 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 		})
 	case *ast.FreeNode:
 		v.typeChecker.expectSet([]ast.TypeNode{&ast.PairTypeNode{}, &ast.ArrayTypeNode{}})
-	case *ast.ReturnNode:
 	case *ast.ExitNode:
 		v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
 	case *ast.PrintNode:
@@ -234,7 +232,6 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 	case *ast.ForLoopNode:
 		v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
 		v.symbolTable.MoveDownScope()
-	case *ast.ScopeNode:
 	case *ast.IdentifierNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident); !ok {
 			foundError = NewDeclarationError(node.Pos, false, false, node.Ident)
@@ -421,11 +418,6 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 				v.typeChecker.expect(f.Params[i].T)
 			}
 		}
-	case ast.BaseTypeNode:
-	case ast.ArrayTypeNode:
-	case ast.PairTypeNode:
-	case *ast.UnaryOperator:
-	case *ast.BinaryOperator:
 	case *ast.IntegerLiteralNode:
 		foundError = v.typeChecker.seen(ast.NewBaseTypeNode(ast.INT)).addPos(node.Pos)
 	case *ast.BooleanLiteralNode:
@@ -494,7 +486,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
 			v.typeChecker.expect(ast.NewBaseTypeNode(ast.BOOL))
 		}
-	case []ast.StatementNode:
+	case ast.Statements:
 		v.symbolTable.MoveDownScope()
 	}
 
@@ -507,11 +499,11 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 // Leave will be called to leave the current node.
 func (v *SemanticCheck) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
-	case []ast.StatementNode:
+	case ast.Statements:
 		v.symbolTable.MoveUpScope()
 	case *ast.ForLoopNode:
 		v.symbolTable.MoveUpScope()
-	case ast.SwitchNode:
+	case *ast.SwitchNode:
 		v.typeChecker.forcePop()
 	case *ast.FunctionNode:
 		v.symbolTable.MoveUpScope()

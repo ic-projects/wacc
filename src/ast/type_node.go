@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// TypeNode is an empty interface for all types to implement.
+// TypeNode is an interface for all types to implement.
 type TypeNode interface {
 	fmt.Stringer
 	Equals(TypeNode) bool
@@ -113,6 +113,9 @@ func (node BaseTypeNode) String() string {
 	return node.T.String()
 }
 
+func (node *BaseTypeNode) walkNode(visitor Visitor) {
+}
+
 func (node BaseTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(BaseTypeNode); ok {
 		return node.T == arr.T
@@ -190,6 +193,9 @@ func (node ArrayTypeNode) String() string {
 	return buf.String()
 }
 
+func (node *ArrayTypeNode) walkNode(visitor Visitor) {
+}
+
 func (node ArrayTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(ArrayTypeNode); ok {
 		if arr2, ok := ToValue(node).(ArrayTypeNode); ok {
@@ -227,6 +233,9 @@ func (node PairTypeNode) String() string {
 	return fmt.Sprintf("pair(%s, %s)", node.T1, node.T2)
 }
 
+func (node *PairTypeNode) walkNode(visitor Visitor) {
+}
+
 func (node PairTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(PairTypeNode); ok {
 		return node.T1.Equals(arr.T1) && node.T2.Equals(arr.T2)
@@ -247,13 +256,17 @@ func NewNullTypeNode() *NullTypeNode {
 	return &NullTypeNode{}
 }
 
+func (node NullTypeNode) String() string {
+	return "null"
+}
+
+func (node *NullTypeNode) walkNode(visitor Visitor) {
+	return
+}
+
 func (node NullTypeNode) Equals(t TypeNode) bool {
 	_, ok := ToValue(t).(NullTypeNode)
 	return ok
-}
-
-func (node NullTypeNode) String() string {
-	return "null"
 }
 
 /**************** STRUCT TYPE NODE ****************/
@@ -283,42 +296,11 @@ func (node StructTypeNode) String() string {
 	return fmt.Sprintf("struct %s", node.Ident)
 }
 
+func (node *StructTypeNode) walkNode(visitor Visitor) {
+}
+
 func (node StructTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(StructTypeNode); ok {
-		/*if arr.Ident == "" && node.Ident == "" {
-			newSet := make([]string, 0)
-			for _, t := range arr.Poss {
-				for _, t2 := range node.Poss {
-					if t == t2 {
-						newSet = append(newSet, t)
-					}
-				}
-			}
-
-			arr.Poss = newSet
-			node.Poss = newSet
-			if len(newSet) == 1 {
-				node.Ident = newSet[0]
-				arr.Ident = newSet[0]
-			}
-			return len(newSet) > 0
-		}
-		if arr.Ident == "" {
-			for _, t := range arr.Poss {
-				if t == node.Ident {
-					arr.Ident = t
-					return true
-				}
-			}
-		}
-		if node.Ident == "" {
-			for _, t := range node.Poss {
-				if t == arr.Ident {
-					node.Ident = t
-					return true
-				}
-			}
-		}*/
 		return arr.Ident == node.Ident
 	}
 	return false
@@ -338,6 +320,9 @@ func NewPointerTypeNode(t TypeNode) *PointerTypeNode {
 
 func (node PointerTypeNode) String() string {
 	return fmt.Sprintf("%s *", node.T.String())
+}
+
+func (node *PointerTypeNode) walkNode(visitor Visitor) {
 }
 
 func (node PointerTypeNode) Equals(t TypeNode) bool {
@@ -410,6 +395,18 @@ func NewDynamicTypeInsidePairNode() *DynamicTypeNode {
 	return node
 }
 
+func (node DynamicTypeNode) String() string {
+	return fmt.Sprintf("dynamic (%s) %p", node.T, node.T)
+}
+
+func (node *DynamicTypeNode) walkNode(visitor Visitor) {
+}
+
+func (node DynamicTypeNode) Equals(t TypeNode) bool {
+	_, ok := node.ReduceSet([]TypeNode{t})
+	return ok
+}
+
 // changeToWatch links two DynamicTypeNodes together,
 // it merges the watchlist together and changes the type both
 // DynamicTypeNodes refer to be the same pointer.
@@ -429,15 +426,6 @@ func (node InternalDynamicType) String() string {
 		return fmt.Sprintf("%s", node.Poss)
 	}
 	return fmt.Sprintf("unknown")
-}
-
-func (node DynamicTypeNode) String() string {
-	return fmt.Sprintf("dynamic (%s) %p", node.T, node.T)
-}
-
-func (node DynamicTypeNode) Equals(t TypeNode) bool {
-	_, ok := node.ReduceSet([]TypeNode{t})
-	return ok
 }
 
 // getValue returns the TypeNode of the DynamicTypeNode,
@@ -480,7 +468,7 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 // then they will reduce their possibilities and then link if
 // valid, otherwise they will just link. It returns
 // the type the TypeChecker should use to check and a boolean
-// indicating if an error occured.
+// indicating if an error occurred.
 func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 	if node.T.init && dyn.T.init {
 		if len(node.T.Poss) == 1 && len(dyn.T.Poss) == 1 {
@@ -511,7 +499,7 @@ func (node *DynamicTypeNode) reduce(dyn *DynamicTypeNode) (TypeNode, bool) {
 // ReduceSet reduces the possibilities of a DynamicTypeNode
 // down using the given list of possible TypeNode. It returns
 // the type the TypeChecker should use to check and a boolean
-// indicating if an error occured.
+// indicating if an error occurred.
 func (node *DynamicTypeNode) ReduceSet(ts []TypeNode) (TypeNode, bool) {
 	// Dynamic type saw another dynamic type
 	if dyn, ok := ts[0].(*DynamicTypeNode); len(ts) == 1 && ok {

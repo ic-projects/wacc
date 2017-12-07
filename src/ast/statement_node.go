@@ -6,9 +6,29 @@ import (
 	"utils"
 )
 
-// StatementNode is an empty interface for statement nodes to implement.
+// StatementNode is an interface for statement nodes to implement.
 type StatementNode interface {
-	fmt.Stringer
+	ProgramNode
+}
+
+/**************** STATEMENT NODE SLICE ****************/
+
+// Statements is a slice of StatementNodes. We need this type so that visitors
+// can easily tell when to change scope.
+type Statements []StatementNode
+
+func (stats Statements) String() string {
+	var buf bytes.Buffer
+	for _, s := range stats {
+		buf.WriteString(s.String())
+	}
+	return buf.String()
+}
+
+func (stats Statements) walkNode(visitor Visitor) {
+	for _, s := range stats {
+		Walk(visitor, s)
+	}
 }
 
 /**************** STATEMENT HELPER FUNCTIONS ****************/
@@ -51,8 +71,11 @@ func NewSkipNode(pos utils.Position) *SkipNode {
 	}
 }
 
-func (node SkipNode) String() string {
+func (node *SkipNode) String() string {
 	return "- SKIP\n"
+}
+
+func (node *SkipNode) walkNode(visitor Visitor) {
 }
 
 /**************** DECLARE NODE ****************/
@@ -85,7 +108,7 @@ func NewDeclareNode(
 	}
 }
 
-func (node DeclareNode) String() string {
+func (node *DeclareNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- DECLARE"))
 	buf.WriteString(fmt.Sprintln("  - TYPE"))
@@ -95,6 +118,10 @@ func (node DeclareNode) String() string {
 	buf.WriteString(fmt.Sprintln("  - RHS"))
 	buf.WriteString(utils.Indent(fmt.Sprintln(node.RHS), "    "))
 	return buf.String()
+}
+
+func (node *DeclareNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.RHS)
 }
 
 /**************** ASSIGN NODE ****************/
@@ -119,7 +146,7 @@ func NewAssignNode(pos utils.Position, lhs LHSNode, rhs RHSNode) *AssignNode {
 	}
 }
 
-func (node AssignNode) String() string {
+func (node *AssignNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- ASSIGNMENT"))
 	buf.WriteString(fmt.Sprintln("  - LHS"))
@@ -127,6 +154,11 @@ func (node AssignNode) String() string {
 	buf.WriteString(fmt.Sprintln("  - RHS"))
 	buf.WriteString(utils.Indent(node.RHS.String(), "    "))
 	return buf.String()
+}
+
+func (node *AssignNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.LHS)
+	Walk(visitor, node.RHS)
 }
 
 /**************** READ NODE ****************/
@@ -149,8 +181,12 @@ func NewReadNode(pos utils.Position, lhs LHSNode) *ReadNode {
 	}
 }
 
-func (node ReadNode) String() string {
+func (node *ReadNode) String() string {
 	return writeSimpleString("READ", node.LHS)
+}
+
+func (node *ReadNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.LHS)
 }
 
 /**************** FREE NODE ****************/
@@ -173,8 +209,12 @@ func NewFreeNode(pos utils.Position, expr ExpressionNode) *FreeNode {
 	}
 }
 
-func (node FreeNode) String() string {
+func (node *FreeNode) String() string {
 	return writeSimpleString("FREE", node.Expr)
+}
+
+func (node *FreeNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** RETURN NODE ****************/
@@ -197,8 +237,12 @@ func NewReturnNode(pos utils.Position, expr ExpressionNode) *ReturnNode {
 	}
 }
 
-func (node ReturnNode) String() string {
+func (node *ReturnNode) String() string {
 	return writeSimpleString("RETURN", node.Expr)
+}
+
+func (node *ReturnNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** EXIT NODE ****************/
@@ -221,8 +265,12 @@ func NewExitNode(pos utils.Position, expr ExpressionNode) *ExitNode {
 	}
 }
 
-func (node ExitNode) String() string {
+func (node *ExitNode) String() string {
 	return writeSimpleString("EXIT", node.Expr)
+}
+
+func (node *ExitNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** PRINT NODE ****************/
@@ -245,8 +293,12 @@ func NewPrintNode(pos utils.Position, expr ExpressionNode) *PrintNode {
 	}
 }
 
-func (node PrintNode) String() string {
+func (node *PrintNode) String() string {
 	return writeSimpleString("PRINT", node.Expr)
+}
+
+func (node *PrintNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** PRINTLN NODE ****************/
@@ -269,8 +321,12 @@ func NewPrintlnNode(pos utils.Position, expr ExpressionNode) *PrintlnNode {
 	}
 }
 
-func (node PrintlnNode) String() string {
+func (node *PrintlnNode) String() string {
 	return writeSimpleString("PRINTLN", node.Expr)
+}
+
+func (node *PrintlnNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
 }
 
 /**************** SWITCH NODE ****************/
@@ -295,7 +351,7 @@ func NewSwitchNode(pos utils.Position, expr ExpressionNode, cases []CaseNode) *S
 	}
 }
 
-func (node SwitchNode) String() string {
+func (node *SwitchNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SWITCH"))
 	buf.WriteString(utils.Indent(fmt.Sprintln("- EXPRESSION"), "  "))
@@ -306,10 +362,22 @@ func (node SwitchNode) String() string {
 	return buf.String()
 }
 
+func (node *SwitchNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
+	for _, c := range node.Cases {
+		if !c.IsDefault {
+			Walk(visitor, c.Expr)
+		}
+		Walk(visitor, c.Stats)
+	}
+}
+
+/**************** CASE NODE ****************/
+
 type CaseNode struct {
 	Pos       utils.Position
 	Expr      ExpressionNode
-	Stats     []StatementNode
+	Stats     Statements
 	IsDefault bool
 }
 
@@ -330,7 +398,7 @@ func NewCaseNode(pos utils.Position, expr ExpressionNode, stats []StatementNode)
 	}
 }
 
-func (node CaseNode) String() string {
+func (node *CaseNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- CASE"))
 	if node.IsDefault {
@@ -346,6 +414,9 @@ func (node CaseNode) String() string {
 	return buf.String()
 }
 
+func (node *CaseNode) walkNode(visitor Visitor) {
+}
+
 /**************** IF NODE ****************/
 
 // IfNode stores the position, condition and the two branches of an if else
@@ -357,8 +428,8 @@ func (node CaseNode) String() string {
 type IfNode struct {
 	Pos       utils.Position
 	Expr      ExpressionNode
-	IfStats   []StatementNode
-	ElseStats []StatementNode
+	IfStats   Statements
+	ElseStats Statements
 }
 
 // NewIfNode builds a IfNode
@@ -376,7 +447,7 @@ func NewIfNode(
 	}
 }
 
-func (node IfNode) String() string {
+func (node *IfNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- IF"))
 	buf.WriteString(utils.Indent(fmt.Sprintln("- CONDITION"), "  "))
@@ -392,6 +463,12 @@ func (node IfNode) String() string {
 	return buf.String()
 }
 
+func (node *IfNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
+	Walk(visitor, node.IfStats)
+	Walk(visitor, node.ElseStats)
+}
+
 /**************** LOOP NODE ****************/
 
 // LoopNode stores the position, condition and loop statements for a loop
@@ -403,7 +480,7 @@ func (node IfNode) String() string {
 type LoopNode struct {
 	Pos   utils.Position
 	Expr  ExpressionNode
-	Stats []StatementNode
+	Stats Statements
 }
 
 // NewLoopNode builds a LoopNode
@@ -419,7 +496,7 @@ func NewLoopNode(
 	}
 }
 
-func (node LoopNode) String() string {
+func (node *LoopNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- LOOP"))
 	buf.WriteString(fmt.Sprintln("  - CONDITION"))
@@ -429,6 +506,11 @@ func (node LoopNode) String() string {
 		buf.WriteString(utils.Indent(s.String(), "    "))
 	}
 	return buf.String()
+}
+
+func (node *LoopNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Expr)
+	Walk(visitor, node.Stats)
 }
 
 /**************** FOR LOOP NODE ****************/
@@ -444,7 +526,7 @@ type ForLoopNode struct {
 	Initial StatementNode
 	Expr    ExpressionNode
 	Update  StatementNode
-	Stats   []StatementNode
+	Stats   Statements
 }
 
 func NewForLoopNode(
@@ -463,7 +545,7 @@ func NewForLoopNode(
 	}
 }
 
-func (node ForLoopNode) String() string {
+func (node *ForLoopNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- FOR"))
 	buf.WriteString(fmt.Sprintln("  - INITIAL"))
@@ -479,6 +561,13 @@ func (node ForLoopNode) String() string {
 	return buf.String()
 }
 
+func (node *ForLoopNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Initial)
+	Walk(visitor, node.Expr)
+	Walk(visitor, node.Update)
+	Walk(visitor, node.Stats)
+}
+
 /**************** SCOPE NODE ****************/
 
 // ScopeNode stores the position and statement of a new scope.
@@ -488,7 +577,7 @@ func (node ForLoopNode) String() string {
 //  begin skip end
 type ScopeNode struct {
 	Pos   utils.Position
-	Stats []StatementNode
+	Stats Statements
 }
 
 // NewScopeNode builds a ScopeNode
@@ -499,11 +588,15 @@ func NewScopeNode(pos utils.Position, stats []StatementNode) *ScopeNode {
 	}
 }
 
-func (node ScopeNode) String() string {
+func (node *ScopeNode) String() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintln("- SCOPE"))
 	for _, s := range node.Stats {
 		buf.WriteString(utils.Indent(s.String(), "  "))
 	}
 	return buf.String()
+}
+
+func (node *ScopeNode) walkNode(visitor Visitor) {
+	Walk(visitor, node.Stats)
 }
