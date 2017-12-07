@@ -44,11 +44,17 @@ const (
 
 /**************** SHIFTS ****************/
 
-// DEF Default (No shift)
+// Shift is an enum of supported logical / arithmetic / rotate shifts.
+type Shift int
 
-// LSL Logical Shift Left
-
-// ASR Arithmetic Shift Right
+const (
+	// NONE Default (No shift)
+	NONE Shift = iota
+	// LSL Logical Shift Left
+	LSL
+	// ASR Arithmetic Shift Right
+	ASR
+)
 
 /**************** OPERAND 2 ****************/
 
