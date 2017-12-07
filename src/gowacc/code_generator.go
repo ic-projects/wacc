@@ -647,11 +647,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 	case *ast.PointerDereferenceNode:
 		ast.Walk(v, node.Ident)
-		register := v.returnRegisters.Pop()
-
+		register := v.returnRegisters.Peek()
 		v.addCode("LDR %s, [%s]", register, register)
-
-		v.returnRegisters.Push(register)
 	case *ast.NewPairNode:
 		register := v.getFreeRegister()
 
