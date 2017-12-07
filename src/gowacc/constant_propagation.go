@@ -49,11 +49,14 @@ func (v *Propagator) Visit(programNode ast.ProgramNode) {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			dec.IsDeclared = true
 		}
+	case *ast.LoopNode,
+		*ast.ForLoopNode:
+		v.symbolTable.DestroyAllConstants()
+	case ast.Statements:
+		v.symbolTable.DestroyAllConstants()
+		v.symbolTable.MoveNextScope()
 	case ast.ExpressionHolderNode:
 		node.MapExpressions(v.simulate)
-	case ast.Statements:
-		v.symbolTable.MoveNextScope()
-
 	}
 }
 
@@ -76,10 +79,10 @@ func (v *Propagator) SetValue(node ast.RHSNode, identDec *ast.IdentifierDeclarat
 		if flag {
 			identDec.SetValue(rhs)
 		} else {
-			identDec.RemoveValue()
+			v.symbolTable.DestroyConstant(identDec.Ident.Ident)
 		}
 	default:
-		identDec.RemoveValue()
+		v.symbolTable.DestroyConstant(identDec.Ident.Ident)
 	}
 }
 
@@ -100,6 +103,8 @@ func (v *Propagator) Leave(programNode ast.ProgramNode) {
 		if ident, ok := node.LHS.(*ast.IdentifierNode); ok {
 			identDec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
 			v.SetValue(node.RHS, identDec)
+		} else if i, ok := node.LHS.(*ast.ArrayElementNode); ok {
+			v.symbolTable.DestroyConstant(i.Ident.Ident)
 		}
 	}
 }
