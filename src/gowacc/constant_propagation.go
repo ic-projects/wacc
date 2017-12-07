@@ -10,6 +10,7 @@ func SimplifiyTree(
 
 	propagator := NewPropagator(symbolTable)
 	ast.Walk(propagator, tree)
+	symbolTable.Reset()
 }
 
 type Propagator struct {
@@ -24,8 +25,51 @@ func NewPropagator(symbolTable *ast.SymbolTable) *Propagator {
 
 func (v *Propagator) Visit(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
+	case *ast.FunctionNode:
+		v.symbolTable.MoveNextScope()
+	case ast.Parameters:
+		for _, e := range node {
+			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
+			dec.IsDeclared = true
+		}
 	case ast.ExpressionHolderNode:
 		node.MapExpressions(v.simulate)
+	case ast.Statements:
+		v.symbolTable.MoveNextScope()
+
+	}
+}
+
+func (v *Propagator) Leave(programNode ast.ProgramNode) {
+	switch node := programNode.(type) {
+	case ast.Statements:
+		v.symbolTable.MoveUpScope()
+	case *ast.FunctionNode:
+		v.symbolTable.MoveUpScope()
+	case *ast.DeclareNode:
+		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
+		dec.IsDeclared = true
+		identDec := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
+		switch rhs := node.RHS.(type) {
+		case *ast.BooleanLiteralNode,
+			*ast.IntegerLiteralNode,
+			*ast.CharacterLiteralNode:
+			identDec.SetValue(rhs)
+		default:
+			identDec.RemoveValue()
+		}
+	case *ast.AssignNode:
+		if ident, ok := node.LHS.(*ast.IdentifierNode); ok {
+			identDec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
+			switch rhs := node.RHS.(type) {
+			case *ast.BooleanLiteralNode,
+				*ast.IntegerLiteralNode,
+				*ast.CharacterLiteralNode:
+				identDec.SetValue(rhs)
+			default:
+				identDec.RemoveValue()
+			}
+		}
 	}
 }
 
@@ -39,7 +83,10 @@ func (v *Propagator) simulate(node ast.ProgramNode) ast.ExpressionNode {
 func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, bool) {
 	switch t := node.(type) {
 	case *ast.IdentifierNode:
-		// TODO
+		identDec := v.symbolTable.SearchForDeclaredIdent(t.Ident)
+		if identDec.HasValue {
+			return identDec.Value, true
+		}
 	case *ast.BooleanLiteralNode,
 		*ast.IntegerLiteralNode,
 		*ast.CharacterLiteralNode:
