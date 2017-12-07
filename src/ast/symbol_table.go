@@ -108,7 +108,15 @@ func (dec *IdentifierDeclaration) RemoveValue() {
 /**************** MOVING SCOPE HELPER FUNCTIONS ****************/
 
 func (table *SymbolTable) Reset() {
-	// TODO
+	table.CurrentScope = table.Head
+	table.Head.Reset()
+}
+
+func (node *SymbolTableNode) Reset() {
+	node.lastScope = -1
+	for _, n := range node.ChildScopes {
+		n.Reset()
+	}
 }
 
 // MoveDownScope creates a new Scope such that it is a chile of the
