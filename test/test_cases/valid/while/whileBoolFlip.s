@@ -1,69 +1,63 @@
--- Compiling...
--- Printing Assembly...
-whileBoolFlip.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 7
-4		.ascii	"flip b!"
-5	msg_1:
-6		.word 11
-7		.ascii	"end of loop"
-8	msg_2:
-9		.word 5
-10		.ascii	"%.*s\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		SUB sp, sp, #1
-21		MOV r4, #1
-22		STRB r4, [sp]
-23		B L0
-24	L1:
-25		LDR r4, =msg_0
-26		MOV r0, r4
-27		BL p_print_string
-28		BL p_print_ln
-29		LDRSB r4, [sp]
-30		EOR r4, r4, #1
-31		STRB r4, [sp]
-32	L0:
-33		LDRSB r4, [sp]
-34		CMP r4, #1
-35		BEQ L1
-36		LDR r4, =msg_1
-37		MOV r0, r4
-38		BL p_print_string
-39		BL p_print_ln
-40		ADD sp, sp, #1
-41		LDR r0, =0
-42		POP {pc}
-43		.ltorg
-44	p_print_string:
-45		PUSH {lr}
-46		LDR r1, [r0]
-47		ADD r2, r0, #4
-48		LDR r0, =msg_2
-49		ADD r0, r0, #4
-50		BL printf
-51		MOV r0, #0
-52		BL fflush
-53		POP {pc}
-54	p_print_ln:
-55		PUSH {lr}
-56		LDR r0, =msg_3
-57		ADD r0, r0, #4
-58		BL puts
-59		MOV r0, #0
-60		BL fflush
-61		POP {pc}
-62	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 7
+	.ascii	"flip b!"
+msg_1:
+	.word 11
+	.ascii	"end of loop"
+msg_2:
+	.word 5
+	.ascii	"%.*s\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #1
+	MOV r4, #1
+	STRB r4, [sp]
+	B L0
+L1:
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	LDRSB r4, [sp]
+	EOR r4, r4, #1
+	STRB r4, [sp]
+L0:
+	LDRSB r4, [sp]
+	CMP r4, #1
+	BEQ L1
+	LDR r4, =msg_1
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	ADD sp, sp, #1
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

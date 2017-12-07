@@ -1,79 +1,73 @@
--- Compiling...
--- Printing Assembly...
-greaterEqExpr.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 5
-4		.ascii	"true\0"
-5	msg_1:
-6		.word 6
-7		.ascii	"false\0"
-8	msg_2:
-9		.word 1
-10		.ascii	"\0"
-11	
-12	.text
-13	
-14	.global main
-15	main:
-16		PUSH {lr}
-17		SUB sp, sp, #16
-18		LDR r4, =2
-19		STR r4, [sp, #12]
-20		LDR r4, =6
-21		STR r4, [sp, #8]
-22		LDR r4, =4
-23		STR r4, [sp, #4]
-24		LDR r4, =4
-25		STR r4, [sp]
-26		LDR r4, [sp, #12]
-27		LDR r5, [sp, #8]
-28		CMP r4, r5
-29		MOVGE r4, #1
-30		MOVLT r4, #0
-31		MOV r0, r4
-32		BL p_print_bool
-33		BL p_print_ln
-34		LDR r4, [sp, #8]
-35		LDR r5, [sp, #4]
-36		CMP r4, r5
-37		MOVGE r4, #1
-38		MOVLT r4, #0
-39		MOV r0, r4
-40		BL p_print_bool
-41		BL p_print_ln
-42		LDR r4, [sp, #4]
-43		LDR r5, [sp, #4]
-44		CMP r4, r5
-45		MOVGE r4, #1
-46		MOVLT r4, #0
-47		MOV r0, r4
-48		BL p_print_bool
-49		BL p_print_ln
-50		ADD sp, sp, #16
-51		LDR r0, =0
-52		POP {pc}
-53		.ltorg
-54	p_print_bool:
-55		PUSH {lr}
-56		CMP r0, #0
-57		LDRNE r0, =msg_0
-58		LDREQ r0, =msg_1
-59		ADD r0, r0, #4
-60		BL printf
-61		MOV r0, #0
-62		BL fflush
-63		POP {pc}
-64	p_print_ln:
-65		PUSH {lr}
-66		LDR r0, =msg_2
-67		ADD r0, r0, #4
-68		BL puts
-69		MOV r0, #0
-70		BL fflush
-71		POP {pc}
-72	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 5
+	.ascii	"true\0"
+msg_1:
+	.word 6
+	.ascii	"false\0"
+msg_2:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #16
+	LDR r4, =2
+	STR r4, [sp, #12]
+	LDR r4, =6
+	STR r4, [sp, #8]
+	LDR r4, =4
+	STR r4, [sp, #4]
+	LDR r4, =4
+	STR r4, [sp]
+	LDR r4, [sp, #12]
+	LDR r5, [sp, #8]
+	CMP r4, r5
+	MOVGE r4, #1
+	MOVLT r4, #0
+	MOV r0, r4
+	BL p_print_bool
+	BL p_print_ln
+	LDR r4, [sp, #8]
+	LDR r5, [sp, #4]
+	CMP r4, r5
+	MOVGE r4, #1
+	MOVLT r4, #0
+	MOV r0, r4
+	BL p_print_bool
+	BL p_print_ln
+	LDR r4, [sp, #4]
+	LDR r5, [sp, #4]
+	CMP r4, r5
+	MOVGE r4, #1
+	MOVLT r4, #0
+	MOV r0, r4
+	BL p_print_bool
+	BL p_print_ln
+	ADD sp, sp, #16
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_bool:
+	PUSH {lr}
+	CMP r0, #0
+	LDRNE r0, =msg_0
+	LDREQ r0, =msg_1
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

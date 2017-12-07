@@ -1,33 +1,27 @@
--- Compiling...
--- Printing Assembly...
-createRefPair.s contents are:
-===========================================================
-0	.text
-1	
-2	.global main
-3	main:
-4		PUSH {lr}
-5		SUB sp, sp, #8
-6		LDR r0, =8
-7		BL malloc
-8		MOV r4, r0
-9		LDR r5, =10
-10		LDR r0, =4
-11		BL malloc
-12		STR r5, [r0]
-13		STR r0, [r4]
-14		MOV r5, #'a'
-15		LDR r0, =1
-16		BL malloc
-17		STRB r5, [r0]
-18		STR r0, [r4, #4]
-19		STR r4, [sp, #4]
-20		LDR r4, [sp, #4]
-21		STR r4, [sp]
-22		ADD sp, sp, #8
-23		LDR r0, =0
-24		POP {pc}
-25		.ltorg
-26	
-===========================================================
--- Finished
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #8
+	LDR r0, =8
+	BL malloc
+	MOV r4, r0
+	LDR r5, =10
+	LDR r0, =4
+	BL malloc
+	STR r5, [r0]
+	STR r0, [r4]
+	MOV r5, #'a'
+	LDR r0, =1
+	BL malloc
+	STRB r5, [r0]
+	STR r0, [r4, #4]
+	STR r4, [sp, #4]
+	LDR r4, [sp, #4]
+	STR r4, [sp]
+	ADD sp, sp, #8
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+

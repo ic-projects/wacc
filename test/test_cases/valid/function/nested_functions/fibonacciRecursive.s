@@ -1,160 +1,154 @@
--- Compiling...
--- Printing Assembly...
-fibonacciRecursive.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 2
-4		.ascii	", "
-5	msg_1:
-6		.word 35
-7		.ascii	"The first 20 fibonacci numbers are:"
-8	msg_2:
-9		.word 3
-10		.ascii	"0, "
-11	msg_3:
-12		.word 3
-13		.ascii	"..."
-14	msg_4:
-15		.word 82
-16		.ascii	"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\n"
-17	msg_5:
-18		.word 3
-19		.ascii	"%d\0"
-20	msg_6:
-21		.word 5
-22		.ascii	"%.*s\0"
-23	msg_7:
-24		.word 1
-25		.ascii	"\0"
-26	
-27	.text
-28	
-29	.global main
-30	f_fibonacci:
-31		PUSH {lr}
-32		SUB sp, sp, #8
-33		LDR r4, [sp, #12]
-34		LDR r5, =1
-35		CMP r4, r5
-36		MOVLE r4, #1
-37		MOVGT r4, #0
-38		CMP r4, #0
-39		BEQ L0
-40		LDR r4, [sp, #12]
-41		MOV r0, r4
-42		ADD sp, sp, #8
-43		POP {pc}
-44		B L1
-45	L0:
-46	L1:
-47		LDRSB r4, [sp, #16]
-48		STRB r4, [sp, #-1]!
-49		LDR r4, [sp, #13]
-50		LDR r5, =1
-51		SUBS r4, r4, r5
-52		BLVS p_throw_overflow_error
-53		STR r4, [sp, #-4]!
-54		BL f_fibonacci
-55		ADD sp, sp, #5
-56		MOV r4, r0
-57		STR r4, [sp, #4]
-58		LDRSB r4, [sp, #16]
-59		CMP r4, #0
-60		BEQ L2
-61		LDR r4, [sp, #4]
-62		MOV r0, r4
-63		BL p_print_int
-64		LDR r4, =msg_0
-65		MOV r0, r4
-66		BL p_print_string
-67		B L3
-68	L2:
-69	L3:
-70		MOV r4, #0
-71		STRB r4, [sp, #-1]!
-72		LDR r4, [sp, #13]
-73		LDR r5, =2
-74		SUBS r4, r4, r5
-75		BLVS p_throw_overflow_error
-76		STR r4, [sp, #-4]!
-77		BL f_fibonacci
-78		ADD sp, sp, #5
-79		MOV r4, r0
-80		STR r4, [sp]
-81		LDR r4, [sp, #4]
-82		LDR r5, [sp]
-83		ADDS r4, r4, r5
-84		BLVS p_throw_overflow_error
-85		MOV r0, r4
-86		ADD sp, sp, #8
-87		POP {pc}
-88		POP {pc}
-89		.ltorg
-90	main:
-91		PUSH {lr}
-92		SUB sp, sp, #4
-93		LDR r4, =msg_1
-94		MOV r0, r4
-95		BL p_print_string
-96		BL p_print_ln
-97		LDR r4, =msg_2
-98		MOV r0, r4
-99		BL p_print_string
-100		MOV r4, #1
-101		STRB r4, [sp, #-1]!
-102		LDR r4, =19
-103		STR r4, [sp, #-4]!
-104		BL f_fibonacci
-105		ADD sp, sp, #5
-106		MOV r4, r0
-107		STR r4, [sp]
-108		LDR r4, [sp]
-109		MOV r0, r4
-110		BL p_print_int
-111		LDR r4, =msg_3
-112		MOV r0, r4
-113		BL p_print_string
-114		BL p_print_ln
-115		ADD sp, sp, #4
-116		LDR r0, =0
-117		POP {pc}
-118		.ltorg
-119	p_throw_overflow_error:
-120		LDR r0, =msg_4
-121		BL p_throw_runtime_error
-122	p_print_int:
-123		PUSH {lr}
-124		MOV r1, r0
-125		LDR r0, =msg_5
-126		ADD r0, r0, #4
-127		BL printf
-128		MOV r0, #0
-129		BL fflush
-130		POP {pc}
-131	p_print_string:
-132		PUSH {lr}
-133		LDR r1, [r0]
-134		ADD r2, r0, #4
-135		LDR r0, =msg_6
-136		ADD r0, r0, #4
-137		BL printf
-138		MOV r0, #0
-139		BL fflush
-140		POP {pc}
-141	p_print_ln:
-142		PUSH {lr}
-143		LDR r0, =msg_7
-144		ADD r0, r0, #4
-145		BL puts
-146		MOV r0, #0
-147		BL fflush
-148		POP {pc}
-149	p_throw_runtime_error:
-150		BL p_print_string
-151		MOV r0, #-1
-152		BL exit
-153	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 2
+	.ascii	", "
+msg_1:
+	.word 35
+	.ascii	"The first 20 fibonacci numbers are:"
+msg_2:
+	.word 3
+	.ascii	"0, "
+msg_3:
+	.word 3
+	.ascii	"..."
+msg_4:
+	.word 82
+	.ascii	"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\n"
+msg_5:
+	.word 3
+	.ascii	"%d\0"
+msg_6:
+	.word 5
+	.ascii	"%.*s\0"
+msg_7:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+f_fibonacci:
+	PUSH {lr}
+	SUB sp, sp, #8
+	LDR r4, [sp, #12]
+	LDR r5, =1
+	CMP r4, r5
+	MOVLE r4, #1
+	MOVGT r4, #0
+	CMP r4, #0
+	BEQ L0
+	LDR r4, [sp, #12]
+	MOV r0, r4
+	ADD sp, sp, #8
+	POP {pc}
+	B L1
+L0:
+L1:
+	LDRSB r4, [sp, #16]
+	STRB r4, [sp, #-1]!
+	LDR r4, [sp, #13]
+	LDR r5, =1
+	SUBS r4, r4, r5
+	BLVS p_throw_overflow_error
+	STR r4, [sp, #-4]!
+	BL f_fibonacci
+	ADD sp, sp, #5
+	MOV r4, r0
+	STR r4, [sp, #4]
+	LDRSB r4, [sp, #16]
+	CMP r4, #0
+	BEQ L2
+	LDR r4, [sp, #4]
+	MOV r0, r4
+	BL p_print_int
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	B L3
+L2:
+L3:
+	MOV r4, #0
+	STRB r4, [sp, #-1]!
+	LDR r4, [sp, #13]
+	LDR r5, =2
+	SUBS r4, r4, r5
+	BLVS p_throw_overflow_error
+	STR r4, [sp, #-4]!
+	BL f_fibonacci
+	ADD sp, sp, #5
+	MOV r4, r0
+	STR r4, [sp]
+	LDR r4, [sp, #4]
+	LDR r5, [sp]
+	ADDS r4, r4, r5
+	BLVS p_throw_overflow_error
+	MOV r0, r4
+	ADD sp, sp, #8
+	POP {pc}
+	POP {pc}
+	.ltorg
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =msg_1
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	LDR r4, =msg_2
+	MOV r0, r4
+	BL p_print_string
+	MOV r4, #1
+	STRB r4, [sp, #-1]!
+	LDR r4, =19
+	STR r4, [sp, #-4]!
+	BL f_fibonacci
+	ADD sp, sp, #5
+	MOV r4, r0
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	LDR r4, =msg_3
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_throw_overflow_error:
+	LDR r0, =msg_4
+	BL p_throw_runtime_error
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_5
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_6
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_7
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_throw_runtime_error:
+	BL p_print_string
+	MOV r0, #-1
+	BL exit
+

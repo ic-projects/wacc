@@ -1,57 +1,51 @@
--- Compiling...
--- Printing Assembly...
-functionSimple.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"%d\0"
-5	msg_1:
-6		.word 1
-7		.ascii	"\0"
-8	
-9	.text
-10	
-11	.global main
-12	f_f:
-13		PUSH {lr}
-14		LDR r4, =0
-15		MOV r0, r4
-16		POP {pc}
-17		POP {pc}
-18		.ltorg
-19	main:
-20		PUSH {lr}
-21		SUB sp, sp, #4
-22		BL f_f
-23		MOV r4, r0
-24		STR r4, [sp]
-25		LDR r4, [sp]
-26		MOV r0, r4
-27		BL p_print_int
-28		BL p_print_ln
-29		ADD sp, sp, #4
-30		LDR r0, =0
-31		POP {pc}
-32		.ltorg
-33	p_print_int:
-34		PUSH {lr}
-35		MOV r1, r0
-36		LDR r0, =msg_0
-37		ADD r0, r0, #4
-38		BL printf
-39		MOV r0, #0
-40		BL fflush
-41		POP {pc}
-42	p_print_ln:
-43		PUSH {lr}
-44		LDR r0, =msg_1
-45		ADD r0, r0, #4
-46		BL puts
-47		MOV r0, #0
-48		BL fflush
-49		POP {pc}
-50	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"%d\0"
+msg_1:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+f_f:
+	PUSH {lr}
+	LDR r4, =0
+	MOV r0, r4
+	POP {pc}
+	POP {pc}
+	.ltorg
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	BL f_f
+	MOV r4, r0
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_0
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

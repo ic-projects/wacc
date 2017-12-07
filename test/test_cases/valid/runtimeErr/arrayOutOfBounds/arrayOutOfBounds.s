@@ -1,114 +1,108 @@
--- Compiling...
--- Printing Assembly...
-arrayOutOfBounds.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 44
-4		.ascii	"ArrayIndexOutOfBoundsError: negative index\n\0"
-5	msg_1:
-6		.word 45
-7		.ascii	"ArrayIndexOutOfBoundsError: index too large\n\0"
-8	msg_2:
-9		.word 3
-10		.ascii	"%d\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	msg_4:
-15		.word 5
-16		.ascii	"%.*s\0"
-17	
-18	.text
-19	
-20	.global main
-21	main:
-22		PUSH {lr}
-23		SUB sp, sp, #8
-24		LDR r0, =16
-25		BL malloc
-26		MOV r4, r0
-27		LDR r5, =1
-28		STR r5, [r4, #4]
-29		LDR r5, =2
-30		STR r5, [r4, #8]
-31		LDR r5, =3
-32		STR r5, [r4, #12]
-33		LDR r5, =3
-34		STR r5, [r4]
-35		STR r4, [sp, #4]
-36		LDR r0, =20
-37		BL malloc
-38		MOV r4, r0
-39		LDR r5, =43
-40		STR r5, [r4, #4]
-41		LDR r5, =2
-42		STR r5, [r4, #8]
-43		LDR r5, =18
-44		STR r5, [r4, #12]
-45		LDR r5, =1
-46		STR r5, [r4, #16]
-47		LDR r5, =4
-48		STR r5, [r4]
-49		STR r4, [sp]
-50		ADD r4, sp, #0
-51		LDR r5, =5
-52		LDR r4, [r4]
-53		MOV r0, r5
-54		MOV r1, r4
-55		BL p_check_array_bounds
-56		ADD r4, r4, #4
-57		ADD r4, r4, r5, LSL #2
-58		LDR r4, [r4]
-59		MOV r0, r4
-60		BL p_print_int
-61		BL p_print_ln
-62		ADD sp, sp, #8
-63		LDR r0, =0
-64		POP {pc}
-65		.ltorg
-66	p_check_array_bounds:
-67		PUSH {lr}
-68		CMP r0, #0
-69		LDRLT r0, =msg_0
-70		BLLT p_throw_runtime_error
-71		LDR r1, [r1]
-72		CMP r0, r1
-73		LDRCS r0, =msg_1
-74		BLCS p_throw_runtime_error
-75		POP {pc}
-76	p_print_int:
-77		PUSH {lr}
-78		MOV r1, r0
-79		LDR r0, =msg_2
-80		ADD r0, r0, #4
-81		BL printf
-82		MOV r0, #0
-83		BL fflush
-84		POP {pc}
-85	p_print_ln:
-86		PUSH {lr}
-87		LDR r0, =msg_3
-88		ADD r0, r0, #4
-89		BL puts
-90		MOV r0, #0
-91		BL fflush
-92		POP {pc}
-93	p_throw_runtime_error:
-94		BL p_print_string
-95		MOV r0, #-1
-96		BL exit
-97	p_print_string:
-98		PUSH {lr}
-99		LDR r1, [r0]
-100		ADD r2, r0, #4
-101		LDR r0, =msg_4
-102		ADD r0, r0, #4
-103		BL printf
-104		MOV r0, #0
-105		BL fflush
-106		POP {pc}
-107	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 44
+	.ascii	"ArrayIndexOutOfBoundsError: negative index\n\0"
+msg_1:
+	.word 45
+	.ascii	"ArrayIndexOutOfBoundsError: index too large\n\0"
+msg_2:
+	.word 3
+	.ascii	"%d\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+msg_4:
+	.word 5
+	.ascii	"%.*s\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #8
+	LDR r0, =16
+	BL malloc
+	MOV r4, r0
+	LDR r5, =1
+	STR r5, [r4, #4]
+	LDR r5, =2
+	STR r5, [r4, #8]
+	LDR r5, =3
+	STR r5, [r4, #12]
+	LDR r5, =3
+	STR r5, [r4]
+	STR r4, [sp, #4]
+	LDR r0, =20
+	BL malloc
+	MOV r4, r0
+	LDR r5, =43
+	STR r5, [r4, #4]
+	LDR r5, =2
+	STR r5, [r4, #8]
+	LDR r5, =18
+	STR r5, [r4, #12]
+	LDR r5, =1
+	STR r5, [r4, #16]
+	LDR r5, =4
+	STR r5, [r4]
+	STR r4, [sp]
+	ADD r4, sp, #0
+	LDR r5, =5
+	LDR r4, [r4]
+	MOV r0, r5
+	MOV r1, r4
+	BL p_check_array_bounds
+	ADD r4, r4, #4
+	ADD r4, r4, r5, LSL #2
+	LDR r4, [r4]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #8
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_check_array_bounds:
+	PUSH {lr}
+	CMP r0, #0
+	LDRLT r0, =msg_0
+	BLLT p_throw_runtime_error
+	LDR r1, [r1]
+	CMP r0, r1
+	LDRCS r0, =msg_1
+	BLCS p_throw_runtime_error
+	POP {pc}
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_throw_runtime_error:
+	BL p_print_string
+	MOV r0, #-1
+	BL exit
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_4
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

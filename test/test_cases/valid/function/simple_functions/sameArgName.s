@@ -1,60 +1,54 @@
--- Compiling...
--- Printing Assembly...
-sameArgName.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"%d\0"
-5	msg_1:
-6		.word 1
-7		.ascii	"\0"
-8	
-9	.text
-10	
-11	.global main
-12	f_f:
-13		PUSH {lr}
-14		LDR r4, [sp, #4]
-15		MOV r0, r4
-16		POP {pc}
-17		POP {pc}
-18		.ltorg
-19	main:
-20		PUSH {lr}
-21		SUB sp, sp, #4
-22		LDR r4, =99
-23		STR r4, [sp, #-4]!
-24		BL f_f
-25		ADD sp, sp, #4
-26		MOV r4, r0
-27		STR r4, [sp]
-28		LDR r4, [sp]
-29		MOV r0, r4
-30		BL p_print_int
-31		BL p_print_ln
-32		ADD sp, sp, #4
-33		LDR r0, =0
-34		POP {pc}
-35		.ltorg
-36	p_print_int:
-37		PUSH {lr}
-38		MOV r1, r0
-39		LDR r0, =msg_0
-40		ADD r0, r0, #4
-41		BL printf
-42		MOV r0, #0
-43		BL fflush
-44		POP {pc}
-45	p_print_ln:
-46		PUSH {lr}
-47		LDR r0, =msg_1
-48		ADD r0, r0, #4
-49		BL puts
-50		MOV r0, #0
-51		BL fflush
-52		POP {pc}
-53	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"%d\0"
+msg_1:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+f_f:
+	PUSH {lr}
+	LDR r4, [sp, #4]
+	MOV r0, r4
+	POP {pc}
+	POP {pc}
+	.ltorg
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =99
+	STR r4, [sp, #-4]!
+	BL f_f
+	ADD sp, sp, #4
+	MOV r4, r0
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_0
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

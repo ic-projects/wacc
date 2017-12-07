@@ -1,62 +1,56 @@
--- Compiling...
--- Printing Assembly...
-whileFalse.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 10
-4		.ascii	"looping..."
-5	msg_1:
-6		.word 11
-7		.ascii	"end of loop"
-8	msg_2:
-9		.word 5
-10		.ascii	"%.*s\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		B L0
-21	L1:
-22		LDR r4, =msg_0
-23		MOV r0, r4
-24		BL p_print_string
-25		BL p_print_ln
-26	L0:
-27		MOV r4, #0
-28		CMP r4, #1
-29		BEQ L1
-30		LDR r4, =msg_1
-31		MOV r0, r4
-32		BL p_print_string
-33		BL p_print_ln
-34		LDR r0, =0
-35		POP {pc}
-36		.ltorg
-37	p_print_string:
-38		PUSH {lr}
-39		LDR r1, [r0]
-40		ADD r2, r0, #4
-41		LDR r0, =msg_2
-42		ADD r0, r0, #4
-43		BL printf
-44		MOV r0, #0
-45		BL fflush
-46		POP {pc}
-47	p_print_ln:
-48		PUSH {lr}
-49		LDR r0, =msg_3
-50		ADD r0, r0, #4
-51		BL puts
-52		MOV r0, #0
-53		BL fflush
-54		POP {pc}
-55	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 10
+	.ascii	"looping..."
+msg_1:
+	.word 11
+	.ascii	"end of loop"
+msg_2:
+	.word 5
+	.ascii	"%.*s\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	B L0
+L1:
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+L0:
+	MOV r4, #0
+	CMP r4, #1
+	BEQ L1
+	LDR r4, =msg_1
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

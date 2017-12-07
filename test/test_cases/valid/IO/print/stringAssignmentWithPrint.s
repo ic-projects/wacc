@@ -1,62 +1,56 @@
--- Compiling...
--- Printing Assembly...
-stringAssignmentWithPrint.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"foo"
-5	msg_1:
-6		.word 3
-7		.ascii	"bar"
-8	msg_2:
-9		.word 5
-10		.ascii	"%.*s\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		SUB sp, sp, #4
-21		LDR r4, =msg_0
-22		STR r4, [sp]
-23		LDR r4, [sp]
-24		MOV r0, r4
-25		BL p_print_string
-26		BL p_print_ln
-27		LDR r4, =msg_1
-28		STR r4, [sp]
-29		LDR r4, [sp]
-30		MOV r0, r4
-31		BL p_print_string
-32		BL p_print_ln
-33		ADD sp, sp, #4
-34		LDR r0, =0
-35		POP {pc}
-36		.ltorg
-37	p_print_string:
-38		PUSH {lr}
-39		LDR r1, [r0]
-40		ADD r2, r0, #4
-41		LDR r0, =msg_2
-42		ADD r0, r0, #4
-43		BL printf
-44		MOV r0, #0
-45		BL fflush
-46		POP {pc}
-47	p_print_ln:
-48		PUSH {lr}
-49		LDR r0, =msg_3
-50		ADD r0, r0, #4
-51		BL puts
-52		MOV r0, #0
-53		BL fflush
-54		POP {pc}
-55	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"foo"
+msg_1:
+	.word 3
+	.ascii	"bar"
+msg_2:
+	.word 5
+	.ascii	"%.*s\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =msg_0
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	LDR r4, =msg_1
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

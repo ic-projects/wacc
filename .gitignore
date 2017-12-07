@@ -11,5 +11,5 @@
 *.lyx~
 *.aux
 *.log
-*.out
+/doc/*.out
 *.pdf

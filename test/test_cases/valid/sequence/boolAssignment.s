@@ -1,21 +1,15 @@
--- Compiling...
--- Printing Assembly...
-boolAssignment.s contents are:
-===========================================================
-0	.text
-1	
-2	.global main
-3	main:
-4		PUSH {lr}
-5		SUB sp, sp, #1
-6		MOV r4, #0
-7		STRB r4, [sp]
-8		MOV r4, #1
-9		STRB r4, [sp]
-10		ADD sp, sp, #1
-11		LDR r0, =0
-12		POP {pc}
-13		.ltorg
-14	
-===========================================================
--- Finished
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #1
+	MOV r4, #0
+	STRB r4, [sp]
+	MOV r4, #1
+	STRB r4, [sp]
+	ADD sp, sp, #1
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+

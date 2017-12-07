@@ -1,126 +1,120 @@
--- Compiling...
--- Printing Assembly...
-IOLoop.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 25
-4		.ascii	"Please input an integer: "
-5	msg_1:
-6		.word 12
-7		.ascii	"echo input: "
-8	msg_2:
-9		.word 39
-10		.ascii	"Do you want to continue entering input?"
-11	msg_3:
-12		.word 34
-13		.ascii	"(enter Y for \'yes\' and N for \'no\')"
-14	msg_4:
-15		.word 5
-16		.ascii	"%.*s\0"
-17	msg_5:
-18		.word 3
-19		.ascii	"%d\0"
-20	msg_6:
-21		.word 3
-22		.ascii	"%d\0"
-23	msg_7:
-24		.word 1
-25		.ascii	"\0"
-26	msg_8:
-27		.word 4
-28		.ascii	" %c\0"
-29	
-30	.text
-31	
-32	.global main
-33	main:
-34		PUSH {lr}
-35		SUB sp, sp, #5
-36		MOV r4, #'Y'
-37		STRB r4, [sp, #4]
-38		LDR r4, =0
-39		STR r4, [sp]
-40		B L0
-41	L1:
-42		LDR r4, =msg_0
-43		MOV r0, r4
-44		BL p_print_string
-45		ADD r4, sp, #0
-46		MOV r0, r4
-47		BL p_read_int
-48		LDR r4, =msg_1
-49		MOV r0, r4
-50		BL p_print_string
-51		LDR r4, [sp]
-52		MOV r0, r4
-53		BL p_print_int
-54		BL p_print_ln
-55		LDR r4, =msg_2
-56		MOV r0, r4
-57		BL p_print_string
-58		BL p_print_ln
-59		LDR r4, =msg_3
-60		MOV r0, r4
-61		BL p_print_string
-62		BL p_print_ln
-63		ADD r4, sp, #4
-64		MOV r0, r4
-65		BL p_read_char
-66	L0:
-67		LDRSB r4, [sp, #4]
-68		MOV r5, #'N'
-69		CMP r4, r5
-70		MOVNE r4, #1
-71		MOVEQ r4, #0
-72		CMP r4, #1
-73		BEQ L1
-74		ADD sp, sp, #5
-75		LDR r0, =0
-76		POP {pc}
-77		.ltorg
-78	p_print_string:
-79		PUSH {lr}
-80		LDR r1, [r0]
-81		ADD r2, r0, #4
-82		LDR r0, =msg_4
-83		ADD r0, r0, #4
-84		BL printf
-85		MOV r0, #0
-86		BL fflush
-87		POP {pc}
-88	p_read_int:
-89		PUSH {lr}
-90		MOV r1, r0
-91		LDR r0, =msg_5
-92		ADD r0, r0, #4
-93		BL scanf
-94		POP {pc}
-95	p_print_int:
-96		PUSH {lr}
-97		MOV r1, r0
-98		LDR r0, =msg_6
-99		ADD r0, r0, #4
-100		BL printf
-101		MOV r0, #0
-102		BL fflush
-103		POP {pc}
-104	p_print_ln:
-105		PUSH {lr}
-106		LDR r0, =msg_7
-107		ADD r0, r0, #4
-108		BL puts
-109		MOV r0, #0
-110		BL fflush
-111		POP {pc}
-112	p_read_char:
-113		PUSH {lr}
-114		MOV r1, r0
-115		LDR r0, =msg_8
-116		ADD r0, r0, #4
-117		BL scanf
-118		POP {pc}
-119	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 25
+	.ascii	"Please input an integer: "
+msg_1:
+	.word 12
+	.ascii	"echo input: "
+msg_2:
+	.word 39
+	.ascii	"Do you want to continue entering input?"
+msg_3:
+	.word 34
+	.ascii	"(enter Y for \'yes\' and N for \'no\')"
+msg_4:
+	.word 5
+	.ascii	"%.*s\0"
+msg_5:
+	.word 3
+	.ascii	"%d\0"
+msg_6:
+	.word 3
+	.ascii	"%d\0"
+msg_7:
+	.word 1
+	.ascii	"\0"
+msg_8:
+	.word 4
+	.ascii	" %c\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #5
+	MOV r4, #'Y'
+	STRB r4, [sp, #4]
+	LDR r4, =0
+	STR r4, [sp]
+	B L0
+L1:
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	ADD r4, sp, #0
+	MOV r0, r4
+	BL p_read_int
+	LDR r4, =msg_1
+	MOV r0, r4
+	BL p_print_string
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	LDR r4, =msg_2
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	LDR r4, =msg_3
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	ADD r4, sp, #4
+	MOV r0, r4
+	BL p_read_char
+L0:
+	LDRSB r4, [sp, #4]
+	MOV r5, #'N'
+	CMP r4, r5
+	MOVNE r4, #1
+	MOVEQ r4, #0
+	CMP r4, #1
+	BEQ L1
+	ADD sp, sp, #5
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_4
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_read_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_5
+	ADD r0, r0, #4
+	BL scanf
+	POP {pc}
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_6
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_7
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_read_char:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_8
+	ADD r0, r0, #4
+	BL scanf
+	POP {pc}
+

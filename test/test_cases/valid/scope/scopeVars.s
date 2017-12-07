@@ -1,61 +1,55 @@
--- Compiling...
--- Printing Assembly...
-scopeVars.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"%d\0"
-5	msg_1:
-6		.word 1
-7		.ascii	"\0"
-8	
-9	.text
-10	
-11	.global main
-12	main:
-13		PUSH {lr}
-14		SUB sp, sp, #4
-15		LDR r4, =2
-16		STR r4, [sp]
-17		LDR r4, [sp]
-18		MOV r0, r4
-19		BL p_print_int
-20		BL p_print_ln
-21		SUB sp, sp, #4
-22		LDR r4, =4
-23		STR r4, [sp]
-24		LDR r4, [sp]
-25		MOV r0, r4
-26		BL p_print_int
-27		BL p_print_ln
-28		ADD sp, sp, #4
-29		LDR r4, [sp]
-30		MOV r0, r4
-31		BL p_print_int
-32		BL p_print_ln
-33		ADD sp, sp, #4
-34		LDR r0, =0
-35		POP {pc}
-36		.ltorg
-37	p_print_int:
-38		PUSH {lr}
-39		MOV r1, r0
-40		LDR r0, =msg_0
-41		ADD r0, r0, #4
-42		BL printf
-43		MOV r0, #0
-44		BL fflush
-45		POP {pc}
-46	p_print_ln:
-47		PUSH {lr}
-48		LDR r0, =msg_1
-49		ADD r0, r0, #4
-50		BL puts
-51		MOV r0, #0
-52		BL fflush
-53		POP {pc}
-54	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"%d\0"
+msg_1:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =2
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	SUB sp, sp, #4
+	LDR r4, =4
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_0
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

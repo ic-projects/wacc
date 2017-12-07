@@ -1,82 +1,76 @@
--- Compiling...
--- Printing Assembly...
-intnegateOverflow2.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"%d\0"
-5	msg_1:
-6		.word 1
-7		.ascii	"\0"
-8	msg_2:
-9		.word 82
-10		.ascii	"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\n"
-11	msg_3:
-12		.word 5
-13		.ascii	"%.*s\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		SUB sp, sp, #4
-21		LDR r4, =-2147483648
-22		STR r4, [sp]
-23		LDR r4, [sp]
-24		MOV r0, r4
-25		BL p_print_int
-26		BL p_print_ln
-27		LDR r4, [sp]
-28		LDR r5, =10
-29		SMULL r4, r5, r4, r5
-30		CMP r5, r4, ASR #31
-31		BLNE p_throw_overflow_error
-32		STR r4, [sp]
-33		LDR r4, [sp]
-34		MOV r0, r4
-35		BL p_print_int
-36		BL p_print_ln
-37		ADD sp, sp, #4
-38		LDR r0, =0
-39		POP {pc}
-40		.ltorg
-41	p_print_int:
-42		PUSH {lr}
-43		MOV r1, r0
-44		LDR r0, =msg_0
-45		ADD r0, r0, #4
-46		BL printf
-47		MOV r0, #0
-48		BL fflush
-49		POP {pc}
-50	p_print_ln:
-51		PUSH {lr}
-52		LDR r0, =msg_1
-53		ADD r0, r0, #4
-54		BL puts
-55		MOV r0, #0
-56		BL fflush
-57		POP {pc}
-58	p_throw_overflow_error:
-59		LDR r0, =msg_2
-60		BL p_throw_runtime_error
-61	p_throw_runtime_error:
-62		BL p_print_string
-63		MOV r0, #-1
-64		BL exit
-65	p_print_string:
-66		PUSH {lr}
-67		LDR r1, [r0]
-68		ADD r2, r0, #4
-69		LDR r0, =msg_3
-70		ADD r0, r0, #4
-71		BL printf
-72		MOV r0, #0
-73		BL fflush
-74		POP {pc}
-75	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"%d\0"
+msg_1:
+	.word 1
+	.ascii	"\0"
+msg_2:
+	.word 82
+	.ascii	"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\n"
+msg_3:
+	.word 5
+	.ascii	"%.*s\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =-2147483648
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	LDR r4, [sp]
+	LDR r5, =10
+	SMULL r4, r5, r4, r5
+	CMP r5, r4, ASR #31
+	BLNE p_throw_overflow_error
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_int
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_int:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_0
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_throw_overflow_error:
+	LDR r0, =msg_2
+	BL p_throw_runtime_error
+p_throw_runtime_error:
+	BL p_print_string
+	MOV r0, #-1
+	BL exit
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

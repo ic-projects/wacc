@@ -1,23 +1,17 @@
--- Compiling...
--- Printing Assembly...
-arrayEmpty.s contents are:
-===========================================================
-0	.text
-1	
-2	.global main
-3	main:
-4		PUSH {lr}
-5		SUB sp, sp, #4
-6		LDR r0, =4
-7		BL malloc
-8		MOV r4, r0
-9		LDR r5, =0
-10		STR r5, [r4]
-11		STR r4, [sp]
-12		ADD sp, sp, #4
-13		LDR r0, =0
-14		POP {pc}
-15		.ltorg
-16	
-===========================================================
--- Finished
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r0, =4
+	BL malloc
+	MOV r4, r0
+	LDR r5, =0
+	STR r5, [r4]
+	STR r4, [sp]
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+

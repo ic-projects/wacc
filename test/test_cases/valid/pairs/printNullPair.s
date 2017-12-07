@@ -1,49 +1,43 @@
--- Compiling...
--- Printing Assembly...
-printNullPair.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 3
-4		.ascii	"%p\0"
-5	msg_1:
-6		.word 1
-7		.ascii	"\0"
-8	
-9	.text
-10	
-11	.global main
-12	main:
-13		PUSH {lr}
-14		SUB sp, sp, #4
-15		LDR r4, =0
-16		STR r4, [sp]
-17		LDR r4, [sp]
-18		MOV r0, r4
-19		BL p_print_reference
-20		BL p_print_ln
-21		ADD sp, sp, #4
-22		LDR r0, =0
-23		POP {pc}
-24		.ltorg
-25	p_print_reference:
-26		PUSH {lr}
-27		MOV r1, r0
-28		LDR r0, =msg_0
-29		ADD r0, r0, #4
-30		BL printf
-31		MOV r0, #0
-32		BL fflush
-33		POP {pc}
-34	p_print_ln:
-35		PUSH {lr}
-36		LDR r0, =msg_1
-37		ADD r0, r0, #4
-38		BL puts
-39		MOV r0, #0
-40		BL fflush
-41		POP {pc}
-42	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 3
+	.ascii	"%p\0"
+msg_1:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =0
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_reference
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_reference:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_0
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+

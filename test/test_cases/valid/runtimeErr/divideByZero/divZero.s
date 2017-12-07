@@ -1,72 +1,66 @@
--- Compiling...
--- Printing Assembly...
-divZero.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 21
-4		.ascii	"should not reach here"
-5	msg_1:
-6		.word 45
-7		.ascii	"DivideByZeroError: divide or modulo by zero\n\0"
-8	msg_2:
-9		.word 5
-10		.ascii	"%.*s\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		SUB sp, sp, #4
-21		LDR r4, =10
-22		LDR r5, =0
-23		MOV r0, r4
-24		MOV r1, r5
-25		BL p_check_divide_by_zero
-26		BL __aeabi_idiv
-27		MOV r4, r0
-28		STR r4, [sp]
-29		LDR r4, =msg_0
-30		MOV r0, r4
-31		BL p_print_string
-32		BL p_print_ln
-33		ADD sp, sp, #4
-34		LDR r0, =0
-35		POP {pc}
-36		.ltorg
-37	p_check_divide_by_zero:
-38		PUSH {lr}
-39		CMP r1, #0
-40		LDREQ r0, =msg_1
-41		BLEQ p_throw_runtime_error
-42		POP {pc}
-43	p_print_string:
-44		PUSH {lr}
-45		LDR r1, [r0]
-46		ADD r2, r0, #4
-47		LDR r0, =msg_2
-48		ADD r0, r0, #4
-49		BL printf
-50		MOV r0, #0
-51		BL fflush
-52		POP {pc}
-53	p_print_ln:
-54		PUSH {lr}
-55		LDR r0, =msg_3
-56		ADD r0, r0, #4
-57		BL puts
-58		MOV r0, #0
-59		BL fflush
-60		POP {pc}
-61	p_throw_runtime_error:
-62		BL p_print_string
-63		MOV r0, #-1
-64		BL exit
-65	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 21
+	.ascii	"should not reach here"
+msg_1:
+	.word 45
+	.ascii	"DivideByZeroError: divide or modulo by zero\n\0"
+msg_2:
+	.word 5
+	.ascii	"%.*s\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =10
+	LDR r5, =0
+	MOV r0, r4
+	MOV r1, r5
+	BL p_check_divide_by_zero
+	BL __aeabi_idiv
+	MOV r4, r0
+	STR r4, [sp]
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_check_divide_by_zero:
+	PUSH {lr}
+	CMP r1, #0
+	LDREQ r0, =msg_1
+	BLEQ p_throw_runtime_error
+	POP {pc}
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_throw_runtime_error:
+	BL p_print_string
+	MOV r0, #-1
+	BL exit
+

@@ -1,78 +1,72 @@
--- Compiling...
--- Printing Assembly...
-printRef.s contents are:
-===========================================================
-0	.data
-1	
-2	msg_0:
-3		.word 53
-4		.ascii	"Printing an array variable gives an address, such as "
-5	msg_1:
-6		.word 5
-7		.ascii	"%.*s\0"
-8	msg_2:
-9		.word 3
-10		.ascii	"%p\0"
-11	msg_3:
-12		.word 1
-13		.ascii	"\0"
-14	
-15	.text
-16	
-17	.global main
-18	main:
-19		PUSH {lr}
-20		SUB sp, sp, #4
-21		LDR r4, =msg_0
-22		MOV r0, r4
-23		BL p_print_string
-24		LDR r0, =16
-25		BL malloc
-26		MOV r4, r0
-27		LDR r5, =1
-28		STR r5, [r4, #4]
-29		LDR r5, =2
-30		STR r5, [r4, #8]
-31		LDR r5, =3
-32		STR r5, [r4, #12]
-33		LDR r5, =3
-34		STR r5, [r4]
-35		STR r4, [sp]
-36		LDR r4, [sp]
-37		MOV r0, r4
-38		BL p_print_reference
-39		BL p_print_ln
-40		ADD sp, sp, #4
-41		LDR r0, =0
-42		POP {pc}
-43		.ltorg
-44	p_print_string:
-45		PUSH {lr}
-46		LDR r1, [r0]
-47		ADD r2, r0, #4
-48		LDR r0, =msg_1
-49		ADD r0, r0, #4
-50		BL printf
-51		MOV r0, #0
-52		BL fflush
-53		POP {pc}
-54	p_print_reference:
-55		PUSH {lr}
-56		MOV r1, r0
-57		LDR r0, =msg_2
-58		ADD r0, r0, #4
-59		BL printf
-60		MOV r0, #0
-61		BL fflush
-62		POP {pc}
-63	p_print_ln:
-64		PUSH {lr}
-65		LDR r0, =msg_3
-66		ADD r0, r0, #4
-67		BL puts
-68		MOV r0, #0
-69		BL fflush
-70		POP {pc}
-71	
-===========================================================
--- Finished
+.data
+
+msg_0:
+	.word 53
+	.ascii	"Printing an array variable gives an address, such as "
+msg_1:
+	.word 5
+	.ascii	"%.*s\0"
+msg_2:
+	.word 3
+	.ascii	"%p\0"
+msg_3:
+	.word 1
+	.ascii	"\0"
+
+.text
+
+.global main
+main:
+	PUSH {lr}
+	SUB sp, sp, #4
+	LDR r4, =msg_0
+	MOV r0, r4
+	BL p_print_string
+	LDR r0, =16
+	BL malloc
+	MOV r4, r0
+	LDR r5, =1
+	STR r5, [r4, #4]
+	LDR r5, =2
+	STR r5, [r4, #8]
+	LDR r5, =3
+	STR r5, [r4, #12]
+	LDR r5, =3
+	STR r5, [r4]
+	STR r4, [sp]
+	LDR r4, [sp]
+	MOV r0, r4
+	BL p_print_reference
+	BL p_print_ln
+	ADD sp, sp, #4
+	LDR r0, =0
+	POP {pc}
+	.ltorg
+p_print_string:
+	PUSH {lr}
+	LDR r1, [r0]
+	ADD r2, r0, #4
+	LDR r0, =msg_1
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_reference:
+	PUSH {lr}
+	MOV r1, r0
+	LDR r0, =msg_2
+	ADD r0, r0, #4
+	BL printf
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+p_print_ln:
+	PUSH {lr}
+	LDR r0, =msg_3
+	ADD r0, r0, #4
+	BL puts
+	MOV r0, #0
+	BL fflush
+	POP {pc}
+
