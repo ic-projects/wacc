@@ -583,7 +583,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			} else if dec.Location.IsRegister() {
 				// Store the address on stack
 				v.addCode("PUSH {%s}", register)
-				v.currentStackPos += 4
+
+				// Note that addresses are 4 bytes in size
+				v.addToStackPointer(4)
 
 				// Change the Location type to be an address on the heap
 				dec.Location.Register = utils.UNDEFINED
