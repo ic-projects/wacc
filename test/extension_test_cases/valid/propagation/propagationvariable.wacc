@@ -12,10 +12,10 @@ begin
   a := 1 + 1 + 2 ;
   a2 := a + 1;
   a3 := a2 + a * 6 * a ;
-  array := [0,1,2,3,4,5] ;
+  array := [0,1,2,3,40,5] ;
   if a + 9 == 13
   then
-    println array[a] 
+    println array[a]
   else
     skip
   fi ;
