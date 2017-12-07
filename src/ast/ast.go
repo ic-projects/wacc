@@ -92,6 +92,7 @@ type StructNode struct {
 	Types      []*StructInternalNode
 	TypesMap   map[string]int
 	MemorySize int
+	T          TypeNode
 }
 
 // NewStructNode builds a StructNode.
@@ -105,6 +106,7 @@ func NewStructNode(
 		Ident:    ident,
 		Types:    types,
 		TypesMap: make(map[string]int),
+		T:        NewStructTypeNode(ident),
 	}
 	structNode.CalcMemorySpace()
 	return structNode

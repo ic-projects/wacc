@@ -313,9 +313,15 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			v.typeChecker.freeze(node)
 		} else {
 			if dyn, ok := ast.ToValue(id.T).(*ast.DynamicTypeNode); ok {
-				poss := v.symbolTable.SearchForStructByUsage(node.Struct.Ident)
-				dyn.ReduceSet(poss)
-				v.typeChecker.seen(nil)
+				poss, structs, internals := v.symbolTable.SearchForStructByUsage(node.Ident.Ident)
+				if len(poss) == 1 {
+					foundError = v.typeChecker.seen(poss[0]).addPos(node.Pos)
+					node.SetStructType(internals[0])
+					dyn.ReduceSet([]ast.TypeNode{structs[0].T})
+				} else {
+					t, _ := dyn.ReduceSet(poss)
+					foundError = v.typeChecker.seen(t).addPos(node.Pos)
+				}
 			} else {
 				if struc, ok := ast.ToValue(id.T).(ast.StructTypeNode); !ok {
 					foundError = NewCustomError(node.Pos, fmt.Sprintf("Struct access on non-struct variable \"%s\"", node.Ident.Ident))
@@ -368,11 +374,10 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 	case *ast.NewPairNode:
 		foundError = v.typeChecker.seen(&ast.PairTypeNode{}).addPos(node.Pos)
 	case *ast.StructNewNode:
-		foundError = v.typeChecker.seen(node.T).addPos(node.Pos)
-		if structNode, ok := v.symbolTable.SearchForStruct(node.T.Ident); !ok {
+		if structNode, ok := v.symbolTable.SearchForStruct(node.Ident.Ident); !ok {
 			foundError = NewCustomError(node.Pos, fmt.Sprintf(
 				"Struct init on non-struct \"%s\"",
-				node.T,
+				node.Ident,
 			))
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
@@ -387,6 +392,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			v.typeChecker.seen(nil)
 			v.typeChecker.freeze(node)
 		} else {
+			foundError = v.typeChecker.seen(structNode.T).addPos(node.Pos)
 			node.SetStructType(structNode)
 			for i := len(structNode.Types) - 1; i >= 0; i-- {
 				v.typeChecker.expect(structNode.Types[i].T)

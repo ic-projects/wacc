@@ -192,14 +192,19 @@ func (table *SymbolTable) SearchForStruct(
 
 // SearchForStructByUsage will search for a struct, returning false as its
 // second return if not found. This version finds a struct from a member.
-func (table *SymbolTable) SearchForStructByUsage(usage string) []TypeNode {
+func (table *SymbolTable) SearchForStructByUsage(
+	usage string) ([]TypeNode, []*StructNode, []*StructInternalNode) {
 	set := make([]TypeNode, 0)
+	structSet := make([]*StructNode, 0)
+	structInternalSet := make([]*StructInternalNode, 0)
 	for _, s := range table.Structs {
 		if t, ok := s.TypesMap[usage]; ok {
 			set = append(set, s.Types[t].T)
+			structSet = append(structSet, s)
+			structInternalSet = append(structInternalSet, s.Types[t])
 		}
 	}
-	return set
+	return set, structSet, structInternalSet
 }
 
 /**************** ADDING HELPER FUNCTIONS ****************/
