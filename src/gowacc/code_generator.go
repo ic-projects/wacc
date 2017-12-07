@@ -256,6 +256,7 @@ func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 		*ast.NewPairNode,
 		*ast.StructNewNode,
 		*ast.PointerNewNode,
+		*ast.PointerDereferenceNode,
 		*ast.ReadNode,
 		*ast.FunctionCallNode,
 		*ast.BinaryOperatorNode:
@@ -358,6 +359,13 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 					rhsRegister,
 					v.LocationOf(ident.Location))
 			}
+		case *ast.PointerDereferenceNode:
+			ast.Walk(v, lhsNode.Ident)
+			lhsRegister := v.getReturnRegister()
+			v.addCode("%s %s, [%s]",
+				store(ast.SizeOf(ast.Type(lhsNode, v.symbolTable))),
+				rhsRegister,
+				lhsRegister)
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case *ast.ReadNode:
@@ -597,6 +605,12 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			v.addCode("LDR %s, %s", register, dec.Location)
 		}
 		v.freeRegisters.Push(valueReg)
+	case *ast.PointerDereferenceNode:
+		ast.Walk(v, node.Ident)
+		register := v.returnRegisters.Pop()
+
+		v.addCode("LDR %s, [%s]", register, register)
+
 		v.returnRegisters.Push(register)
 	case *ast.NewPairNode:
 		register := v.getFreeRegister()
