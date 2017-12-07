@@ -1,0 +1,19 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  a := [0, 1] ;
+  a =  [0 + 0, 6, 2, 3] ;
+  b := a[0] ;
+  c := a[1] ;
+  d := a[a[1]];
+  e := a[8 - 9];
+  exit 0
+end
