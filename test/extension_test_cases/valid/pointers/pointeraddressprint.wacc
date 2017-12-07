@@ -1,0 +1,18 @@
+# pointers
+
+# Output:
+# #some address#
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  int num = 1 ;
+  int *numPtr = &num ;
+
+  println numPtr ;
+
+  exit 0
+end
