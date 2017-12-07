@@ -146,7 +146,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 		// that Functions can be declared in any order.
 		for _, f := range node.Functions {
 			if functionNode, ok :=
-				v.symbolTable.SearchForFunction(f.Ident.Ident); ok {
+				v.symbolTable.SearchForFunctionParams(f.Ident.Ident, f.Params); ok {
 				foundError = NewPreviouslyDeclared(NewDeclarationError(
 					f.Pos,
 					true,
@@ -399,7 +399,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			}
 		}
 	case *ast.FunctionCallNode:
-		if f, ok := v.symbolTable.SearchForFunction(node.Ident.Ident); !ok {
+		if f, ok := v.symbolTable.SearchForFunction(node.Ident.Ident, node.Exprs); !ok {
 			foundError = NewDeclarationError(
 				node.Pos,
 				true,
