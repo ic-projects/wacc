@@ -1,7 +1,10 @@
 # pointers
 
 # Output:
-# #empty#
+# 2
+# 2
+# 4
+# 4
 
 # Exit:
 # 0
@@ -13,6 +16,14 @@ begin
   int *numPtr = &num ;
 
   *numPtr = 2 ;
+
+  println num ;
+  println *numPtr ;
+
+  num = 4 ;
+
+  println num ;
+  println *numPtr ;
 
   exit 0
 end
