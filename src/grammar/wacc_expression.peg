@@ -176,7 +176,7 @@ INTLITER ← INTSIGN? _ DIGIT+ {
 
 	return ast.NewIntegerLiteralNode(
 		c.getPosition(),
-		int(i),
+		int64(i),
 	), err
 
 }

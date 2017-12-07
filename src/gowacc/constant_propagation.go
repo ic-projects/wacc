@@ -2,6 +2,7 @@ package main
 
 import (
 	"ast"
+	"utils"
 )
 
 // SimplifyTree will simplifiy a given tree, changing branches of the
@@ -131,16 +132,16 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 					index := expr.(*ast.IntegerLiteralNode).Val
 
 					// Array index bounds checking
-					if index >= len(arrLiteral.Exprs) {
+					if index >= int64(len(arrLiteral.Exprs)) {
 						*v.errors = append(*v.errors,
-							NewArrayIndexError(t.Pos,
+							NewCustomStringError(t.Pos,
 								ArrayIndexTooLarge,
 								index,
 								len(arrLiteral.Exprs)))
 						return node, false
 					} else if index < 0 {
 						*v.errors = append(*v.errors,
-							NewArrayIndexError(t.Pos, ArrayIndexNegative, index))
+							NewCustomStringError(t.Pos, ArrayIndexNegative, index))
 						return node, false
 					}
 
@@ -188,16 +189,16 @@ func (v *Propagator) ApplyUnary(
 		}
 	case ast.NEG:
 		if b, ok := e.(*ast.IntegerLiteralNode); ok {
-			//if err, ok := CheckOverflow(-b1.Val); ok {
-			// TODO OverflowError
-			//}
+			if v.CheckOverflow(-b.Val, un.Pos) {
+				return nil, false
+			}
 			return ast.NewIntegerLiteralNode(b.Pos, -b.Val), true
 		}
 	case ast.LEN:
 		// TODO
 	case ast.ORD:
 		if b, ok := e.(*ast.CharacterLiteralNode); ok {
-			return ast.NewIntegerLiteralNode(b.Pos, int(b.Val)), true
+			return ast.NewIntegerLiteralNode(b.Pos, int64(b.Val)), true
 		}
 	case ast.CHR:
 		if b, ok := e.(*ast.IntegerLiteralNode); ok {
@@ -229,9 +230,9 @@ func (v *Propagator) ApplyBinary(
 		b1, ok1 := e1.(*ast.IntegerLiteralNode)
 		b2, ok2 := e2.(*ast.IntegerLiteralNode)
 		if ok1 && ok2 {
-			//if err, ok := CheckOverflow(b1.Val*b2.Val); ok {
-			// TODO OverflowError
-			//}
+			if v.CheckOverflow(b1.Val*b2.Val, binOp.Pos) {
+				return nil, false
+			}
 			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val*b2.Val), true
 		}
 	case ast.DIV:
@@ -239,7 +240,8 @@ func (v *Propagator) ApplyBinary(
 		b2, ok2 := e2.(*ast.IntegerLiteralNode)
 		if ok1 && ok2 {
 			if b2.Val == 0 {
-				// TODO divide by zero error
+				*v.errors = append(*v.errors, NewCustomStringError(binOp.Pos, DivideByZero))
+				return nil, false
 			}
 			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val/b2.Val), true
 		}
@@ -248,7 +250,8 @@ func (v *Propagator) ApplyBinary(
 		b2, ok2 := e2.(*ast.IntegerLiteralNode)
 		if ok1 && ok2 {
 			if b2.Val == 0 {
-				// TODO mod by zero error
+				*v.errors = append(*v.errors, NewCustomStringError(binOp.Pos, ModByZero))
+				return nil, false
 			}
 			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val%b2.Val), true
 		}
@@ -256,18 +259,18 @@ func (v *Propagator) ApplyBinary(
 		b1, ok1 := e1.(*ast.IntegerLiteralNode)
 		b2, ok2 := e2.(*ast.IntegerLiteralNode)
 		if ok1 && ok2 {
-			//if err, ok := CheckOverflow(b1.Val-b2.Val); ok {
-			// TODO OverflowError
-			//}
+			if v.CheckOverflow(b1.Val-b2.Val, binOp.Pos) {
+				return nil, false
+			}
 			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val-b2.Val), true
 		}
 	case ast.ADD:
 		b1, ok1 := e1.(*ast.IntegerLiteralNode)
 		b2, ok2 := e2.(*ast.IntegerLiteralNode)
 		if ok1 && ok2 {
-			//if err, ok := CheckOverflow(b1.Val+b2.Val); ok {
-			// TODO OverflowError
-			//}
+			if v.CheckOverflow(b1.Val+b2.Val, binOp.Pos) {
+				return nil, false
+			}
 			return ast.NewIntegerLiteralNode(b1.Pos, b1.Val+b2.Val), true
 		}
 	case ast.GEQ:
@@ -310,4 +313,13 @@ func (v *Propagator) ApplyBinary(
 		}
 	}
 	return nil, false
+}
+
+func (v *Propagator) CheckOverflow(val int64, pos utils.Position) bool {
+	if int64(int32(val)) != val {
+		*v.errors = append(*v.errors,
+			NewCustomStringError(pos, OverFlow, val))
+		return true
+	}
+	return false
 }

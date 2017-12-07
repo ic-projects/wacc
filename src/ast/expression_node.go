@@ -226,11 +226,11 @@ func (binOp BinaryOperator) String() string {
 //  7
 type IntegerLiteralNode struct {
 	Pos utils.Position
-	Val int
+	Val int64
 }
 
 // NewIntegerLiteralNode builds an IntegerLiteralNode
-func NewIntegerLiteralNode(pos utils.Position, val int) *IntegerLiteralNode {
+func NewIntegerLiteralNode(pos utils.Position, val int64) *IntegerLiteralNode {
 	return &IntegerLiteralNode{
 		Pos: pos,
 		Val: val,

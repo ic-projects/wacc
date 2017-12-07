@@ -11,10 +11,16 @@ import (
 )
 
 const (
-	ArrayIndexTooLarge string = "Array access using index of value %d on array " +
-		"of length %d (too large index)."
-	ArrayIndexNegative string = "Array access using index of value %d on array " +
-		"(negative index)."
+	ArrayIndexTooLarge string = "Array Out-Of-Bounds Error: Array access using " +
+		"index of value %d on array of length %d (too large index)."
+	ArrayIndexNegative string = "Array Out-Of-Bounds Error: Array access using " +
+		"index of value %d on array (negative index)."
+	OverFlow string = "Overflow Error: The result of this operation (%d) " +
+		"cannot be stored in 4 bytes"
+	DivideByZero string = "Divide By Zero Error: This operation causes a " +
+		"divide by zero operation"
+	ModByZero string = "Mod By Zero Error: This operation causes a " +
+		"mod by zero operation"
 )
 
 // GenericError is an interface that errors implement, which allows for elegent
@@ -56,8 +62,8 @@ func (e CustomError) String() string {
 	return e.text
 }
 
-// NewArrayIndexError builds a ArrayIndexError
-func NewArrayIndexError(pos utils.Position,
+// NewCustomStringError builds CustomError
+func NewCustomStringError(pos utils.Position,
 	text string,
 	vars ...interface{},
 ) CustomError {
