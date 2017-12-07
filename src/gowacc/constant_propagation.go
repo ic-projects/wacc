@@ -150,7 +150,9 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 	case *ast.IdentifierNode:
 		identDec := v.symbolTable.SearchForDeclaredIdent(t.Ident)
 		if identDec.HasValue {
-			return identDec.Value, true
+			if _, ok := identDec.Value.(*ast.ArrayLiteralNode); !ok {
+				return identDec.Value, true
+			}
 		}
 	case *ast.BooleanLiteralNode,
 		*ast.IntegerLiteralNode,
