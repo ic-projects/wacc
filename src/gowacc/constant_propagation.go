@@ -8,11 +8,13 @@ import (
 // tree to their immediate values if they can be calculated.
 func SimplifyTree(
 	tree ast.ProgramNode,
-	checker *SemanticCheck) {
+	checker *SemanticCheck,
+) *SemanticCheck {
 
 	propagator := NewPropagator(checker)
 	ast.Walk(propagator, tree)
 	checker.symbolTable.Reset()
+	return checker
 }
 
 // Propagator is the struct used when simplifying the tree, it links
@@ -133,6 +135,7 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 					return node, false
 				}
 			}
+
 			return cur, true
 		}
 	case *ast.IdentifierNode:

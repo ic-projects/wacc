@@ -74,7 +74,7 @@ func main() {
 		checker := PerformSemanticCheck(tree)
 
 		// Print out all semantic errors that occur
-		if checker.hasErrors() {
+		if checker.hasErrors() || SimplifyTree(tree, checker).hasErrors() {
 			fmt.Println("Errors detected during compilation! Exit code 200 returned.")
 			checker.PrintErrors(filepath)
 			os.Exit(200)
