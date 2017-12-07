@@ -100,20 +100,27 @@ func NewStructNode(
 	ident *IdentifierNode,
 	types []*StructInternalNode,
 ) *StructNode {
-	structNode := StructNode{
+	structNode := &StructNode{
 		Pos:      pos,
 		Ident:    ident,
 		Types:    types,
 		TypesMap: make(map[string]int),
 	}
+	structNode.CalcMemorySpace()
+	return structNode
+}
+
+// CalcMemorySpace calculates and sets the correct memorySize
+// for the StructNode and the correct individual offsets
+// for each of the structs members.
+func (node *StructNode) CalcMemorySpace() {
 	mem := 0
-	for i, t := range structNode.Types {
+	for i, t := range node.Types {
 		t.MemoryOffset = mem
 		mem += SizeOf(t.T)
-		structNode.TypesMap[t.Ident.Ident] = i
+		node.TypesMap[t.Ident.Ident] = i
 	}
-	structNode.MemorySize = mem
-	return &structNode
+	node.MemorySize = mem
 }
 
 func (node *StructNode) String() string {

@@ -499,6 +499,10 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 // Leave will be called to leave the current node.
 func (v *SemanticCheck) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
+	case *ast.Program:
+		for _, s := range node.Structs {
+			s.CalcMemorySpace()
+		}
 	case ast.Statements:
 		v.symbolTable.MoveUpScope()
 	case *ast.ForLoopNode:
