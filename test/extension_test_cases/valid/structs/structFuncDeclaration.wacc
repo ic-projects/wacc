@@ -1,0 +1,25 @@
+# structs
+
+# Output:
+# #empty#
+
+# Exit:
+# 0
+
+# Program:
+
+struct MyType is
+  int a ;
+  int b ;
+end
+
+begin
+  MyType.f(i) is
+    this.a = 2;
+    return i
+  end
+  struct MyType t = new MyType(0, 2);
+  i := call t.f(true);
+  println i;
+  exit t.a
+end

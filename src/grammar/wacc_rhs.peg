@@ -90,20 +90,24 @@ POINTERDEREFERENCE ← '*' ident:IDENT {
 // PairSecondElementNode - defined in wacc_lhs.peg
 
 // FunctionCallNode
-CALL ← "call" __ i:IDENT _ '(' _ args:ARGLIST? _ ')' {
+CALL ← "call" __ s:(IDENT'.')?i:IDENT _ '(' _ args:ARGLIST? _ ')' {
 
-	if(args == nil) {
-		return ret(ast.NewFunctionCallNode(
-			c.getPosition(),
-			i.(*ast.IdentifierNode),
-			[]ast.ExpressionNode{},
-		))
-	}
+  var argList []ast.ExpressionNode
+
+  if args != nil {
+    argList = args.([]ast.ExpressionNode)
+  } else {
+    argList = make([]ast.ExpressionNode, 0)
+  }
+
+  if s != nil {
+    argList = append(argList, getItem(s, 0).(ast.ExpressionNode))
+  }
 
 	return ret(ast.NewFunctionCallNode(
 		c.getPosition(),
 		i.(*ast.IdentifierNode),
-		args.([]ast.ExpressionNode),
+		argList,
 	))
 
 }
