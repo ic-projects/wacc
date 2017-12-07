@@ -88,6 +88,7 @@ func main() {
 
 		if !*semanticOnly {
 
+			SimplifiyTree(tree, checker.SymbolTable())
 			// Generate assembly Code
 			asm := GenerateCode(tree, checker.SymbolTable())
 
