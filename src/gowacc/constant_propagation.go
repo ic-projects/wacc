@@ -4,22 +4,26 @@ import (
 	"ast"
 )
 
+// SimplifiyTree will simplifiy a given tree, changing branches of the
+// tree to their immediate values if they can be calculated.
 func SimplifiyTree(
 	tree ast.ProgramNode,
-	symbolTable *ast.SymbolTable) {
+	checker *SemanticCheck) {
 
-	propagator := NewPropagator(symbolTable)
+	propagator := NewPropagator(checker)
 	ast.Walk(propagator, tree)
-	symbolTable.Reset()
+	checker.symbolTable.Reset()
 }
 
 type Propagator struct {
 	symbolTable *ast.SymbolTable
+	errors      *[]GenericError
 }
 
-func NewPropagator(symbolTable *ast.SymbolTable) *Propagator {
+func NewPropagator(checker *SemanticCheck) *Propagator {
 	return &Propagator{
-		symbolTable: symbolTable,
+		symbolTable: checker.symbolTable,
+		errors:      checker.Errors,
 	}
 }
 
@@ -101,7 +105,16 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 				if expr, ok := v.simulateFull(e); ok {
 					index := expr.(*ast.IntegerLiteralNode).Val
 					if index >= len(arrLiteral.Exprs) {
-						// TODO Array out of bounds access
+						*v.errors = append(*v.errors,
+							NewArrayIndexError(t.Pos,
+								ArrayIndexTooLarge,
+								index,
+								len(arrLiteral.Exprs)))
+						return node, false
+					} else if index < 0 {
+						*v.errors = append(*v.errors,
+							NewArrayIndexError(t.Pos, ArrayIndexNegative, index))
+						return node, false
 					}
 					cur = arrLiteral.Exprs[index]
 				} else {

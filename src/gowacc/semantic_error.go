@@ -10,6 +10,13 @@ import (
 	"utils"
 )
 
+const (
+	ArrayIndexTooLarge string = "Array access using index of value %d on array " +
+		"of length %d (too large index)."
+	ArrayIndexNegative string = "Array access using index of value %d on array " +
+		"(negative index)."
+)
+
 // GenericError is an interface that errors implement, which allows for elegent
 // printing of errors.
 type GenericError interface {
@@ -47,6 +54,17 @@ func (e CustomError) Pos() utils.Position {
 
 func (e CustomError) String() string {
 	return e.text
+}
+
+// NewArrayIndexError builds a ArrayIndexError
+func NewArrayIndexError(pos utils.Position,
+	text string,
+	vars ...interface{},
+) CustomError {
+	return CustomError{
+		pos:  pos,
+		text: fmt.Sprintf(text, vars...),
+	}
 }
 
 /**************** TYPE ERROR ****************/

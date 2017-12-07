@@ -71,8 +71,7 @@ func main() {
 	if !*parseOnly {
 
 		// Perform semantic error checking
-		checker := NewSemanticCheck()
-		ast.Walk(checker, tree)
+		checker := PerformSemanticCheck(tree)
 
 		// Print out all semantic errors that occur
 		if checker.hasErrors() {
@@ -88,7 +87,6 @@ func main() {
 
 		if !*semanticOnly {
 
-			SimplifiyTree(tree, checker.SymbolTable())
 			// Generate assembly Code
 			asm := GenerateCode(tree, checker.SymbolTable())
 

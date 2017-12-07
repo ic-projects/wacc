@@ -86,17 +86,34 @@ type SemanticCheck struct {
 	symbolTable *ast.SymbolTable
 	typeTable   map[string]*ast.StructNode
 	typeChecker *TypeChecker
-	Errors      []GenericError
+	Errors      *[]GenericError
 }
 
 // NewSemanticCheck returns an initialised SemanticCheck
 func NewSemanticCheck() *SemanticCheck {
+	errors := make([]GenericError, 0)
 	return &SemanticCheck{
 		symbolTable: ast.NewSymbolTable(),
 		typeTable:   make(map[string]*ast.StructNode),
 		typeChecker: NewTypeChecker(),
-		Errors:      make([]GenericError, 0),
+		Errors:      &errors,
 	}
+}
+
+// PerformSemanticCheck will create a SemanticCheck object and perform
+// semantic checking and pruning on the given tree.
+func PerformSemanticCheck(
+	tree ast.ProgramNode,
+) *SemanticCheck {
+
+	// Perform semantic checking
+	checker := NewSemanticCheck()
+	ast.Walk(checker, tree)
+
+	// Perform pruning and array checking
+	SimplifiyTree(tree, checker)
+
+	return checker
 }
 
 /**************** GETTER / PRINTING FUNCTIONS ****************/
@@ -114,14 +131,14 @@ func (v *SemanticCheck) PrintSymbolTable() {
 // PrintErrors pretty prints semantic errors using the PrintErrors function in
 // semantic_error.go
 func (v *SemanticCheck) PrintErrors(filepath string) {
-	PrintErrors(v.Errors, filepath)
+	PrintErrors(*v.Errors, filepath)
 }
 
 func (v *SemanticCheck) hasErrors() bool {
-	if len(v.Errors) > 0 {
+	if len(*v.Errors) > 0 {
 		return true
 	}
-	return v.checkForDynamicErrors(&v.Errors)
+	return v.checkForDynamicErrors(v.Errors)
 }
 
 // Visit will apply the correct rule for the programNode given, to be used with
@@ -498,7 +515,7 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 
 	// If we have an error, add it to the list of errors.
 	if foundError != nil {
-		v.Errors = append(v.Errors, foundError)
+		*v.Errors = append(*v.Errors, foundError)
 	}
 }
 
