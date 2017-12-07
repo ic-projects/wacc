@@ -2,6 +2,7 @@
 
 # Output:
 # #some address#
+# #same address as above#
 
 # Exit:
 # 0
@@ -13,6 +14,8 @@ begin
   int *numPtr = &num ;
 
   println numPtr ;
+
+  println &num ;
 
   exit 0
 end
