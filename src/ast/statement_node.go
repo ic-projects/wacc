@@ -343,7 +343,12 @@ type SwitchNode struct {
 	Cases []CaseNode
 }
 
-func NewSwitchNode(pos utils.Position, expr ExpressionNode, cases []CaseNode) *SwitchNode {
+// NewSwitchNode builds a SwitchNode.
+func NewSwitchNode(
+	pos utils.Position,
+	expr ExpressionNode,
+	cases []CaseNode,
+) *SwitchNode {
 	return &SwitchNode{
 		Pos:   pos,
 		Expr:  expr,
@@ -374,6 +379,8 @@ func (node *SwitchNode) walkNode(visitor Visitor) {
 
 /**************** CASE NODE ****************/
 
+// CaseNode is a struct that holds the case and the statements that should be
+// executed.
 type CaseNode struct {
 	Pos       utils.Position
 	Expr      ExpressionNode
@@ -381,6 +388,7 @@ type CaseNode struct {
 	IsDefault bool
 }
 
+// NewDefaultCaseNode builds a CaseNode for the default case.
 func NewDefaultCaseNode(pos utils.Position, stats []StatementNode) CaseNode {
 	return CaseNode{
 		Pos:       pos,
@@ -389,7 +397,12 @@ func NewDefaultCaseNode(pos utils.Position, stats []StatementNode) CaseNode {
 	}
 }
 
-func NewCaseNode(pos utils.Position, expr ExpressionNode, stats []StatementNode) CaseNode {
+// NewCaseNode builds a CaseNode for a non-default case.
+func NewCaseNode(
+	pos utils.Position,
+	expr ExpressionNode,
+	stats []StatementNode,
+) CaseNode {
 	return CaseNode{
 		Pos:       pos,
 		Expr:      expr,
@@ -529,6 +542,7 @@ type ForLoopNode struct {
 	Stats   Statements
 }
 
+// NewForLoopNode builds a ForLoopNode.
 func NewForLoopNode(
 	pos utils.Position,
 	initial StatementNode,

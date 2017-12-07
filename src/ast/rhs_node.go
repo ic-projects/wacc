@@ -178,12 +178,17 @@ func (node *StructNewNode) walkNode(visitor Visitor) {
 
 /**************** POINTER NEW NODE ****************/
 
+// PointerNewNode is a struct with the identifier for a new pointer.
 type PointerNewNode struct {
 	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
-func NewPointerNewNode(pos utils.Position, ident *IdentifierNode) *PointerNewNode {
+// NewPointerNewNode builds a PointerNewNode.
+func NewPointerNewNode(
+	pos utils.Position,
+	ident *IdentifierNode,
+) *PointerNewNode {
 	return &PointerNewNode{
 		Pos:   pos,
 		Ident: ident,
@@ -199,11 +204,14 @@ func (node *PointerNewNode) walkNode(visitor Visitor) {
 
 /**************** POINTER DEREFERENCE NODE ****************/
 
+// PointerDereferenceNode is a struct with the identifier of a pointer to be
+// dereferenced.
 type PointerDereferenceNode struct {
 	Pos   utils.Position
 	Ident *IdentifierNode
 }
 
+// NewPointerDereferenceNode builds a PointerDereferenceNode.
 func NewPointerDereferenceNode(
 	pos utils.Position,
 	ident *IdentifierNode,

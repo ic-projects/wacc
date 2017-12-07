@@ -26,6 +26,7 @@ func SizeOf(t TypeNode) int {
 	return 4
 }
 
+// ToValue returns the non-pointer TypeNode for a given type
 func ToValue(typeNode TypeNode) TypeNode {
 	switch t := typeNode.(type) {
 	case *ArrayTypeNode:
@@ -46,8 +47,6 @@ func ToValue(typeNode TypeNode) TypeNode {
 			return t2
 		}
 		return ToValue(t2)
-	case ArrayTypeNode:
-		return t
 	default:
 		return t
 	}
