@@ -604,7 +604,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			// Store the address in the return register
 			v.addCode("LDR %s, %s", register, dec.Location)
 		}
-		v.freeRegisters.Push(valueReg)
 	case *ast.PointerDereferenceNode:
 		ast.Walk(v, node.Ident)
 		register := v.returnRegisters.Pop()
