@@ -8,19 +8,24 @@ type Instruction interface {
 
 /**************** CONDITIONS ****************/
 
-// DEF Default (No condition)
+type Condition int
 
-// EQ Equal / zero
-
-// NE Not equal / non-zero
-
-// GE Greater than or equal to
-
-// GT Greater than
-
-// LE Less than or equal to
-
-// LT Less than
+const (
+	// DEF Default (No condition)
+	DEF Condition = iota
+	// EQ Equal / zero
+	EQ
+	// NE Not equal / non-zero
+	NE
+	// GE Greater than or equal to
+	GE
+	// GT Greater than
+	GT
+	// LE Less than or equal to
+	LE
+	// LT Less than
+	LT
+)
 
 /**************** SIZES ****************/
 
