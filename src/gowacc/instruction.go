@@ -8,11 +8,12 @@ type Instruction interface {
 
 /**************** CONDITIONS ****************/
 
+// Condition is an enum of all possible instruction conditions.
 type Condition int
 
 const (
-	// DEF Default (No condition)
-	DEF Condition = iota
+	// ALWAYS Default (No condition)
+	ALWAYS Condition = iota
 	// EQ Equal / zero
 	EQ
 	// NE Not equal / non-zero
@@ -29,11 +30,17 @@ const (
 
 /**************** SIZES ****************/
 
-// DEF Default (Word)
+// Size is an enum of load / store sizes.
+type Size int
 
-// B Unsigned Byte
-
-// SB Signed Byte
+const (
+	// W Default (Word)
+	W Size = iota
+	// B Unsigned Byte
+	B
+	// SB Signed Byte
+	SB
+)
 
 /**************** SHIFTS ****************/
 
