@@ -308,10 +308,23 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
-				v.addCode("%s %s, %s",
-					store(ast.SizeOf(e.T)),
-					registers[n],
-					v.LocationOf(dec.Location))
+				if dec.Location.IsAddress() {
+					register := v.freeRegisters.Pop()
+					v.addCode("%s %s, %s",
+						load(4), // Size of address is 4 bytes
+						register,
+						v.LocationOf(dec.Location))
+					v.addCode("%s %s, [%s]",
+						store(ast.SizeOf(e.T)),
+						registers[n],
+						register)
+					v.freeRegisters.Push(register)
+				} else {
+					v.addCode("%s %s, %s",
+						store(ast.SizeOf(e.T)),
+						registers[n],
+						v.LocationOf(dec.Location))
+				}
 			}
 		}
 	case *ast.AssignNode:
@@ -354,10 +367,23 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		case *ast.IdentifierNode:
 			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident)
 			if ident.Location != nil {
-				v.addCode("%s %s, %s",
-					store(ast.SizeOf(ident.T)),
-					rhsRegister,
-					v.LocationOf(ident.Location))
+				if ident.Location.IsAddress() {
+					register := v.freeRegisters.Pop()
+					v.addCode("%s %s, %s",
+						load(4), // Size of address is 4 bytes
+						register,
+						v.LocationOf(ident.Location))
+					v.addCode("%s %s, [%s]",
+						store(ast.SizeOf(ident.T)),
+						rhsRegister,
+						register)
+					v.freeRegisters.Push(register)
+				} else {
+					v.addCode("%s %s, %s",
+						store(ast.SizeOf(ident.T)),
+						rhsRegister,
+						v.LocationOf(ident.Location))
+				}
 			}
 		case *ast.PointerDereferenceNode:
 			ast.Walk(v, lhsNode.Ident)
@@ -456,10 +482,23 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("BEQ DO%d", doLabel)
 	case *ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
-		v.addCode("%s %s, %s",
-			load(ast.SizeOf(dec.T)),
-			v.getFreeRegister(),
-			v.LocationOf(dec.Location))
+		if dec.Location.IsAddress() {
+			register := v.freeRegisters.Pop()
+			v.addCode("%s %s, %s",
+				load(4), // Size of address is 4 bytes
+				register,
+				v.LocationOf(dec.Location))
+			v.addCode("%s %s, [%s]",
+				load(ast.SizeOf(dec.T)),
+				v.getFreeRegister(),
+				register)
+			v.freeRegisters.Push(register)
+		} else {
+			v.addCode("%s %s, %s",
+				load(ast.SizeOf(dec.T)),
+				v.getFreeRegister(),
+				v.LocationOf(dec.Location))
+		}
 	case *ast.ArrayElementNode:
 		ast.Walk(v, node.Ident)
 		identRegister := v.returnRegisters.Pop()
@@ -821,10 +860,23 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
 		if dec.Location != nil {
-			v.addCode("%s %s, %s",
-				store(ast.SizeOf(dec.T)),
-				v.getReturnRegister(),
-				v.LocationOf(dec.Location))
+			if dec.Location.IsAddress() {
+				register := v.freeRegisters.Pop()
+				v.addCode("%s %s, %s",
+					load(4), // Size of address is 4 bytes
+					register,
+					v.LocationOf(dec.Location))
+				v.addCode("%s %s, [%s]",
+					store(ast.SizeOf(dec.T)),
+					v.getReturnRegister(),
+					register)
+				v.freeRegisters.Push(register)
+			} else {
+				v.addCode("%s %s, %s",
+					store(ast.SizeOf(dec.T)),
+					v.getReturnRegister(),
+					v.LocationOf(dec.Location))
+			}
 		}
 	case *ast.PrintNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
