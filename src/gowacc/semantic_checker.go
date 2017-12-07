@@ -111,7 +111,7 @@ func PerformSemanticCheck(
 	ast.Walk(checker, tree)
 
 	// Perform pruning and array checking
-	SimplifiyTree(tree, checker)
+	SimplifyTree(tree, checker)
 
 	return checker
 }

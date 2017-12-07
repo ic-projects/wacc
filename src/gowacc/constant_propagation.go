@@ -4,9 +4,9 @@ import (
 	"ast"
 )
 
-// SimplifiyTree will simplifiy a given tree, changing branches of the
+// SimplifyTree will simplifiy a given tree, changing branches of the
 // tree to their immediate values if they can be calculated.
-func SimplifiyTree(
+func SimplifyTree(
 	tree ast.ProgramNode,
 	checker *SemanticCheck) {
 
@@ -15,11 +15,15 @@ func SimplifiyTree(
 	checker.symbolTable.Reset()
 }
 
+// Propagator is the struct used when simplifying the tree, it links
+// the propagator to the symbol table and error list.
 type Propagator struct {
 	symbolTable *ast.SymbolTable
 	errors      *[]GenericError
 }
 
+// NewPropagator returns a initialised Propagator struct from a given
+// semantic checker.
 func NewPropagator(checker *SemanticCheck) *Propagator {
 	return &Propagator{
 		symbolTable: checker.symbolTable,
@@ -44,6 +48,8 @@ func (v *Propagator) Visit(programNode ast.ProgramNode) {
 	}
 }
 
+// SetValue is used to set the internal value of an identifier in the
+// symbol table if it detected to have a constant value.
 func (v *Propagator) SetValue(node ast.RHSNode, identDec *ast.IdentifierDeclaration) {
 	switch rhs := node.(type) {
 	case *ast.BooleanLiteralNode,
@@ -87,6 +93,7 @@ func (v *Propagator) Leave(programNode ast.ProgramNode) {
 	}
 }
 
+// simulate returns the simplified version of a expression node branch.
 func (v *Propagator) simulate(node ast.ProgramNode) ast.ExpressionNode {
 	if result, ok := v.simulateFull(node); ok {
 		return result
@@ -94,6 +101,8 @@ func (v *Propagator) simulate(node ast.ProgramNode) ast.ExpressionNode {
 	return node
 }
 
+// simulateFull returns the simplified version of a expression node branch and
+// a boolean indicating if a prune or change occured.
 func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, bool) {
 	switch t := node.(type) {
 	case *ast.ArrayElementNode:
@@ -104,6 +113,8 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 			for _, e := range t.Exprs {
 				if expr, ok := v.simulateFull(e); ok {
 					index := expr.(*ast.IntegerLiteralNode).Val
+
+					// Array index bounds checking
 					if index >= len(arrLiteral.Exprs) {
 						*v.errors = append(*v.errors,
 							NewArrayIndexError(t.Pos,
@@ -116,6 +127,7 @@ func (v *Propagator) simulateFull(node ast.ProgramNode) (ast.ExpressionNode, boo
 							NewArrayIndexError(t.Pos, ArrayIndexNegative, index))
 						return node, false
 					}
+
 					cur = arrLiteral.Exprs[index]
 				} else {
 					return node, false
