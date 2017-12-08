@@ -306,6 +306,21 @@ String
 walkNode
 \family default
  function that tells a visitor how to visit any child nodes.
+ Nodes that can be optimised by the propagation algorithm must implement
+ the 
+\family typewriter
+MapExpressions
+\family default
+ function to allow the child expressions to be altered.
+ Any TypeNodes in the AST must also implement an 
+\family typewriter
+equals
+\family default
+ and 
+\family typewriter
+hash
+\family default
+ function for use by the type checker and symbol table.
 \end_layout
 
 \begin_layout Enumerate
@@ -317,6 +332,11 @@ Semantic checks are simple and powerful
  Our semantic checking is done using a stack.
  Type checking is as simple as writing one function with what you expect
  to see, and one function to say it's been seen.
+ The type checker then uses the TypeNodes 
+\family typewriter
+equals
+\family default
+ function to check for valid type matching.
 \end_layout
 
 \begin_layout Enumerate
