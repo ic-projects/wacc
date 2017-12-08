@@ -267,7 +267,9 @@ func (v *CodeGenerator) visitArrayElementNode(node *ast.ArrayElementNode) {
 
 	length := len(node.Exprs)
 	symbol := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
-	lastIsCharOrBool := ast.SizeOf(ast.ToValue(symbol.T).(ast.ArrayTypeNode).GetDimElement(length)) == 1
+	lastIsCharOrBool := ast.SizeOf(
+		ast.ToValue(symbol.T).(ast.ArrayTypeNode).GetDimElement(length),
+	) == 1
 
 	for i := 0; i < length; i++ {
 		expr := node.Exprs[i]
@@ -463,7 +465,9 @@ func (v *CodeGenerator) visitBooleanLiteralNode(node *ast.BooleanLiteralNode) {
 
 /**************** CHARACTER LITERAL NODE ****************/
 
-func (v *CodeGenerator) visitCharacterLiteralNode(node *ast.CharacterLiteralNode) {
+func (v *CodeGenerator) visitCharacterLiteralNode(
+	node *ast.CharacterLiteralNode,
+) {
 	v.addCode("MOV %s, #'%s'", v.getFreeRegister(), string(node.Val))
 }
 
@@ -476,7 +480,7 @@ func (v *CodeGenerator) visitStringLiteralNode(node *ast.StringLiteralNode) {
 
 /**************** NULL NODE ****************/
 
-func (v *CodeGenerator) visitNullNode(node *ast.NullNode) {
+func (v *CodeGenerator) visitNullNode() {
 	v.addCode(NewLoad(W, v.getFreeRegister(), ConstantAddress(0)).armAssembly())
 }
 
@@ -512,71 +516,125 @@ func (v *CodeGenerator) visitBinaryOperatorNode(node *ast.BinaryOperatorNode) {
 			operand1 = v.returnRegisters.Pop()
 		}
 	}
-	switch node.Op {
-	case ast.MUL:
-		v.addCode(
-			"SMULL %s, %s, %s, %s",
-			operand1,
-			operand2,
-			operand1,
-			operand2,
-		)
-		v.addCode("CMP %s, %s, ASR #31", operand2, operand1)
-		v.callLibraryFunction(NE, checkOverflow)
-	case ast.DIV:
-		v.addCode("MOV r0, %s", operand1)
-		v.addCode("MOV r1, %s", operand2)
-		v.callLibraryFunction(AL, checkDivide)
-		v.addCode(NewBranchL("__aeabi_idiv").armAssembly())
-		v.addCode("MOV %s, r0", operand1)
-	case ast.MOD:
-		v.addCode("MOV r0, %s", operand1)
-		v.addCode("MOV r1, %s", operand2)
-		v.callLibraryFunction(AL, checkDivide)
-		v.addCode(NewBranchL("__aeabi_idivmod").armAssembly())
-		v.addCode("MOV %s, r1", operand1)
-	case ast.ADD:
-		v.addCode("ADDS %s, %s, %s", operand1, operand1, operand2)
-		v.callLibraryFunction(VS, checkOverflow)
-	case ast.SUB:
-		v.addCode("SUBS %s, %s, %s", operand1, operand1, operand2)
-		v.callLibraryFunction(VS, checkOverflow)
-	case ast.GT:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVGT %s, #1", operand1)
-		v.addCode("MOVLE %s, #0", operand1)
-	case ast.GEQ:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVGE %s, #1", operand1)
-		v.addCode("MOVLT %s, #0", operand1)
-	case ast.LT:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVLT %s, #1", operand1)
-		v.addCode("MOVGE %s, #0", operand1)
-	case ast.LEQ:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVLE %s, #1", operand1)
-		v.addCode("MOVGT %s, #0", operand1)
-	case ast.EQ:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVEQ %s, #1", operand1)
-		v.addCode("MOVNE %s, #0", operand1)
-	case ast.NEQ:
-		v.addCode("CMP %s, %s", operand1, operand2)
-		v.addCode("MOVNE %s, #1", operand1)
-		v.addCode("MOVEQ %s, #0", operand1)
-	case ast.AND:
-		v.addCode("AND %s, %s, %s", operand1, operand1, operand2)
-	case ast.OR:
-		v.addCode("ORR %s, %s, %s", operand1, operand1, operand2)
-	}
+	v.visitBinaryOperator(node.Op, operand1, operand2)
 	v.freeRegisters.Push(operand2)
 	v.returnRegisters.Push(operand1)
 }
 
+func (v *CodeGenerator) visitBinaryOperator(
+	op ast.BinaryOperator,
+	r1 utils.Register,
+	r2 utils.Register,
+) {
+	switch op {
+	case ast.MUL:
+		v.visitMUL(r1, r2)
+	case ast.DIV:
+		v.visitDIV(r1, r2)
+	case ast.MOD:
+		v.visitMOD(r1, r2)
+	case ast.ADD:
+		v.visitADD(r1, r2)
+	case ast.SUB:
+		v.visitSUB(r1, r2)
+	case ast.GT:
+		v.visitGT(r1, r2)
+	case ast.GEQ:
+		v.visitGEQ(r1, r2)
+	case ast.LT:
+		v.visitLT(r1, r2)
+	case ast.LEQ:
+		v.visitLEQ(r1, r2)
+	case ast.EQ:
+		v.visitEQ(r1, r2)
+	case ast.NEQ:
+		v.visitNEQ(r1, r2)
+	case ast.AND:
+		v.visitAND(r1, r2)
+	case ast.OR:
+		v.visitOR(r1, r2)
+	}
+}
+
+func (v *CodeGenerator) visitMUL(r1 utils.Register, r2 utils.Register) {
+	v.addCode("SMULL %s, %s, %s, %s", r1, r2, r1, r2)
+	v.addCode("CMP %s, %s, ASR #31", r2, r1)
+	v.callLibraryFunction(NE, checkOverflow)
+}
+
+func (v *CodeGenerator) visitDIV(r1 utils.Register, r2 utils.Register) {
+	v.addCode("MOV r0, %s", r1)
+	v.addCode("MOV r1, %s", r2)
+	v.callLibraryFunction(AL, checkDivide)
+	v.addCode(NewBranchL("__aeabi_idiv").armAssembly())
+	v.addCode("MOV %s, r0", r1)
+}
+
+func (v *CodeGenerator) visitMOD(r1 utils.Register, r2 utils.Register) {
+	v.addCode("MOV r0, %s", r1)
+	v.addCode("MOV r1, %s", r2)
+	v.callLibraryFunction(AL, checkDivide)
+	v.addCode(NewBranchL("__aeabi_idivmod").armAssembly())
+	v.addCode("MOV %s, r1", r1)
+}
+
+func (v *CodeGenerator) visitADD(r1 utils.Register, r2 utils.Register) {
+	v.addCode("ADDS %s, %s, %s", r1, r1, r2)
+	v.callLibraryFunction(VS, checkOverflow)
+}
+
+func (v *CodeGenerator) visitSUB(r1 utils.Register, r2 utils.Register) {
+	v.addCode("SUBS %s, %s, %s", r1, r1, r2)
+	v.callLibraryFunction(VS, checkOverflow)
+}
+
+func (v *CodeGenerator) visitGT(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVGT %s, #1", r1)
+	v.addCode("MOVLE %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitGEQ(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVGE %s, #1", r1)
+	v.addCode("MOVLT %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitLT(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVLT %s, #1", r1)
+	v.addCode("MOVGE %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitLEQ(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVLE %s, #1", r1)
+	v.addCode("MOVGT %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitEQ(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVEQ %s, #1", r1)
+	v.addCode("MOVNE %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitNEQ(r1 utils.Register, r2 utils.Register) {
+	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode("MOVNE %s, #1", r1)
+	v.addCode("MOVEQ %s, #0", r1)
+}
+
+func (v *CodeGenerator) visitAND(r1 utils.Register, r2 utils.Register) {
+	v.addCode("AND %s, %s, %s", r1, r1, r2)
+}
+
+func (v *CodeGenerator) visitOR(r1 utils.Register, r2 utils.Register) {
+	v.addCode("ORR %s, %s, %s", r1, r1, r2)
+}
+
 /**************** STATEMENTS ****************/
 
-func (v *CodeGenerator) visitStatements(node ast.Statements) {
+func (v *CodeGenerator) visitStatements() {
 	v.symbolTable.MoveNextScope()
 	size := 0
 	for _, dec := range v.symbolTable.CurrentScope.Scope {
@@ -589,7 +647,7 @@ func (v *CodeGenerator) visitStatements(node ast.Statements) {
 	v.symbolTable.CurrentScope.ScopeSize = size
 }
 
-func (v *CodeGenerator) leaveStatements(node ast.Statements) {
+func (v *CodeGenerator) leaveStatements() {
 	if v.symbolTable.CurrentScope.ScopeSize != 0 {
 		v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 	}
@@ -598,7 +656,7 @@ func (v *CodeGenerator) leaveStatements(node ast.Statements) {
 
 /**************** FREE NODE ****************/
 
-func (v *CodeGenerator) leaveFreeNode(node *ast.FreeNode) {
+func (v *CodeGenerator) leaveFreeNode() {
 	v.addCode("MOV r0, %s", v.getReturnRegister())
 	v.callLibraryFunction(AL, free)
 }
@@ -634,14 +692,14 @@ func (v *CodeGenerator) leavePrintlnNode(node *ast.PrintlnNode) {
 
 /**************** EXIT NODE ****************/
 
-func (v *CodeGenerator) leaveExitNode(node *ast.ExitNode) {
+func (v *CodeGenerator) leaveExitNode() {
 	v.addCode("MOV r0, %s", v.getReturnRegister())
 	v.addCode(NewBranchL("exit").armAssembly())
 }
 
 /**************** RETURN NODE ****************/
 
-func (v *CodeGenerator) leaveReturnNode(node *ast.ReturnNode) {
+func (v *CodeGenerator) leaveReturnNode() {
 	sizeOfAllVariablesInScope := 0
 	for scope := v.symbolTable.CurrentScope; scope !=
 		v.symbolTable.Head; scope = scope.ParentScope {
@@ -665,7 +723,9 @@ func (v *CodeGenerator) leaveReturnNode(node *ast.ReturnNode) {
 
 /**************** PAIR FIRST ELEMENT NODE ****************/
 
-func (v *CodeGenerator) leavePairFirstElementNode(node *ast.PairFirstElementNode) {
+func (v *CodeGenerator) leavePairFirstElementNode(
+	node *ast.PairFirstElementNode,
+) {
 	register := v.returnRegisters.Peek()
 	v.addCode("MOV r0, %s", register)
 	v.callLibraryFunction(AL, checkNullPointer)

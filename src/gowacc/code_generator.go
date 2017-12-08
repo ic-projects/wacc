@@ -308,11 +308,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case *ast.StringLiteralNode:
 		v.visitStringLiteralNode(node)
 	case *ast.NullNode:
-		v.visitNullNode(node)
+		v.visitNullNode()
 	case *ast.BinaryOperatorNode:
 		v.visitBinaryOperatorNode(node)
 	case ast.Statements:
-		v.visitStatements(node)
+		v.visitStatements()
 	}
 }
 
@@ -320,11 +320,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case ast.Statements:
-		v.leaveStatements(node)
+		v.leaveStatements()
 	case *ast.FunctionNode:
 		v.leaveFunctionNode(node)
 	case *ast.FreeNode:
-		v.leaveFreeNode(node)
+		v.leaveFreeNode()
 	case *ast.DeclareNode:
 		v.leaveDeclareNode(node)
 	case *ast.PrintNode:
@@ -332,9 +332,9 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PrintlnNode:
 		v.leavePrintlnNode(node)
 	case *ast.ExitNode:
-		v.leaveExitNode(node)
+		v.leaveExitNode()
 	case *ast.ReturnNode:
-		v.leaveReturnNode(node)
+		v.leaveReturnNode()
 	case *ast.PairFirstElementNode:
 		v.leavePairFirstElementNode(node)
 	case *ast.PairSecondElementNode:
