@@ -1,0 +1,11 @@
+begin
+  int i = 0;
+  case i
+  when 0, 1:
+    println "correct"
+    end
+  else:
+    println "not here"
+    end
+  fi
+end

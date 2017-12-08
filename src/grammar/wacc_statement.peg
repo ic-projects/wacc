@@ -244,10 +244,14 @@ SWITCH ← "case" __ expr:EXPR __ cases:(_ CASE)+ _ defaultCase:(DEFAULT)? _ "fi
     ))
 }
 
-CASE ← "when" __ expr:EXPR _ ':' _ stats:STATS _ "end" {
+CASE ← "when" __ expr:EXPR exprs:(_ ',' _ EXPR)* _ ':' _ stats:STATS _ "end" {
+  expressionList := []ast.ExpressionNode{expr.(ast.ExpressionNode)}
+  for _, p := range toSlice(exprs) {
+    expressionList = append(expressionList, getItem(p, 3).(ast.ExpressionNode))
+  }
   return ret(ast.NewCaseNode(
     c.getPosition(),
-    expr.(ast.ExpressionNode),
+    expressionList,
     stats.([]ast.StatementNode),
   ))
 }
