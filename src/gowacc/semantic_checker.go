@@ -239,6 +239,10 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 					foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
 				}
 			default:
+				foundError = NewCustomError(
+					node.Pos,
+					"Cannot dereference a non pointer",
+				)
 			}
 		}
 	case *ast.AssignNode:
