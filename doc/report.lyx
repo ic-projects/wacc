@@ -1733,6 +1733,18 @@ y = [5,6]; x = y[0] + 5;
 Future Extensions
 \end_layout
 
+\begin_layout Standard
+It would be possible to add golang style interfaces to the WACC language,
+ as structs already exist and functions on structs are implemented.
+ An interface would specify the type signature of various functions and
+ would cause the type checker to check for the exsistance of these functions
+ on the structs that implement the interface.
+ This would then allow functions to have interfaces as arguments and the
+ typechecker would simply check that the struct being passed into the function
+ when called is either a valid implementation of the interface or already
+ the interface itself.
+\end_layout
+
 \begin_layout Section
 Development of the 
 \family typewriter
