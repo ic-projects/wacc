@@ -64,7 +64,7 @@ func (cond Condition) armCondition() string {
 	}
 }
 
-/**************** SET ****************/
+/**************** SET FLAGS ****************/
 
 func armSet(set bool) string {
 	if set {
@@ -117,7 +117,7 @@ func (op RegisterOperand) armOperand() string {
 		return op.Reg.String()
 	}
 	return fmt.Sprintf(
-		"%s, %s %d",
+		"%s, %s #%d",
 		op.Reg.String(),
 		op.ShiftType.armShift(),
 		op.ShiftVal,
@@ -190,6 +190,26 @@ type Move struct {
 	Op2  Operand
 }
 
+// NewMove builds a MOV instruction with a register operand.
+func NewMove(r1 utils.Register, r2 utils.Register) Move {
+	return Move{AL, false, r1, RegisterOperand{r2, NONE, 0}}
+}
+
+// NewMoveInt builds a MOV instruction with an immediate operand.
+func NewMoveInt(reg utils.Register, op2 int) Move {
+	return Move{AL, false, reg, ImmediateOperand(op2)}
+}
+
+// NewMoveChar builds a MOV instruction with an immediate char operand.
+func NewMoveChar(reg utils.Register, op2 string) Move {
+	return Move{AL, false, reg, ImmediateCharOperand(op2)}
+}
+
+// NewMoveCond builds a MOV instruction with a condition and immediate operand.
+func NewMoveCond(cond Condition, reg utils.Register, op2 int) Move {
+	return Move{cond, false, reg, ImmediateOperand(op2)}
+}
+
 // MOV{Cond}{S} Rd, Op2
 func (instr Move) armAssembly() string {
 	return fmt.Sprintf(
@@ -242,6 +262,63 @@ type ArithmeticInstruction struct {
 	Op2   Operand
 }
 
+// NewAdd builds an ADD instruction with an immediate operand.
+func NewAdd(
+	r1 utils.Register,
+	r2 utils.Register,
+	imm int,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{ADD, AL, false, r1, r2, ImmediateOperand(imm)}
+}
+
+// NewAddLSL builds an ADD instruction with a LSL shifted register operand.
+func NewAddLSL(
+	r1 utils.Register,
+	r2 utils.Register,
+	shift int,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		ADD,
+		AL,
+		false,
+		r1,
+		r1,
+		RegisterOperand{r2, LSL, shift},
+	}
+}
+
+// NewAddReg builds an ADDS instruction with a register operand.
+func NewAddReg(
+	r1 utils.Register,
+	r2 utils.Register,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		ADD,
+		AL,
+		true,
+		r1,
+		r1,
+		RegisterOperand{r2, NONE, 0},
+	}
+}
+
+// NewSubtract builds a SUBS instruction with a register operand.
+func NewSubtract(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		SUB,
+		AL,
+		true,
+		r1,
+		r1,
+		RegisterOperand{r2, NONE, 0},
+	}
+}
+
+// NewNegate builds a RSBS instruction with an immediate operand of 0.
+func NewNegate(r1 utils.Register) ArithmeticInstruction {
+	return ArithmeticInstruction{RSB, AL, true, r1, r1, ImmediateOperand(0)}
+}
+
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr ArithmeticInstruction) armAssembly() string {
 	return fmt.Sprintf(
@@ -265,6 +342,21 @@ type Compare struct {
 	Cond Condition
 	Rn   utils.Register
 	Op2  Operand
+}
+
+// NewCompare builds a CMP instruction with a register operand.
+func NewCompare(r1 utils.Register, r2 utils.Register) Compare {
+	return Compare{AL, r1, RegisterOperand{r2, NONE, 0}}
+}
+
+// NewCompareInt builds a CMP instruction with a immediate operand.
+func NewCompareInt(reg utils.Register, imm int) Compare {
+	return Compare{AL, reg, ImmediateOperand(imm)}
+}
+
+// NewCompareASR builds a CMP instruction with a ASR shifted register operand.
+func NewCompareASR(r1 utils.Register, r2 utils.Register, shift int) Compare {
+	return Compare{AL, r1, RegisterOperand{r2, ASR, shift}}
 }
 
 // CMP{Cond} Rn, Op2
@@ -318,6 +410,40 @@ type LogicalInstruction struct {
 	Op2   Operand
 }
 
+// NewLogicalInstr builds a LogicalInstruction with a register operand.
+func NewLogicalInstr(
+	instr LogicalInstructionType,
+	r1 utils.Register,
+	r2 utils.Register,
+	r3 utils.Register,
+) LogicalInstruction {
+	return LogicalInstruction{
+		instr,
+		AL,
+		false,
+		r1,
+		r2,
+		RegisterOperand{r3, NONE, 0},
+	}
+}
+
+// NewLogicalInstrInt builds a LogicalInstruction with an immediate operand.
+func NewLogicalInstrInt(
+	instr LogicalInstructionType,
+	r1 utils.Register,
+	r2 utils.Register,
+	imm int,
+) LogicalInstruction {
+	return LogicalInstruction{
+		instr,
+		AL,
+		false,
+		r1,
+		r2,
+		ImmediateOperand(imm),
+	}
+}
+
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr LogicalInstruction) armAssembly() string {
 	return fmt.Sprintf(
@@ -343,6 +469,12 @@ type SignedMultiply struct {
 	RdHi utils.Register
 	Rm   utils.Register
 	Rs   utils.Register
+}
+
+// NewSignedMultiply builds a SMULL instruction that overwrites operand
+// registers.
+func NewSignedMultiply(r1 utils.Register, r2 utils.Register) SignedMultiply {
+	return SignedMultiply{AL, false, r1, r2, r1, r2}
 }
 
 // SMULL{Cond}{S} RdLo, RdHi, Rm{, Rs}
