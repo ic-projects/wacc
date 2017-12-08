@@ -427,6 +427,18 @@ Semantic errors are handled by storing a slice of Errors interface, that
  that a user might want.
  For example, if an identifier is the wrong type for an expression it will
  state where that identifier was declared.
+ When an error is generated in the semantic checker the type checker is
+ frozen on the relevant node and unfrozen when that node is left.
+ This stops any further irrelevant error messages from printing until the
+ erroneous region of code has passed.
+ E.g.
+ in the code 
+\family typewriter
+x = true; x = 7;
+\family default
+ a re-declaration error has been found on the second statement and the type
+ checker is frozen to stop the following irrelevant type error from also
+ being reported.
  These Errors can be then printed in the main function, limiting the number
  of errors printed if there are too many.
  Whenever an error is found in the semantic checking, it is added to the
@@ -575,8 +587,8 @@ fi
 \begin_layout Standard
 Our switch statements are based upon the ruby when statement.
  This was because most switch statements in other languages use curly braces
- which aren’t in the wacc language.
- There aren’t break statements, instead you can indicate more expressions
+ which are not in the wacc language.
+ There are not break statements, instead you can indicate more expressions
  after commas.
  The default case must be the last case.
  
@@ -902,7 +914,15 @@ end
 
 \begin_layout Standard
 We introduced full implicit typing to the WACC language without having to
- change the type checking or semantic checking.
+ change the type checking or semantic checking.Our implementation of implicit
+ typing allows type information to still be present in the program, but
+ not necessary as the types of variables, parameters and return types can
+ all be fully derived even when no types are originally given.
+ This allows the user the option to add type information where they choose,
+ this being useful for reference and clarity.
+ In addition, the extra type information will still be used by the type
+ checker, although it is not necessary to verify the types of the program
+ and return any semantic errors.
  This was done by adding a new TypeNode called DynamicTypeNode.
  A DynamicTypeNode starts uninitialised and without a type but over the
  semantic checking pass it will resolve to a type or point to another DynamicTyp
@@ -911,22 +931,16 @@ eNode as its type.
  then the node reduces down to the type it has received.
  If both are DynamicTypeNodes then they must have the same type, so they
  link together and point to the same type (as well as any other nodes pointing
- to one).
+ to either).
  If the DynamicTypeNode resolves to an array, pair or pointer then the inner
  type contained in these types is expanded to another DynamicTypeNode.
  The DynamicTypeNode then returns the type it has to the type checker which
  goes through the normal process of checking the types are valid.
- Once the pass is over, the semantic checker checks the symbol for any remaining
- unresolved DynamicTypeNodes and throws an error if present.
+ Once the pass is over, the semantic checker checks the symbol table for
+ any remaining unresolved DynamicTypeNodes and throws an error if present.
  A DynamicTypeNode is created by the grammar whenever a Type has no string
- value, or when declare is used with ":=".
- Our implementation of implicit typing allows type information to still
- be present but not necessary as the types of variables, parameters and
- return types can all be derived even when no types are originally given.
- This allows the user the option to add type information where they choose,
- this being useful for reference and clarity.
- In addition, the extra type information will still be used by the type
- checker, although it is not necessary to verify the types of the program.
+ value, or when declare is used with ":=", this allows function parameters,
+ return types, struct members and variables to all have implicit types.
 \end_layout
 
 \begin_layout Subsubsection
