@@ -49,23 +49,24 @@ func NewAssembly() *Assembly {
 // String will return the string format of the Assembly code.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(".data\n")
+	buf.WriteString(".data\n\n")
 	for dname, d := range asm.data {
 		buf.WriteString(dname + ":\n")
-		buf.WriteString(fmt.Sprintf("   .word %d\n", d.length))
-		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"\n", d.text))
+		buf.WriteString(fmt.Sprintf("\t.word %d\n", d.length))
+		buf.WriteString(fmt.Sprintf("\t.ascii \"%s\"\n", d.text))
 	}
-	buf.WriteString(".text\n")
+	buf.WriteString("\n.text\n\n")
 	for _, s := range asm.text {
-		buf.WriteString(utils.Indent(s, "  "))
+		buf.WriteString(utils.Indent(s, "\t"))
 	}
 	buf.WriteString(".global main\n")
 	for fname, f := range asm.global {
 		buf.WriteString(fname + ":\n")
 		for _, s := range f {
-			buf.WriteString(utils.Indent(s, "  "))
+			buf.WriteString(s)
 		}
 	}
+	buf.WriteString("\n")
 	return buf.String()
 }
 
@@ -281,7 +282,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			}
 			v.addFunction("f" + buff.String() + "_" + node.Ident.Ident)
 		}
-		v.addCode("PUSH {lr}")
+		v.addCode(NewPush(utils.LR).armAssembly())
 	case ast.Parameters:
 		registers := utils.ReturnRegisters()
 		parametersFromRegsSize := 0
@@ -645,14 +646,14 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		if v.freeRegisters.Length() == 2 {
 			ast.Walk(v, node.Expr2)
 			operand2 = v.returnRegisters.Pop()
-			v.addCode("PUSH {%s}", operand2)
+			v.addCode(NewPush(operand2).armAssembly())
 			v.currentStackPos += ast.SizeOf(ast.Type(node.Expr1, v.symbolTable))
 			v.freeRegisters.Push(operand2)
 
 			ast.Walk(v, node.Expr1)
 			operand1 = v.returnRegisters.Pop()
 			operand2 = v.freeRegisters.Pop()
-			v.addCode("POP {%s}", operand2)
+			v.addCode(NewPop(operand2).armAssembly())
 			v.currentStackPos -= ast.SizeOf(ast.Type(node.Expr1, v.symbolTable))
 		} else {
 			// Evaluate the expression with the largest weight first
@@ -766,7 +767,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
 			v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
-			v.addCode("POP {pc}")
+			v.addCode(NewPop(utils.PC).armAssembly())
 		}
 		v.addCode(".ltorg")
 	case *ast.ArrayLiteralNode:
@@ -812,7 +813,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			v.addCode("ADD sp, sp, #%d", i)
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.addCode("POP {pc}")
+		v.addCode(NewPop(utils.PC).armAssembly())
 	case *ast.PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
