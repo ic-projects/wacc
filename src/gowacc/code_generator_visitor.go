@@ -282,16 +282,9 @@ func (v *CodeGenerator) visitArrayElementNode(node *ast.ArrayElementNode) {
 		v.addCode(NewAdd(identRegister, identRegister, 4).armAssembly())
 
 		if i == length-1 && lastIsCharOrBool {
-			v.addCode(
-				"ADD %s, %s, %s", identRegister,
-				identRegister,
-				exprRegister,
-			)
+			v.addCode(NewAddLSL(identRegister, exprRegister, 0).armAssembly())
 		} else {
-			v.addCode("ADD %s, %s, %s, LSL #2",
-				identRegister,
-				identRegister,
-				exprRegister)
+			v.addCode(NewAddLSL(identRegister, exprRegister, 2).armAssembly())
 		}
 
 		// If it is an assignment leave the Pointer to the element in the
@@ -342,7 +335,7 @@ func (v *CodeGenerator) visitArrayLiteralNode(node *ast.ArrayLiteralNode) {
 		size = ast.SizeOf(ast.Type(node.Exprs[0], v.symbolTable))
 	}
 	v.addCode(NewLoad(W, utils.R0, ConstantAddress(length*size+4)).armAssembly())
-	v.addCode(NewBranchL("malloc").armAssembly())
+	v.addCode(NewBranchL(malloc).armAssembly())
 	v.addCode(NewMove(register, utils.R0).armAssembly())
 	for i := 0; i < length; i++ {
 		ast.Walk(v, node.Exprs[i])
@@ -369,7 +362,7 @@ func (v *CodeGenerator) visitStructNewNode(node *ast.StructNewNode) {
 		utils.R0,
 		ConstantAddress(node.StructNode.MemorySize),
 	).armAssembly())
-	v.addCode(NewBranchL("malloc").armAssembly())
+	v.addCode(NewBranchL(malloc).armAssembly())
 	v.addCode(NewMove(register, utils.R0).armAssembly())
 	for index, n := range node.StructNode.Types {
 		ast.Walk(v, node.Exprs[index])
@@ -390,7 +383,7 @@ func (v *CodeGenerator) visitNewPairNode(node *ast.NewPairNode) {
 
 	// Make space for 2 new pointers on heap
 	v.addCode(NewLoad(W, utils.R0, ConstantAddress(8)).armAssembly())
-	v.addCode(NewBranchL("malloc").armAssembly())
+	v.addCode(NewBranchL(malloc).armAssembly())
 	v.addCode(NewMove(register, utils.R0).armAssembly())
 
 	// Store first element
@@ -398,7 +391,7 @@ func (v *CodeGenerator) visitNewPairNode(node *ast.NewPairNode) {
 	fst := v.getReturnRegister()
 	fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
 	v.addCode(NewLoad(W, utils.R0, ConstantAddress(fstSize)).armAssembly())
-	v.addCode(NewBranchL("malloc").armAssembly())
+	v.addCode(NewBranchL(malloc).armAssembly())
 	v.addCode(NewStoreReg(W, utils.R0, register).armAssembly())
 	v.addCode(NewStoreReg(store(fstSize), fst, utils.R0).armAssembly())
 
@@ -407,7 +400,7 @@ func (v *CodeGenerator) visitNewPairNode(node *ast.NewPairNode) {
 	snd := v.getReturnRegister()
 	sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
 	v.addCode(NewLoad(W, utils.R0, ConstantAddress(sndSize)).armAssembly())
-	v.addCode(NewBranchL("malloc").armAssembly())
+	v.addCode(NewBranchL(malloc).armAssembly())
 	v.addCode(NewStoreRegOffset(W, utils.R0, register, 4).armAssembly())
 	v.addCode(NewStoreReg(store(sndSize), snd, utils.R0).armAssembly())
 }
@@ -532,13 +525,13 @@ func (v *CodeGenerator) visitBinaryOperator(
 	case ast.MUL:
 		v.visitMul(r1, r2)
 	case ast.DIV:
-		v.visitDivMod("__aeabi_idiv", r1, r2, utils.R0)
+		v.visitDivMod(div, r1, r2, utils.R0)
 	case ast.MOD:
-		v.visitDivMod("__aeabi_idivmod", r1, r2, utils.R1)
+		v.visitDivMod(divmod, r1, r2, utils.R1)
 	case ast.ADD:
-		v.visitADD(r1, r2)
+		v.visitAdd(r1, r2)
 	case ast.SUB:
-		v.visitSUB(r1, r2)
+		v.visitSub(r1, r2)
 	case ast.GT:
 		v.visitCompare(r1, r2, GT, LE)
 	case ast.GEQ:
@@ -577,12 +570,12 @@ func (v *CodeGenerator) visitDivMod(
 	v.addCode(NewMove(r1, returnReg).armAssembly())
 }
 
-func (v *CodeGenerator) visitADD(r1 utils.Register, r2 utils.Register) {
-	v.addCode("ADDS %s, %s, %s", r1, r1, r2)
+func (v *CodeGenerator) visitAdd(r1 utils.Register, r2 utils.Register) {
+	v.addCode(NewAddReg(r1, r2).armAssembly())
 	v.callLibraryFunction(VS, checkOverflow)
 }
 
-func (v *CodeGenerator) visitSUB(r1 utils.Register, r2 utils.Register) {
+func (v *CodeGenerator) visitSub(r1 utils.Register, r2 utils.Register) {
 	v.addCode(NewSubtract(r1, r2).armAssembly())
 	v.callLibraryFunction(VS, checkOverflow)
 }
@@ -668,7 +661,7 @@ func (v *CodeGenerator) leavePrintlnNode(node *ast.PrintlnNode) {
 
 func (v *CodeGenerator) leaveExitNode() {
 	v.addCode(NewMove(utils.R0, v.getReturnRegister()).armAssembly())
-	v.addCode(NewBranchL("exit").armAssembly())
+	v.addCode(NewBranchL(exit).armAssembly())
 }
 
 /**************** RETURN NODE ****************/

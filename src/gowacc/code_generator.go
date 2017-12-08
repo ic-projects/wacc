@@ -11,6 +11,14 @@ import (
 	"utils"
 )
 
+const (
+	malloc  string = "malloc"
+	exit    string = "exit"
+	div     string = "__aeabi_idiv"
+	divmod  string = "__aeabi_idivmod"
+	putchar string = "putchar"
+)
+
 /**************** CODE GENERATOR STRUCTS ****************/
 
 // ASCIIWord is a struct that stores the length and string of an ASCII string.
@@ -177,7 +185,7 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 		case ast.INT:
 			v.callLibraryFunction(AL, printInt)
 		case ast.CHAR:
-			v.addCode(NewBranchL("putchar").armAssembly())
+			v.addCode(NewBranchL(putchar).armAssembly())
 		case ast.PAIR:
 			v.callLibraryFunction(AL, printReference)
 		}

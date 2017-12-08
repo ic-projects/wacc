@@ -271,14 +271,36 @@ func NewAdd(
 	return ArithmeticInstruction{ADD, AL, false, r1, r2, ImmediateOperand(imm)}
 }
 
-// func NewAdd() ArithmeticInstruction {
-// }
-//
-// func NewAdd() ArithmeticInstruction {
-// }
-//
-// func NewAdd() ArithmeticInstruction {
-// }
+// NewAddLSL builds an ADD instruction with a LSL shifted register operand.
+func NewAddLSL(
+	r1 utils.Register,
+	r2 utils.Register,
+	shift int,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		ADD,
+		AL,
+		false,
+		r1,
+		r1,
+		RegisterOperand{r2, LSL, shift},
+	}
+}
+
+// NewAddReg builds an ADDS instruction with a register operand.
+func NewAddReg(
+	r1 utils.Register,
+	r2 utils.Register,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		ADD,
+		AL,
+		true,
+		r1,
+		r1,
+		RegisterOperand{r2, NONE, 0},
+	}
+}
 
 // NewSubtract builds a SUBS instruction with a register operand.
 func NewSubtract(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
