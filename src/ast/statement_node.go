@@ -52,6 +52,13 @@ func FinalStatIsValid(s StatementNode) bool {
 		elseStats := s.(*IfNode).ElseStats
 		elseFinalStat := elseStats[len(elseStats)-1]
 		return FinalStatIsValid(ifFinalStat) && FinalStatIsValid(elseFinalStat)
+	case *SwitchNode:
+		for _, c := range s.(*SwitchNode).Cases {
+			if !FinalStatIsValid(c.Stats[len(c.Stats)-1]) {
+				return false
+			}
+		}
+		return true
 	default:
 		return false
 	}
@@ -367,7 +374,7 @@ func (node *PrintlnNode) walkNode(visitor Visitor) {
 //
 // E.g.
 //
-//  todo
+//  when i case 0, 1: skip end else: skip end fi
 type SwitchNode struct {
 	Pos   utils.Position
 	Expr  ExpressionNode
