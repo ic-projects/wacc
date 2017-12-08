@@ -42,8 +42,10 @@ lint:
 	$(GOLINT) --enable-all --skip=grammar ./src/...
 
 fmt:
+	@go get golang.org/x/tools/cmd/goimports
 	@echo "\n== Formatting =="
 	gofmt -s -w $(SRC)
+	goimports -w $(SRC)
 
 tests:
 	@echo "\n== Testing at http://localhost:18000/ =="
