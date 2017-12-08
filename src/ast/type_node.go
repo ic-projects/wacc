@@ -461,6 +461,9 @@ func (node *DynamicTypeNode) changeToWatch(other *DynamicTypeNode) {
 }
 
 func (node DynamicTypeNode) Hash() string {
+	if _, ok := node.getValue().(*DynamicTypeNode); ok {
+		return "-1"
+	}
 	return node.getValue().Hash()
 }
 
