@@ -379,6 +379,27 @@ AST Visitor
 Error Handling
 \end_layout
 
+\begin_layout Paragraph
+Syntax Errors
+\end_layout
+
+\begin_layout Paragraph
+Semantic Errors
+\end_layout
+
+\begin_layout Standard
+Semantic errors are handled by storing a slice of Errors interface, that
+ stores information about the type of error, and any other useful information
+ that a user might want.
+ For example, if an identifier is the wrong type for an expression it will
+ state where that identifier was declared.
+ These Errors can be then printed in the main function, limiting the number
+ of errors printed if there are too many.
+ Whenever an error is found in the semantic checking, it is added to the
+ slice of Errors.
+ 
+\end_layout
+
 \begin_layout Subsubsection
 Code Generator
 \end_layout
@@ -831,6 +852,13 @@ eNode as its type.
 
 \begin_layout Subsubsection
 Function Overloading
+\end_layout
+
+\begin_layout Standard
+Function overloading is done by creating a hash of the parameter types,
+ used to compare between the distinct functions with different parameters
+ with the same identifier.
+ The hash is also used to create distinct labels in the code generation.
 \end_layout
 
 \begin_layout Subsubsection
