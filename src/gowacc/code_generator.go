@@ -867,6 +867,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		if v.symbolTable.CurrentScope.ScopeSize != 0 {
 			v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 		}
+		v.garbageCollect()
 		v.symbolTable.MoveUpScope()
 	case *ast.FunctionNode:
 		if v.symbolTable.CurrentScope.ScopeSize > 0 {
@@ -881,6 +882,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			}
 			v.addCode("ADD sp, sp, #%d", i)
 		}
+		v.garbageCollect()
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
 			v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
@@ -990,6 +992,24 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 }
 
 /**************** HELPER FUNCTIONS ****************/
+
+// garbageCollect is used to free all variables in the current scope that is
+// stored on the heap.
+func (v *CodeGenerator) garbageCollect() {
+	for ident, _ := range v.symbolTable.CurrentScope.Scope {
+		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(ident)
+
+		// Only free if the variable is stored on the heap
+		if dec.Location.IsAddress() {
+			v.addCode(NewLoad(
+				W, // Address has size of a word
+				utils.R0,
+				v.LocationOf(dec.Location),
+			).armAssembly())
+			v.addCode(NewBranchL("free").armAssembly())
+		}
+	}
+}
 
 // addToStackPointer increments the stack pointer by the size parameter.
 // If size is greater than 1024 then it will increment in multiple iterations.
