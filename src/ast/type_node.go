@@ -329,10 +329,11 @@ func (node *PointerTypeNode) walkNode(visitor Visitor) {
 }
 
 func (node PointerTypeNode) Equals(t TypeNode) bool {
-	if node.T == nil {
-		return true
-	}
 	if arr, ok := ToValue(t).(PointerTypeNode); ok {
+		// Match any pointer if expected PointerTypeNode has T equal to nil
+		if node.T == nil {
+			return true
+		}
 		return arr.T.Equals(node.T)
 	}
 	return false
