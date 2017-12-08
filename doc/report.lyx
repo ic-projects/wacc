@@ -15,7 +15,7 @@
 \font_sans "default" "default"
 \font_typewriter "default" "default"
 \font_math "auto" "auto"
-\font_default_family default
+\font_default_family sfdefault
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
@@ -187,13 +187,17 @@ Our compiler does not perform lexical analysis.
  significantly affect how we meet much of the specification.
  It does, however, affect how much we can tell about errors.
  For example, consider the (incorrect) statement:
-\begin_inset Formula 
-\[
-\texttt{intx = 3}
-\]
+\end_layout
 
-\end_inset
+\begin_layout Quotation
+\noindent
+\align block
 
+\family typewriter
+intx = 3
+\end_layout
+
+\begin_layout Standard
 Most parsers would store 
 \family typewriter
 intx
@@ -389,23 +393,237 @@ We will now discuss the additional features that our compiler implements,
 \end_layout
 
 \begin_layout Subsubsection
+Unicode Characters
+\end_layout
+
+\begin_layout Subsubsection
 For Loops
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+for int i=0; i<5; i=i+1 do
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+skip;
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+end
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align block
+For loops take a similar grammar to while loops, using do and end to denote
+ the new scope.
+ For loops take two additional statements, before and after the condition,
+ where the first is executed before the loop begins, and the second is executed
+ before checking the condition again.
 \end_layout
 
 \begin_layout Subsubsection
 Switch Statements
 \end_layout
 
-\begin_layout Subsubsection
-Unicode Characters
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+when i
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+case 2, 3:
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+skip
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+end
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+else:
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+skip
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+end
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+fi
+\end_layout
+
+\begin_layout Standard
+Our switch statements are based upon the ruby when statement.
+ This was because most switch statements in other languages use curly braces
+ which aren’t in the wacc language.
+ There aren’t break statements, instead you can indicate more expressions
+ after commas.
+ The default case must be the last case.
+ Function overloading Function overloading is done by creating a hash of
+ the parameter types, used to compare between the distinct functions with
+ different parameters with the same identifier.
+ The hash is also used to create distinct labels in the code generation.
 \end_layout
 
 \begin_layout Subsubsection
+\noindent
 Structures
 \end_layout
 
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+#Declaration, a is field of MyType
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+int MyType.f(int i) is
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+this.a = 2;
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+return i
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+end
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+#Calling, t is a MyType
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+i := call t.f(true);
+\end_layout
+
+\begin_layout Standard
+Instead of classes, you can call functions on structs.
+ Calling a function on a struct is comparable to having a parameter of the
+ type of the struct, with identifier this.
+\end_layout
+
 \begin_layout Subsubsection
-Pointer Types
+Pointers and Garbage Collection
+\end_layout
+
+\begin_layout Subsubsection
+Implicit Types
+\end_layout
+
+\begin_layout Subsubsection
+Function Overloading
 \end_layout
 
 \begin_layout Subsubsection
@@ -413,7 +631,11 @@ Improved Register Allocation
 \end_layout
 
 \begin_layout Subsubsection
-Dynamic Types
+Peephole Optimisations
+\end_layout
+
+\begin_layout Subsubsection
+Constant Propagation and Array Bounds Checking
 \end_layout
 
 \begin_layout Subsubsection
@@ -591,7 +813,7 @@ Code Quality
 
 \begin_layout Standard
 We ensure code quality by concurrently running a collection of community-develop
-ed tools: 
+ed tools:
 \family typewriter
 deadcode
 \family default
@@ -689,11 +911,11 @@ unused
 \family default
 , 
 \family typewriter
-varcheck
+varcheck 
 \family default
-, and 
+and
 \family typewriter
-vet
+ vet
 \family default
 .
  These check various metrics on our code.
