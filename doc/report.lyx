@@ -26,7 +26,7 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\paperfontsize default
+\paperfontsize 10
 \spacing single
 \use_hyperref false
 \papersize a4paper
@@ -54,14 +54,14 @@
 \shortcut idx
 \color #008000
 \end_index
-\leftmargin 2cm
-\topmargin 2cm
-\rightmargin 2cm
-\bottommargin 2cm
+\leftmargin 1.5cm
+\topmargin 1.5cm
+\rightmargin 1.5cm
+\bottommargin 1.5cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation skip
-\defskip medskip
+\defskip smallskip
 \quotes_language english
 \papercolumns 1
 \papersides 1
@@ -292,13 +292,11 @@ During the first milestone, we used GitLab issues to assign tasks between
  generating a parse tree, generating the AST, writing syntax errors, implementin
 g a type checker, writing semantic errors, writing a test suite, etc.).
  We then each claimed issues to work on.
- Whilst this was a fairly effective method for assigning tasks, we firstly
- felt that it was unrealistic for one person to claim such a large chunk
- of work, and complete it entirely individually.
- Secondly, it was also the case, for example, that writing error checking
- would be much easier once the AST had been completed.
- Finally, this meant that group members failed to gain an understanding
- of large parts of the codebase (that were written by others).
+ Whilst this was a fairly effective method for assigning tasks, we felt
+ that it was unrealistic for one person to claim such a large chunk of work,
+ and complete it entirely individually.
+ It also meant that group members failed to gain an understanding of parts
+ of the codebase that were written by others.
  For these reasons, for the later milestones, we decided to take a more
  ad-hoc approach.
 \end_layout
@@ -311,19 +309,17 @@ on, testing and quality reviews.
  task (this could be development, documentation, testing or reviewing) -
  thus ensuring that the entire group developed a good knowledge of the full
  code-base.
- There was also a space to write notes to let other group members what was
- being done or what needed to be done.
+ There was also a space to write notes.
 \end_layout
 
 \begin_layout Standard
 Overall, we believe our task allocation was both fair and efficient, and
  this is demonstrated by the group's WebPA scores.
  In future projects, especially with large and spread out teams, we would
- like to make further use of GitLab issues, as was done in the first milestone.
- In this case, due to the size of the group, and the amount of time that
- we were in the same location, we felt that GitLab issues were unnecessary
- and created more of a burden than actually helping improve the group's
- organisation, and so the ad-hoc approach was more appropriate.
+ like to make further use of GitLab issues, as was done in the first milestone,
+ though in this case, due to us mostly working together, we felt that GitLab
+ issues created more of a burden than they worth, and so the ad-hoc approach
+ was more appropriate.
 \end_layout
 
 \begin_layout Subsection
@@ -344,20 +340,11 @@ We used Git for version control, using the college's provided GitLab repository.
 \end_layout
 
 \begin_layout Standard
-We followed a consistent style for all of our commit descriptions, choosing
- the style most commonly used in industry.
+We followed a consistent style for all of our commit descriptions.
  All commits were required to start with a capital letter, be less than
  72 characters long, be in present tense, and not end with a full-stop.
-\end_layout
-
-\begin_layout Standard
-We also enforced that commits should be short, and in general, only affect
+ We also enforced that commits should be short, and in general, only affect
  a single file.
- For example.
- in the case that the description required more than 72 characters, we enforced
- that the description should carry on, in depth, on the following line -
- however this was dissuaded, since it would likely have meant that the commit
- was too large to begin with.
 \end_layout
 
 \begin_layout Standard
@@ -367,7 +354,11 @@ All major features were developed on feature branches, and we required that
 master
 \family default
  branch must compile, and should not fail any more tests than the previous
- push.
+ commit on 
+\family typewriter
+master
+\family default
+.
  Feature branches were required to have the format 
 \family typewriter
 doc-username/feature-name
@@ -411,7 +402,7 @@ goimports
 .
  These tools ensure standardised formatting of the code and correct, well-ordere
 d imports respectively.
- These tools were especially useful, as there was no need to write or follow
+ Using these tools was very helpful, as there was no need to write or follow
  a style guide, since the correct style is forced by the tools.
 \end_layout
 
@@ -554,12 +545,9 @@ gocyclo
 \family default
  (which ensures that the cyclomatic complexity of all functions is under
  10).
-\end_layout
-
-\begin_layout Standard
-These tools are invaluable, since if our linter doesn't return any warnings,
- we can be fairly confident that the code we have written is of very high
- quality.
+ These tools were extremely useful, since if our linter doesn't return any
+ warnings, we can be fairly confident that the code we have written is of
+ very high quality.
 \end_layout
 
 \begin_layout Standard
@@ -596,7 +584,7 @@ doc.go
 \family typewriter
 gowacc
 \family default
- package, which explains how the 
+ package, which explains the overall project architecture, and how the 
 \family typewriter
 gowacc
 \family default
@@ -618,6 +606,8 @@ Testing
 \begin_layout Standard
 Our group used testing to guide us through the development process, and
  as a harness to ensure that future changes would not break working features.
+ We spent a lot of time writing tests, however we believe that thorough
+ testing was integral to our success in this project.
 \end_layout
 
 \begin_layout Subsubsection
