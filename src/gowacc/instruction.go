@@ -353,6 +353,40 @@ type LogicalInstruction struct {
 	Op2   Operand
 }
 
+// NewLogicalInstr builds a LogicalInstruction with a register operand.
+func NewLogicalInstr(
+	instr LogicalInstructionType,
+	r1 utils.Register,
+	r2 utils.Register,
+	r3 utils.Register,
+) LogicalInstruction {
+	return LogicalInstruction{
+		instr,
+		AL,
+		false,
+		r1,
+		r2,
+		RegisterOperand{r3, NONE, 0},
+	}
+}
+
+// NewLogicalInstrInt builds a LogicalInstruction with an immediate operand.
+func NewLogicalInstrInt(
+	instr LogicalInstructionType,
+	r1 utils.Register,
+	r2 utils.Register,
+	imm int,
+) LogicalInstruction {
+	return LogicalInstruction{
+		instr,
+		AL,
+		false,
+		r1,
+		r2,
+		ImmediateOperand(imm),
+	}
+}
+
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr LogicalInstruction) armAssembly() string {
 	return fmt.Sprintf(

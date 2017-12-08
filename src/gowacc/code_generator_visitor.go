@@ -552,9 +552,9 @@ func (v *CodeGenerator) visitBinaryOperator(
 	case ast.NEQ:
 		v.visitCompare(r1, r2, NE, EQ)
 	case ast.AND:
-		v.visitAND(r1, r2)
+		v.visitAndOr(AND, r1, r2)
 	case ast.OR:
-		v.visitOR(r1, r2)
+		v.visitAndOr(ORR, r1, r2)
 	}
 }
 
@@ -598,12 +598,12 @@ func (v *CodeGenerator) visitCompare(
 	v.addCode(NewMoveCond(opp, r1, 0).armAssembly())
 }
 
-func (v *CodeGenerator) visitAND(r1 utils.Register, r2 utils.Register) {
-	v.addCode("AND %s, %s, %s", r1, r1, r2)
-}
-
-func (v *CodeGenerator) visitOR(r1 utils.Register, r2 utils.Register) {
-	v.addCode("ORR %s, %s, %s", r1, r1, r2)
+func (v *CodeGenerator) visitAndOr(
+	instr LogicalInstructionType,
+	r1 utils.Register,
+	r2 utils.Register,
+) {
+	v.addCode(NewLogicalInstr(instr, r1, r1, r2).armAssembly())
 }
 
 /**************** STATEMENTS ****************/
@@ -740,7 +740,7 @@ func (v *CodeGenerator) leaveUnaryOperatorNode(node *ast.UnaryOperatorNode) {
 	register := v.returnRegisters.Peek()
 	switch node.Op {
 	case ast.NOT:
-		v.addCode("EOR %s, %s, #1", register, register)
+		v.addCode(NewLogicalInstrInt(EOR, register, register, 1).armAssembly())
 	case ast.NEG:
 		v.addCode("RSBS %s, %s, #0", register, register)
 		v.callLibraryFunction(VS, checkOverflow)
