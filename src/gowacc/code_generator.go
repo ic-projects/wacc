@@ -49,23 +49,24 @@ func NewAssembly() *Assembly {
 // String will return the string format of the Assembly code.
 func (asm *Assembly) String() string {
 	var buf bytes.Buffer
-	buf.WriteString(".data\n")
+	buf.WriteString(".data\n\n")
 	for dname, d := range asm.data {
 		buf.WriteString(dname + ":\n")
-		buf.WriteString(fmt.Sprintf("   .word %d\n", d.length))
-		buf.WriteString(fmt.Sprintf("   .ascii \"%s\"\n", d.text))
+		buf.WriteString(fmt.Sprintf("\t.word %d\n", d.length))
+		buf.WriteString(fmt.Sprintf("\t.ascii \"%s\"\n", d.text))
 	}
-	buf.WriteString(".text\n")
+	buf.WriteString("\n.text\n\n")
 	for _, s := range asm.text {
-		buf.WriteString(utils.Indent(s, "  "))
+		buf.WriteString(utils.Indent(s, "\t"))
 	}
 	buf.WriteString(".global main\n")
 	for fname, f := range asm.global {
 		buf.WriteString(fname + ":\n")
 		for _, s := range f {
-			buf.WriteString(utils.Indent(s, "  "))
+			buf.WriteString(s)
 		}
 	}
+	buf.WriteString("\n")
 	return buf.String()
 }
 
@@ -173,24 +174,24 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 	case ast.BaseTypeNode:
 		switch node.T {
 		case ast.BOOL:
-			v.callLibraryFunction("BL", printBool)
+			v.callLibraryFunction(AL, printBool)
 		case ast.INT:
-			v.callLibraryFunction("BL", printInt)
+			v.callLibraryFunction(AL, printInt)
 		case ast.CHAR:
-			v.addCode("BL putchar")
+			v.addCode(NewBranchL("putchar").armAssembly())
 		case ast.PAIR:
-			v.callLibraryFunction("BL", printReference)
+			v.callLibraryFunction(AL, printReference)
 		}
 	case ast.ArrayTypeNode:
 		if arr, ok := ast.ToValue(node.T).(ast.BaseTypeNode); ok {
 			if arr.T == ast.CHAR {
-				v.callLibraryFunction("BL", printString)
+				v.callLibraryFunction(AL, printString)
 				return
 			}
 		}
-		v.callLibraryFunction("BL", printReference)
+		v.callLibraryFunction(AL, printReference)
 	case ast.PairTypeNode, ast.StructTypeNode, ast.NullTypeNode:
-		v.callLibraryFunction("BL", printReference)
+		v.callLibraryFunction(AL, printReference)
 	}
 }
 
@@ -233,10 +234,10 @@ func (v *CodeGenerator) addFunction(name string) {
 // assembly if it is not already added. It also adds the call to the function to
 // the assembly, using call as the instruction before the label.
 func (v *CodeGenerator) callLibraryFunction(
-	call string,
+	cond Condition,
 	function LibraryFunction,
 ) {
-	v.addCode("%s %s", call, function)
+	v.addCode(NewCondBranchL(cond, function.String()).armAssembly())
 	v.library.add(v, function)
 }
 
@@ -281,7 +282,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			}
 			v.addFunction("f" + buff.String() + "_" + node.Ident.Ident)
 		}
-		v.addCode("PUSH {lr}")
+		v.addCode(NewPush(utils.LR).armAssembly())
 	case ast.Parameters:
 		registers := utils.ReturnRegisters()
 		parametersFromRegsSize := 0
@@ -380,80 +381,82 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		if ast.SizeOf(ast.Type(node.LHS, v.symbolTable)) == 1 {
-			v.callLibraryFunction("BL", readChar)
+			v.callLibraryFunction(AL, readChar)
 		} else {
-			v.callLibraryFunction("BL", readInt)
+			v.callLibraryFunction(AL, readInt)
 		}
 	case *ast.IfNode:
 		// Labels
-		elseLabel := v.labelCount + 1
-		endifLabel := v.labelCount + 1
-		v.labelCount += 2
+		elseLabel := fmt.Sprintf("ELSE%d", v.labelCount)
+		endifLabel := fmt.Sprintf("ENDIF%d", v.labelCount)
+		v.labelCount++
 		// Cond
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #0", v.getReturnRegister())
-		v.addCode("BEQ ELSE%d", elseLabel)
+		v.addCode(NewCondBranch(EQ, elseLabel).armAssembly())
 		// If
 		ast.Walk(v, node.IfStats)
-		v.addCode("B ENDIF%d", endifLabel)
+		v.addCode(NewBranch(endifLabel).armAssembly())
 		// Else
-		v.addCode("ELSE%d:", elseLabel)
+		v.addCode("%s:", elseLabel)
 		ast.Walk(v, node.ElseStats)
 		// Fi
-		v.addCode("ENDIF%d:", endifLabel)
+		v.addCode("%s:", endifLabel)
 	case *ast.SwitchNode:
-		// Labels
-		endLabel := v.labelCount + 1
+		labelNumber := v.labelCount
+		endLabel := fmt.Sprintf("END%d", labelNumber)
 		v.labelCount++
 		ast.Walk(v, node.Expr)
 		r := v.returnRegisters.Pop()
 		for i, c := range node.Cases {
+			caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
 			if !c.IsDefault {
 				ast.Walk(v, c.Expr)
 				v.addCode("CMP %s, %s", v.getReturnRegister(), r)
-				v.addCode("BEQ CASE%d_%d", endLabel, i)
+				v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
 			} else {
-				v.addCode("B CASE%d_%d", endLabel, i)
+				v.addCode(NewBranch(caseLabel).armAssembly())
 			}
 		}
-		v.addCode("B END%d", endLabel)
+		v.addCode(NewBranch(endLabel).armAssembly())
 		v.freeRegisters.Push(r)
 		for i, c := range node.Cases {
-			v.addCode("CASE%d_%d:", endLabel, i)
+			caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
+			v.addCode("%s:", caseLabel)
 			ast.Walk(v, c.Stats)
-			v.addCode("B END%d", endLabel)
+			v.addCode(NewBranch(endLabel).armAssembly())
 		}
-		v.addCode("END%d:", endLabel)
+		v.addCode("%s:", endLabel)
 	case *ast.LoopNode:
 		// Labels
-		doLabel := v.labelCount + 1
-		whileLabel := v.labelCount + 1
-		v.labelCount += 2
-		v.addCode("B WHILE%d", whileLabel)
+		doLabel := fmt.Sprintf("DO%d", v.labelCount)
+		whileLabel := fmt.Sprintf("WHILE%d", v.labelCount)
+		v.labelCount++
+		v.addCode(NewBranch(whileLabel).armAssembly())
 		// Do
-		v.addCode("DO%d:", doLabel)
+		v.addCode("%s:", doLabel)
 		ast.Walk(v, node.Stats)
 		// While
-		v.addCode("WHILE%d:", whileLabel)
+		v.addCode("%s:", whileLabel)
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
-		v.addCode("BEQ DO%d", doLabel)
+		v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 	case *ast.ForLoopNode:
 		ast.Walk(v, node.Initial)
 		// Labels
-		doLabel := v.labelCount + 1
-		whileLabel := v.labelCount + 1
-		v.labelCount += 2
-		v.addCode("B WHILE%d", whileLabel)
+		doLabel := fmt.Sprintf("DO%d", v.labelCount)
+		whileLabel := fmt.Sprintf("WHILE%d", v.labelCount)
+		v.labelCount++
+		v.addCode(NewBranch(whileLabel).armAssembly())
 		// Do
-		v.addCode("DO%d:", doLabel)
+		v.addCode("%s:", doLabel)
 		ast.Walk(v, node.Stats)
 		ast.Walk(v, node.Update)
 		// While
-		v.addCode("WHILE%d:", whileLabel)
+		v.addCode("%s:", whileLabel)
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
-		v.addCode("BEQ DO%d", doLabel)
+		v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 	case *ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
 		v.addCode(NewLoad(
@@ -475,7 +478,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			exprRegister := v.getReturnRegister()
 			v.addCode("MOV r0, %s", exprRegister)
 			v.addCode("MOV r1, %s", identRegister)
-			v.callLibraryFunction("BL", checkArrayIndex)
+			v.callLibraryFunction(AL, checkArrayIndex)
 			v.addCode("ADD %s, %s, #4", identRegister, identRegister)
 
 			if i == length-1 && lastIsCharOrBool {
@@ -495,9 +498,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			// register otherwise convert to value
 			if !node.Pointer {
 				if i == length-1 && lastIsCharOrBool {
-					v.addCode("LDRSB %s, [%s]", identRegister, identRegister)
+					v.addCode(NewLoadReg(SB, identRegister, identRegister).armAssembly())
 				} else {
-					v.addCode("LDR %s, [%s]", identRegister, identRegister)
+					v.addCode(NewLoadReg(W, identRegister, identRegister).armAssembly())
 				}
 			}
 		}
@@ -508,7 +511,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
+		v.callLibraryFunction(AL, checkNullPointer)
 		v.addCode(
 			"ADD %s, %s, #%d",
 			register,
@@ -531,8 +534,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		if length > 0 {
 			size = ast.SizeOf(ast.Type(node.Exprs[0], v.symbolTable))
 		}
-		v.addCode("LDR r0, =%d", length*size+4)
-		v.addCode("BL malloc")
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(length*size+4)).armAssembly())
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 		for i := 0; i < length; i++ {
 			ast.Walk(v, node.Exprs[i])
@@ -545,13 +548,17 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			).armAssembly())
 		}
 		lengthRegister := v.freeRegisters.Peek()
-		v.addCode("LDR %s, =%d", lengthRegister, length)
+		v.addCode(NewLoad(W, lengthRegister, ConstantAddress(length)).armAssembly())
 		v.addCode(NewStoreReg(W, lengthRegister, register).armAssembly())
 	case *ast.StructNewNode:
 		register := v.getFreeRegister()
 
-		v.addCode("LDR r0, =%d", node.StructNode.MemorySize)
-		v.addCode("BL malloc")
+		v.addCode(NewLoad(
+			W,
+			utils.R0,
+			ConstantAddress(node.StructNode.MemorySize),
+		).armAssembly())
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 		for index, n := range node.StructNode.Types {
 			ast.Walk(v, node.Exprs[index])
@@ -567,16 +574,16 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		register := v.getFreeRegister()
 
 		// Make space for 2 new pointers on heap
-		v.addCode("LDR r0, =8")
-		v.addCode("BL malloc")
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(8)).armAssembly())
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 
 		// Store first element
 		ast.Walk(v, node.Fst)
 		fst := v.getReturnRegister()
 		fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
-		v.addCode("LDR r0, =%d", fstSize)
-		v.addCode("BL malloc")
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(fstSize)).armAssembly())
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode(NewStoreReg(W, utils.R0, register).armAssembly())
 		v.addCode(NewStoreReg(store(fstSize), fst, utils.R0).armAssembly())
 
@@ -584,8 +591,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		ast.Walk(v, node.Snd)
 		snd := v.getReturnRegister()
 		sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
-		v.addCode("LDR r0, =%d", sndSize)
-		v.addCode("BL malloc")
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(sndSize)).armAssembly())
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode(NewStoreRegOffset(W, utils.R0, register, 4).armAssembly())
 		v.addCode(NewStoreReg(store(sndSize), snd, utils.R0).armAssembly())
 
@@ -612,14 +619,15 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for _, e := range node.Exprs {
 			buff.WriteString(ast.Type(e, v.symbolTable).Hash())
 		}
-		v.addCode("BL f%s_%s", buff.String(), node.Ident.Ident)
+		functionLabel := fmt.Sprintf("f%s_%s", buff.String(), node.Ident.Ident)
+		v.addCode(NewBranchL(functionLabel).armAssembly())
 		if size > 0 {
 			v.addToStackPointer(size)
 		}
 
 		v.addCode("MOV %s, r0", v.getFreeRegister())
 	case *ast.IntegerLiteralNode:
-		v.addCode("LDR %s, =%d", v.getFreeRegister(), node.Val)
+		v.addCode(NewLoad(W, v.getFreeRegister(), ConstantAddress(node.Val)).armAssembly())
 	case *ast.BooleanLiteralNode:
 		register := v.getFreeRegister()
 		if node.Val {
@@ -631,17 +639,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("MOV %s, #'%s'", v.getFreeRegister(), string(node.Val))
 	case *ast.StringLiteralNode:
 		label := v.addData(node.Val)
-		v.addCode("LDR %s, =%s", v.getFreeRegister(), label)
+		v.addCode(NewLoad(W, v.getFreeRegister(), LabelAddress(label)).armAssembly())
 	case *ast.NullNode:
-		v.addCode("LDR %s, =0", v.getFreeRegister())
-	case *ast.UnaryOperatorNode:
-		switch node.Op {
-		case ast.NOT:
-		case ast.NEG:
-		case ast.LEN:
-		case ast.ORD:
-		case ast.CHR:
-		}
+		v.addCode(NewLoad(W, v.getFreeRegister(), ConstantAddress(0)).armAssembly())
 	case *ast.BinaryOperatorNode:
 		var operand2 utils.Register
 		var operand1 utils.Register
@@ -649,14 +649,14 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		if v.freeRegisters.Length() == 2 {
 			ast.Walk(v, node.Expr2)
 			operand2 = v.returnRegisters.Pop()
-			v.addCode("PUSH {%s}", operand2)
+			v.addCode(NewPush(operand2).armAssembly())
 			v.currentStackPos += ast.SizeOf(ast.Type(node.Expr1, v.symbolTable))
 			v.freeRegisters.Push(operand2)
 
 			ast.Walk(v, node.Expr1)
 			operand1 = v.returnRegisters.Pop()
 			operand2 = v.freeRegisters.Pop()
-			v.addCode("POP {%s}", operand2)
+			v.addCode(NewPop(operand2).armAssembly())
 			v.currentStackPos -= ast.SizeOf(ast.Type(node.Expr1, v.symbolTable))
 		} else {
 			// Evaluate the expression with the largest weight first
@@ -682,25 +682,25 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				operand2,
 			)
 			v.addCode("CMP %s, %s, ASR #31", operand2, operand1)
-			v.callLibraryFunction("BLNE", checkOverflow)
+			v.callLibraryFunction(NE, checkOverflow)
 		case ast.DIV:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", checkDivide)
-			v.addCode("BL __aeabi_idiv")
+			v.callLibraryFunction(AL, checkDivide)
+			v.addCode(NewBranchL("__aeabi_idiv").armAssembly())
 			v.addCode("MOV %s, r0", operand1)
 		case ast.MOD:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", checkDivide)
-			v.addCode("BL __aeabi_idivmod")
+			v.callLibraryFunction(AL, checkDivide)
+			v.addCode(NewBranchL("__aeabi_idivmod").armAssembly())
 			v.addCode("MOV %s, r1", operand1)
 		case ast.ADD:
 			v.addCode("ADDS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.SUB:
 			v.addCode("SUBS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.GT:
 			v.addCode("CMP %s, %s", operand1, operand2)
 			v.addCode("MOVGT %s, #1", operand1)
@@ -769,14 +769,14 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		}
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
-			v.addCode("LDR r0, =0")
-			v.addCode("POP {pc}")
+			v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
+			v.addCode(NewPop(utils.PC).armAssembly())
 		}
 		v.addCode(".ltorg")
 	case *ast.ArrayLiteralNode:
 	case *ast.FreeNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.callLibraryFunction("BL", free)
+		v.callLibraryFunction(AL, free)
 	case *ast.DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
@@ -793,10 +793,10 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PrintlnNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addPrint(ast.Type(node.Expr, v.symbolTable))
-		v.callLibraryFunction("BL", printLn)
+		v.callLibraryFunction(AL, printLn)
 	case *ast.ExitNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.addCode("BL exit")
+		v.addCode(NewBranchL("exit").armAssembly())
 	case *ast.ReturnNode:
 		sizeOfAllVariablesInScope := 0
 		for scope := v.symbolTable.CurrentScope; scope !=
@@ -816,12 +816,12 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			v.addCode("ADD sp, sp, #%d", i)
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.addCode("POP {pc}")
+		v.addCode(NewPop(utils.PC).armAssembly())
 	case *ast.PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
-		v.addCode("LDR %s, [%s]", register, register)
+		v.callLibraryFunction(AL, checkNullPointer)
+		v.addCode(NewLoadReg(W, register, register).armAssembly())
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
 			v.addCode(NewLoadReg(
@@ -833,8 +833,8 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PairSecondElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
-		v.addCode("LDR %s, [%s, #4]", register, register)
+		v.callLibraryFunction(AL, checkNullPointer)
+		v.addCode(NewLoadRegOffset(W, register, register, 4).armAssembly())
 
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
@@ -851,9 +851,9 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			v.addCode("EOR %s, %s, #1", register, register)
 		case ast.NEG:
 			v.addCode("RSBS %s, %s, #0", register, register)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.LEN:
-			v.addCode("LDR %s, [%s]", register, register)
+			v.addCode(NewLoadReg(W, register, register).armAssembly())
 		case ast.ORD:
 		case ast.CHR:
 		}

@@ -6,8 +6,12 @@ import (
 	"utils"
 )
 
-// ERROR is the string to be printed when no instruction exists.
-const ERROR = "ERROR"
+const (
+	// ERROR is the string to be printed when no instruction exists.
+	ERROR string = "ERROR"
+	// INDENT is the string to be printed before each line of assembly.
+	INDENT string = "\t"
+)
 
 // Instruction is an interface for assembly instructions to implement.
 type Instruction interface {
@@ -21,8 +25,8 @@ type Instruction interface {
 type Condition int
 
 const (
-	// ALWAYS Default (No condition)
-	ALWAYS Condition = iota
+	// AL Default (Always / No condition)
+	AL Condition = iota
 	// EQ Equal / zero
 	EQ
 	// NE Not equal / non-zero
@@ -35,6 +39,8 @@ const (
 	LE
 	// LT Less than
 	LT
+	// VS Overflow
+	VS
 )
 
 func (cond Condition) armCondition() string {
@@ -51,6 +57,8 @@ func (cond Condition) armCondition() string {
 		return "LE"
 	case LT:
 		return "LT"
+	case VS:
+		return "VS"
 	default:
 		return ""
 	}
@@ -185,7 +193,8 @@ type Move struct {
 // MOV{Cond}{S} Rd, Op2
 func (instr Move) armAssembly() string {
 	return fmt.Sprintf(
-		"MOV%s%s %s, %s",
+		"%sMOV%s%s %s, %s",
+		INDENT,
 		instr.Cond.armCondition(),
 		armSet(instr.Set),
 		instr.Rd.String(),
@@ -236,7 +245,8 @@ type ArithmeticInstruction struct {
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr ArithmeticInstruction) armAssembly() string {
 	return fmt.Sprintf(
-		"%s%s%s %s, %s, %s",
+		"%s%s%s%s %s, %s, %s",
+		INDENT,
 		instr.Instr.armInstruction(),
 		instr.Cond.armCondition(),
 		armSet(instr.Set),
@@ -260,7 +270,8 @@ type Compare struct {
 // CMP{Cond} Rn, Op2
 func (instr Compare) armAssembly() string {
 	return fmt.Sprintf(
-		"CMP%s %s, %s",
+		"%sCMP%s %s, %s",
+		INDENT,
 		instr.Cond.armCondition(),
 		instr.Rn.String(),
 		instr.Op2.armOperand(),
@@ -310,7 +321,8 @@ type LogicalInstruction struct {
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr LogicalInstruction) armAssembly() string {
 	return fmt.Sprintf(
-		"%s%s%s %s, %s, %s",
+		"%s%s%s%s %s, %s, %s",
+		INDENT,
 		instr.Instr.armInstruction(),
 		instr.Cond.armCondition(),
 		armSet(instr.Set),
@@ -337,7 +349,8 @@ type SignedMultiply struct {
 func (instr SignedMultiply) armAssembly() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf(
-		"SMULL%s%s %s, %s, %s",
+		"%sSMULL%s%s %s, %s, %s",
+		INDENT,
 		instr.Cond.armCondition(),
 		armSet(instr.Set),
 		instr.RdLo.String(),
@@ -362,6 +375,26 @@ type Branch struct {
 	Addr Address
 }
 
+// NewBranch builds a Branch.
+func NewBranch(label string) Branch {
+	return NewCondBranch(AL, label)
+}
+
+// NewCondBranch builds a Branch with a condition.
+func NewCondBranch(cond Condition, label string) Branch {
+	return Branch{cond, true, LabelAddress(label)}
+}
+
+// NewBranchL builds a Branch with a link.
+func NewBranchL(label string) Branch {
+	return NewCondBranchL(AL, label)
+}
+
+// NewCondBranchL builds a Branch with a condition and a link.
+func NewCondBranchL(cond Condition, label string) Branch {
+	return Branch{cond, true, LabelAddress(label)}
+}
+
 func armLink(link bool) string {
 	if link {
 		return "L"
@@ -372,10 +405,11 @@ func armLink(link bool) string {
 // B{Link}{Cond} Addr
 func (instr Branch) armAssembly() string {
 	return fmt.Sprintf(
-		"B%s%s %s",
+		"%sB%s%s %s",
+		INDENT,
 		armLink(instr.Link),
 		instr.Cond.armCondition(),
-		instr.Addr.armAddress(),
+		instr.Addr.armAddress()[1:],
 	)
 }
 
@@ -443,13 +477,7 @@ func NewLoad(
 	reg utils.Register,
 	addr Address,
 ) DataTransferInstruction {
-	return DataTransferInstruction{
-		LDR,
-		ALWAYS,
-		size,
-		reg,
-		addr,
-	}
+	return DataTransferInstruction{LDR, AL, size, reg, addr}
 }
 
 // NewLoadReg builds a LDR instruction from an address held by a register.
@@ -458,7 +486,17 @@ func NewLoadReg(
 	r1 utils.Register,
 	r2 utils.Register,
 ) DataTransferInstruction {
-	return NewLoad(size, r1, RegisterAddress{r1, 0})
+	return NewLoad(size, r1, RegisterAddress{r2, 0})
+}
+
+// NewLoadRegOffset builds a LDR instruction to an address held by a register.
+func NewLoadRegOffset(
+	size Size,
+	r1 utils.Register,
+	r2 utils.Register,
+	offset int,
+) DataTransferInstruction {
+	return NewLoad(size, r1, RegisterAddress{r2, offset})
 }
 
 // NewStore builds a STR instruction.
@@ -467,13 +505,7 @@ func NewStore(
 	reg utils.Register,
 	addr Address,
 ) DataTransferInstruction {
-	return DataTransferInstruction{
-		STR,
-		ALWAYS,
-		size,
-		reg,
-		addr,
-	}
+	return DataTransferInstruction{STR, AL, size, reg, addr}
 }
 
 // NewStoreReg builds a STR instruction to an address held by a register.
@@ -498,7 +530,8 @@ func NewStoreRegOffset(
 // Instr{Cond}{Size} Rd, Addr
 func (instr DataTransferInstruction) armAssembly() string {
 	return fmt.Sprintf(
-		"%s%s%s %s, %s",
+		"%s%s%s%s %s, %s",
+		INDENT,
 		instr.Instr.armInstruction(),
 		instr.Cond.armCondition(),
 		instr.Size.armSize(),
@@ -539,11 +572,22 @@ type StackInstruction struct {
 	Reglist []utils.Register
 }
 
+// NewPush builds a PUSH instruction with a single register.
+func NewPush(reg utils.Register) StackInstruction {
+	return StackInstruction{PUSH, AL, []utils.Register{reg}}
+}
+
+// NewPop builds a POP instruction with a single register.
+func NewPop(reg utils.Register) StackInstruction {
+	return StackInstruction{POP, AL, []utils.Register{reg}}
+}
+
 // Instr{Cond} Reglist
 func (instr StackInstruction) armAssembly() string {
 	var buf bytes.Buffer
 	buf.WriteString(fmt.Sprintf(
-		"%s%s {",
+		"%s%s%s {",
+		INDENT,
 		instr.Instr.armInstruction(),
 		instr.Cond.armCondition(),
 	))
