@@ -307,6 +307,7 @@ func (node StructTypeNode) Equals(t TypeNode) bool {
 
 /**************** POINTER TYPE NODE ****************/
 
+// Note that if T is nil then PointerTypeNode represents a pointer to any type.
 type PointerTypeNode struct {
 	T TypeNode
 }
@@ -318,6 +319,9 @@ func NewPointerTypeNode(t TypeNode) *PointerTypeNode {
 }
 
 func (node PointerTypeNode) String() string {
+	if node.T == nil {
+		return "any *"
+	}
 	return fmt.Sprintf("%s *", node.T.String())
 }
 
@@ -325,6 +329,9 @@ func (node *PointerTypeNode) walkNode(visitor Visitor) {
 }
 
 func (node PointerTypeNode) Equals(t TypeNode) bool {
+	if node.T == nil {
+		return true
+	}
 	if arr, ok := ToValue(t).(PointerTypeNode); ok {
 		return arr.T.Equals(node.T)
 	}
