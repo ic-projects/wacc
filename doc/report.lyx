@@ -927,6 +927,51 @@ Peephole Optimisations
 Constant Propagation and Array Bounds Checking
 \end_layout
 
+\begin_layout Standard
+Constant propagation has been implemented that will simplify expressions
+ if they evaluate to a constant expression, taking into account any previously
+ known constant variables.
+ E.g.
+ 
+\family typewriter
+x = true || false;
+\family default
+ is replaced by
+\family typewriter
+ x = true;
+\family default
+ and
+\family typewriter
+ y = 2; x = y * 2;
+\family default
+ is replaced by 
+\family typewriter
+y = 2; x = 4;.
+
+\family default
+ This also works for constant arrays, E.g.
+ 
+\family typewriter
+y = [5,6]; x = y[0] + 5;
+\family default
+ is replaced by
+\family typewriter
+ y = [5,6]; x = 10;.
+
+\family default
+ This allows any expression present in the tree to be replaced if the value
+ it evaluates to is constant.
+ In addition, we also check at compile time for various runtime errors such
+ as array bounds errors, overflow and divide and mod by zero errors.
+ This is possible because if the index of an array access is simplified
+ to a constant and the array length is also known to be constant then we
+ can check if the index is valid.
+ Furthermore, we can simplify all constant integer expressions and check
+ for overflows, divide by zero and mod by zero errors at compile time.
+ Giving the user the line the error occurred on, the operation responsible
+ and the result of the operation that is too big to store in 4 bytes.
+\end_layout
+
 \begin_layout Subsubsection
 Future Extensions
 \end_layout
