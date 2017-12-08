@@ -271,8 +271,59 @@ Our group used several tools to communicate effectively, assign tasks, and
 Communication
 \end_layout
 
+\begin_layout Standard
+Throughout the project, we made use of the group messaging application,
+ Slack, to keep each other updated on progress, and whenever possible, we
+ made effort to work in the same place.
+ This decision made debugging much easier, as group members could easily
+ contact the person responsible for introducing a bug - who would have a
+ much clearer idea on how to solve the issue.
+ Overall, the level of communication between group members was excellent.
+\end_layout
+
 \begin_layout Subsubsection
-Individual Responsibility
+Task Assignment
+\end_layout
+
+\begin_layout Standard
+During the first milestone, we used GitLab issues to assign tasks between
+ the group.
+ We wrote a list of the code that needed to be written (e.g.
+ generating a parse tree, generating the AST, writing syntax errors, implementin
+g a type checker, writing semantic errors, writing a test suite, etc.).
+ We then each claimed issues to work on.
+ Whilst this was a fairly effective method for assigning tasks, we firstly
+ felt that it was unrealistic for one person to claim such a large chunk
+ of work, and complete it entirely individually.
+ Secondly, it was also the case, for example, that writing error checking
+ would be much easier once the AST had been completed.
+ Finally, this meant that group members failed to gain an understanding
+ of large parts of the codebase (that were written by others).
+ For these reasons, for the later milestones, we decided to take a more
+ ad-hoc approach.
+\end_layout
+
+\begin_layout Standard
+During the final two milestones, we used a Google Sheets spreadsheet, which
+ listed a number of small tasks, and had boxes for writing the code, documentati
+on, testing and quality reviews.
+ We enforced that every member of the group should take some part in each
+ task (this could be development, documentation, testing or reviewing) -
+ thus ensuring that the entire group developed a good knowledge of the full
+ code-base.
+ There was also a space to write notes to let other group members what was
+ being done or what needed to be done.
+\end_layout
+
+\begin_layout Standard
+Overall, we believe our task allocation was both fair and efficient, and
+ this is demonstrated by the group's WebPA scores.
+ In future projects, especially with large and spread out teams, we would
+ like to make further use of GitLab issues, as was done in the first milestone.
+ In this case, due to the size of the group, and the amount of time that
+ we were in the same location, we felt that GitLab issues were unnecessary
+ and created more of a burden than actually helping improve the group's
+ organisation, and so the ad-hoc approach was more appropriate.
 \end_layout
 
 \begin_layout Subsection
@@ -288,12 +339,235 @@ Our group made use of several tools and strategies to ensure that we developed
 Version Control
 \end_layout
 
+\begin_layout Standard
+We used Git for version control, using the college's provided GitLab repository.
+\end_layout
+
+\begin_layout Standard
+We followed a consistent style for all of our commit descriptions, choosing
+ the style most commonly used in industry.
+ All commits were required to start with a capital letter, be less than
+ 72 characters long, be in present tense, and not end with a full-stop.
+\end_layout
+
+\begin_layout Standard
+We also enforced that commits should be short, and in general, only affect
+ a single file.
+ For example.
+ in the case that the description required more than 72 characters, we enforced
+ that the description should carry on, in depth, on the following line -
+ however this was dissuaded, since it would likely have meant that the commit
+ was too large to begin with.
+\end_layout
+
+\begin_layout Standard
+All major features were developed on feature branches, and we required that
+ all pushes to the 
+\family typewriter
+master
+\family default
+ branch must compile, and should not fail any more tests than the previous
+ push.
+ Feature branches were required to have the format 
+\family typewriter
+doc-username/feature-name
+\family default
+.
+ We also ensured that feature branches were merged in at the end of each
+ day, to reduce merge conflicts.
+\end_layout
+
+\begin_layout Standard
+Overall, we found that our use of Git promoted a very efficient work-flow,
+ allowing all members to work concurrently, and to easily keep up-to-date
+ with and search for recent changes.
+ In future projects, we would prefer to make use of Git hooks (to enforce
+ our standards more effectively), and tools such as 
+\family typewriter
+godoc.org
+\family default
+ and 
+\family typewriter
+goreport.com
+\family default
+, although unfortunately these changes would require Master permissions
+ and public visibility respectively, which are not afforded by the department's
+ provided repositories.
+\end_layout
+
 \begin_layout Subsubsection
 Code Style
 \end_layout
 
+\begin_layout Standard
+We enforced that all code pushed to GitLab had been formatted with 
+\family typewriter
+gofmt -s
+\family default
+ and 
+\family typewriter
+goimports
+\family default
+.
+ These tools ensure standardised formatting of the code and correct, well-ordere
+d imports respectively.
+ These tools were especially useful, as there was no need to write or follow
+ a style guide, since the correct style is forced by the tools.
+\end_layout
+
+\begin_layout Standard
+Code style can be automatically corrected with the recipe, 
+\family typewriter
+make fmt
+\family default
+.
+\end_layout
+
 \begin_layout Subsubsection
 Code Quality
+\end_layout
+
+\begin_layout Standard
+We ensure code quality by concurrently running a collection of community-develop
+ed tools: 
+\family typewriter
+deadcode
+\family default
+, 
+\family typewriter
+dupl
+\family default
+, 
+\family typewriter
+errcheck
+\family default
+, 
+\family typewriter
+gas
+\family default
+, 
+\family typewriter
+goconst
+\family default
+, 
+\family typewriter
+gocyclo
+\family default
+, 
+\family typewriter
+gofmt -s
+\family default
+, 
+\family typewriter
+goimports
+\family default
+, 
+\family typewriter
+golint
+\family default
+, 
+\family typewriter
+gosimple
+\family default
+, 
+\family typewriter
+gotype
+\family default
+, 
+\family typewriter
+gotypex
+\family default
+, 
+\family typewriter
+ineffassign
+\family default
+, 
+\family typewriter
+interfacer
+\family default
+, 
+\family typewriter
+lll
+\family default
+, 
+\family typewriter
+maligned
+\family default
+, 
+\family typewriter
+megacheck
+\family default
+, 
+\family typewriter
+misspell
+\family default
+, 
+\family typewriter
+nakedret
+\family default
+, 
+\family typewriter
+staticcheck
+\family default
+, 
+\family typewriter
+structcheck
+\family default
+, 
+\family typewriter
+unconvert
+\family default
+, 
+\family typewriter
+unparam
+\family default
+, 
+\family typewriter
+unused
+\family default
+, 
+\family typewriter
+varcheck
+\family default
+, and 
+\family typewriter
+vet
+\family default
+.
+ These check various metrics on our code.
+ Some check that our style is correct such as 
+\family typewriter
+gofmt
+\family default
+ and 
+\family typewriter
+lll
+\family default
+ (which checks for lines longer than 80 characters), whilst others look
+ for code smells, such as 
+\family typewriter
+vet
+\family default
+ (which looks for common mistakes) and 
+\family typewriter
+gocyclo
+\family default
+ (which ensures that the cyclomatic complexity of all functions is under
+ 10).
+\end_layout
+
+\begin_layout Standard
+These tools are invaluable, since if our linter doesn't return any warnings,
+ we can be fairly confident that the code we have written is of very high
+ quality.
+\end_layout
+
+\begin_layout Standard
+Code quality can be automatically checked with the recipe, 
+\family typewriter
+make lint
+\family default
+.
 \end_layout
 
 \begin_layout Subsection
@@ -301,13 +575,40 @@ Documentation
 \end_layout
 
 \begin_layout Standard
-In order to ensure that all group members were able to achieve a strong
- understanding of the entire codebase, we strictly enforced that all code
- was fully documented.
+We required that all exported constants, variables, interfaces, structs
+ and functions were accompanied by a GoDoc comment.
+ In many simple cases (such as constructors), they were largely unnecessary,
+ but we made the decision to keep them in order to avoid 
+\family typewriter
+golint
+\family default
+ warnings.
+ In complex cases, these comments were extremely useful in helping members
+ of group to understand parts of the codebase which they hadn't written.
 \end_layout
 
-\begin_layout Subsubsection
-GoDoc
+\begin_layout Standard
+We also have a 
+\family typewriter
+doc.go
+\family default
+ in our 
+\family typewriter
+gowacc
+\family default
+ package, which explains how the 
+\family typewriter
+gowacc
+\family default
+ binary should be used.
+\end_layout
+
+\begin_layout Standard
+Documentation can be automatically generated with the recipe, 
+\family typewriter
+make docs
+\family default
+.
 \end_layout
 
 \begin_layout Subsection
@@ -323,8 +624,41 @@ Our group used testing to guide us through the development process, and
 Unit Testing
 \end_layout
 
+\begin_layout Standard
+Where necessary throughout our code, we use unit testing to ensure the correct
+ functionality is maintained.
+\end_layout
+
 \begin_layout Subsubsection
 Functional Testing
+\end_layout
+
+\begin_layout Standard
+We spent a not-insignificant amount of time developing a web-based Ruby
+ test suite, which is forked from the first year ARM project's test suite.
+ The test suite tests all of the provided example WACC files, as well as
+ a significant number of additional tests that cover both edge cases of
+ the original specification and the functionality of our extensions.
+\end_layout
+
+\begin_layout Standard
+For the front-end, we compare our compiler's exit code, as well as the generated
+ AST, with a saved copy of the reference compiler's output.
+\end_layout
+
+\begin_layout Standard
+For the back-end, we compare the result of our compiled code's execution
+ with a saved copy of the result of the reference compiler and emulator.
+ We also present our assembly and the reference assembly, side-by-side,
+ to allow for easy debugging and comparison of performance.
+\end_layout
+
+\begin_layout Standard
+Automatic functional tests can be run with the recipe, 
+\family typewriter
+make tests
+\family default
+.
 \end_layout
 
 \end_body
