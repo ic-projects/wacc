@@ -64,7 +64,7 @@ func (cond Condition) armCondition() string {
 	}
 }
 
-/**************** SET ****************/
+/**************** SET FLAGS ****************/
 
 func armSet(set bool) string {
 	if set {
@@ -188,6 +188,26 @@ type Move struct {
 	Set  bool
 	Rd   utils.Register
 	Op2  Operand
+}
+
+// NewMove builds a MOV instruction with a register operand.
+func NewMove(r1 utils.Register, r2 utils.Register) Move {
+	return Move{AL, false, r1, RegisterOperand{r2, NONE, 0}}
+}
+
+// NewMoveInt builds a MOV instruction with an immediate operand.
+func NewMoveInt(reg utils.Register, op2 int) Move {
+	return Move{AL, false, reg, ImmediateOperand(op2)}
+}
+
+// NewMoveChar builds a MOV instruction with an immediate char operand.
+func NewMoveChar(reg utils.Register, op2 string) Move {
+	return Move{AL, false, reg, ImmediateCharOperand(op2)}
+}
+
+// NewMoveCond builds a MOV instruction with a condition and immediate operand.
+func NewMoveCond(cond Condition, reg utils.Register, op2 int) Move {
+	return Move{cond, false, reg, ImmediateOperand(op2)}
 }
 
 // MOV{Cond}{S} Rd, Op2
