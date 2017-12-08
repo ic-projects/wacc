@@ -174,24 +174,24 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 	case ast.BaseTypeNode:
 		switch node.T {
 		case ast.BOOL:
-			v.callLibraryFunction("BL", printBool)
+			v.callLibraryFunction(AL, printBool)
 		case ast.INT:
-			v.callLibraryFunction("BL", printInt)
+			v.callLibraryFunction(AL, printInt)
 		case ast.CHAR:
-			v.addCode("BL putchar")
+			v.addCode(NewBranchL("putchar").armAssembly())
 		case ast.PAIR:
-			v.callLibraryFunction("BL", printReference)
+			v.callLibraryFunction(AL, printReference)
 		}
 	case ast.ArrayTypeNode:
 		if arr, ok := ast.ToValue(node.T).(ast.BaseTypeNode); ok {
 			if arr.T == ast.CHAR {
-				v.callLibraryFunction("BL", printString)
+				v.callLibraryFunction(AL, printString)
 				return
 			}
 		}
-		v.callLibraryFunction("BL", printReference)
+		v.callLibraryFunction(AL, printReference)
 	case ast.PairTypeNode, ast.StructTypeNode, ast.NullTypeNode:
-		v.callLibraryFunction("BL", printReference)
+		v.callLibraryFunction(AL, printReference)
 	}
 }
 
@@ -234,10 +234,10 @@ func (v *CodeGenerator) addFunction(name string) {
 // assembly if it is not already added. It also adds the call to the function to
 // the assembly, using call as the instruction before the label.
 func (v *CodeGenerator) callLibraryFunction(
-	call string,
+	cond Condition,
 	function LibraryFunction,
 ) {
-	v.addCode("%s %s", call, function)
+	v.addCode(NewCondBranchL(cond, function.String()).armAssembly())
 	v.library.add(v, function)
 }
 
@@ -381,9 +381,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		if ast.SizeOf(ast.Type(node.LHS, v.symbolTable)) == 1 {
-			v.callLibraryFunction("BL", readChar)
+			v.callLibraryFunction(AL, readChar)
 		} else {
-			v.callLibraryFunction("BL", readInt)
+			v.callLibraryFunction(AL, readInt)
 		}
 	case *ast.IfNode:
 		// Labels
@@ -403,7 +403,6 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		// Fi
 		v.addCode("%s:", endifLabel)
 	case *ast.SwitchNode:
-		// Labels
 		labelNumber := v.labelCount
 		endLabel := fmt.Sprintf("END%d", labelNumber)
 		v.labelCount++
@@ -479,7 +478,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			exprRegister := v.getReturnRegister()
 			v.addCode("MOV r0, %s", exprRegister)
 			v.addCode("MOV r1, %s", identRegister)
-			v.callLibraryFunction("BL", checkArrayIndex)
+			v.callLibraryFunction(AL, checkArrayIndex)
 			v.addCode("ADD %s, %s, #4", identRegister, identRegister)
 
 			if i == length-1 && lastIsCharOrBool {
@@ -512,7 +511,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
+		v.callLibraryFunction(AL, checkNullPointer)
 		v.addCode(
 			"ADD %s, %s, #%d",
 			register,
@@ -536,7 +535,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			size = ast.SizeOf(ast.Type(node.Exprs[0], v.symbolTable))
 		}
 		v.addCode(NewLoad(W, utils.R0, ConstantAddress(length*size+4)).armAssembly())
-		v.addCode("BL malloc")
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 		for i := 0; i < length; i++ {
 			ast.Walk(v, node.Exprs[i])
@@ -559,7 +558,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			utils.R0,
 			ConstantAddress(node.StructNode.MemorySize),
 		).armAssembly())
-		v.addCode("BL malloc")
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 		for index, n := range node.StructNode.Types {
 			ast.Walk(v, node.Exprs[index])
@@ -576,7 +575,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		// Make space for 2 new pointers on heap
 		v.addCode(NewLoad(W, utils.R0, ConstantAddress(8)).armAssembly())
-		v.addCode("BL malloc")
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode("MOV %s, r0", register)
 
 		// Store first element
@@ -584,7 +583,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		fst := v.getReturnRegister()
 		fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
 		v.addCode(NewLoad(W, utils.R0, ConstantAddress(fstSize)).armAssembly())
-		v.addCode("BL malloc")
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode(NewStoreReg(W, utils.R0, register).armAssembly())
 		v.addCode(NewStoreReg(store(fstSize), fst, utils.R0).armAssembly())
 
@@ -593,7 +592,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		snd := v.getReturnRegister()
 		sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
 		v.addCode(NewLoad(W, utils.R0, ConstantAddress(sndSize)).armAssembly())
-		v.addCode("BL malloc")
+		v.addCode(NewBranchL("malloc").armAssembly())
 		v.addCode(NewStoreRegOffset(W, utils.R0, register, 4).armAssembly())
 		v.addCode(NewStoreReg(store(sndSize), snd, utils.R0).armAssembly())
 
@@ -682,25 +681,25 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				operand2,
 			)
 			v.addCode("CMP %s, %s, ASR #31", operand2, operand1)
-			v.callLibraryFunction("BLNE", checkOverflow)
+			v.callLibraryFunction(NE, checkOverflow)
 		case ast.DIV:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", checkDivide)
-			v.addCode("BL __aeabi_idiv")
+			v.callLibraryFunction(AL, checkDivide)
+			v.addCode(NewBranchL("__aeabi_idiv").armAssembly())
 			v.addCode("MOV %s, r0", operand1)
 		case ast.MOD:
 			v.addCode("MOV r0, %s", operand1)
 			v.addCode("MOV r1, %s", operand2)
-			v.callLibraryFunction("BL", checkDivide)
-			v.addCode("BL __aeabi_idivmod")
+			v.callLibraryFunction(AL, checkDivide)
+			v.addCode(NewBranchL("__aeabi_idivmod").armAssembly())
 			v.addCode("MOV %s, r1", operand1)
 		case ast.ADD:
 			v.addCode("ADDS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.SUB:
 			v.addCode("SUBS %s, %s, %s", operand1, operand1, operand2)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.GT:
 			v.addCode("CMP %s, %s", operand1, operand2)
 			v.addCode("MOVGT %s, #1", operand1)
@@ -776,7 +775,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.ArrayLiteralNode:
 	case *ast.FreeNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.callLibraryFunction("BL", free)
+		v.callLibraryFunction(AL, free)
 	case *ast.DeclareNode:
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
@@ -793,10 +792,10 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PrintlnNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addPrint(ast.Type(node.Expr, v.symbolTable))
-		v.callLibraryFunction("BL", printLn)
+		v.callLibraryFunction(AL, printLn)
 	case *ast.ExitNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())
-		v.addCode("BL exit")
+		v.addCode(NewBranchL("exit").armAssembly())
 	case *ast.ReturnNode:
 		sizeOfAllVariablesInScope := 0
 		for scope := v.symbolTable.CurrentScope; scope !=
@@ -820,7 +819,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PairFirstElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
+		v.callLibraryFunction(AL, checkNullPointer)
 		v.addCode(NewLoadReg(W, register, register).armAssembly())
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
@@ -833,7 +832,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.PairSecondElementNode:
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
-		v.callLibraryFunction("BL", checkNullPointer)
+		v.callLibraryFunction(AL, checkNullPointer)
 		v.addCode(NewLoadRegOffset(W, register, register, 4).armAssembly())
 
 		// If we don't want a Pointer then don't retrieve the value
@@ -851,7 +850,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			v.addCode("EOR %s, %s, #1", register, register)
 		case ast.NEG:
 			v.addCode("RSBS %s, %s, #0", register, register)
-			v.callLibraryFunction("BLVS", checkOverflow)
+			v.callLibraryFunction(VS, checkOverflow)
 		case ast.LEN:
 			v.addCode(NewLoadReg(W, register, register).armAssembly())
 		case ast.ORD:

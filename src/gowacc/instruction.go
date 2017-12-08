@@ -25,8 +25,8 @@ type Instruction interface {
 type Condition int
 
 const (
-	// ALWAYS Default (No condition)
-	ALWAYS Condition = iota
+	// AL Default (Always / No condition)
+	AL Condition = iota
 	// EQ Equal / zero
 	EQ
 	// NE Not equal / non-zero
@@ -39,6 +39,8 @@ const (
 	LE
 	// LT Less than
 	LT
+	// VS Overflow
+	VS
 )
 
 func (cond Condition) armCondition() string {
@@ -55,6 +57,8 @@ func (cond Condition) armCondition() string {
 		return "LE"
 	case LT:
 		return "LT"
+	case VS:
+		return "VS"
 	default:
 		return ""
 	}
@@ -373,7 +377,7 @@ type Branch struct {
 
 // NewBranch builds a Branch.
 func NewBranch(label string) Branch {
-	return Branch{ALWAYS, false, LabelAddress(label)}
+	return NewCondBranch(AL, label)
 }
 
 // NewCondBranch builds a Branch with a condition.
@@ -381,13 +385,13 @@ func NewCondBranch(cond Condition, label string) Branch {
 	return Branch{cond, true, LabelAddress(label)}
 }
 
-// NewBranchWithLink builds a Branch with a link.
-func NewBranchWithLink(label string) Branch {
-	return Branch{ALWAYS, false, LabelAddress(label)}
+// NewBranchL builds a Branch with a link.
+func NewBranchL(label string) Branch {
+	return NewCondBranchL(AL, label)
 }
 
-// NewCondBranchWithLink builds a Branch with a condition and a link.
-func NewCondBranchWithLink(cond Condition, label string) Branch {
+// NewCondBranchL builds a Branch with a condition and a link.
+func NewCondBranchL(cond Condition, label string) Branch {
 	return Branch{cond, true, LabelAddress(label)}
 }
 
@@ -473,13 +477,7 @@ func NewLoad(
 	reg utils.Register,
 	addr Address,
 ) DataTransferInstruction {
-	return DataTransferInstruction{
-		LDR,
-		ALWAYS,
-		size,
-		reg,
-		addr,
-	}
+	return DataTransferInstruction{LDR, AL, size, reg, addr}
 }
 
 // NewLoadReg builds a LDR instruction from an address held by a register.
@@ -507,13 +505,7 @@ func NewStore(
 	reg utils.Register,
 	addr Address,
 ) DataTransferInstruction {
-	return DataTransferInstruction{
-		STR,
-		ALWAYS,
-		size,
-		reg,
-		addr,
-	}
+	return DataTransferInstruction{STR, AL, size, reg, addr}
 }
 
 // NewStoreReg builds a STR instruction to an address held by a register.
@@ -582,12 +574,12 @@ type StackInstruction struct {
 
 // NewPush builds a PUSH instruction with a single register.
 func NewPush(reg utils.Register) StackInstruction {
-	return StackInstruction{PUSH, ALWAYS, []utils.Register{reg}}
+	return StackInstruction{PUSH, AL, []utils.Register{reg}}
 }
 
 // NewPop builds a POP instruction with a single register.
 func NewPop(reg utils.Register) StackInstruction {
-	return StackInstruction{POP, ALWAYS, []utils.Register{reg}}
+	return StackInstruction{POP, AL, []utils.Register{reg}}
 }
 
 // Instr{Cond} Reglist
