@@ -559,7 +559,7 @@ func (v *CodeGenerator) visitBinaryOperator(
 }
 
 func (v *CodeGenerator) visitMul(r1 utils.Register, r2 utils.Register) {
-	v.addCode("SMULL %s, %s, %s, %s", r1, r2, r1, r2)
+	v.addCode(NewSignedMultiply(r1, r2).armAssembly())
 	v.addCode(NewCompareASR(r2, r1, 31).armAssembly())
 	v.callLibraryFunction(NE, checkOverflow)
 }

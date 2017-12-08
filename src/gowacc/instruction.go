@@ -414,6 +414,12 @@ type SignedMultiply struct {
 	Rs   utils.Register
 }
 
+// NewSignedMultiply builds a SMULL instruction that overwrites operand
+// registers.
+func NewSignedMultiply(r1 utils.Register, r2 utils.Register) SignedMultiply {
+	return SignedMultiply{AL, false, r1, r2, r1, r2}
+}
+
 // SMULL{Cond}{S} RdLo, RdHi, Rm{, Rs}
 func (instr SignedMultiply) armAssembly() string {
 	var buf bytes.Buffer
