@@ -21,6 +21,12 @@ const (
 		"divide by zero operation"
 	ModByZero string = "Mod By Zero Error: This operation causes a " +
 		"mod by zero operation"
+	FunctionAlreadyDefined string = "Function \"%s\" is already defined"
+	FunctionNotDefined     string = "Function \"%s\" is not defined"
+	VariableAlreadyDefined string = "Variable \"%s\" is already defined in the " +
+		"current Scope"
+	VariableNotDefined string = "Variable \"%s\" is not defined in the " +
+		"current Scope"
 )
 
 // GenericError is an interface that errors implement, which allows for elegent
@@ -195,24 +201,24 @@ func (e DeclarationError) String() string {
 	if e.isFunction {
 		if e.isDefined {
 			b.WriteString(fmt.Sprintf(
-				"Function \"%s\" is already defined",
+				FunctionAlreadyDefined,
 				e.identifier,
 			))
 		} else {
 			b.WriteString(fmt.Sprintf(
-				"Function \"%s\" is not defined",
+				FunctionNotDefined,
 				e.identifier,
 			))
 		}
 	} else {
 		if e.isDefined {
 			b.WriteString(fmt.Sprintf(
-				"Variable \"%s\" is already defined in the current Scope",
+				VariableAlreadyDefined,
 				e.identifier,
 			))
 		} else {
 			b.WriteString(fmt.Sprintf(
-				"Variable \"%s\" is not defined in the current Scope",
+				VariableNotDefined,
 				e.identifier,
 			))
 		}
