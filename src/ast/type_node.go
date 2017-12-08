@@ -450,8 +450,7 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 		t := node.T.Poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
 			if arr.T == nil {
-				arr := NewArrayTypeNode(NewDynamicTypeNode())
-				node.T.Poss[0] = arr
+				node.T.Poss[0] = NewArrayTypeNode(NewDynamicTypeNode())
 				t = node.T.Poss[0]
 			}
 		} else if pair, ok := t.(*PairTypeNode); ok {
@@ -468,6 +467,11 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 				}
 			} else {
 				node.T.Poss[0] = NewBaseTypeNode(PAIR)
+				t = node.T.Poss[0]
+			}
+		} else if ptr, ok := t.(*PointerTypeNode); ok {
+			if ptr.T == nil {
+				node.T.Poss[0] = NewPointerTypeNode(NewDynamicTypeNode())
 				t = node.T.Poss[0]
 			}
 		}
