@@ -13,7 +13,7 @@ import (
 type SymbolTable struct {
 	Head           *SymbolTableNode
 	CurrentScope   *SymbolTableNode
-	Functions      map[string]*FunctionNode
+	Functions      map[string]map[string]*FunctionNode
 	Structs        map[string]*StructNode
 	functionsOrder []string
 }
@@ -25,7 +25,7 @@ func NewSymbolTable() *SymbolTable {
 	return &SymbolTable{
 		Head:           head,
 		CurrentScope:   head,
-		Functions:      make(map[string]*FunctionNode),
+		Functions:      make(map[string]map[string]*FunctionNode),
 		Structs:        make(map[string]*StructNode),
 		functionsOrder: make([]string, 0),
 	}
@@ -226,12 +226,20 @@ func (table *SymbolTable) SearchForFunction(
 	exprs []ExpressionNode,
 ) (*FunctionNode, bool) {
 	var buff bytes.Buffer
-	buff.WriteString(identifier)
 	for _, e := range exprs {
 		buff.WriteString(Type(e, table).Hash())
 	}
-	node, ok := table.Functions[buff.String()]
-	return node, ok
+	if m, ok := table.Functions[identifier]; ok {
+		if len(m) == 1 {
+			for _, v := range m {
+				return v, true
+			}
+		} else {
+			node, ok := m[buff.String()]
+			return node, ok
+		}
+	}
+	return &FunctionNode{}, false
 }
 
 func (table *SymbolTable) SearchForFunctionParams(
@@ -239,12 +247,20 @@ func (table *SymbolTable) SearchForFunctionParams(
 	params Parameters,
 ) (*FunctionNode, bool) {
 	var buff bytes.Buffer
-	buff.WriteString(identifier)
 	for _, p := range params {
 		buff.WriteString(p.T.Hash())
 	}
-	node, ok := table.Functions[buff.String()]
-	return node, ok
+	if m, ok := table.Functions[identifier]; ok {
+		if len(m) == 1 {
+			for _, v := range m {
+				return v, true
+			}
+		} else {
+			node, ok := m[buff.String()]
+			return node, ok
+		}
+	}
+	return &FunctionNode{}, false
 }
 
 // SearchForStruct will search for a struct, returning false as its second
@@ -286,11 +302,15 @@ func (table *SymbolTable) AddToScope(
 // AddFunction will add a function to the symbolTable
 func (table *SymbolTable) AddFunction(identifier string, node *FunctionNode) {
 	var buff bytes.Buffer
-	buff.WriteString(identifier)
 	for _, p := range node.Params {
 		buff.WriteString(p.T.Hash())
 	}
-	table.Functions[buff.String()] = node
+	if m, ok := table.Functions[identifier]; ok {
+		m[buff.String()] = node
+	} else {
+		table.Functions[identifier] = make(map[string]*FunctionNode)
+		table.Functions[identifier][buff.String()] = node
+	}
 }
 
 // AddStruct will add a struct to the symbolTable
@@ -320,8 +340,10 @@ func (table *SymbolTable) Print() {
 		fmt.Printf("%s", f)
 	}
 	fmt.Println("Functions ------------------------")
-	for _, f := range table.Functions {
-		fmt.Printf("%s of type %s\n", f.Ident, f.T)
+	for _, m := range table.Functions {
+		for _, f := range m {
+			fmt.Printf("%s of type %s\n", f.Ident, f.T)
+		}
 	}
 	fmt.Println("Scopes ---------------------------")
 	table.CurrentScope.Print()
@@ -337,16 +359,18 @@ func (table *SymbolTable) String() string {
 		buf.WriteString(f.String())
 	}
 	buf.WriteString("- Functions:\n")
-	for _, f := range table.Functions {
-		buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))
-		for i, p := range f.Params {
-			if i == 0 {
-				buf.WriteString(p.String())
-			} else {
-				buf.WriteString(fmt.Sprintf(", %s", p))
+	for _, m := range table.Functions {
+		for _, f := range m {
+			buf.WriteString(fmt.Sprintf("  - %s %s(", f.T, f.Ident.String()[2:]))
+			for i, p := range f.Params {
+				if i == 0 {
+					buf.WriteString(p.String())
+				} else {
+					buf.WriteString(fmt.Sprintf(", %s", p))
+				}
 			}
+			buf.WriteString(fmt.Sprintln(")"))
 		}
-		buf.WriteString(fmt.Sprintln(")"))
 	}
 	buf.WriteString("- Scopes:\n")
 	for _, s := range table.Head.ChildScopes {
