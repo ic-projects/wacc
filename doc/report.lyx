@@ -329,14 +329,28 @@ hash
 Semantic checks are simple and powerful
 \emph default
 .
- Our semantic checking is done using a stack.
+ The semantic checker uses the 
+\family typewriter
+SearchForIdent
+\family default
+ function in the symbol table to find declaration errors and the 
+\family typewriter
+Seen
+\family default
+ function in the type checker to find type errors.
+ Our type checking is done using a stack.
  Type checking is as simple as writing one function with what you expect
  to see, and one function to say it's been seen.
  The type checker then uses the TypeNodes 
 \family typewriter
 equals
 \family default
- function to check for valid type matching.
+ function to check for valid type matching and various forms of
+\family typewriter
+ Expectance
+\family default
+ to resolve and determine if further checks are necessary.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -853,6 +867,17 @@ x := [1, 2, 67];
 \begin_inset Formula $\qquad$
 \end_inset
 
+#c is calculated to have type Char
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
 c := call getThirdChar(x); 
 \end_layout
 
@@ -913,14 +938,6 @@ Function overloading is done by creating a hash of the parameter types,
  used to compare between the distinct functions with different parameters
  with the same identifier.
  The hash is also used to create distinct labels in the code generation.
-\end_layout
-
-\begin_layout Subsubsection
-Improved Register Allocation
-\end_layout
-
-\begin_layout Subsubsection
-Peephole Optimisations
 \end_layout
 
 \begin_layout Subsubsection
@@ -1343,7 +1360,7 @@ Unit Testing
 
 \begin_layout Standard
 Where necessary throughout our code, we use unit testing to ensure the correct
- functionality is maintained.
+ functionality is maintained for specific individual functions.
 \end_layout
 
 \begin_layout Subsubsection
