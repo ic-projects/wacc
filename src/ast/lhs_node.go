@@ -229,29 +229,3 @@ func (node *StructElementNode) String() string {
 
 func (node *StructElementNode) walkNode(visitor Visitor) {
 }
-
-/**************** POINTER NODE ****************/
-
-// PointerNode is a struct that stores the identifier of a pointer.
-type PointerNode struct {
-	Pos   utils.Position
-	Ident *IdentifierNode
-}
-
-// NewPointerNode builds a PointerNode.
-func NewPointerNode(pos utils.Position, ident *IdentifierNode) *PointerNode {
-	return &PointerNode{
-		Pos:   pos,
-		Ident: ident,
-	}
-}
-
-func (node *PointerNode) String() string {
-	return fmt.Sprintf(
-		"POINTER %s\n",
-		node.Ident.String()[2:],
-	)
-}
-
-func (node *PointerNode) walkNode(visitor Visitor) {
-}

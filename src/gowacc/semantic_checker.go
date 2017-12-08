@@ -208,10 +208,28 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 					declareNode.Pos)
 				v.typeChecker.freeze(node)
 			} else {
-				v.typeChecker.expect(declareNode.T)
+				switch n := declareNode.T.(type) {
+				case *ast.PointerTypeNode:
+					// A pointer of any type T can also be set to an int
+					v.typeChecker.expectSet([]ast.TypeNode{
+						ast.NewPointerTypeNode(n.T),
+						ast.NewBaseTypeNode(ast.INT),
+					})
+				default:
+					v.typeChecker.expect(declareNode.T)
+				}
 			}
 		} else {
-			v.typeChecker.expect(node.T)
+			switch n := node.T.(type) {
+			case *ast.PointerTypeNode:
+				// A pointer of any type T can also be set to an int
+				v.typeChecker.expectSet([]ast.TypeNode{
+					ast.NewPointerTypeNode(n.T),
+					ast.NewBaseTypeNode(ast.INT),
+				})
+			default:
+				v.typeChecker.expect(node.T)
+			}
 		}
 	case *ast.PointerNewNode:
 		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
@@ -224,8 +242,41 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 				foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
 			}
 		}
+	case *ast.PointerDereferenceNode:
+		if identDec, ok := v.symbolTable.SearchForIdent(node.Ident.Ident); !ok {
+			foundError = NewDeclarationError(node.Pos, false, false, node.Ident.Ident)
+			v.typeChecker.seen(nil)
+			v.typeChecker.freeze(node)
+		} else {
+			switch t := identDec.T.(type) {
+			case *ast.PointerTypeNode:
+				foundError = v.typeChecker.seen(t.T).addPos(node.Pos)
+				if foundError != nil {
+					foundError = NewTypeErrorDeclaration(foundError.(TypeError), identDec.Pos)
+				}
+			default:
+				foundError = NewCustomError(
+					node.Pos,
+					"Cannot dereference a non pointer",
+				)
+				v.typeChecker.seen(nil)
+				v.typeChecker.freeze(node)
+			}
+		}
 	case *ast.AssignNode:
-		v.typeChecker.expectTwiceSame(NewAnyExpectance())
+		switch t := ast.Type(node.LHS, v.symbolTable).(type) {
+		case *ast.PointerTypeNode:
+			v.typeChecker.expectSet([]ast.TypeNode{
+				ast.NewPointerTypeNode(t.T),
+				ast.NewBaseTypeNode(ast.INT),
+			})
+			v.typeChecker.expectSet([]ast.TypeNode{
+				ast.NewPointerTypeNode(t.T),
+				ast.NewBaseTypeNode(ast.INT),
+			})
+		default:
+			v.typeChecker.expectTwiceSame(NewAnyExpectance())
+		}
 	case *ast.ReadNode:
 		v.typeChecker.expectSet([]ast.TypeNode{
 			ast.NewBaseTypeNode(ast.INT),
@@ -486,13 +537,20 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 			foundError = v.typeChecker.seen(
 				ast.NewBaseTypeNode(ast.INT),
 			).addPos(node.Pos)
-			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
-			v.typeChecker.expect(ast.NewBaseTypeNode(ast.INT))
+			v.typeChecker.expectSet([]ast.TypeNode{
+				ast.NewPointerTypeNode(nil),
+				ast.NewBaseTypeNode(ast.INT),
+			})
+			v.typeChecker.expectSet([]ast.TypeNode{
+				ast.NewPointerTypeNode(nil),
+				ast.NewBaseTypeNode(ast.INT),
+			})
 		case ast.GT, ast.GEQ, ast.LT, ast.LEQ:
 			foundError = v.typeChecker.seen(
 				ast.NewBaseTypeNode(ast.BOOL),
 			).addPos(node.Pos)
 			v.typeChecker.expectTwiceSame(NewSetExpectance([]ast.TypeNode{
+				ast.NewPointerTypeNode(nil),
 				ast.NewBaseTypeNode(ast.INT),
 				ast.NewBaseTypeNode(ast.CHAR),
 			}))

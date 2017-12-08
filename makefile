@@ -67,6 +67,7 @@ docs:
 clean:
 	rm -rf $(BINARY)
 	rm -rf $(GENERATED)
+	rm -rf *.s
 
 clean-lib:
 	rm -rf lib

@@ -1,0 +1,37 @@
+# a function with pointer parameters
+
+# Output:
+# a is #addrs#
+# b is true
+# c is u
+# d is hello
+# e is #addrs#
+# f is #addrs#
+# answer is g
+
+# Program:
+
+begin
+  char doSomething(int *a, bool b, char c, string d, bool[] *e, int[] *f) is
+    print "a is " ;
+    println a ;
+    print "b is " ;
+    println b ;
+    print "c is " ;
+    println c ;
+    print "d is " ;
+    println d ;
+    print "e is " ;
+    println e ;
+    print "f is " ;
+    println f ;
+    return 'g'
+  end
+  bool[] bools = [ false, true ] ;
+  int[] ints = [ 1, 2 ] ;
+  int fourtytwo = 42 ;
+  int *ptr42 = &fourtytwo;
+  char answer = call doSomething(ptr42, true, 'u', "hello", &bools, &ints) ;
+  print "answer is " ;
+  println answer
+end

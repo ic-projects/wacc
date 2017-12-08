@@ -102,19 +102,17 @@ func (asm *Assembly) SaveToFile(savepath string) error {
 	return file.Close()
 }
 
-// LocationOf will return the correct Operand of a Location object
+// LocationOf will return the string representation of a Location.
+//
+// If the Location is an address (that is stored on the heap), it will return
+// the stack offset.
 func (v *CodeGenerator) LocationOf(loc *utils.Location) Address {
 	// Location is a register
-	if loc.Register != utils.UNDEFINED {
+	if loc.IsRegister() {
 		return RegisterAddress{loc.Register, 0}
 	}
 
-	// Location is an address on the heap
-	if loc.Address != 0 {
-		return ConstantAddress(loc.Address)
-	}
-
-	// Location is a stack offset
+	// Location is either a stack offset or an address stored on the stack.
 	return RegisterAddress{utils.SP, v.currentStackPos - loc.CurrentPos}
 }
 
@@ -190,7 +188,11 @@ func (v *CodeGenerator) addPrint(t ast.TypeNode) {
 			}
 		}
 		v.callLibraryFunction(AL, printReference)
-	case ast.PairTypeNode, ast.StructTypeNode, ast.NullTypeNode:
+	case
+		ast.PairTypeNode,
+		ast.StructTypeNode,
+		ast.NullTypeNode,
+		ast.PointerTypeNode:
 		v.callLibraryFunction(AL, printReference)
 	}
 }
@@ -256,6 +258,8 @@ func (v *CodeGenerator) NoRecurse(programNode ast.ProgramNode) bool {
 		*ast.ForLoopNode,
 		*ast.NewPairNode,
 		*ast.StructNewNode,
+		*ast.PointerNewNode,
+		*ast.PointerDereferenceNode,
 		*ast.ReadNode,
 		*ast.FunctionCallNode,
 		*ast.BinaryOperatorNode:
@@ -311,11 +315,26 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for n, e := range node {
 			dec, _ := v.symbolTable.SearchForIdent(e.Ident.Ident)
 			if n < len(registers) {
-				v.addCode(NewStore(
-					store(ast.SizeOf(e.T)),
-					registers[n],
-					v.LocationOf(dec.Location),
-				).armAssembly())
+				if dec.Location.IsAddress() {
+					register := v.freeRegisters.Pop()
+					v.addCode(NewLoad(
+						W, // Address has size of a word
+						register,
+						v.LocationOf(dec.Location),
+					).armAssembly())
+					v.addCode(NewStoreReg(
+						store(ast.SizeOf(e.T)),
+						registers[n],
+						register,
+					).armAssembly())
+					v.freeRegisters.Push(register)
+				} else {
+					v.addCode(NewStore(
+						store(ast.SizeOf(e.T)),
+						registers[n],
+						v.LocationOf(dec.Location),
+					).armAssembly())
+				}
 			}
 		}
 	case *ast.AssignNode:
@@ -361,12 +380,35 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		case *ast.IdentifierNode:
 			ident := v.symbolTable.SearchForDeclaredIdent(lhsNode.Ident)
 			if ident.Location != nil {
-				v.addCode(NewStore(
-					store(ast.SizeOf(ident.T)),
-					rhsRegister,
-					v.LocationOf(ident.Location),
-				).armAssembly())
+				if ident.Location.IsAddress() {
+					register := v.freeRegisters.Pop()
+					v.addCode(NewLoad(
+						W, // Address has size of a word
+						register,
+						v.LocationOf(ident.Location),
+					).armAssembly())
+					v.addCode(NewStoreReg(
+						store(ast.SizeOf(ident.T)),
+						rhsRegister,
+						register,
+					).armAssembly())
+					v.freeRegisters.Push(register)
+				} else {
+					v.addCode(NewStore(
+						store(ast.SizeOf(ident.T)),
+						rhsRegister,
+						v.LocationOf(ident.Location),
+					).armAssembly())
+				}
 			}
+		case *ast.PointerDereferenceNode:
+			ast.Walk(v, lhsNode.Ident)
+			lhsRegister := v.getReturnRegister()
+			v.addCode(NewStoreReg(
+				store(ast.SizeOf(ast.Type(lhsNode, v.symbolTable))),
+				rhsRegister,
+				lhsRegister,
+			).armAssembly())
 		}
 		v.freeRegisters.Push(rhsRegister)
 	case *ast.ReadNode:
@@ -461,11 +503,26 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 	case *ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
-		v.addCode(NewLoad(
-			load(ast.SizeOf(dec.T)),
-			v.getFreeRegister(),
-			v.LocationOf(dec.Location),
-		).armAssembly())
+		if dec.Location.IsAddress() {
+			register := v.freeRegisters.Pop()
+			v.addCode(NewLoad(
+				W, // Address has size of a word
+				register,
+				v.LocationOf(dec.Location),
+			).armAssembly())
+			v.addCode(NewLoadReg(
+				load(ast.SizeOf(dec.T)),
+				v.getFreeRegister(),
+				register,
+			).armAssembly())
+			v.freeRegisters.Push(register)
+		} else {
+			v.addCode(NewLoad(
+				load(ast.SizeOf(dec.T)),
+				v.getFreeRegister(),
+				v.LocationOf(dec.Location),
+			).armAssembly())
+		}
 	case *ast.ArrayElementNode:
 		ast.Walk(v, node.Ident)
 		identRegister := v.returnRegisters.Pop()
@@ -572,6 +629,61 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 				n.MemoryOffset,
 			).armAssembly())
 		}
+	case *ast.PointerNewNode:
+		register := v.getFreeRegister()
+
+		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident.Ident)
+		ast.Walk(v, node.Ident)
+		valueReg := v.getReturnRegister()
+
+		if !dec.Location.IsAddress() {
+			// Make space for the variable
+			v.addCode("LDR r0, =%d", ast.SizeOf(ast.ToValue(dec.T)))
+			v.addCode("BL malloc")
+			v.addCode("MOV %s, r0", register)
+
+			// Move the variable value onto the heap space
+			v.addCode(NewStoreReg(
+				store(ast.SizeOf(ast.ToValue(dec.T))),
+				valueReg,
+				register,
+			).armAssembly())
+
+			if dec.Location.IsStackOffset() {
+				// Replace variable stored on stack with address to variable stored on
+				// heap.
+				v.addCode(NewStore(
+					W, // Address has size of a word
+					register,
+					v.LocationOf(dec.Location),
+				).armAssembly())
+
+				// Change the Location type to be an address on the heap
+				dec.Location.IsOnHeap = true
+			} else if dec.Location.IsRegister() {
+				// Change the Location type to be an address on the heap
+				dec.Location.Register = utils.UNDEFINED
+				dec.Location.IsOnHeap = true
+				dec.Location.CurrentPos = v.currentStackPos
+
+				// Store the address on stack
+				v.addCode("PUSH {%s}", register)
+
+				// Note that addresses are 4 bytes in size
+				v.addToStackPointer(4)
+			}
+		} else {
+			// Store the address in the return register
+			v.addCode(NewLoad(
+				W, // Address has size of a word
+				register,
+				v.LocationOf(dec.Location),
+			).armAssembly())
+		}
+	case *ast.PointerDereferenceNode:
+		ast.Walk(v, node.Ident)
+		register := v.returnRegisters.Peek()
+		v.addCode("LDR %s, [%s]", register, register)
 	case *ast.NewPairNode:
 		register := v.getFreeRegister()
 
@@ -783,11 +895,26 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(node.Ident.Ident)
 		dec.IsDeclared = true
 		if dec.Location != nil {
-			v.addCode(NewStore(
-				store(ast.SizeOf(dec.T)),
-				v.getReturnRegister(),
-				v.LocationOf(dec.Location),
-			).armAssembly())
+			if dec.Location.IsAddress() {
+				register := v.freeRegisters.Pop()
+				v.addCode(NewLoad(
+					W, // Address has size of a word
+					register,
+					v.LocationOf(dec.Location),
+				).armAssembly())
+				v.addCode(NewStoreReg(
+					store(ast.SizeOf(dec.T)),
+					v.getReturnRegister(),
+					register,
+				).armAssembly())
+				v.freeRegisters.Push(register)
+			} else {
+				v.addCode(NewStore(
+					store(ast.SizeOf(dec.T)),
+					v.getReturnRegister(),
+					v.LocationOf(dec.Location),
+				).armAssembly())
+			}
 		}
 	case *ast.PrintNode:
 		v.addCode("MOV r0, %s", v.getReturnRegister())

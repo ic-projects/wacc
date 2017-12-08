@@ -346,6 +346,7 @@ func (node StructTypeNode) Hash() string {
 
 /**************** POINTER TYPE NODE ****************/
 
+// Note that if T is nil then PointerTypeNode represents a pointer to any type.
 type PointerTypeNode struct {
 	T TypeNode
 }
@@ -357,6 +358,9 @@ func NewPointerTypeNode(t TypeNode) *PointerTypeNode {
 }
 
 func (node PointerTypeNode) String() string {
+	if node.T == nil {
+		return "any *"
+	}
 	return fmt.Sprintf("%s *", node.T.String())
 }
 
@@ -365,6 +369,16 @@ func (node *PointerTypeNode) walkNode(visitor Visitor) {
 
 func (node PointerTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(PointerTypeNode); ok {
+		// Match any pointer if expected PointerTypeNode has T equal to nil.
+		//
+		// For example, if we expect a type int* then we don't want to match if we
+		// see a type any*.
+		//
+		// However, if we expect a type any* and we see a type int* then we should
+		// match.
+		if node.T == nil {
+			return true
+		}
 		return arr.T.Equals(node.T)
 	}
 	return false
@@ -486,8 +500,7 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 		t := node.T.Poss[0]
 		if arr, ok := t.(*ArrayTypeNode); ok {
 			if arr.T == nil {
-				arr := NewArrayTypeNode(NewDynamicTypeNode())
-				node.T.Poss[0] = arr
+				node.T.Poss[0] = NewArrayTypeNode(NewDynamicTypeNode())
 				t = node.T.Poss[0]
 			}
 		} else if pair, ok := t.(*PairTypeNode); ok {
@@ -504,6 +517,11 @@ func (node *DynamicTypeNode) getValue() TypeNode {
 				}
 			} else {
 				node.T.Poss[0] = NewBaseTypeNode(PAIR)
+				t = node.T.Poss[0]
+			}
+		} else if ptr, ok := t.(*PointerTypeNode); ok {
+			if ptr.T == nil {
+				node.T.Poss[0] = NewPointerTypeNode(NewDynamicTypeNode())
 				t = node.T.Poss[0]
 			}
 		}

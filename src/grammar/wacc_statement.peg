@@ -102,7 +102,7 @@ NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 		rhs.(ast.RHSNode),
 	))
 
-} /  t:TYPE ident:IDENT _ ":=" _ rhs:ASSIGNRHS {
+} / t:TYPE ident:IDENT _ ":=" _ rhs:ASSIGNRHS {
 
 	return ret(ast.NewDeclareNode(
 		c.getPosition(),
@@ -111,7 +111,7 @@ NEWASSIGN ← t:TYPE ident:IDENT _ '=' _ rhs:ASSIGNRHS {
 		rhs.(ast.RHSNode),
 	))
 
-} /  t:TYPE ident:RESERVED _ ":=" _ rhs:ASSIGNRHS {
+} / t:TYPE ident:RESERVED _ ":=" _ rhs:ASSIGNRHS {
 
 	name := string(getItem(ident, 0).([]byte))
 	errmsg := fmt.Sprintf("Invalid identifier, \"%s\" (reserved)", name)

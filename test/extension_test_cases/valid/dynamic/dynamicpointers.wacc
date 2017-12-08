@@ -1,0 +1,83 @@
+# pointers
+
+# Output:
+# num: #some address 1# = 1
+# num2: #some address 2# = 5
+# false
+# false
+# false
+# true
+# true
+# true
+# str: #some address 3# = Uno
+# str2: #some address 4# = Dos
+# false
+# false
+# false
+# true
+# true
+# true
+
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  # ints
+  num := 1 ;
+  num2 := 5 ;
+  *numPtr := &num ;
+  *numPtr2 := &num2 ;
+
+  print "num: " ;
+  print numPtr ;
+  print " = " ;
+  println *numPtr ;
+
+  print "num2: " ;
+  print numPtr2 ;
+  print " = " ;
+  println *numPtr2 ;
+
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  *numPtr = *numPtr2 ;
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  numPtr = numPtr2 ;
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  # strings
+  str := "Uno" ;
+  str2 := "Dos" ;
+  *strPtr := &str ;
+  *strPtr2 := &str2 ;
+
+  print "str: " ;
+  print strPtr ;
+  print " = " ;
+  println *strPtr ;
+
+  print "str2: " ;
+  print strPtr2 ;
+  print " = " ;
+  println *strPtr2 ;
+
+  println strPtr == strPtr2 ;
+  println *strPtr == *strPtr2 ;
+
+  *strPtr = *strPtr2 ;
+  println strPtr == strPtr2 ;
+  println *strPtr == *strPtr2 ;
+
+  strPtr = strPtr2 ;
+  println strPtr == strPtr2 ;
+  println *strPtr == *strPtr2 ;
+
+  exit 0
+end

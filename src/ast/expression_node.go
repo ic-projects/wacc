@@ -58,6 +58,15 @@ func Type(e ExpressionNode, s *SymbolTable) TypeNode {
 	case *IdentifierNode:
 		v, _ := s.SearchForIdent(node.Ident)
 		return v.T
+	case *PointerNewNode:
+		v, _ := s.SearchForIdent(node.Ident.Ident)
+		return NewPointerTypeNode(v.T)
+	case *PointerDereferenceNode:
+		v, _ := s.SearchForIdent(node.Ident.Ident)
+		switch n := v.T.(type) {
+		case *PointerTypeNode:
+			return n.T
+		}
 	}
 	return nil
 }

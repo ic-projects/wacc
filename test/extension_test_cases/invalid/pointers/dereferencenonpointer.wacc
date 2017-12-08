@@ -1,0 +1,17 @@
+# pointers
+
+# Output:
+# #empty#
+
+# Exit:
+# 200
+
+# Program:
+
+begin
+  int num = 178 ;
+
+  println *num ;
+
+  exit 0
+end
