@@ -141,7 +141,7 @@ func (node *SymbolTableNode) Reset() {
 	}
 }
 
-// MoveDownScope creates a new Scope such that it is a chile of the
+// MoveDownScope creates a new Scope such that it is a child of the
 // currentscope, and then sets the CurrentScope to be the new Scope.
 func (table *SymbolTable) MoveDownScope() {
 	newNode := NewSymbolTableNode(table.CurrentScope)

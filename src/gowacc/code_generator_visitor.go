@@ -739,6 +739,7 @@ func (v *CodeGenerator) visitStatements() {
 }
 
 func (v *CodeGenerator) leaveStatements() {
+	v.garbageCollect()
 	if v.symbolTable.CurrentScope.ScopeSize != 0 {
 		v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 	}
@@ -805,7 +806,15 @@ func (v *CodeGenerator) leaveExitNode() {
 
 /**************** RETURN NODE ****************/
 
-func (v *CodeGenerator) leaveReturnNode() {
+func (v *CodeGenerator) leaveReturnNode(node *ast.ReturnNode) {
+	// Ensure that we don't garbage collect any pointers returned
+	switch ast.Type(node.Expr, v.symbolTable).(type) {
+	case *ast.PointerTypeNode:
+		v.garbageCollectExcept(node.Expr.(*ast.PointerNewNode).Ident)
+	default:
+		v.garbageCollect()
+	}
+
 	sizeOfAllVariablesInScope := 0
 	for scope := v.symbolTable.CurrentScope; scope !=
 		v.symbolTable.Head; scope = scope.ParentScope {

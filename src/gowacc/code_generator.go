@@ -349,7 +349,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	case *ast.ExitNode:
 		v.leaveExitNode()
 	case *ast.ReturnNode:
-		v.leaveReturnNode()
+		v.leaveReturnNode(node)
 	case *ast.PairFirstElementNode:
 		v.leavePairFirstElementNode(node)
 	case *ast.PairSecondElementNode:
@@ -360,6 +360,32 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 }
 
 /**************** HELPER FUNCTIONS ****************/
+
+// garbageCollectExcept is used to free all variables in the current scope that
+// are stored on the heap, except the variable with the specified identifier.
+// stored on the heap.
+func (v *CodeGenerator) garbageCollectExcept(except *ast.IdentifierNode) {
+	for _, dec := range v.symbolTable.CurrentScope.Scope {
+		// Only free identifiers not equal to the given exception (if given)
+		if except == nil || dec.Ident.Ident != except.Ident {
+			// Only free if the variable is stored on the heap
+			if dec.Location.IsAddress() {
+				v.addCode(NewLoad(
+					W, // Address has size of a word
+					utils.R0,
+					v.LocationOf(dec.Location),
+				).armAssembly())
+				v.addCode(NewBranchL("free").armAssembly())
+			}
+		}
+	}
+}
+
+// garbageCollect is used to free all variables in the current scope that are
+// stored on the heap.
+func (v *CodeGenerator) garbageCollect() {
+	v.garbageCollectExcept(nil)
+}
 
 // addToStackPointer increments the stack pointer by the size parameter.
 // If size is greater than 1024 then it will increment in multiple iterations.
