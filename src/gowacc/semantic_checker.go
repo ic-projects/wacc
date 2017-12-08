@@ -40,11 +40,13 @@ func (v *SemanticCheck) checkForDynamicErrors(e *[]GenericError) bool {
 		}
 	}
 
-	for _, f := range v.symbolTable.Functions {
-		for _, t := range f.Params {
-			err := validType(t.T, t.Ident)
-			if err != nil {
-				*e = append(*e, err)
+	for _, m := range v.symbolTable.Functions {
+		for _, f := range m {
+			for _, t := range f.Params {
+				err := validType(t.T, t.Ident)
+				if err != nil {
+					*e = append(*e, err)
+				}
 			}
 		}
 	}
