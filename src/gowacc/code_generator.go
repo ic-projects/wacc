@@ -495,9 +495,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			// register otherwise convert to value
 			if !node.Pointer {
 				if i == length-1 && lastIsCharOrBool {
-					v.addCode("LDRSB %s, [%s]", identRegister, identRegister)
+					v.addCode(NewLoadReg(SB, identRegister, identRegister).armAssembly())
 				} else {
-					v.addCode("LDR %s, [%s]", identRegister, identRegister)
+					v.addCode(NewLoadReg(W, identRegister, identRegister).armAssembly())
 				}
 			}
 		}
@@ -531,7 +531,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		if length > 0 {
 			size = ast.SizeOf(ast.Type(node.Exprs[0], v.symbolTable))
 		}
-		v.addCode("LDR r0, =%d", length*size+4)
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(length*size+4)).armAssembly())
 		v.addCode("BL malloc")
 		v.addCode("MOV %s, r0", register)
 		for i := 0; i < length; i++ {
@@ -545,12 +545,16 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 			).armAssembly())
 		}
 		lengthRegister := v.freeRegisters.Peek()
-		v.addCode("LDR %s, =%d", lengthRegister, length)
+		v.addCode(NewLoad(W, lengthRegister, ConstantAddress(length)).armAssembly())
 		v.addCode(NewStoreReg(W, lengthRegister, register).armAssembly())
 	case *ast.StructNewNode:
 		register := v.getFreeRegister()
 
-		v.addCode("LDR r0, =%d", node.StructNode.MemorySize)
+		v.addCode(NewLoad(
+			W,
+			utils.R0,
+			ConstantAddress(node.StructNode.MemorySize),
+		).armAssembly())
 		v.addCode("BL malloc")
 		v.addCode("MOV %s, r0", register)
 		for index, n := range node.StructNode.Types {
@@ -567,7 +571,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		register := v.getFreeRegister()
 
 		// Make space for 2 new pointers on heap
-		v.addCode("LDR r0, =8")
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(8)).armAssembly())
 		v.addCode("BL malloc")
 		v.addCode("MOV %s, r0", register)
 
@@ -575,7 +579,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		ast.Walk(v, node.Fst)
 		fst := v.getReturnRegister()
 		fstSize := ast.SizeOf(ast.Type(node.Fst, v.symbolTable))
-		v.addCode("LDR r0, =%d", fstSize)
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(fstSize)).armAssembly())
 		v.addCode("BL malloc")
 		v.addCode(NewStoreReg(W, utils.R0, register).armAssembly())
 		v.addCode(NewStoreReg(store(fstSize), fst, utils.R0).armAssembly())
@@ -584,7 +588,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		ast.Walk(v, node.Snd)
 		snd := v.getReturnRegister()
 		sndSize := ast.SizeOf(ast.Type(node.Snd, v.symbolTable))
-		v.addCode("LDR r0, =%d", sndSize)
+		v.addCode(NewLoad(W, utils.R0, ConstantAddress(sndSize)).armAssembly())
 		v.addCode("BL malloc")
 		v.addCode(NewStoreRegOffset(W, utils.R0, register, 4).armAssembly())
 		v.addCode(NewStoreReg(store(sndSize), snd, utils.R0).armAssembly())
@@ -619,7 +623,7 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 
 		v.addCode("MOV %s, r0", v.getFreeRegister())
 	case *ast.IntegerLiteralNode:
-		v.addCode("LDR %s, =%d", v.getFreeRegister(), node.Val)
+		v.addCode(NewLoad(W, v.getFreeRegister(), ConstantAddress(node.Val)).armAssembly())
 	case *ast.BooleanLiteralNode:
 		register := v.getFreeRegister()
 		if node.Val {
@@ -631,17 +635,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("MOV %s, #'%s'", v.getFreeRegister(), string(node.Val))
 	case *ast.StringLiteralNode:
 		label := v.addData(node.Val)
-		v.addCode("LDR %s, =%s", v.getFreeRegister(), label)
+		v.addCode(NewLoad(W, v.getFreeRegister(), LabelAddress(label)).armAssembly())
 	case *ast.NullNode:
-		v.addCode("LDR %s, =0", v.getFreeRegister())
-	case *ast.UnaryOperatorNode:
-		switch node.Op {
-		case ast.NOT:
-		case ast.NEG:
-		case ast.LEN:
-		case ast.ORD:
-		case ast.CHR:
-		}
+		v.addCode(NewLoad(W, v.getFreeRegister(), ConstantAddress(0)).armAssembly())
 	case *ast.BinaryOperatorNode:
 		var operand2 utils.Register
 		var operand1 utils.Register
@@ -769,7 +765,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		}
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
-			v.addCode("LDR r0, =0")
+			v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
 			v.addCode("POP {pc}")
 		}
 		v.addCode(".ltorg")
@@ -821,7 +817,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
 		v.callLibraryFunction("BL", checkNullPointer)
-		v.addCode("LDR %s, [%s]", register, register)
+		v.addCode(NewLoadReg(W, register, register).armAssembly())
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
 			v.addCode(NewLoadReg(
@@ -834,7 +830,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		register := v.returnRegisters.Peek()
 		v.addCode("MOV r0, %s", register)
 		v.callLibraryFunction("BL", checkNullPointer)
-		v.addCode("LDR %s, [%s, #4]", register, register)
+		v.addCode(NewLoadRegOffset(W, register, register, 4).armAssembly())
 
 		// If we don't want a Pointer then don't retrieve the value
 		if !node.Pointer {
@@ -853,7 +849,7 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			v.addCode("RSBS %s, %s, #0", register, register)
 			v.callLibraryFunction("BLVS", checkOverflow)
 		case ast.LEN:
-			v.addCode("LDR %s, [%s]", register, register)
+			v.addCode(NewLoadReg(W, register, register).armAssembly())
 		case ast.ORD:
 		case ast.CHR:
 		}

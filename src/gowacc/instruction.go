@@ -461,6 +461,16 @@ func NewLoadReg(
 	return NewLoad(size, r1, RegisterAddress{r1, 0})
 }
 
+// NewStoreRegOffset builds a STR instruction to an address held by a register.
+func NewLoadRegOffset(
+	size Size,
+	r1 utils.Register,
+	r2 utils.Register,
+	offset int,
+) DataTransferInstruction {
+	return NewLoad(size, r1, RegisterAddress{r2, offset})
+}
+
 // NewStore builds a STR instruction.
 func NewStore(
 	size Size,
