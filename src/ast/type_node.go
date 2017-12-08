@@ -330,7 +330,13 @@ func (node *PointerTypeNode) walkNode(visitor Visitor) {
 
 func (node PointerTypeNode) Equals(t TypeNode) bool {
 	if arr, ok := ToValue(t).(PointerTypeNode); ok {
-		// Match any pointer if expected PointerTypeNode has T equal to nil
+		// Match any pointer if expected PointerTypeNode has T equal to nil.
+		//
+		// For example, if we expect a type int* then we don't want to match if we
+		// see a type any*.
+		//
+		// However, if we expect a type any* and we see a type int* then we should
+		// match.
 		if node.T == nil {
 			return true
 		}
