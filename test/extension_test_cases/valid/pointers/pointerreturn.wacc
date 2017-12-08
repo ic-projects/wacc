@@ -1,0 +1,16 @@
+# a function which returns a new pointer
+
+# Output:
+
+# Program:
+
+begin
+  int *doSomething() is
+    int x = 5 ;
+    return &x
+  end
+  int *answer = call doSomething() ;
+
+  println answer;
+  println *answer
+end
