@@ -316,12 +316,11 @@ func (v *CodeGenerator) visitStructElementNode(node *ast.StructElementNode) {
 	register := v.returnRegisters.Peek()
 	v.addCode(NewMove(utils.R0, register).armAssembly())
 	v.callLibraryFunction(AL, checkNullPointer)
-	v.addCode(
-		"ADD %s, %s, #%d",
+	v.addCode(NewAdd(
 		register,
 		register,
 		node.StructType.MemoryOffset,
-	)
+	).armAssembly())
 	// If we don't want a Pointer then don't retrieve the value
 	if !node.Pointer {
 		v.addCode(
