@@ -1324,6 +1324,219 @@ Instead of classes, you can call functions on structs.
 Pointers and Garbage Collection
 \end_layout
 
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+int x = 5;
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+int *ptrX = &x;
+\end_layout
+
+\begin_layout Standard
+Pointers have been implemented in WACC.
+ Like C, we can retrieve the pointer to any variable using 
+\family typewriter
+&
+\family default
+.
+ Our implementation of pointers does not require the user to allocate memory
+ on the heap using e.g.
+ 
+\family typewriter
+malloc
+\family default
+.
+ This is done automatically, and if the variable is not currently on the
+ heap, we will move it to the heap.
+ When we come across a 
+\family typewriter
+PointerNewNode
+\family default
+ (which represents 
+\family typewriter
+&x
+\family default
+), we:
+\end_layout
+
+\begin_layout Enumerate
+Return the address of the variable on the heap (if it is already on the
+ heap).
+\end_layout
+
+\begin_layout Enumerate
+Otherwise, we allocate space on the heap (according to the size of the variable'
+s value) and move the variable's value onto the heap.
+ If the variable was originally stored on stack, we replace the value on
+ the stack with the address to the value (now on the heap).
+ Otherwise, if the variable was originally stored on a register, we replace
+ the register contents with the address to the value (now on the heap).
+\end_layout
+
+\begin_layout Standard
+Pointers can be dereferenced using 
+\family typewriter
+*
+\family default
+.
+ For example, we can print the value of 
+\family typewriter
+x
+\family default
+ using 
+\family typewriter
+println *ptrX
+\family default
+.
+ Our implementation also supports pointer arithmetic and comparison (e.g.
+ 
+\family typewriter
+ptrX = ptrX + 16
+\family default
+).
+\end_layout
+
+\begin_layout Standard
+Our garbage collection implementation is fairly simple - when we leave a
+ scope, we free all the variables in that scope.
+ The exception to this is when we return a pointer that is declared from
+ within a function.
+ In this case, we do not free the variable (as we still want to use it outside
+ of the function).
+ The code below illustrates this:
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+begin
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+int *getPtrToFive() is
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+
+\begin_inset Formula $\qquad$
+\end_inset
+
+int *five = 5;
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+
+\begin_inset Formula $\qquad$
+\end_inset
+
+return &five
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+end
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+int *num := call getPtrToFive(); 
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+# Prints 5 
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+println *num
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+# Prints address of num
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+println num
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+end 
+\end_layout
+
 \begin_layout Subsubsection
 Implicit Types
 \end_layout
