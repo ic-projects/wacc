@@ -178,6 +178,26 @@ func (addr RegisterAddress) armAddress() string {
 	return fmt.Sprintf("[%s, #%d]", addr.Reg.String(), addr.Offset)
 }
 
+/**************** COMMENT ****************/
+
+// Comment is copied directly to assembly
+type Comment string
+
+// comment
+func (comment Comment) armAssembly() string {
+	return string(comment)
+}
+
+/**************** LABEL ****************/
+
+// Label is an assembly label
+type Label string
+
+// label:
+func (label Label) armAssembly() string {
+	return fmt.Sprintf("%s:", label)
+}
+
 /**************** MOVEMENT ****************/
 
 // Move is a struct for the MOV instruction.
@@ -302,8 +322,17 @@ func NewAddReg(
 	}
 }
 
-// NewSubtract builds a SUBS instruction with a register operand.
-func NewSubtract(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
+// NewSub builds an SUB instruction with an immediate operand.
+func NewSub(
+	r1 utils.Register,
+	r2 utils.Register,
+	imm int,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{SUB, AL, false, r1, r2, ImmediateOperand(imm)}
+}
+
+// NewSubReg builds a SUBS instruction with a register operand.
+func NewSubReg(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
 	return ArithmeticInstruction{
 		SUB,
 		AL,

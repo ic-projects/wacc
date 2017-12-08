@@ -43,7 +43,7 @@ func (v *CodeGenerator) leaveFunctionNode(node *ast.FunctionNode) {
 		v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
 		v.addCode(NewPop(utils.PC).armAssembly())
 	}
-	v.addCode(".ltorg")
+	v.addCode(Comment(".ltorg").armAssembly())
 }
 
 /**************** PARAMETERS ****************/
@@ -214,10 +214,10 @@ func (v *CodeGenerator) visitIfNode(node *ast.IfNode) {
 	ast.Walk(v, node.IfStats)
 	v.addCode(NewBranch(endifLabel).armAssembly())
 	// Else
-	v.addCode("%s:", elseLabel)
+	v.addCode(Label(elseLabel).armAssembly())
 	ast.Walk(v, node.ElseStats)
 	// Fi
-	v.addCode("%s:", endifLabel)
+	v.addCode(Label(endifLabel).armAssembly())
 }
 
 /**************** SWITCH NODE ****************/
@@ -233,7 +233,7 @@ func (v *CodeGenerator) visitSwitchNode(node *ast.SwitchNode) {
 		if !c.IsDefault {
 			for _, e := range c.Exprs {
 				ast.Walk(v, e)
-				v.addCode("CMP %s, %s", v.getReturnRegister(), r)
+				v.addCode(NewCompare(v.getReturnRegister(), r).armAssembly())
 				v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
 			}
 		} else {
@@ -244,11 +244,11 @@ func (v *CodeGenerator) visitSwitchNode(node *ast.SwitchNode) {
 	v.freeRegisters.Push(r)
 	for i, c := range node.Cases {
 		caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
-		v.addCode("%s:", caseLabel)
+		v.addCode(Label(caseLabel).armAssembly())
 		ast.Walk(v, c.Stats)
 		v.addCode(NewBranch(endLabel).armAssembly())
 	}
-	v.addCode("%s:", endLabel)
+	v.addCode(Label(endLabel).armAssembly())
 }
 
 /**************** LOOP NODE ****************/
@@ -260,10 +260,10 @@ func (v *CodeGenerator) visitLoopNode(node *ast.LoopNode) {
 	v.labelCount++
 	v.addCode(NewBranch(whileLabel).armAssembly())
 	// Do
-	v.addCode("%s:", doLabel)
+	v.addCode(Label(doLabel).armAssembly())
 	ast.Walk(v, node.Stats)
 	// While
-	v.addCode("%s:", whileLabel)
+	v.addCode(Label(whileLabel).armAssembly())
 	ast.Walk(v, node.Expr)
 	v.addCode(NewCompareInt(v.getReturnRegister(), 1).armAssembly())
 	v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
@@ -279,11 +279,11 @@ func (v *CodeGenerator) visitForLoopNode(node *ast.ForLoopNode) {
 	v.labelCount++
 	v.addCode(NewBranch(whileLabel).armAssembly())
 	// Do
-	v.addCode("%s:", doLabel)
+	v.addCode(Label(doLabel).armAssembly())
 	ast.Walk(v, node.Stats)
 	ast.Walk(v, node.Update)
 	// While
-	v.addCode("%s:", whileLabel)
+	v.addCode(Label(whileLabel).armAssembly())
 	ast.Walk(v, node.Expr)
 	v.addCode(NewCompareInt(v.getReturnRegister(), 1).armAssembly())
 	v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
@@ -442,9 +442,13 @@ func (v *CodeGenerator) visitPointerNewNode(node *ast.PointerNewNode) {
 
 	if !dec.Location.IsAddress() {
 		// Make space for the variable
-		v.addCode("LDR r0, =%d", ast.SizeOf(ast.ToValue(dec.T)))
-		v.addCode("BL malloc")
-		v.addCode("MOV %s, r0", register)
+		v.addCode(NewLoad(
+			W,
+			utils.R0,
+			ConstantAddress(ast.SizeOf(ast.ToValue(dec.T))),
+		).armAssembly())
+		v.addCode(NewBranchL(malloc).armAssembly())
+		v.addCode(NewMove(register, utils.R0).armAssembly())
 
 		// Move the variable value onto the heap space
 		v.addCode(NewStoreReg(
@@ -471,7 +475,7 @@ func (v *CodeGenerator) visitPointerNewNode(node *ast.PointerNewNode) {
 			dec.Location.CurrentPos = v.currentStackPos
 
 			// Store the address on stack
-			v.addCode("PUSH {%s}", register)
+			v.addCode(NewPush(register).armAssembly())
 
 			// Note that addresses are 4 bytes in size
 			v.addToStackPointer(4)
@@ -493,7 +497,7 @@ func (v *CodeGenerator) visitPointerDereferenceNode(
 ) {
 	ast.Walk(v, node.Ident)
 	register := v.returnRegisters.Peek()
-	v.addCode("LDR %s, [%s]", register, register)
+	v.addCode(NewLoadReg(W, register, register).armAssembly())
 }
 
 /**************** NEW PAIR NODE ****************/
@@ -696,7 +700,7 @@ func (v *CodeGenerator) visitAdd(r1 utils.Register, r2 utils.Register) {
 }
 
 func (v *CodeGenerator) visitSub(r1 utils.Register, r2 utils.Register) {
-	v.addCode(NewSubtract(r1, r2).armAssembly())
+	v.addCode(NewSubReg(r1, r2).armAssembly())
 	v.callLibraryFunction(VS, checkOverflow)
 }
 

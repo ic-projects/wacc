@@ -369,9 +369,9 @@ func (v *CodeGenerator) addToStackPointer(size int) {
 	i := size
 	v.currentStackPos -= i
 	for ; i > 1024; i -= 1024 {
-		v.addCode("ADD sp, sp, #1024")
+		v.addCode(NewAdd(utils.SP, utils.SP, 1024).armAssembly())
 	}
-	v.addCode("ADD sp, sp, #%d", i)
+	v.addCode(NewAdd(utils.SP, utils.SP, i).armAssembly())
 }
 
 // subtractFromStackPointer decrements the stack pointer by the size parameter.
@@ -382,9 +382,9 @@ func (v *CodeGenerator) subtractFromStackPointer(size int) {
 	i := size
 	v.currentStackPos += size
 	for ; i > 1024; i -= 1024 {
-		v.addCode("SUB sp, sp, #1024")
+		v.addCode(NewSub(utils.SP, utils.SP, 1024).armAssembly())
 	}
-	v.addCode("SUB sp, sp, #%d", i)
+	v.addCode(NewSub(utils.SP, utils.SP, i).armAssembly())
 }
 
 // getFreeRegister pops a register from freeRegisters, and returns it
