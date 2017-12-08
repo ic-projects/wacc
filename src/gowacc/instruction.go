@@ -262,6 +262,23 @@ type ArithmeticInstruction struct {
 	Op2   Operand
 }
 
+// NewSubtract builds a SUBS instruction with a register operand.
+func NewSubtract(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
+	return ArithmeticInstruction{
+		SUB,
+		AL,
+		true,
+		r1,
+		r1,
+		RegisterOperand{r2, NONE, 0},
+	}
+}
+
+// NewNegate builds a RSBS instruction with an immediate operand of 0.
+func NewNegate(r1 utils.Register) ArithmeticInstruction {
+	return ArithmeticInstruction{RSB, AL, true, r1, r1, ImmediateOperand(0)}
+}
+
 // Instr{Cond}{S} Rd, Rs, Op2
 func (instr ArithmeticInstruction) armAssembly() string {
 	return fmt.Sprintf(

@@ -583,7 +583,7 @@ func (v *CodeGenerator) visitADD(r1 utils.Register, r2 utils.Register) {
 }
 
 func (v *CodeGenerator) visitSUB(r1 utils.Register, r2 utils.Register) {
-	v.addCode("SUBS %s, %s, %s", r1, r1, r2)
+	v.addCode(NewSubtract(r1, r2).armAssembly())
 	v.callLibraryFunction(VS, checkOverflow)
 }
 
@@ -742,7 +742,7 @@ func (v *CodeGenerator) leaveUnaryOperatorNode(node *ast.UnaryOperatorNode) {
 	case ast.NOT:
 		v.addCode(NewLogicalInstrInt(EOR, register, register, 1).armAssembly())
 	case ast.NEG:
-		v.addCode("RSBS %s, %s, #0", register, register)
+		v.addCode(NewNegate(register).armAssembly())
 		v.callLibraryFunction(VS, checkOverflow)
 	case ast.LEN:
 		v.addCode(NewLoadReg(W, register, register).armAssembly())
