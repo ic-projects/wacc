@@ -406,7 +406,9 @@ func (node *SwitchNode) walkNode(visitor Visitor) {
 	Walk(visitor, node.Expr)
 	for _, c := range node.Cases {
 		if !c.IsDefault {
-			Walk(visitor, c.Expr)
+			for _, e := range c.Exprs {
+				Walk(visitor, e)
+			}
 		}
 		Walk(visitor, c.Stats)
 	}
@@ -418,7 +420,7 @@ func (node *SwitchNode) walkNode(visitor Visitor) {
 // executed.
 type CaseNode struct {
 	Pos       utils.Position
-	Expr      ExpressionNode
+	Exprs     []ExpressionNode
 	Stats     Statements
 	IsDefault bool
 }
@@ -435,12 +437,12 @@ func NewDefaultCaseNode(pos utils.Position, stats []StatementNode) CaseNode {
 // NewCaseNode builds a CaseNode for a non-default case.
 func NewCaseNode(
 	pos utils.Position,
-	expr ExpressionNode,
+	exprs []ExpressionNode,
 	stats []StatementNode,
 ) CaseNode {
 	return CaseNode{
 		Pos:       pos,
-		Expr:      expr,
+		Exprs:     exprs,
 		Stats:     stats,
 		IsDefault: false,
 	}
@@ -452,8 +454,10 @@ func (node *CaseNode) String() string {
 	if node.IsDefault {
 		buf.WriteString(utils.Indent(fmt.Sprintln("- DEFAULT"), "  "))
 	} else {
-		buf.WriteString(utils.Indent(fmt.Sprintln("- EXPRESSION"), "  "))
-		buf.WriteString(utils.Indent(node.Expr.String(), "    "))
+		for _, e := range node.Exprs {
+			buf.WriteString(utils.Indent(fmt.Sprintln("- EXPRESSION"), "  "))
+			buf.WriteString(utils.Indent(e.String(), "    "))
+		}
 	}
 	buf.WriteString(utils.Indent(fmt.Sprintln("- THEN"), "  "))
 	for _, s := range node.Stats {
@@ -463,7 +467,9 @@ func (node *CaseNode) String() string {
 }
 
 func (node *CaseNode) MapExpressions(m Mapper) {
-	node.Expr = m(node.Expr)
+	for _, e := range node.Exprs {
+		e = m(e)
+	}
 }
 
 func (node *CaseNode) walkNode(visitor Visitor) {
