@@ -242,6 +242,8 @@ func (table *SymbolTable) SearchForFunction(
 	return &FunctionNode{}, false
 }
 
+// SearchForFunctionParams will search for a function, returning false as its
+// second return if it is not found.
 func (table *SymbolTable) SearchForFunctionParams(
 	identifier string,
 	params Parameters,
