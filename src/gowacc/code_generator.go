@@ -429,34 +429,34 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		v.addCode("%s:", endLabel)
 	case *ast.LoopNode:
 		// Labels
-		doLabel := v.labelCount
-		whileLabel := v.labelCount
+		doLabel := fmt.Sprintf("DO%d", v.labelCount)
+		whileLabel := fmt.Sprintf("WHILE%d", v.labelCount)
 		v.labelCount++
-		v.addCode("B WHILE%d", whileLabel)
+		v.addCode(NewBranch(whileLabel).armAssembly())
 		// Do
-		v.addCode("DO%d:", doLabel)
+		v.addCode("%s:", doLabel)
 		ast.Walk(v, node.Stats)
 		// While
-		v.addCode("WHILE%d:", whileLabel)
+		v.addCode("%s:", whileLabel)
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
-		v.addCode("BEQ DO%d", doLabel)
+		v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 	case *ast.ForLoopNode:
 		ast.Walk(v, node.Initial)
 		// Labels
-		doLabel := v.labelCount
-		whileLabel := v.labelCount
+		doLabel := fmt.Sprintf("DO%d", v.labelCount)
+		whileLabel := fmt.Sprintf("WHILE%d", v.labelCount)
 		v.labelCount++
-		v.addCode("B WHILE%d", whileLabel)
+		v.addCode(NewBranch(whileLabel).armAssembly())
 		// Do
-		v.addCode("DO%d:", doLabel)
+		v.addCode("%s:", doLabel)
 		ast.Walk(v, node.Stats)
 		ast.Walk(v, node.Update)
 		// While
-		v.addCode("WHILE%d:", whileLabel)
+		v.addCode("%s:", whileLabel)
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #1", v.getReturnRegister())
-		v.addCode("BEQ DO%d", doLabel)
+		v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 	case *ast.IdentifierNode:
 		dec := v.symbolTable.SearchForDeclaredIdent(node.Ident)
 		v.addCode(NewLoad(
@@ -619,7 +619,8 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for _, e := range node.Exprs {
 			buff.WriteString(ast.Type(e, v.symbolTable).Hash())
 		}
-		v.addCode("BL f%s_%s", buff.String(), node.Ident.Ident)
+		functionLabel := fmt.Sprintf("f%s_%s", buff.String(), node.Ident.Ident)
+		v.addCode(NewBranchL(functionLabel).armAssembly())
 		if size > 0 {
 			v.addToStackPointer(size)
 		}
