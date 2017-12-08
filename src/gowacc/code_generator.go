@@ -411,9 +411,11 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		for i, c := range node.Cases {
 			caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
 			if !c.IsDefault {
-				ast.Walk(v, c.Expr)
-				v.addCode("CMP %s, %s", v.getReturnRegister(), r)
-				v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
+				for _, e := range c.Exprs {
+					ast.Walk(v, e)
+					v.addCode("CMP %s, %s", v.getReturnRegister(), r)
+					v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
+				}
 			} else {
 				v.addCode(NewBranch(caseLabel).armAssembly())
 			}
