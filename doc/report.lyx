@@ -754,8 +754,143 @@ gowacc
 Parsing
 \end_layout
 
+\begin_layout Standard
+We made the decision to use 
+\family typewriter
+pigeon
+\family default
+ to generate our parser.
+ 
+\end_layout
+
 \begin_layout Subsubsection
-AST Visitor
+AST Walker
+\end_layout
+
+\begin_layout Standard
+We developed a 
+\family typewriter
+Walk
+\family default
+ function for our AST, that given a 
+\family typewriter
+Visitor
+\family default
+ (anything that implements the function 
+\family typewriter
+Visit
+\family default
+ on an AST node), and an AST node, will call 
+\family typewriter
+Visit
+\family default
+ on the given node, and then recursively 
+\family typewriter
+Visit
+\family default
+ that node's children.
+ In order to implement this, each AST node implements its own 
+\family typewriter
+walkNode
+\family default
+ function, which is responsible for the recursive calls to its children.
+\end_layout
+
+\begin_layout Standard
+Our AST walker made both semantic checking and code generation very simple.
+ Both the 
+\family typewriter
+SemanticChecker
+\family default
+ and the 
+\family typewriter
+CodeGenerator
+\family default
+ implement the 
+\family typewriter
+Visitor
+\family default
+ interface, meaning they provide a 
+\family typewriter
+Visit
+\family default
+ function.
+ Their 
+\family typewriter
+Visit
+\family default
+ functions make significant use of Golang's type switch statements.
+ This means that 
+\family typewriter
+Visit
+\family default
+ function has a case for each possible type of AST node, and within each
+ case, makes a call to the correct function for that type of node.
+ This is very different to how you would implement a visitor pattern in
+ most programming languages, but we decided to use this method since it
+ is the most common implementation that we found in open-source Go code.
+ Indeed, a Java-style visitor pattern would be impossible without merging
+ our packages, since it would only be possible by implementing methods for
+ AST nodes (in the same way in which 
+\family typewriter
+walkNode
+\family default
+ is implemented).
+ This would require all of the semantic checking and code generation code
+ to be within in our AST package, which was not a compromise that we were
+ willing to make.
+\end_layout
+
+\begin_layout Standard
+Once we had written 
+\family typewriter
+Visit
+\family default
+'s switch statement and the functions it calls, we can simply call 
+\family typewriter
+Walk
+\family default
+ with the 
+\family typewriter
+Visitor
+\family default
+ and the root of the AST, and the functionality provided by the 
+\family typewriter
+Visit
+\family default
+ function will be called on each node of the full AST.
+\end_layout
+
+\begin_layout Standard
+In general, the 
+\family typewriter
+Visitor
+\family default
+ interface was sufficient to complete most tasks, however occasionally we
+ required finer control over the order in which nodes are visited.
+ For this reason, we extended it by developing an 
+\family typewriter
+EntryExitVisitor
+\family default
+, which calls the function 
+\family typewriter
+Leave
+\family default
+ on each AST node, 
+\emph on
+after
+\emph default
+ recursing through its children.
+ We further extended this into an 
+\family typewriter
+EntryExitOptionalVisitor
+\family default
+, which allows full control, requiring the 
+\family typewriter
+Visit
+\family default
+ function to state explicitly what children should be visited for each AST
+ node, and in which order.
 \end_layout
 
 \begin_layout Subsubsection
@@ -766,37 +901,66 @@ Error Handling
 Syntax Errors
 \end_layout
 
+\begin_layout Standard
+Syntax error handling occurs within our parsing expression grammar.
+\end_layout
+
 \begin_layout Paragraph
 Semantic Errors
 \end_layout
 
 \begin_layout Standard
-Semantic errors are handled by storing a slice of Errors interface, that
- stores information about the type of error, and any other useful information
- that a user might want.
- For example, if an identifier is the wrong type for an expression it will
- state where that identifier was declared.
- When an error is generated in the semantic checker the type checker is
- frozen on the relevant node and unfrozen when that node is left.
- This stops any further irrelevant error messages from printing until the
- erroneous region of code has passed.
- E.g.
- in the code 
-\family typewriter
-x = true; x = 7;
-\family default
- a re-declaration error has been found on the second statement and the type
- checker is frozen to stop the following irrelevant type error from also
- being reported.
- These Errors can be then printed in the main function, limiting the number
- of errors printed if there are too many.
+Semantic errors are handled by storing a slice of Errors interface.
+ An error interface is used such that we can have several types of errors,
+ such as type errors or declaration errors.
  Whenever an error is found in the semantic checking, it is added to the
  slice of Errors.
- 
+ This is done so that we can inform the user of as many errors as we can
+ find.
+ An error stores information about the type of error, and any other useful
+ information that a user might want.
+ For example, if an identifier is the wrong type for an expression it will
+ state where that identifier was declared to allow the user to do easier
+ debugging.
+ The line of the error and a caret indicating where the error was found
+ is also printed.
+ This was done so that the end user would have the easiest possible time
+ figuring out where the error is.
+ These Errors can be then printed in the main function, limiting the number
+ of errors printed if there are too many.
+ The number of errors that we print is limited so that we do not flood the
+ user with excessive and not useful data.
 \end_layout
 
 \begin_layout Subsubsection
 Code Generator
+\end_layout
+
+\begin_layout Standard
+Our code generation generates an intermediate struct representation of the
+ assembly, before being converted to the assembly strings.
+ This is done so that if we wished to change our compiler to compile into
+ a different assembly language it would be far easier.
+ It also means that changing elements of generated code is far easier.
+ Additionally, it allows another pass to be done on the generated assembly
+ for further analysis, to improve the assembly that is generated.
+ We use our visitor pattern yet again to visit our tree to generate the
+ structs.
+ It stores a stack of free registers and return registers.
+ The stack of free registers is used so that we do not overwrite any values
+ that are needed.
+ The stack of return registers is used to make it easy to know where an
+ expected value will be.
+ We have helper functions, used for moving registers between the two stacks.
+ This was done so that it is easy to have precise control over which registers
+ are in use and which registers are free to be used.
+ When the size of the free register stack is equal to one we start using
+ the stack to store values.
+ This is done to ensure that we never run out of registers.
+ All variables are stored in a location struct.
+ The location struct allows for variables to be on the stack, be a label
+ or to be a register.
+ This was done as it allows for easy extension of our compiler.
 \end_layout
 
 \begin_layout Subsection
