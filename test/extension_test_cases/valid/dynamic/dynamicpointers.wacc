@@ -1,0 +1,46 @@
+# pointers
+
+# Output:
+# num: #some address 1# = 1
+# num2: #some address 2# = 5
+# false
+# false
+# false
+# true
+# true
+# true
+
+# Exit:
+# 0
+
+# Program:
+
+begin
+  num := 1 ;
+  num2 := 5 ;
+  *numPtr := &num ;
+  *numPtr2 := &num2 ;
+
+  print "num: " ;
+  print numPtr ;
+  print " = " ;
+  println *numPtr ;
+
+  print "num2: " ;
+  print numPtr2 ;
+  print " = " ;
+  println *numPtr2 ;
+
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  *numPtr = *numPtr2 ;
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  numPtr = numPtr2 ;
+  println numPtr == numPtr2 ;
+  println *numPtr == *numPtr2 ;
+
+  exit 0
+end
