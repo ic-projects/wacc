@@ -457,7 +457,7 @@ for int i=0; i<5; i=i+1 do
 \begin_inset Formula $\qquad$
 \end_inset
 
-skip;
+skip
 \end_layout
 
 \begin_layout Quotation
@@ -565,10 +565,7 @@ Our switch statements are based upon the ruby when statement.
  There aren’t break statements, instead you can indicate more expressions
  after commas.
  The default case must be the last case.
- Function overloading Function overloading is done by creating a hash of
- the parameter types, used to compare between the distinct functions with
- different parameters with the same identifier.
- The hash is also used to create distinct labels in the code generation.
+ 
 \end_layout
 
 \begin_layout Subsubsection
@@ -775,7 +772,7 @@ end
 \align block
 
 \family typewriter
-i := call t.f(true);
+i := call t.f(1);
 \end_layout
 
 \begin_layout Standard
@@ -808,6 +805,43 @@ begin
 \begin_inset Formula $\qquad$
 \end_inset
 
+getThirdChar(list) is
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+
+\begin_inset Formula $\qquad$
+\end_inset
+
+return chr list[2]
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+end
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
 x := [1, 2, 67];
 \end_layout
 
@@ -819,7 +853,7 @@ x := [1, 2, 67];
 \begin_inset Formula $\qquad$
 \end_inset
 
-c := chr x[2]; 
+c := call getThirdChar(x); 
 \end_layout
 
 \begin_layout Quotation
@@ -865,7 +899,7 @@ eNode as its type.
  be present but not necessary as the types of variables, parameters and
  return types can all be derived even when no types are originally given.
  This allows the user the option to add type information where they choose,
- this would be useful for reference and clarity.
+ this being useful for reference and clarity.
  In addition, the extra type information will still be used by the type
  checker, although it is not necessary to verify the types of the program.
 \end_layout
@@ -891,6 +925,51 @@ Peephole Optimisations
 
 \begin_layout Subsubsection
 Constant Propagation and Array Bounds Checking
+\end_layout
+
+\begin_layout Standard
+Constant propagation has been implemented that will simplify expressions
+ if they evaluate to a constant expression, taking into account any previously
+ known constant variables.
+ E.g.
+ 
+\family typewriter
+x = true || false;
+\family default
+ is replaced by
+\family typewriter
+ x = true;
+\family default
+ and
+\family typewriter
+ y = 2; x = y * 2;
+\family default
+ is replaced by 
+\family typewriter
+y = 2; x = 4;.
+
+\family default
+ This also works for constant arrays, E.g.
+ 
+\family typewriter
+y = [5,6]; x = y[0] + 5;
+\family default
+ is replaced by
+\family typewriter
+ y = [5,6]; x = 10;.
+
+\family default
+ This allows any expression present in the tree to be replaced if the value
+ it evaluates to is constant.
+ In addition, we also check at compile time for various runtime errors such
+ as array bounds errors, overflow and divide and mod by zero errors.
+ This is possible because if the index of an array access is simplified
+ to a constant and the array length is also known to be constant then we
+ can check if the index is valid.
+ Furthermore, we can simplify all constant integer expressions and check
+ for overflows, divide by zero and mod by zero errors at compile time.
+ Giving the user the line the error occurred on, the operation responsible
+ and the result of the operation that is too big to store in 4 bytes.
 \end_layout
 
 \begin_layout Subsubsection
