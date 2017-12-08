@@ -34,9 +34,9 @@ func (v *CodeGenerator) leaveFunctionNode(node *ast.FunctionNode) {
 		// to be unchanged.
 		i := v.symbolTable.CurrentScope.ScopeSize
 		for ; i > 1024; i -= 1024 {
-			v.addCode("ADD sp, sp, #1024")
+			v.addCode(NewAdd(utils.SP, utils.SP, 1024).armAssembly())
 		}
-		v.addCode("ADD sp, sp, #%d", i)
+		v.addCode(NewAdd(utils.SP, utils.SP, i).armAssembly())
 	}
 	v.symbolTable.MoveUpScope()
 	if node.Ident.Ident == "" {
@@ -145,10 +145,11 @@ func (v *CodeGenerator) visitAssignNode(node *ast.AssignNode) {
 func (v *CodeGenerator) visitReadNode(node *ast.ReadNode) {
 	if ident, ok := node.LHS.(*ast.IdentifierNode); ok {
 		dec := v.symbolTable.SearchForDeclaredIdent(ident.Ident)
-		v.addCode(
-			"ADD %s, %s", v.getFreeRegister(),
+		v.addCode(NewAdd(
+			v.getFreeRegister(),
+			utils.SP,
 			v.PointerTo(dec.Location),
-		)
+		).armAssembly())
 	} else {
 		ast.Walk(v, node.LHS)
 	}
@@ -278,7 +279,7 @@ func (v *CodeGenerator) visitArrayElementNode(node *ast.ArrayElementNode) {
 		v.addCode(NewMove(utils.R0, exprRegister).armAssembly())
 		v.addCode(NewMove(utils.R1, identRegister).armAssembly())
 		v.callLibraryFunction(AL, checkArrayIndex)
-		v.addCode("ADD %s, %s, #4", identRegister, identRegister)
+		v.addCode(NewAdd(identRegister, identRegister, 4).armAssembly())
 
 		if i == length-1 && lastIsCharOrBool {
 			v.addCode(
@@ -687,9 +688,9 @@ func (v *CodeGenerator) leaveReturnNode() {
 		// to be unchanged.
 		i := sizeOfAllVariablesInScope
 		for ; i > 1024; i -= 1024 {
-			v.addCode("ADD sp, sp, #1024")
+			v.addCode(NewAdd(utils.SP, utils.SP, 1024).armAssembly())
 		}
-		v.addCode("ADD sp, sp, #%d", i)
+		v.addCode(NewAdd(utils.SP, utils.SP, i).armAssembly())
 	}
 	v.addCode(NewMove(utils.R0, v.getReturnRegister()).armAssembly())
 	v.addCode(NewPop(utils.PC).armAssembly())

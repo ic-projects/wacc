@@ -118,11 +118,10 @@ func (v *CodeGenerator) LocationOf(loc *utils.Location) Address {
 	return RegisterAddress{utils.SP, v.currentStackPos - loc.CurrentPos}
 }
 
-// PointerTo returns a string, that when added gives the object's location in
+// PointerTo returns an int, that when added to SP gives the object's location in
 // memory
-func (v *CodeGenerator) PointerTo(location *utils.Location) string {
-	return "sp, #" +
-		strconv.Itoa(v.currentStackPos-location.CurrentPos)
+func (v *CodeGenerator) PointerTo(location *utils.Location) int {
+	return v.currentStackPos - location.CurrentPos
 }
 
 // GenerateCode is a function that will generate and return the finished

@@ -262,6 +262,24 @@ type ArithmeticInstruction struct {
 	Op2   Operand
 }
 
+// NewAdd builds an ADD instruction with an immediate operand.
+func NewAdd(
+	r1 utils.Register,
+	r2 utils.Register,
+	imm int,
+) ArithmeticInstruction {
+	return ArithmeticInstruction{ADD, AL, false, r1, r2, ImmediateOperand(imm)}
+}
+
+// func NewAdd() ArithmeticInstruction {
+// }
+
+// func NewAdd() ArithmeticInstruction {
+// }
+//
+// func NewAdd() ArithmeticInstruction {
+// }
+
 // NewSubtract builds a SUBS instruction with a register operand.
 func NewSubtract(r1 utils.Register, r2 utils.Register) ArithmeticInstruction {
 	return ArithmeticInstruction{
