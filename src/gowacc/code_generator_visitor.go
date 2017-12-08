@@ -169,7 +169,7 @@ func (v *CodeGenerator) visitIfNode(node *ast.IfNode) {
 	v.labelCount++
 	// Cond
 	ast.Walk(v, node.Expr)
-	v.addCode("CMP %s, #0", v.getReturnRegister())
+	v.addCode(NewCompareInt(v.getReturnRegister(), 0).armAssembly())
 	v.addCode(NewCondBranch(EQ, elseLabel).armAssembly())
 	// If
 	ast.Walk(v, node.IfStats)
@@ -193,7 +193,7 @@ func (v *CodeGenerator) visitSwitchNode(node *ast.SwitchNode) {
 		caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
 		if !c.IsDefault {
 			ast.Walk(v, c.Expr)
-			v.addCode("CMP %s, %s", v.getReturnRegister(), r)
+			v.addCode(NewCompare(v.getReturnRegister(), r).armAssembly())
 			v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
 		} else {
 			v.addCode(NewBranch(caseLabel).armAssembly())
@@ -224,7 +224,7 @@ func (v *CodeGenerator) visitLoopNode(node *ast.LoopNode) {
 	// While
 	v.addCode("%s:", whileLabel)
 	ast.Walk(v, node.Expr)
-	v.addCode("CMP %s, #1", v.getReturnRegister())
+	v.addCode(NewCompareInt(v.getReturnRegister(), 1).armAssembly())
 	v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 }
 
@@ -244,7 +244,7 @@ func (v *CodeGenerator) visitForLoopNode(node *ast.ForLoopNode) {
 	// While
 	v.addCode("%s:", whileLabel)
 	ast.Walk(v, node.Expr)
-	v.addCode("CMP %s, #1", v.getReturnRegister())
+	v.addCode(NewCompareInt(v.getReturnRegister(), 1).armAssembly())
 	v.addCode(NewCondBranch(EQ, doLabel).armAssembly())
 }
 
@@ -560,7 +560,7 @@ func (v *CodeGenerator) visitBinaryOperator(
 
 func (v *CodeGenerator) visitMul(r1 utils.Register, r2 utils.Register) {
 	v.addCode("SMULL %s, %s, %s, %s", r1, r2, r1, r2)
-	v.addCode("CMP %s, %s, ASR #31", r2, r1)
+	v.addCode(NewCompareASR(r2, r1, 31).armAssembly())
 	v.callLibraryFunction(NE, checkOverflow)
 }
 
@@ -593,7 +593,7 @@ func (v *CodeGenerator) visitCompare(
 	cond Condition,
 	opp Condition,
 ) {
-	v.addCode("CMP %s, %s", r1, r2)
+	v.addCode(NewCompare(r1, r2).armAssembly())
 	v.addCode(NewMoveCond(cond, r1, 1).armAssembly())
 	v.addCode(NewMoveCond(opp, r1, 0).armAssembly())
 }

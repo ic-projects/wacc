@@ -117,7 +117,7 @@ func (op RegisterOperand) armOperand() string {
 		return op.Reg.String()
 	}
 	return fmt.Sprintf(
-		"%s, %s %d",
+		"%s, %s #%d",
 		op.Reg.String(),
 		op.ShiftType.armShift(),
 		op.ShiftVal,
@@ -285,6 +285,21 @@ type Compare struct {
 	Cond Condition
 	Rn   utils.Register
 	Op2  Operand
+}
+
+// NewCompare builds a CMP instruction with a register operand.
+func NewCompare(r1 utils.Register, r2 utils.Register) Compare {
+	return Compare{AL, r1, RegisterOperand{r2, NONE, 0}}
+}
+
+// NewCompareInt builds a CMP instruction with a immediate operand.
+func NewCompareInt(reg utils.Register, imm int) Compare {
+	return Compare{AL, reg, ImmediateOperand(imm)}
+}
+
+// NewCompareASR builds a CMP instruction with a ASR shifted register operand.
+func NewCompareASR(r1 utils.Register, r2 utils.Register, shift int) Compare {
+	return Compare{AL, r1, RegisterOperand{r2, ASR, shift}}
 }
 
 // CMP{Cond} Rn, Op2
