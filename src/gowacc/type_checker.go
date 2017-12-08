@@ -2,6 +2,7 @@ package main
 
 import (
 	"ast"
+	"bytes"
 	"fmt"
 )
 
@@ -285,9 +286,6 @@ func (check *TypeChecker) expect(t ast.TypeNode) {
 	if check.frozen() {
 		return
 	}
-	if ast.DebugMode {
-		fmt.Printf("Expecting %s  -- p %T: &p=%p p=&i=%p \n", t, t, &t, t)
-	}
 	check.expectSet([]ast.TypeNode{t})
 }
 
@@ -295,6 +293,17 @@ func (check *TypeChecker) expect(t ast.TypeNode) {
 func (check *TypeChecker) expectSet(ts []ast.TypeNode) {
 	if check.frozen() {
 		return
+	}
+	if ast.DebugMode {
+		var b bytes.Buffer
+		b.WriteString("Expecting ")
+		for i, t := range ts {
+			b.WriteString(fmt.Sprintf("[%s  -- p %T: &p=%p p=&i=%p]", t, t, &t, t))
+			if i != len(ts)-1 {
+				b.WriteString(" or ")
+			}
+		}
+		fmt.Println(b.String())
 	}
 	check.stack = append(check.stack, NewSetExpectance(ts))
 }
