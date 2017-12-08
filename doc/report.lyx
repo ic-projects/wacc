@@ -536,6 +536,135 @@ Structures
 \end_layout
 
 \begin_layout Quotation
+
+\family typewriter
+struct List is
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+$List next;
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+int value;
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+end
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+begin
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+$List a = new List(null, 1);
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+$List b = new List(a, 2);
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+$List c = new List(b, 4);
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+println c.value; # prints 4
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+c.next = a;
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+$List next = c.next;
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+println next.value # prints 1
+\end_layout
+
+\begin_layout Quotation
+
+\family typewriter
+end 
+\end_layout
+
+\begin_layout Standard
+Structs have also been implemented in WACC.
+ They are declared at the top section of the program and can be constructed
+ using the “new” keyword in the program and function bodies.
+ The declaration of the struct includes information such as the struct name,
+ its member names and member types.
+ The struct is represented internally as a pointer to the struct object
+ on the heap, where each member is stored in the order they are declared.
+ The members of a struct can be accessed and changed and can also be other
+ (or the same) struct, meaning tree like and cyclic structures are possible
+ with them.
+ The structs can be declared with implicit types and can be passed as arguments
+ to functions or functions can be declared to operate on a struct type.
+\end_layout
+
+\begin_layout Quotation
 \noindent
 \align block
 
@@ -620,6 +749,84 @@ Pointers and Garbage Collection
 
 \begin_layout Subsubsection
 Implicit Types
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+begin
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+x := [1, 2, 67];
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+c := chr x[2]; 
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+\begin_inset Formula $\qquad$
+\end_inset
+
+println c
+\end_layout
+
+\begin_layout Quotation
+\noindent
+\align block
+
+\family typewriter
+end 
+\end_layout
+
+\begin_layout Standard
+We introduced full implicit typing to the WACC language without having to
+ change the type checking or semantic checking.
+ This was done by adding a new TypeNode called DynamicTypeNode.
+ A DynamicTypeNode starts uninitialised and without a type but over the
+ semantic checking pass it will resolve to a type or point to another DynamicTyp
+eNode as its type.
+ When the type checker calls equals on an uninitialised DynamicTypeNode
+ then the node reduces down to the type it has received.
+ If both are DynamicTypeNodes then they must have the same type, so they
+ link together and point to the same type (as well as any other nodes pointing
+ to one).
+ If the DynamicTypeNode resolves to an array, pair or pointer then the inner
+ type contained in these types is expanded to another DynamicTypeNode.
+ The DynamicTypeNode then returns the type it has to the type checker which
+ goes through the normal process of checking the types are valid.
+ Once the pass is over, the semantic checker checks the symbol for any remaining
+ unresolved DynamicTypeNodes and throws an error if present.
+ A DynamicTypeNode is created by the grammar whenever a Type has no string
+ value, or when declare is used with ":=".
+ Our implementation of implicit typing allows type information to still
+ be present but not necessary as the types of variables, parameters and
+ return types can all be derived even when no types are originally given.
+ This allows the user the option to add type information where they choose,
+ this would be useful for reference and clarity.
+ In addition, the extra type information will still be used by the type
+ checker, although it is not necessary to verify the types of the program.
 \end_layout
 
 \begin_layout Subsubsection
