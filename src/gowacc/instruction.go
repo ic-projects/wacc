@@ -371,6 +371,26 @@ type Branch struct {
 	Addr Address
 }
 
+// NewBranch builds a Branch.
+func NewBranch(label string) Branch {
+	return Branch{ALWAYS, false, LabelAddress(label)}
+}
+
+// NewCondBranch builds a Branch with a condition.
+func NewCondBranch(cond Condition, label string) Branch {
+	return Branch{cond, true, LabelAddress(label)}
+}
+
+// NewBranchWithLink builds a Branch with a link.
+func NewBranchWithLink(label string) Branch {
+	return Branch{ALWAYS, false, LabelAddress(label)}
+}
+
+// NewCondBranchWithLink builds a Branch with a condition and a link.
+func NewCondBranchWithLink(cond Condition, label string) Branch {
+	return Branch{cond, true, LabelAddress(label)}
+}
+
 func armLink(link bool) string {
 	if link {
 		return "L"
@@ -385,7 +405,7 @@ func (instr Branch) armAssembly() string {
 		INDENT,
 		armLink(instr.Link),
 		instr.Cond.armCondition(),
-		instr.Addr.armAddress(),
+		instr.Addr.armAddress()[1:],
 	)
 }
 

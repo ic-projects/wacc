@@ -387,49 +387,52 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 		}
 	case *ast.IfNode:
 		// Labels
-		elseLabel := v.labelCount + 1
-		endifLabel := v.labelCount + 1
-		v.labelCount += 2
+		elseLabel := fmt.Sprintf("ELSE%d", v.labelCount)
+		endifLabel := fmt.Sprintf("ENDIF%d", v.labelCount)
+		v.labelCount++
 		// Cond
 		ast.Walk(v, node.Expr)
 		v.addCode("CMP %s, #0", v.getReturnRegister())
-		v.addCode("BEQ ELSE%d", elseLabel)
+		v.addCode(NewCondBranch(EQ, elseLabel).armAssembly())
 		// If
 		ast.Walk(v, node.IfStats)
-		v.addCode("B ENDIF%d", endifLabel)
+		v.addCode(NewBranch(endifLabel).armAssembly())
 		// Else
-		v.addCode("ELSE%d:", elseLabel)
+		v.addCode("%s:", elseLabel)
 		ast.Walk(v, node.ElseStats)
 		// Fi
-		v.addCode("ENDIF%d:", endifLabel)
+		v.addCode("%s:", endifLabel)
 	case *ast.SwitchNode:
 		// Labels
-		endLabel := v.labelCount + 1
+		labelNumber := v.labelCount
+		endLabel := fmt.Sprintf("END%d", labelNumber)
 		v.labelCount++
 		ast.Walk(v, node.Expr)
 		r := v.returnRegisters.Pop()
 		for i, c := range node.Cases {
+			caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
 			if !c.IsDefault {
 				ast.Walk(v, c.Expr)
 				v.addCode("CMP %s, %s", v.getReturnRegister(), r)
-				v.addCode("BEQ CASE%d_%d", endLabel, i)
+				v.addCode(NewCondBranch(EQ, caseLabel).armAssembly())
 			} else {
-				v.addCode("B CASE%d_%d", endLabel, i)
+				v.addCode(NewBranch(caseLabel).armAssembly())
 			}
 		}
-		v.addCode("B END%d", endLabel)
+		v.addCode(NewBranch(endLabel).armAssembly())
 		v.freeRegisters.Push(r)
 		for i, c := range node.Cases {
-			v.addCode("CASE%d_%d:", endLabel, i)
+			caseLabel := fmt.Sprintf("CASE%d_%d", labelNumber, i)
+			v.addCode("%s:", caseLabel)
 			ast.Walk(v, c.Stats)
-			v.addCode("B END%d", endLabel)
+			v.addCode(NewBranch(endLabel).armAssembly())
 		}
-		v.addCode("END%d:", endLabel)
+		v.addCode("%s:", endLabel)
 	case *ast.LoopNode:
 		// Labels
-		doLabel := v.labelCount + 1
-		whileLabel := v.labelCount + 1
-		v.labelCount += 2
+		doLabel := v.labelCount
+		whileLabel := v.labelCount
+		v.labelCount++
 		v.addCode("B WHILE%d", whileLabel)
 		// Do
 		v.addCode("DO%d:", doLabel)
@@ -442,9 +445,9 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 	case *ast.ForLoopNode:
 		ast.Walk(v, node.Initial)
 		// Labels
-		doLabel := v.labelCount + 1
-		whileLabel := v.labelCount + 1
-		v.labelCount += 2
+		doLabel := v.labelCount
+		whileLabel := v.labelCount
+		v.labelCount++
 		v.addCode("B WHILE%d", whileLabel)
 		// Do
 		v.addCode("DO%d:", doLabel)
