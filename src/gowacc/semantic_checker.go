@@ -243,6 +243,8 @@ func (v *SemanticCheck) Visit(programNode ast.ProgramNode) {
 					node.Pos,
 					"Cannot dereference a non pointer",
 				)
+				v.typeChecker.seen(nil)
+				v.typeChecker.freeze(node)
 			}
 		}
 	case *ast.AssignNode:
