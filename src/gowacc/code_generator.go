@@ -864,10 +864,10 @@ func (v *CodeGenerator) Visit(programNode ast.ProgramNode) {
 func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 	switch node := programNode.(type) {
 	case ast.Statements:
+		v.garbageCollect()
 		if v.symbolTable.CurrentScope.ScopeSize != 0 {
 			v.addToStackPointer(v.symbolTable.CurrentScope.ScopeSize)
 		}
-		v.garbageCollect()
 		v.symbolTable.MoveUpScope()
 	case *ast.FunctionNode:
 		if v.symbolTable.CurrentScope.ScopeSize > 0 {
@@ -882,7 +882,6 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 			}
 			v.addCode("ADD sp, sp, #%d", i)
 		}
-		v.garbageCollect()
 		v.symbolTable.MoveUpScope()
 		if node.Ident.Ident == "" {
 			v.addCode(NewLoad(W, utils.R0, ConstantAddress(0)).armAssembly())
@@ -929,6 +928,14 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 		v.addCode("MOV r0, %s", v.getReturnRegister())
 		v.addCode(NewBranchL("exit").armAssembly())
 	case *ast.ReturnNode:
+		// Ensure that we don't garbage collect any pointers returned
+		switch ast.Type(node.Expr, v.symbolTable).(type) {
+		case *ast.PointerTypeNode:
+			v.garbageCollectExcept(node.Expr.(*ast.PointerNewNode).Ident)
+		default:
+			v.garbageCollect()
+		}
+
 		sizeOfAllVariablesInScope := 0
 		for scope := v.symbolTable.CurrentScope; scope !=
 			v.symbolTable.Head; scope = scope.ParentScope {
@@ -993,22 +1000,30 @@ func (v *CodeGenerator) Leave(programNode ast.ProgramNode) {
 
 /**************** HELPER FUNCTIONS ****************/
 
-// garbageCollect is used to free all variables in the current scope that is
+// garbageCollectExcept is used to free all variables in the current scope that
+// are stored on the heap, except the variable with the specified identifier.
 // stored on the heap.
-func (v *CodeGenerator) garbageCollect() {
-	for ident, _ := range v.symbolTable.CurrentScope.Scope {
-		dec, _ := v.symbolTable.SearchForIdentInCurrentScope(ident)
-
-		// Only free if the variable is stored on the heap
-		if dec.Location.IsAddress() {
-			v.addCode(NewLoad(
-				W, // Address has size of a word
-				utils.R0,
-				v.LocationOf(dec.Location),
-			).armAssembly())
-			v.addCode(NewBranchL("free").armAssembly())
+func (v *CodeGenerator) garbageCollectExcept(except *ast.IdentifierNode) {
+	for _, dec := range v.symbolTable.CurrentScope.Scope {
+		// Only free identifiers not equal to the given exception (if given)
+		if except == nil || dec.Ident.Ident != except.Ident {
+			// Only free if the variable is stored on the heap
+			if dec.Location.IsAddress() {
+				v.addCode(NewLoad(
+					W, // Address has size of a word
+					utils.R0,
+					v.LocationOf(dec.Location),
+				).armAssembly())
+				v.addCode(NewBranchL("free").armAssembly())
+			}
 		}
 	}
+}
+
+// garbageCollect is used to free all variables in the current scope that are
+// stored on the heap.
+func (v *CodeGenerator) garbageCollect() {
+	v.garbageCollectExcept(nil)
 }
 
 // addToStackPointer increments the stack pointer by the size parameter.
